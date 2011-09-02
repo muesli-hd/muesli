@@ -1,0 +1,21 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <!--
+  Copyright 2011, Ansgar Burchardt <ansgar@debian.org>
+
+  Based on templates written for the initial version of PET which are
+
+  Copyright 2007, Martín Ferrari <martin.ferrari@gmail.com>
+  Copyright 2007, Damyan Ivanov <dmn@debian.org>
+
+  Released under the terms of the GNU GPL 2
+  -->
+  <title>Package Entropy Tracker</title>
+  <link rel="stylesheet" type="text/css" href="/static/default.css"></link>
+  <script type="text/javascript" src="/static/overview.js"></script>
+</head>
+<body>
+  <h1>Muesli</h1>
+</body>
+</html>
