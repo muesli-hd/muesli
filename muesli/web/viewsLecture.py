@@ -1,8 +1,7 @@
-# muesli/web/views.py
+# muesli/web/viewsLecture.py
 #
 # This file is part of MUESLI.
 #
-# Copyright (C) 2011, Ansgar Burchard <ansgar (at) 43-1.org>
 # Copyright (C) 2011, Matthias Kuemmerer <matthias (at) matthias-k.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -29,9 +28,11 @@ from sqlalchemy.orm import exc
 import re
 import os
 
-@view_config(route_name='overview', renderer='muesli.web:templates/overview.pt')
-class Overview(object):
+@view_config(route_name='lecture_list', renderer='muesli.web:templates/lecture/list.pt')
+class List(object):
   def __init__(self, request):
     self.request = request
+    self.session = self.request.session
   def __call__(self):
-    return {}
+    lectures = self.session.query(models.Lecture).all()
+    return {'lectures': lectures}

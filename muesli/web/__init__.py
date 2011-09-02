@@ -24,6 +24,7 @@ from pyramid.events import subscriber, NewRequest
 
 from muesli.models import Session
 from muesli.web.views import *
+from muesli.web.viewsLecture import *
 
 @subscriber(NewRequest)
 def add_session_to_request(event):
