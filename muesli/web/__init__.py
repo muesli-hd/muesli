@@ -27,7 +27,7 @@ from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 import pyramid_beaker
 
-from muesli.models import Session
+from muesli.models import *
 from muesli.web.views import *
 from muesli.web.viewsLecture import *
 

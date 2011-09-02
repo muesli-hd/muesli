@@ -33,5 +33,5 @@ class Form(object):
       setattr(obj, f, self[f])
 
 class UserLogin(formencode.Schema):
-  email = validators.PlainText(not_empty=True)
+  email = validators.String(not_empty=True)
   password = validators.String(not_empty=True)
