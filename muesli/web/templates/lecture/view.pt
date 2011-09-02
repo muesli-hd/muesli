@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <!--
+  Copyright 2011, Matthias Kümmerer <matthias@matthias-k.org>
+
+  Released under the terms of the GNU GPL 3 or later
+  -->
+  <title>Müsli</title>
+  <link rel="stylesheet" type="text/css" href="/static/default.css"></link>
+  <script type="text/javascript" src="/static/overview.js"></script>
+</head>
+<body>
+  <h2>${lecture.name}</h2>
+
+  <p tal:condition="lecture.url">
+  Internetseite zu dieser Vorlesung: <a href="${lecture.url}">${lecture.url}</a>
+  </p>
+
+
+
+  <h3>Übungsgruppen</h3>
+  <p tal:condition='lecture.mode=="off"'>
+    Es ist derzeit nicht möglich sich zu Übungsgruppen in dieser Vorlesung anzumelden.
+  </p>
+
+  <div tal:omit-tag='' tal:condition='lecture.mode=="direct"'> <!-- TODO: or is_assistan or is_tutor--> 
+    <p>
+    Zu dieser Vorlesung werden die folgenden Übungsgruppen angeboten:
+    </p>
+
+    <table>
+      <tr tal:condition='lecture.type == "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Kommentar</th><th></th><th></th></tr>
+      <tr tal:condition='lecture.type != "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Titel</th><th></th><th></th></tr>
+
+      <tr tal:repeat='tutorial lecture.tutorials'>
+        <!-- <td><& /Fragments/Format/Weektime, $tutorial->time &></td> -->
+        <td>TODO: Time</td>
+        <td>${tutorial.place}</td>
+        <!-- <td><& /Fragments/HTML/TutorialOccupancy, tutorial => $tutorial &></td> -->
+        <td>TODO: Occupancy</td>
+        <td>
+          <span tal:omit-tag='' tal:condition='tutorial.tutor'>
+            ${tutorial.tutor.first_name} ${tutorial.tutor.last_name}
+          </span>
+          <span tal:omit-tag='' tal:condition='not tutorial.tutor'> <!-- TODO: and (is assistant or is_tutor) -->
+            <!-- <a href="<% c->uri_for('/tutorial/set_tutor', $tutorial->id) %>">Übernehmen</a> -->
+          </span>
+        </td>
+        <td>${tutorial.comment}</td>
+        <!-- %     if (is_assistant || is_tutor) { -->
+        <td tal:condition='True'><!-- <a href="<% c->uri_for('/tutorial/view', $tutorial->id) %>"> -->Details<!-- </a> --></td>
+        <td>
+          <!-- href="<% c->uri_for('/tutorial/subscribe', $tutorial->id) %>"> -->
+          <a tal:condition='tutorial.students.count() &lt; tutorial.max_students' ><!-- <% is_lecturestudent?'Wechseln':'Beitreten' %> --></a>
+        </td>
+      </tr>
+   </table>
+  </div>
+
+  <div tal:omit-tag='' tal:condition='lecture.mode == "prefs"'>
+  <p>
+  Die Zeiten, zu denen Übungsgruppen angeboten werden, sind in der folgenden Tabelle aufgelistet.
+  Damit MÜSLI Sie in Übungsgruppen eintragen kann, müssen Sie eine bestimmte Anzahl von Übungsgruppen in den Modi "Gut" oder "Mittel" ausgewählt haben.
+  Diese kann je nach Zahl der vorhandenen Übungsgruppen variieren.
+  Probieren Sie es einfach aus!
+  </p>
+
+  <form method='post' tal:attributes='action request.route_path("lecture_set_preferences", lecture_id=lecture.id)'>
+  <table>
+    <tr>
+      <th>Zeit</th>
+      <th>Verf. Plätze</th>
+      <th>Präferenz</th>
+    </tr>
+    <tr tal:repeat='count,time enumerate(times,1)'>
+      <td>${time['time']}</td>
+      <td>${time['max_students']}</td>
+      <td>
+        <input type='hidden' name="time-${count}" value="${time['time']}" />
+        <select name='pref-${count}'>
+          <option tal:repeat="pref [{'name': 'Gut', 'penalty': 10}, {'name': 'Schlecht', 'penalty': 100}]" value="${pref['penalty']}" selected="${'selected' if pref['penalty']==time['penalty'] else ''}">${pref['name']}</option>
+        </select>
+      </td>
+    </tr>
+  </table>
+  <input type='submit' value='Ausgewählte Präferenzen speichern'/>
+  </form>
+
+<!--!   if (user_has_prefs) {
+  <form method="post" action="<% c->uri_for("/lecture/remove_preferences", lecture->id) %>">
+  <input type="submit" value="Präferenzen vergessen"/>
+  </form>
+%   }-->
+
+  </div>
+
+</body>
+</html>

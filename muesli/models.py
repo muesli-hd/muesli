@@ -25,6 +25,7 @@ import sqlalchemy
 import sqlalchemy.ext.declarative
 from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, Integer, Boolean, Unicode, DateTime, Date, Numeric, func
 from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 Base = sqlalchemy.ext.declarative.declarative_base()
 
 engine = muesli.engine()
@@ -111,6 +112,10 @@ class Tutorial(Base):
   place = Column(Text)
   max_students = Column(Integer, nullable=False, default=0)
   comment = Column(Text)
+  @hybrid_property
+  def students(self):
+    session = Session.object_session(self)
+    return session.query(User).filter(User.lecture_students.any(LectureStudent.tutorial==self))
   # weekday and time of tutorial
   # format: "D HH:MM"
   # where
