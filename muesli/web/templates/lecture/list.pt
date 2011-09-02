@@ -11,6 +11,9 @@
   <script type="text/javascript" src="/static/overview.js"></script>
 </head>
 <body>
-  <h1>Muesli</h1>
+  <h1>Vorlesungen</h1>
+  <ul>
+    <li tal:repeat="lecture lectures">${lecture.name}</li>
+  </ul>
 </body>
 </html>

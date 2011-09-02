@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from muesli.models import *
+from muesli import models
 
 from pyramid.view import view_config
 from pyramid.response import Response
@@ -35,3 +35,12 @@ class Overview(object):
     self.request = request
   def __call__(self):
     return {}
+
+@view_config(route_name='lecture_list', renderer='muesli.web:templates/lecture/list.pt')
+class Lecture_List(object):
+  def __init__(self, request):
+    self.request = request
+    self.session = self.request.session
+  def __call__(self):
+    lectures = self.session.query(models.Lecture).all()
+    return {'lectures': lectures}

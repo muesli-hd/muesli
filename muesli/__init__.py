@@ -18,3 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from sqlalchemy import create_engine
+
+def engine():
+  return create_engine('postgresql:///muesli')

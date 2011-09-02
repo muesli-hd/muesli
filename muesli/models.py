@@ -19,12 +19,17 @@
 
 # -*- coding: utf-8 -*-
 
+import muesli
 
 import sqlalchemy
 import sqlalchemy.ext.declarative
 from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, Integer, Boolean, Unicode, DateTime, Date, Numeric, func
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, sessionmaker
 Base = sqlalchemy.ext.declarative.declarative_base()
+
+engine = muesli.engine()
+Session = sessionmaker(bind=engine)
+
 
 class User(Base):
   __tablename__ = 'users'
