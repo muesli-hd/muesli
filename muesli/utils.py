@@ -20,7 +20,7 @@
 # -*- coding: utf-8 -*-
 
 def tutorialtimeToTime(tutorialtime):
-  return tutorialtime[1:]
+	return tutorialtime[1:]
 
 def tutorialtimeToWeekday(tutorialtime):
-  return tutorialtime[0]
+	return tutorialtime[0]

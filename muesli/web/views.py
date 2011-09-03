@@ -34,23 +34,23 @@ import os
 
 @view_config(route_name='login', renderer='muesli.web:templates/login.pt')
 def login(request):
-  form = Form(UserLogin())
-  if request.method == 'POST' and form.validate(request.POST):
-    user = request.db.query(models.User).filter_by(email=form['email'], password=sha1(form['password']).hexdigest()).first()
-    if user is not None:
-      security.remember(request, user.id)
-      request.user = user
-  return { 'form': form, 'user': security.authenticated_userid(request) }
+	form = Form(UserLogin())
+	if request.method == 'POST' and form.validate(request.POST):
+		user = request.db.query(models.User).filter_by(email=form['email'], password=sha1(form['password']).hexdigest()).first()
+	if user is not None:
+		security.remember(request, user.id)
+		request.user = user
+	return { 'form': form, 'user': security.authenticated_userid(request) }
 
 @view_config(route_name='logout', renderer='invest.measure.web:templates/logout.pt')
 def logout(request):
-  security.forget(request)
-  request.session.invalidate()
-  return {}
+	security.forget(request)
+	request.session.invalidate()
+	return {}
 
 @view_config(route_name='overview', renderer='muesli.web:templates/overview.pt')
 class Overview(object):
-  def __init__(self, request):
-    self.request = request
-  def __call__(self):
-    return {}
+	def __init__(self, request):
+		self.request = request
+	def __call__(self):
+		return {}

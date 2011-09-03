@@ -32,44 +32,44 @@ import os
 
 @view_config(route_name='lecture_list', renderer='muesli.web:templates/lecture/list.pt')
 class List(object):
-  def __init__(self, request):
-    self.request = request
-    self.session = self.request.session
-  def __call__(self):
-    lectures = self.session.query(models.Lecture).all()
-    return {'lectures': lectures}
+	def __init__(self, request):
+		self.request = request
+		self.session = self.request.session
+	def __call__(self):
+		lectures = self.session.query(models.Lecture).all()
+		return {'lectures': lectures}
 
 @view_config(route_name='lecture_view', renderer='muesli.web:templates/lecture/view.pt')
 class View(object):
-  def __init__(self, request):
-    self.request = request
-    self.db = self.request.db
-    self.lecture_id = request.matchdict['lecture_id']
-  def __call__(self):
-    lecture = self.db.query(models.Lecture).get(self.lecture_id)
-    if lecture.mode == "prefs":
-      times = self.db.query(sqlalchemy.func.sum(models.Tutorial.max_students), models.Tutorial.time).\
-        filter(models.Tutorial.lecture == lecture).\
-        group_by(models.Tutorial.time)
-      times = [{'weekday':   utils.tutorialtimeToWeekday(result[1]),
-                'timeofday': utils.tutorialtimeToTime(result[1]),
-                'time':      result[1],
-                'max_students': result[0]} for result in times]
-      for time in times:
-        time['penalty'] = 100
-    else:
-      times = []
-    if self.request.user:
-    	user = self.request.user
-    	is_assistant = user.is_assistant
-    	is_admin = user.is_admin
-    	is_tutor = user in lecture.tutors
-    else:
-    	is_assistant = False
-    	is_admin = False
-    	is_tutor = False
-    return {'lecture': lecture,
-            'times': times,
-            'is_assistant': is_assistant,
-            'is_admin': is_admin,
-            'is_tutor': is_tutor}
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.lecture_id = request.matchdict['lecture_id']
+	def __call__(self):
+		lecture = self.db.query(models.Lecture).get(self.lecture_id)
+		if lecture.mode == "prefs":
+			times = self.db.query(sqlalchemy.func.sum(models.Tutorial.max_students), models.Tutorial.time).\
+				filter(models.Tutorial.lecture == lecture).\
+				group_by(models.Tutorial.time)
+			times = [{'weekday':   utils.tutorialtimeToWeekday(result[1]),
+				'timeofday': utils.tutorialtimeToTime(result[1]),
+				'time':      result[1],
+				'max_students': result[0]} for result in times]
+			for time in times:
+				time['penalty'] = 100
+		else:
+			times = []
+		if self.request.user:
+			user = self.request.user
+			is_assistant = user.is_assistant
+			is_admin = user.is_admin
+			is_tutor = user in lecture.tutors
+		else:
+			is_assistant = False
+			is_admin = False
+			is_tutor = False
+		return {'lecture': lecture,
+			'times': times,
+			'is_assistant': is_assistant,
+			'is_admin': is_admin,
+			'is_tutor': is_tutor}

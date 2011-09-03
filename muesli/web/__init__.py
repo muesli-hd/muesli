@@ -33,45 +33,45 @@ from muesli.web.viewsLecture import *
 
 @subscriber(NewRequest)
 def add_session_to_request(event):
-  event.request.db = Session()
-  def callback(request):
-    request.db.rollback()
-  event.request.add_finished_callback(callback)
+	event.request.db = Session()
+	def callback(request):
+		request.db.rollback()
+	event.request.add_finished_callback(callback)
 
-  user_id = security.authenticated_userid(event.request)
-  if user_id is not None:
-    event.request.user = event.request.db.query(User).get(user_id)
-  else:
-    event.request.user = None
+	user_id = security.authenticated_userid(event.request)
+	if user_id is not None:
+		event.request.user = event.request.db.query(User).get(user_id)
+	else:
+		event.request.user = None
 
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):
-  event['templates'] = lambda name: get_renderer('templates/{0}'.format(name)).implementation()
+	event['templates'] = lambda name: get_renderer('templates/{0}'.format(name)).implementation()
 
 def main(global_config=None, **settings):
-  #settings.update({
-  #})
+	#settings.update({
+	#})
 
-  session_factory = pyramid_beaker.session_factory_from_settings(settings)
-  authentication_policy = SessionAuthenticationPolicy()
-  authorization_policy = ACLAuthorizationPolicy()
-  config = Configurator(
-    authentication_policy=authentication_policy,
-    authorization_policy=authorization_policy,
-    session_factory=session_factory,
-    settings=settings,
-    )
+	session_factory = pyramid_beaker.session_factory_from_settings(settings)
+	authentication_policy = SessionAuthenticationPolicy()
+	authorization_policy = ACLAuthorizationPolicy()
+	config = Configurator(
+		authentication_policy=authentication_policy,
+		authorization_policy=authorization_policy,
+		session_factory=session_factory,
+		settings=settings,
+		)
 
-  config.add_static_view('static', 'muesli.web:static')
+	config.add_static_view('static', 'muesli.web:static')
 
-  config.add_route('login', '/login')
-  config.add_route('logout', '/logout')
-  config.add_route('overview', '/')
-  config.add_route('lecture_list', '/lecture/list')
-  config.add_route('lecture_edit', '/lecture/edit')
-  config.add_route('lecture_email_tutors', '/lecture/email_tutors')
-  config.add_route('lecture_view', '/lecture/view/{lecture_id}')
-  config.add_route('lecture_set_preferences', '/lecture/set_preferences/{lecture_id}')
-  config.scan()
+	config.add_route('login', '/login')
+	config.add_route('logout', '/logout')
+	config.add_route('overview', '/')
+	config.add_route('lecture_list', '/lecture/list')
+	config.add_route('lecture_edit', '/lecture/edit')
+	config.add_route('lecture_email_tutors', '/lecture/email_tutors')
+	config.add_route('lecture_view', '/lecture/view/{lecture_id}')
+	config.add_route('lecture_set_preferences', '/lecture/set_preferences/{lecture_id}')
+	config.scan()
 
-  return config.make_wsgi_app()
+	return config.make_wsgi_app()
