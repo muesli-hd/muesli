@@ -37,9 +37,9 @@ def login(request):
 	form = Form(UserLogin())
 	if request.method == 'POST' and form.validate(request.POST):
 		user = request.db.query(models.User).filter_by(email=form['email'], password=sha1(form['password']).hexdigest()).first()
-	if user is not None:
-		security.remember(request, user.id)
-		request.user = user
+		if user is not None:
+			security.remember(request, user.id)
+			request.user = user
 	return { 'form': form, 'user': security.authenticated_userid(request) }
 
 @view_config(route_name='logout', renderer='invest.measure.web:templates/logout.pt')
