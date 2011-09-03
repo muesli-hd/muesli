@@ -17,11 +17,11 @@
   Internetseite zu dieser Vorlesung: <a href="${lecture.url}">${lecture.url}</a>
   </p>
 
-  <p tal:condition="is_assistant">
+  <p tal:condition="request.userInfo.is_assistant()">
   Sie können <a tal:attributes='href request.route_path("lecture_edit", lecture_id=lecture.id)'>diese Vorlesung bearbeiten</a>.
   </p>
 
-  <p tal:condition="is_assistant or is_tutor">
+  <p tal:condition="request.userInfo.is_assistant() or request.userInfo.is_tutor(lecture)">
   Sie können eine <a tal:attributes='href request.route_path("lecture_email_tutors", lecture_id=lecture.id)'>E-Mail an alle Übungsleiter schreiben</a>.
   </p>
 

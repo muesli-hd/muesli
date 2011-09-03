@@ -24,3 +24,21 @@ def tutorialtimeToTime(tutorialtime):
 
 def tutorialtimeToWeekday(tutorialtime):
 	return tutorialtime[0]
+
+class UserInfo:
+	def __init__(self, user):
+		self.user = user
+	def is_loggedin(self):
+		return self.user != None
+	def is_admin(self):
+		if self.is_loggedin():
+			return self.user.is_admin
+		else: return False
+	def is_assistant(self):
+		if self.is_loggedin():
+			return self.user.is_assistant
+		else: return False
+	def is_tutor(self, lecture):
+		if self.is_loggedin():
+			return self in lecture.tutors
+		else: return False

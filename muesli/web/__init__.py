@@ -30,6 +30,7 @@ import pyramid_beaker
 from muesli.models import *
 from muesli.web.views import *
 from muesli.web.viewsLecture import *
+from muesli import utils
 
 @subscriber(NewRequest)
 def add_session_to_request(event):
@@ -43,6 +44,7 @@ def add_session_to_request(event):
 		event.request.user = event.request.db.query(User).get(user_id)
 	else:
 		event.request.user = None
+	event.request.userInfo = utils.UserInfo(event.request.user)
 
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):

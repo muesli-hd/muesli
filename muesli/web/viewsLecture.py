@@ -59,17 +59,5 @@ class View(object):
 				time['penalty'] = 100
 		else:
 			times = []
-		if self.request.user:
-			user = self.request.user
-			is_assistant = user.is_assistant
-			is_admin = user.is_admin
-			is_tutor = user in lecture.tutors
-		else:
-			is_assistant = False
-			is_admin = False
-			is_tutor = False
 		return {'lecture': lecture,
-			'times': times,
-			'is_assistant': is_assistant,
-			'is_admin': is_admin,
-			'is_tutor': is_tutor}
+		        'times': times}
