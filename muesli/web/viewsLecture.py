@@ -43,12 +43,12 @@ class List(object):
 class View(object):
   def __init__(self, request):
     self.request = request
-    self.session = self.request.session
+    self.db = self.request.db
     self.lecture_id = request.matchdict['lecture_id']
   def __call__(self):
-    lecture = self.session.query(models.Lecture).get(self.lecture_id)
+    lecture = self.db.query(models.Lecture).get(self.lecture_id)
     if lecture.mode == "prefs":
-      times = self.session.query(sqlalchemy.func.sum(models.Tutorial.max_students), models.Tutorial.time).\
+      times = self.db.query(sqlalchemy.func.sum(models.Tutorial.max_students), models.Tutorial.time).\
         filter(models.Tutorial.lecture == lecture).\
         group_by(models.Tutorial.time)
       times = [{'weekday':   utils.tutorialtimeToWeekday(result[1]),
@@ -59,4 +59,17 @@ class View(object):
         time['penalty'] = 100
     else:
       times = []
-    return {'lecture': lecture, 'times': times}
+    if self.request.user:
+    	user = self.request.user
+    	is_assistant = user.is_assistant
+    	is_admin = user.is_admin
+    	is_tutor = user in lecture.tutors
+    else:
+    	is_assistant = False
+    	is_admin = False
+    	is_tutor = False
+    return {'lecture': lecture,
+            'times': times,
+            'is_assistant': is_assistant,
+            'is_admin': is_admin,
+            'is_tutor': is_tutor}

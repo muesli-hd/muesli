@@ -84,6 +84,10 @@ class Lecture(Base):
   #  'static' - no subscription, no unsubscription
   mode = Column(Text, nullable=False, default='off')
   minimum_preferences = Column(Integer, default=None)
+  @property
+  def tutors(self):
+    session = Session.object_session(self)
+    return session.query(User).filter(User.lecture_tutors.any(LectureTutor.lecture==self))
 
 class Exam(Base):
   __tablename__ = 'exams'

@@ -68,6 +68,8 @@ def main(global_config=None, **settings):
   config.add_route('logout', '/logout')
   config.add_route('overview', '/')
   config.add_route('lecture_list', '/lecture/list')
+  config.add_route('lecture_edit', '/lecture/edit')
+  config.add_route('lecture_email_tutors', '/lecture/email_tutors')
   config.add_route('lecture_view', '/lecture/view/{lecture_id}')
   config.add_route('lecture_set_preferences', '/lecture/set_preferences/{lecture_id}')
   config.scan()
