@@ -68,6 +68,16 @@ def main(global_config=None, **settings):
 
 	config.add_route('login', '/login')
 	config.add_route('logout', '/logout')
+	config.add_route('start', '/start')
+	config.add_route('contact', '/contact')
+	config.add_route('admin', '/admin')
+	config.add_route('user_update', '/user/update')
+	config.add_route('user_change_email', '/user/change_email')
+	config.add_route('user_change_password', '/user/change_password')
+	config.add_route('user_logout', '/user/logout')
+	config.add_route('user_login', '/user/logout')
+	config.add_route('user_register', '/user/register')
+
 	config.add_route('overview', '/')
 	config.add_route('lecture_list', '/lecture/list')
 	config.add_route('lecture_edit', '/lecture/edit')

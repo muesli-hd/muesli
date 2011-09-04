@@ -1,0 +1,180 @@
+/*
+ * root/static/css/muesli.css
+ *
+ * This file is part of MÜSLI.
+ *
+ * Copyright (C) 2008-2009, Ansgar Burchardt <ansgar (at) 43-1.org>
+ * Copyright (C) 2008, Matthias Kümmerer <matthias (at) familie-kuemmerer.de>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+html {
+    height: 100%;
+}
+
+body { 
+    font-family: Helvetica,Arial,sans-serif;
+    color: #000000;
+    background-color: #f5f5f5;
+    margin: 0px;
+    padding: 0px;
+    height: 100%;
+}
+
+#header {
+    background-color:#B8860B;
+    margin: 1em 1em 0em 1em;
+    padding: 1em 1em 1em 3em;
+    border: 1px solid gray;
+    border-bottom: 0px;
+    /*border-bottom: 1px solid #000000;*/
+}
+
+#header h2 {
+   color:#FFFFFF;
+}
+
+#footer {
+    background-color: #F5F5F5;
+    text-align: center;
+    border-top: 1px solid #000000;
+    position: fixed;
+    bottom: 0;
+    left: 0px;
+    width: 100%;
+    padding: 4px 0px;
+}
+
+#history {
+    padding: 0.2em;
+    padding-left: 3em;
+    border: 1px solid gray;
+    border-top: 0px;
+    border-bottom: 0px;
+    background-color: #ffffff;
+    margin: 0em 1em 0em 1em;
+}
+
+#history ul {
+    font-size: 70%;
+    margin: 0em;
+    padding: 0em;
+}
+
+#history li {
+    display: inline
+}
+
+#history a {
+    margin-right: 1em;
+    color: grey;
+}
+
+
+#content {
+    padding: 0.8em;
+    padding-left: 3em;
+    border: 1px solid gray;
+    border-top: 0px;
+    background-color: #ffffff;
+    margin: 0em 1em 1em 1em;
+}
+
+#content h3 {
+   margin-top: 2em;
+}
+
+#content table {
+    border-collapse: collapse;
+}
+
+#content table th {
+    text-align: center;
+    font-size: 80%;
+    padding: 0.3em 0.5em;
+    margin-bottom: 0.3em;
+    border-bottom: 1px solid #000000;
+}
+
+#content table td {
+    padding: 0.3em 0.5em;
+}
+
+#content table tr.footerstart {
+    border-top: 1px solid #AAAAAA
+}
+
+.menu {
+    background-color: #999999;
+    color: #FFFFFF;
+    list-style-type: none;
+    margin: 0em 1em 0em 1em;
+    padding: 0.3em 0em 0.3em 3em;
+}
+
+.menu li {
+    display: inline;
+}
+
+.menu a {
+    color: #FFFFFF;
+    margin-right: 1em;
+}
+
+.message {
+    background-color: #88dd88;
+    color: #000000;
+    border: 1px #000000 solid;
+    padding: 0.5em;
+}
+
+.error {
+    background-color: #ee8888;
+    color: #000000;
+    border: 1px #000000 solid;
+    padding: 0.5em;
+}
+
+.invalid {
+    background-color: #ee8888;
+}
+
+table.colored tr:nth-child(even) {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+table.colored tr:nth-child(odd) {
+    background-color: #dddddd;
+    color: #000000;
+}
+
+.popup {
+  border-bottom: 1px dotted;
+}
+
+.popup .balloon {
+  display: none;
+}
+
+.popup:focus .balloon,
+.popup:hover .balloon {
+  position: absolute;
+  display: block;
+  padding: 0.5em;
+  background: #F5F5B5;
+  color: black;
+}
+

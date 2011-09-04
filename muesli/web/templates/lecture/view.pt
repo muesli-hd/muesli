@@ -7,10 +7,13 @@
   Released under the terms of the GNU GPL 3 or later
   -->
   <title>Müsli</title>
-  <link rel="stylesheet" type="text/css" href="/static/default.css"></link>
+  <link rel="stylesheet" type="text/css" href="/static/css/muesli.css"></link>
   <script type="text/javascript" src="/static/overview.js"></script>
 </head>
 <body>
+
+  <metal:main metal:use-macro="templates('Fragments/menu.pt').macros['menu']" />
+
   <h2>${lecture.name}</h2>
 
   <p tal:condition="lecture.url">
