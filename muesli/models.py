@@ -24,7 +24,7 @@ import muesli
 import sqlalchemy
 import sqlalchemy.ext.declarative
 from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship, sessionmaker, backref
 from muesli.types import *
 Base = sqlalchemy.ext.declarative.declarative_base()
 
@@ -94,7 +94,7 @@ class Lecture(Base):
 	__tablename__ = 'lectures'
 	id = Column(Integer, primary_key=True)
 	assistant_id = Column('assistant', Integer, ForeignKey(User.id, ondelete='SET NULL'))
-	assistant = relationship(User, backref='lectures_as_assistant')
+	assistant = relationship(User, backref=backref('lectures_as_assistant', order_by='Lecture.term'))
 	name = Column(Text)
 	# lecture type
 	#  'lecture'
