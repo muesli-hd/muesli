@@ -79,6 +79,7 @@ def main(global_config=None, **settings):
 	config.add_route('user_register', '/user/register')
 
 	config.add_route('overview', '/')
+	config.add_route('lecture_add', '/lecture/add')
 	config.add_route('lecture_list', '/lecture/list')
 	config.add_route('lecture_edit', '/lecture/edit')
 	config.add_route('lecture_email_tutors', '/lecture/email_tutors')

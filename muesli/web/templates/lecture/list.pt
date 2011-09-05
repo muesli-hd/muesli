@@ -1,19 +1,20 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-  <!--
-  Copyright 2011, Matthias Kümmerer <matthias@matthias-k.org>
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+    <h2>Liste der mit MÜSLI verwalteten Vorlesungen</h2>
 
-  Released under the terms of the GNU GPL 3 or later
-  -->
-  <title>Müsli</title>
-  <link rel="stylesheet" type="text/css" href="/static/default.css"></link>
-  <script type="text/javascript" src="/static/overview.js"></script>
-</head>
-<body>
-  <h1>Vorlesungen</h1>
-  <ul>
-    <li tal:repeat="lecture lectures">${lecture.name}</li>
-  </ul>
-</body>
-</html>
+    <table>
+      <tr><th>Semester</th><th>Name</th><th>Dozent</th><th>Assistent</th></tr>
+      <tr tal:repeat="lecture lectures">
+        <td tal:define="term lecture.term">
+          ${term[0:4]+('SS' if term[4] == 1 else 'WS') if term else '-'}
+        </td>
+        <td><a tal:attributes="href request.route_path('lecture_view', lecture_id=lecture.id)">${lecture.name}</a></td>
+        <td>${lecture.lecturer}</td>
+        <td><a tal:attributes="href 'mailto:'+lecture.assistant.email">${lecture.assistant.last_name}</a></td>
+      </tr>
+    </table>
+    <a tal:condition="request.userInfo.is_assistant" tal:attributes="href request.route_path('lecture_add')">Neue Vorlesung eintragen</a>
+
+  </metal:main>
+</metal:main>

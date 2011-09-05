@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:define-macro="main">
+<html>
+<head>
+  <!--
+  Copyright 2011, Matthias Kümmerer <matthias@matthias-k.org>
+
+  Released under the terms of the GNU GPL 3 or later
+  -->
+  <title>MÜSLI</title>
+  <link rel="stylesheet" type="text/css" href="/static/css/muesli.css"></link>
+  <script type="text/javascript" src="/static/overview.js"></script>
+</head>
+<body>
+<div id="header">
+  <h1>MÜSLI</h1>
+  <h2>Mathematisches Übungsgruppen- und Scheinlisten-Interface</h2>
+</div>
+<metal:main metal:use-macro="templates('Fragments/menu.pt').macros['menu']" />
+
+<script>
+<![CDATA[
+function set_navigation(nav) {
+  var str = "<ul>\n";
+  for (var i = 0; i<nav.length; i++) {
+    str += '<li><a href="';
+    str += nav[i][1];
+    str += '">';
+    str += nav[i][0];
+    str += '</a></li>\n';
+  }
+  str += '</ul>';
+  document.getElementById('history').innerHTML = str;
+}
+]]>
+</script>
+<div id="history">
+</div>
+<div id="content">
+
+<!--% if (c->flash->{error}) {
+  <p class="error"><% c->flash->{error} %></p>
+% }
+% if (c->flash->{message}) {
+  <p class="message"><% c->flash->{message} %></p>
+% }-->
+<metal:content define-slot="content" />
+</div>
+</body>
+</html>
+</metal:main>
