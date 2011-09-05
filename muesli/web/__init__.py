@@ -29,7 +29,7 @@ import pyramid_beaker
 import beaker.ext.sqla
 import tempfile
 
-
+from muesli.web.context import *
 from muesli.models import *
 from muesli.web.views import *
 from muesli.web.viewsLecture import *
@@ -107,7 +107,7 @@ def main(global_config=None, **settings):
 	config.add_route('lecture_list', '/lecture/list')
 	config.add_route('lecture_edit', '/lecture/edit')
 	config.add_route('lecture_email_tutors', '/lecture/email_tutors')
-	config.add_route('lecture_view', '/lecture/view/{lecture_id}')
+	config.add_route('lecture_view', '/lecture/view/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_set_preferences', '/lecture/set_preferences/{lecture_id}')
 
 	config.add_route('tutorial_view', '/tutorial/view/{tutorial_id}')

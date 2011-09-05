@@ -19,6 +19,7 @@
 
 from muesli import models
 from muesli import utils
+from muesli.web.context import *
 
 from pyramid.view import view_config
 from pyramid.response import Response
@@ -39,7 +40,7 @@ class List(object):
 		lectures = self.db.query(models.Lecture).all()
 		return {'lectures': lectures}
 
-@view_config(route_name='lecture_view', renderer='muesli.web:templates/lecture/view.pt')
+@view_config(route_name='lecture_view', renderer='muesli.web:templates/lecture/view.pt', context=LectureContext, permission='view')
 class View(object):
 	def __init__(self, request):
 		self.request = request

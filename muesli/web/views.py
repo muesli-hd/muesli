@@ -20,6 +20,7 @@
 
 from muesli import models
 from muesli.web.forms import *
+from muesli.web.context import *
 
 from pyramid import security
 from pyramid.view import view_config
@@ -44,7 +45,7 @@ def login(request):
 			return HTTPFound(location=url)
 	return { 'form': form, 'user': security.authenticated_userid(request) }
 
-@view_config(route_name='logout', renderer='invest.measure.web:templates/logout.pt')
+@view_config(route_name='logout', renderer='muesli.web:templates/logout.pt')
 def logout(request):
 	security.forget(request)
 	request.session.invalidate()
