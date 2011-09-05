@@ -93,7 +93,7 @@ class Lecture(Base):
 	__tablename__ = 'lectures'
 	id = Column(Integer, primary_key=True)
 	assistant_id = Column('assistant', Integer, ForeignKey(User.id, ondelete='SET NULL'))
-	assistant = relationship(User, backref=backref('lectures_as_assistant', order_by='Lecture.term'))
+	assistant = relationship(User, backref=backref('lectures_as_assistant', order_by='Lecture.term', lazy='dynamic'))
 	name = Column(Text)
 	# lecture type
 	#  'lecture'
