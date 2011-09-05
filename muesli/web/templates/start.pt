@@ -12,11 +12,11 @@
 
 <h2>Übersicht Ihrer Veranstaltungen in diesem Semester</h2>
 
-<div tal:omit-tag="" tal:condition="request.user.tutorials_as_tutor">
+<div tal:omit-tag="" tal:condition="tutorials_as_tutor">
   <h3>Eigene Übungsgruppen (als Übungsleiter)</h3>
   <table>
     <tr><th>Semester</th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th></th></tr>
-    <tr tal:repeat="tutorial request.user.tutorials_as_tutor">
+    <tr tal:repeat="tutorial tutorials_as_tutor">
       <td>${tutorial.lecture.term}</td>
       <td><a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
         ${tutorial.lecture.name}
@@ -36,12 +36,12 @@
   </table>
 </div>
 
-<div tal:conditon="request.user.tutorialsss">
+<div tal:condition="tutorials">
   <h3>Feste Eintragungen in Übungsgruppen</h3>
   <table>
     <tr><th></th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th>Übungsleiter</th><th></th><th></th></tr>
 
-    <tr tal:repeat="tutorial request.user.tutorials">
+    <tr tal:repeat="tutorial tutorials">
       <td>${tutorial.lecture.term}</td>
       <td><a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">${tutorial.lecture.name}</a></td>
       <td>${tutorial.time}</td>
@@ -72,11 +72,11 @@
 </table>
 </div>
 
-<div tal:condition="request.user.lectures_as_assistant">
+<div tal:condition="lectures_as_assistant">
   <h3>Von Ihnen verwaltete Vorlesungen</h3>
 
   <ul>
-    <li tal:repeat="lecture request.user.lectures_as_assistant">
+    <li tal:repeat="lecture lectures_as_assistant">
       (${lecture.term})
       <a tal:attributes="href request.route_path('lecture_view', lecture_id=lecture.id)">
         ${lecture.name}</a>
@@ -85,22 +85,9 @@
   </ul>
 
 </div>
-<!-- <![CDATA[
-% unless (show_all) {
-<p>Es werden nur aktuelle Veranstaltungen angezeigt. <a href="<% c->uri_for("start", {show_all => 1}) %>">Alle anzeigen</a>.</p>
-% } else {
-<p>Es werden alle Veranstaltungen angezeigt. <a href="<% c->uri_for("/start") %>">Nur aktuelle anzeigen</a>.</p>
-% }
+<p tal:condition="request.GET.get('show_all', '0')=='0'">Es werden nur aktuelle Veranstaltungen angezeigt.
+  <a tal:attributes="href request.route_path('start', _query= {'show_all': '1'})">Alle anzeigen</a>.</p>
+<p tal:condition="request.GET.get('show_all', '0')=='1'">Es werden alle Veranstaltungen angezeigt. <a tal:attributes="href request.route_path('start')">Nur aktuelle anzeigen</a>.</p>
 
-<%args>
-@tutorials             => ()
-@tutorials_as_tutor    => ()
-multi_tutorials
-@lectures_as_assistant => ()
-%time_preferences      => ()
-show_all
-</%args>
-%# vim: ft=mason sw=2
-]]>-->
   </metal:main>
 </metal:main>

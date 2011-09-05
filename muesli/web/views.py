@@ -42,5 +42,16 @@ class Overview(object):
 
 @view_config(route_name='start', renderer='muesli.web:templates/start.pt')
 def start(request):
+	tutorials_as_tutor = request.user.tutorials_as_tutor
+	tutorials = request.user.tutorials
+	lectures_as_assistant = request.user.lectures_as_assistant
+	if request.GET.get('show_all', '0')=='0':
+		semesterlimit = utils.getSemesterLimit()
+		tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
+		tutorials = tutorials.filter(Lecture.term >= semesterlimit)
+		lectures_as_assistant = lectures_as_assistant.filter(Lecture.term >= semesterlimit)
 	return {'time_preferences': request.user.prepareTimePreferences(),
-	        'penalty_names': utils.penalty_names}
+	        'penalty_names': utils.penalty_names,
+	        'tutorials_as_tutor': tutorials_as_tutor.all(),
+	        'tutorials': tutorials.all(),
+	        'lectures_as_assistant': lectures_as_assistant.all()}

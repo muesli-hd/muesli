@@ -19,6 +19,8 @@
 
 # -*- coding: utf-8 -*-
 
+import datetime
+
 preferences = [\
 	{'penalty': 1, 'name': 'Gut'},
 	{'penalty': 3, 'name': 'Mittel'},
@@ -26,6 +28,15 @@ preferences = [\
 	{'penalty': 100, 'name': 'Gar nicht'}]
 
 penalty_names = dict([[pref['penalty'], pref['name']] for pref in preferences])
+
+def getSemesterLimit():
+	now = datetime.datetime.now()
+	semesterlimit = now.year
+	if now.month < 3:
+		semesterlimit -= 1
+	term = '1' if now.month>=3 and now.month <=8 else '2'
+	semesterlimit = '%4i%s' % (semesterlimit, term)
+	return semesterlimit
 
 class UserInfo:
 	def __init__(self, user):
