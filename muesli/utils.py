@@ -25,6 +25,8 @@ preferences = [\
 	{'penalty': 10,'name': 'Schlecht'},
 	{'penalty': 100, 'name': 'Gar nicht'}]
 
+penalty_names = dict([[pref['penalty'], pref['name']] for pref in preferences])
+
 class UserInfo:
 	def __init__(self, user):
 		self.user = user

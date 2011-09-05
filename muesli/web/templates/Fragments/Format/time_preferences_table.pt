@@ -1,0 +1,13 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:define-macro="time_preferences_table">
+  <tr tal:repeat="time time_preferences[lecture_id]">
+        <td>
+        <a tal:condition="repeat.time.index==0"
+           tal:attributes="href request.route_path('lecture_view', lecture_id=time.lecture.id)">
+             ${time.lecture.name}
+        </a>
+        </td>
+        <td>${time.time}</td>
+        <td>${penalty_names[time.penalty]}</td>
+      </tr>
+</metal:main>

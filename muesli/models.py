@@ -69,6 +69,17 @@ class User(Base):
 		return mt
 	def name(self):
 		return self.first_name + ' ' + self.last_name
+	def prepareTimePreferences(self):
+		time_preferences = self.time_preferences
+		tps = {}
+		for tp in time_preferences:
+			if tp.lecture.mode == 'prefs':
+				if tp.lecture.id in tps:
+					tps[tp.lecture.id].append(tp)
+				else:
+					tps[tp.lecture.id] = [tp]
+		print tps
+		return tps
 
 class Confirmation(Base):
 	__tablename__ = 'confirmations'
@@ -182,7 +193,7 @@ class TimePreference(Base):
 	lecture = relationship(Lecture, backref='time_preferences')
 	student_id = Column('student', Integer, ForeignKey(User.id), primary_key=True)
 	student = relationship(User, backref='time_preferences')
-	time = Column(Unicode(length=7), primary_key=True)
+	time = Column(ColumnWrapper(TutorialTime)(length=7), primary_key=True)
 	penalty = Column(Integer)
 	def __init__(self, lecture, student, time, penalty):
 		self.lecture = lecture

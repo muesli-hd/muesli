@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from muesli import models
+from muesli import models, utils
 from muesli.web.forms import *
 from muesli.web.context import *
 
@@ -42,4 +42,5 @@ class Overview(object):
 
 @view_config(route_name='start', renderer='muesli.web:templates/start.pt')
 def start(request):
-	return {}
+	return {'time_preferences': request.user.prepareTimePreferences(),
+	        'penalty_names': utils.penalty_names}

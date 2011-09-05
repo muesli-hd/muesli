@@ -57,21 +57,21 @@
   </table>
 </div>
 
-<!-- <![CDATA[
-% if (keys %time_preferences) {
+<div tal:condition="time_preferences">
 <h3>Vorläufige Eintragungen in Übungsgruppen</h3>
 <table>
   <tr>
     <th>Vorlesung</th>
     <th>Zeit</th>
     <th>Präferenz</th>
-%   while (my (key, value) = each(%time_preferences)) {
-      <& /Fragments/Format/TimePreferences_Table, value &>
-%   }
   </tr>
+  <div tal:omit-tag="" tal:repeat="lecture_id time_preferences">
+    <metal:main
+      metal:use-macro="templates('Fragments/Format/time_preferences_table.pt').macros['time_preferences_table']" />
+  </div>
 </table>
-% }
-
+</div>
+<!-- <![CDATA[
 % if (@lectures_as_assistant) {
   <h3>Von Ihnen verwaltete Vorlesungen</h3>
 
