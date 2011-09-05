@@ -33,6 +33,7 @@ from muesli.web.context import *
 from muesli.models import *
 from muesli.web.views import *
 from muesli.web.viewsLecture import *
+from muesli.web.viewsUser import *
 from muesli import utils
 
 @subscriber(NewRequest)
