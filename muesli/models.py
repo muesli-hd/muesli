@@ -23,13 +23,17 @@ import muesli
 
 import sqlalchemy
 import sqlalchemy.ext.declarative
-from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, Integer, Boolean, Unicode, DateTime, Date, Numeric, func
+from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table
 from sqlalchemy.orm import relationship, sessionmaker
 Base = sqlalchemy.ext.declarative.declarative_base()
 
 engine = muesli.engine()
 Session = sessionmaker(bind=engine)
 
+lecture_tutors_table = Table('lecture_tutors', Base.metadata,
+	Column('lecture', Integer, ForeignKey('lectures.id'), primary_key=True),
+	Column('tutor', Integer, ForeignKey('users.id'), primary_key=True)
+)
 
 class User(Base):
 	__tablename__ = 'users'
@@ -84,10 +88,11 @@ class Lecture(Base):
 	#  'static' - no subscription, no unsubscription
 	mode = Column(Text, nullable=False, default='off')
 	minimum_preferences = Column(Integer, default=None)
-	@property
-	def tutors(self):
-		session = Session.object_session(self)
-		return session.query(User).filter(User.lecture_tutors.any(LectureTutor.lecture==self))
+	tutors = relationship(User, secondary=lecture_tutors_table, backref = "lectures_as_tutor")
+#	@property
+#	def tutors(self):
+#		session = Session.object_session(self)
+#		return session.query(User).filter(User.lecture_tutors.any(LectureTutor.lecture==self))
 
 class Exam(Base):
 	__tablename__ = 'exams'
@@ -166,12 +171,12 @@ class LectureRemovedStudent(Base):
 	tutorial_id = Column('tutorial', Integer, ForeignKey(Tutorial.id))
 	tutorial = relationship(Tutorial, backref='lecture_removed_students')
 
-class LectureTutor(Base):
-	__tablename__ = 'lecture_tutors'
-	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)
-	lecture = relationship(Lecture, backref='lecture_tutors')
-	tutor_id = Column('tutor', Integer, ForeignKey(User.id), primary_key=True)
-	tutor = relationship(User, backref='lecture_tutors')
+#class LectureTutor(Base):
+#	__tablename__ = 'lecture_tutors'
+#	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)
+#	lecture = relationship(Lecture, backref='lecture_tutors')
+#	tutor_id = Column('tutor', Integer, ForeignKey(User.id), primary_key=True)
+#	tutor = relationship(User, backref='lecture_tutors')
 
 class Exercise(Base):
 	__tablename__ = 'exercises'
