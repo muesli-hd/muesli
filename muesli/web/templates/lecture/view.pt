@@ -30,7 +30,6 @@
       <tr tal:condition='lecture.type != "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Titel</th><th></th><th></th></tr>
 
       <tr tal:repeat='tutorial lecture.tutorials'>
-        <!-- <td><& /Fragments/Format/Weektime, $tutorial->time &></td> -->
         <td>${tutorial.time}</td>
         <td>${tutorial.place}</td>
         <!-- <td><& /Fragments/HTML/TutorialOccupancy, tutorial => $tutorial &></td> -->
@@ -75,7 +74,9 @@
       <td>
         <input type='hidden' name="time-${count}" value="${time['time']}" />
         <select name='pref-${count}'>
-          <option tal:repeat="pref [{'name': 'Gut', 'penalty': 10}, {'name': 'Schlecht', 'penalty': 100}]" value="${pref['penalty']}" selected="${'selected' if pref['penalty']==time['penalty'] else ''}">${pref['name']}</option>
+          <option tal:repeat="pref prefs" value="${pref['penalty']}" tal:attributes="selected 'selected' if pref['penalty']==time['penalty'] else None">
+            ${pref['name']}
+          </option>
         </select>
       </td>
     </tr>

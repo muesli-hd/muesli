@@ -19,11 +19,11 @@
 
 # -*- coding: utf-8 -*-
 
-def tutorialtimeToTime(tutorialtime):
-	return tutorialtime[1:]
-
-def tutorialtimeToWeekday(tutorialtime):
-	return tutorialtime[0]
+preferences = [\
+	{'penalty': 1, 'name': 'Gut'},
+	{'penalty': 3, 'name': 'Mittel'},
+	{'penalty': 10,'name': 'Schlecht'},
+	{'penalty': 100, 'name': 'Gar nicht'}]
 
 class UserInfo:
 	def __init__(self, user):

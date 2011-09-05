@@ -47,17 +47,7 @@ class View(object):
 		self.lecture_id = request.matchdict['lecture_id']
 	def __call__(self):
 		lecture = self.db.query(models.Lecture).get(self.lecture_id)
-		if lecture.mode == "prefs":
-			times = self.db.query(sqlalchemy.func.sum(models.Tutorial.max_students), models.Tutorial.time).\
-				filter(models.Tutorial.lecture == lecture).\
-				group_by(models.Tutorial.time)
-			times = [{'weekday':   result[1].weekday(),
-				'timeofday': result[1].time(),
-				'time':      result[1],
-				'max_students': result[0]} for result in times]
-			for time in times:
-				time['penalty'] = 100
-		else:
-			times = []
+		times = lecture.prepareTimePreferences(user=self.request.user)
 		return {'lecture': lecture,
-		        'times': times}
+		        'times': times,
+		        'prefs': utils.preferences}

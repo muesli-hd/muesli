@@ -94,6 +94,29 @@ class Lecture(Base):
 #	def tutors(self):
 #		session = Session.object_session(self)
 #		return session.query(User).filter(User.lecture_tutors.any(LectureTutor.lecture==self))
+	def prepareTimePreferences(self, user=None):
+		session = Session.object_session(self)
+		if self.mode == "prefs":
+			times = session.query(sqlalchemy.func.sum(Tutorial.max_students), Tutorial.time).\
+				filter(Tutorial.lecture == self).\
+				group_by(Tutorial.time)
+			times = [{'weekday':   result[1].weekday(),
+				'timeofday': result[1].time(),
+				'time':      result[1],
+				'max_students': result[0]} for result in times]
+			for time in times:
+				if user:
+					pref = session.query(TimePreference).get((self.id, user.id, time['time'].value))
+					if not pref:
+						pref = TimePreference(self, user, time['time'], 100)
+					time['penalty'] = pref.penalty
+				else:
+					time['penalty'] = 100
+			if user:
+				session.commit()
+		else:
+			times = []
+		return times
 
 class Exam(Base):
 	__tablename__ = 'exams'
@@ -143,6 +166,11 @@ class TimePreference(Base):
 	student = relationship(User, backref='time_preferences')
 	time = Column(Unicode(length=7), primary_key=True)
 	penalty = Column(Integer)
+	def __init__(self, lecture, student, time, penalty):
+		self.lecture = lecture
+		self.student = student
+		self.time = time
+		self.penalty = penalty
 
 class TutorialPreference(Base):
 	__tablename__ = 'tutorial_preferences'
