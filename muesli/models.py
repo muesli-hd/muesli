@@ -55,6 +55,14 @@ class User(Base):
 	def tutorials_as_tutor(self):
 		session = Session.object_session(self)
 		return session.query(Tutorial).filter(Tutorial.tutor_id == self.id).join(Tutorial.lecture).order_by(Lecture.term)
+	def prepareMultiTutorials(self):
+		mt = {}
+		for tutorial in self.tutorials_as_tutor:
+			if tutorial.lecture.id in mt:
+				mt[tutorial.lecture.id].append(tutorial)
+			else:
+				mt[tutorial.lecture.id] = [tutorial]
+		return mt
 
 class Confirmation(Base):
 	__tablename__ = 'confirmations'
