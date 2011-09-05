@@ -78,7 +78,6 @@ class User(Base):
 					tps[tp.lecture.id].append(tp)
 				else:
 					tps[tp.lecture.id] = [tp]
-		print tps
 		return tps
 
 class Confirmation(Base):
