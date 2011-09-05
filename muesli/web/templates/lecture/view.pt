@@ -1,19 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-  <!--
-  Copyright 2011, Matthias Kümmerer <matthias@matthias-k.org>
-
-  Released under the terms of the GNU GPL 3 or later
-  -->
-  <title>Müsli</title>
-  <link rel="stylesheet" type="text/css" href="/static/css/muesli.css"></link>
-  <script type="text/javascript" src="/static/overview.js"></script>
-</head>
-<body>
-
-  <metal:main metal:use-macro="templates('Fragments/menu.pt').macros['menu']" />
-
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
   <h2>${lecture.name}</h2>
 
   <p tal:condition="lecture.url">
@@ -33,7 +20,7 @@
     Es ist derzeit nicht möglich sich zu Übungsgruppen in dieser Vorlesung anzumelden.
   </p>
 
-  <div tal:omit-tag='' tal:condition='lecture.mode=="direct"'> <!-- TODO: or is_assistan or is_tutor--> 
+  <div tal:omit-tag='' tal:condition="lecture.mode=='direct' or request.userInfo.is_assistant() or request.userInfo.is_admin()">
     <p>
     Zu dieser Vorlesung werden die folgenden Übungsgruppen angeboten:
     </p>
@@ -104,5 +91,5 @@
 
   </div>
 
-</body>
-</html>
+  </metal:main>
+</metal:main>
