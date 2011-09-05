@@ -71,18 +71,21 @@
   </div>
 </table>
 </div>
-<!-- <![CDATA[
-% if (@lectures_as_assistant) {
+
+<div tal:condition="request.user.lectures_as_assistant">
   <h3>Von Ihnen verwaltete Vorlesungen</h3>
 
   <ul>
-%   for my lecture (@lectures_as_assistant) {
-    <li>(<& /Fragments/Format/Term, lecture->term &>) <a href="<% c->uri_for("/lecture/view", lecture->id) %>"><% lecture->name %></a> (<a href="<% c->uri_for("/lecture/edit", lecture->id) %>">bearbeiten</a>)</li>
-%   }
+    <li tal:repeat="lecture request.user.lectures_as_assistant">
+      (${lecture.term})
+      <a tal:attributes="href request.route_path('lecture_view', lecture_id=lecture.id)">
+        ${lecture.name}</a>
+      (<a tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">bearbeiten</a>)
+    </li>
   </ul>
 
-% }
-
+</div>
+<!-- <![CDATA[
 % unless (show_all) {
 <p>Es werden nur aktuelle Veranstaltungen angezeigt. <a href="<% c->uri_for("start", {show_all => 1}) %>">Alle anzeigen</a>.</p>
 % } else {
