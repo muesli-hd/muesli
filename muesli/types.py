@@ -48,7 +48,7 @@ class TutorialTime(WrappedColumn):
 	weekdays = {'0': 'Mo', '1': 'Di', '2': 'Mi',\
 		            '3': 'Do', '4': 'Fr', '5': 'Sa', '6': 'So'}
 	def time(self):
-		return self.value[1:]
+		return self.value[2:]
 	def weekday(self):
 		return self.value[0]
 	def __html__(self):
