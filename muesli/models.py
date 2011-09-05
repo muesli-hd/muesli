@@ -52,6 +52,10 @@ class User(Base):
 	is_admin = Column(Integer, nullable=False, default=0)
 	is_assistant = Column(Integer, nullable=False, default=0)
 	@property
+	def tutorials(self):
+		session = Session.object_session(self)
+		return session.query(Tutorial).filter(Tutorial.lecture_students.any(LectureStudent.student_id == self.id)).join(Tutorial.lecture).order_by(Lecture.term)
+	@property
 	def tutorials_as_tutor(self):
 		session = Session.object_session(self)
 		return session.query(Tutorial).filter(Tutorial.tutor_id == self.id).join(Tutorial.lecture).order_by(Lecture.term)
@@ -63,6 +67,8 @@ class User(Base):
 			else:
 				mt[tutorial.lecture.id] = [tutorial]
 		return mt
+	def name(self):
+		return self.first_name + ' ' + self.last_name
 
 class Confirmation(Base):
 	__tablename__ = 'confirmations'

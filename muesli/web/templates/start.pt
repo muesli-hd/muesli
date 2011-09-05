@@ -36,37 +36,28 @@
   </table>
 </div>
 
-<!--<![CDATA[
-% if (@tutorials) {
+<div tal:conditon="request.user.tutorialsss">
   <h3>Feste Eintragungen in Übungsgruppen</h3>
   <table>
     <tr><th></th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th>Übungsleiter</th><th></th><th></th></tr>
 
-%   for my tutorial (@tutorials) {
-%     my lecture = tutorial->lecture;
-%     my tutor = tutorial->tutor;
-    <tr>
-      <td><& /Fragments/Format/Term, lecture->term &></td>
-      <td><a href="<% c->uri_for("/lecture/view", lecture->id) %>"><% lecture->name %></a></td>
-      <td><& /Fragments/Format/Weektime, tutorial->time &></td>
-      <td><% tutorial->place %></td>
+    <tr tal:repeat="tutorial request.user.tutorials">
+      <td>${tutorial.lecture.term}</td>
+      <td><a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">${tutorial.lecture.name}</a></td>
+      <td>${tutorial.time}</td>
+      <td>${tutorial.place}</td>
       <td>
-%     if (defined tutor) {
-        <a href="mailto:<% tutor->email | nu %>"><% tutor->first_name %> <% tutor->last_name %></a></td>
-%     }
-      <td><a href="<% c->uri_for('/exam/view_points', tutorial->lecture->id) %>">[&nbsp;Details&nbsp;]</a></td>
+        <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a></td>
+      <td><a tal:attributes="href request.route_path('exam_view_points', lecture_id=tutorial.lecture.id)">[&nbsp;Details&nbsp;]</a></td>
       <td>
-%     if (lecture->mode ne "static") {
-        <a onclick="return confirm_unsubscribe()" href="<% c->uri_for('/tutorial/unsubscribe', tutorial->id) %>">[&nbsp;Austreten&nbsp;]</a>
-%     }
+        <a tal:condition="tutorial.lecture.mode != 'static'" onclick="return confirm_unsubscribe()"
+           tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">[&nbsp;Austreten&nbsp;]</a>
       </td>
     </tr>
-%   }
-  </th>
   </table>
-% }
+</div>
 
-
+<!-- <![CDATA[
 % if (keys %time_preferences) {
 <h3>Vorläufige Eintragungen in Übungsgruppen</h3>
 <table>

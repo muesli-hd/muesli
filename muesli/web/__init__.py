@@ -110,6 +110,10 @@ def main(global_config=None, **settings):
 	config.add_route('lecture_set_preferences', '/lecture/set_preferences/{lecture_id}')
 
 	config.add_route('tutorial_view', '/tutorial/view/{tutorial_id}')
+	config.add_route('tutorial_unsubscribe', '/tutorial/unsubscribe/{tutorial_id}')
+
+	config.add_route('exam_view_points', '/exam/view_points/{lecture_id}')
+
 
 	config.scan()
 
