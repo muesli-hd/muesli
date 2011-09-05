@@ -34,9 +34,9 @@ import os
 class List(object):
 	def __init__(self, request):
 		self.request = request
-		self.session = self.request.session
+		self.db = self.request.db
 	def __call__(self):
-		lectures = self.session.query(models.Lecture).all()
+		lectures = self.db.query(models.Lecture).all()
 		return {'lectures': lectures}
 
 @view_config(route_name='lecture_view', renderer='muesli.web:templates/lecture/view.pt')
