@@ -31,7 +31,7 @@
 
       <tr tal:repeat='tutorial lecture.tutorials'>
         <!-- <td><& /Fragments/Format/Weektime, $tutorial->time &></td> -->
-        <td>TODO: Time</td>
+        <td>${tutorial.time}</td>
         <td>${tutorial.place}</td>
         <!-- <td><& /Fragments/HTML/TutorialOccupancy, tutorial => $tutorial &></td> -->
         <td>TODO: Occupancy</td>

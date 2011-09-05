@@ -52,6 +52,15 @@ class Term(WrappedColumn):
 	def __html__(self):
 		return self.value[0:4]+' '+('SS' if self.value[4] == 1 else 'WS') if self.value else '-'
 
+class TutorialTime(WrappedColumn):
+	weekdays = {'0': 'Mo', '1': 'Di', '2': 'Mi',\
+		            '3': 'Do', '4': 'Fr', '5': 'Sa', '6': 'So'}
+	def time(self):
+		return self.value[1:]
+	def weekday(self):
+		return self.value[0]
+	def __html__(self):
+		return self.weekdays[self.weekday()]+' '+self.time()
 
 lecture_tutors_table = Table('lecture_tutors', Base.metadata,
 	Column('lecture', Integer, ForeignKey('lectures.id'), primary_key=True),
@@ -153,7 +162,7 @@ class Tutorial(Base):
 	#   D - day: 0..6, where 0 is Monday
 	#  HH - hour
 	#  MM - minute
-	time = Column(Unicode(length=7))
+	time = Column(ColumnWrapper(TutorialTime)(length=7))
 	date = Column(Date)
 	is_special = Column(Boolean, nullable=False, default=False)
 

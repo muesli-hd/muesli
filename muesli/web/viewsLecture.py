@@ -51,8 +51,8 @@ class View(object):
 			times = self.db.query(sqlalchemy.func.sum(models.Tutorial.max_students), models.Tutorial.time).\
 				filter(models.Tutorial.lecture == lecture).\
 				group_by(models.Tutorial.time)
-			times = [{'weekday':   utils.tutorialtimeToWeekday(result[1]),
-				'timeofday': utils.tutorialtimeToTime(result[1]),
+			times = [{'weekday':   result[1].weekday(),
+				'timeofday': result[1].time(),
 				'time':      result[1],
 				'max_students': result[0]} for result in times]
 			for time in times:
