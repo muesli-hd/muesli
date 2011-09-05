@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-# muesli-serve
+# muesli-test
 #
 # This file is part of MUESLI.
 #
@@ -21,17 +21,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-
-import muesli.web
-from paste.httpserver import serve
 import subprocess
+import traceback
+import time
 
-if '--reload' in sys.argv:
-	files = subprocess.Popen(['find', '.', '-iname', '*.pt'], stdout=subprocess.PIPE).communicate()[0].split('\n')[:-1]
-	import paste.reloader
-	for template_file in files:
-		paste.reloader.watch_file(template_file)
-	paste.reloader.install()
-
-app = muesli.web.main()
-serve(app, host='0.0.0.0')
+while True:
+	try:
+		start = time.time()
+		subprocess.Popen(['./muesli-serve', '--reload']).communicate()
+		end = time.time()
+		if end-start < 2:
+			# Don't start endless loop on syntax errors
+			sys.exit()
+	except Exception as e:
+		print traceback.print_exc()
+		print "Terminating..."
+		sys.exit()
