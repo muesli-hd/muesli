@@ -24,11 +24,30 @@ import muesli
 import sqlalchemy
 import sqlalchemy.ext.declarative
 from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table
+from sqlalchemy import types
 from sqlalchemy.orm import relationship, sessionmaker
 Base = sqlalchemy.ext.declarative.declarative_base()
 
 engine = muesli.engine()
 Session = sessionmaker(bind=engine)
+
+class Term(object):
+	def __init__(self, value):
+		self.value = value
+	def __str__(self):
+		return self.value
+	def __html__(self):
+		return self.value[0:4]+' '+('SS' if self.value[4] == 1 else 'WS') if self.value else '-'
+
+class TermType(types.TypeDecorator):
+	impl = types.Unicode
+	def process_bind_param(self, value, dialect):
+		if isinstance(value, Term):
+			return value.value
+		return value
+	def process_result_value(self, value, dialect):
+		return Term(value)
+
 
 lecture_tutors_table = Table('lecture_tutors', Base.metadata,
 	Column('lecture', Integer, ForeignKey('lectures.id'), primary_key=True),
@@ -74,7 +93,7 @@ class Lecture(Base):
 	#  Format: yyyyt
 	#  where "yyyy" is the year the term starts and "t" is "1" for summer term
 	#  and "2" for winter term
-	term = Column(Unicode(length=5))
+	term = Column(TermType(length=5))
 	# lecture id used in LSF.
 	lsf_id = Column(Text)
 	lecturer = Column(Text)
