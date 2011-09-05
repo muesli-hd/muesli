@@ -51,6 +51,10 @@ class User(Base):
 	# TODO: Convert to boolean
 	is_admin = Column(Integer, nullable=False, default=0)
 	is_assistant = Column(Integer, nullable=False, default=0)
+	@property
+	def tutorials_as_tutor(self):
+		session = Session.object_session(self)
+		return session.query(Tutorial).filter(Tutorial.tutor_id == self.id).join(Tutorial.lecture).order_by(Lecture.term)
 
 class Confirmation(Base):
 	__tablename__ = 'confirmations'
@@ -140,7 +144,7 @@ class Tutorial(Base):
 	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id))
 	lecture = relationship(Lecture, backref='tutorials')
 	tutor_id = Column('tutor', Integer, ForeignKey(User.id))
-	tutor = relationship(User, backref='tutorials_as_tutor')
+	tutor = relationship(User, order_by=Lecture.term)
 	place = Column(Text)
 	max_students = Column(Integer, nullable=False, default=0)
 	comment = Column(Text)
