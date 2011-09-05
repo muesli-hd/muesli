@@ -24,7 +24,7 @@ from muesli.web.forms import *
 from pyramid import security
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest
+from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound
 from pyramid.url import route_url
 from sqlalchemy.orm import exc
 from hashlib import sha1
@@ -40,6 +40,8 @@ def login(request):
 		if user is not None:
 			security.remember(request, user.id)
 			request.user = user
+			url = request.route_url('start')
+			return HTTPFound(location=url)
 	return { 'form': form, 'user': security.authenticated_userid(request) }
 
 @view_config(route_name='logout', renderer='invest.measure.web:templates/logout.pt')
