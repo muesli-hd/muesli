@@ -26,6 +26,9 @@ from pyramid.renderers import get_renderer
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 import pyramid_beaker
+import beaker.ext.sqla
+import tempfile
+
 
 from muesli.models import *
 from muesli.web.views import *
@@ -50,12 +53,33 @@ def add_session_to_request(event):
 def add_templates_to_renderer_globals(event):
 	event['templates'] = lambda name: get_renderer('templates/{0}'.format(name)).implementation()
 
+def principals_for_user(user_id, request):
+	user = request.db.query(User).get(user_id)
+	principals = ['user:{0}'.format(user_id)]
+	if user.is_admin:
+		principals.append('group:administrators')
+	return principals
+
+
 def main(global_config=None, **settings):
 	#settings.update({
 	#})
 
+	# XXX: ugly
+	import sqlalchemy as sa
+	beaker.ext.sqla.sa = sa
+	session_table = beaker.ext.sqla.make_cache_table(Base.metadata)
+	session_table.create(bind=engine, checkfirst=True)
+	settings.update({
+		'beaker.session.type': 'ext:sqla',
+		'beaker.session.bind': engine,
+		'beaker.session.table': session_table,
+		'beaker.session.data_dir': tempfile.mkdtemp(),
+	})
 	session_factory = pyramid_beaker.session_factory_from_settings(settings)
-	authentication_policy = SessionAuthenticationPolicy()
+
+	authentication_policy = SessionAuthenticationPolicy(callback=principals_for_user)
+
 	authorization_policy = ACLAuthorizationPolicy()
 	config = Configurator(
 		authentication_policy=authentication_policy,
