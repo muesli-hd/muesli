@@ -85,6 +85,9 @@ def main(global_config=None, **settings):
 	config.add_route('lecture_email_tutors', '/lecture/email_tutors')
 	config.add_route('lecture_view', '/lecture/view/{lecture_id}')
 	config.add_route('lecture_set_preferences', '/lecture/set_preferences/{lecture_id}')
+
+	config.add_route('tutorial_view', '/tutorial/view/{tutorial_id}')
+
 	config.scan()
 
 	return config.make_wsgi_app()

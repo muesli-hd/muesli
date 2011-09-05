@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<script>
+<![CDATA[
+  function confirm_unsubscribe() {
+    return confirm("Wollen Sie wirklich diese Übungsgruppe verlassen?");
+  }
+]]>
+</script>
+
+<h2>Übersicht Ihrer Veranstaltungen in diesem Semester</h2>
+
+<div tal:omit-tag="" tal:condition="request.user.tutorials_as_tutor">
+  <h3>Eigene Übungsgruppen (als Übungsleiter)</h3>
+  <table>
+    <tr><th>Semester</th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th></th></tr>
+    <tr tal:repeat="tutorial request.user.tutorials_as_tutor">
+      <td>${tutorial.lecture.term}</td>
+      <td><a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
+        ${tutorial.lecture.name}
+      </a></td>
+      <td>${tutorial.time}</td>
+      <td>${tutorial.place}</td>
+      <td><a tal:attributes="href request.route_path('tutorial_view', tutorial_id=tutorial.id)">
+         [&nbsp;Details&nbsp;]
+         </a>
+<!--%<![CDATA[ if (@{ multi_tutorials->{tutorial->id} } > 1) {
+% my @ids = map _->id, @{ multi_tutorials->{tutorial->id} };
+          <a href="<% c->uri_for('/tutorial/view', @ids) %>" title="Alle eigenen Übungsgruppen zu dieser Vorlesung verwalten">[&nbsp;+&nbsp;]</a>
+% }]]>-->
+      </td>
+  </tr>
+  </table>
+</div>
+
+<!--<![CDATA[
+% if (@tutorials) {
+  <h3>Feste Eintragungen in Übungsgruppen</h3>
+  <table>
+    <tr><th></th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th>Übungsleiter</th><th></th><th></th></tr>
+
+%   for my tutorial (@tutorials) {
+%     my lecture = tutorial->lecture;
+%     my tutor = tutorial->tutor;
+    <tr>
+      <td><& /Fragments/Format/Term, lecture->term &></td>
+      <td><a href="<% c->uri_for("/lecture/view", lecture->id) %>"><% lecture->name %></a></td>
+      <td><& /Fragments/Format/Weektime, tutorial->time &></td>
+      <td><% tutorial->place %></td>
+      <td>
+%     if (defined tutor) {
+        <a href="mailto:<% tutor->email | nu %>"><% tutor->first_name %> <% tutor->last_name %></a></td>
+%     }
+      <td><a href="<% c->uri_for('/exam/view_points', tutorial->lecture->id) %>">[&nbsp;Details&nbsp;]</a></td>
+      <td>
+%     if (lecture->mode ne "static") {
+        <a onclick="return confirm_unsubscribe()" href="<% c->uri_for('/tutorial/unsubscribe', tutorial->id) %>">[&nbsp;Austreten&nbsp;]</a>
+%     }
+      </td>
+    </tr>
+%   }
+  </th>
+  </table>
+% }
+
+
+% if (keys %time_preferences) {
+<h3>Vorläufige Eintragungen in Übungsgruppen</h3>
+<table>
+  <tr>
+    <th>Vorlesung</th>
+    <th>Zeit</th>
+    <th>Präferenz</th>
+%   while (my (key, value) = each(%time_preferences)) {
+      <& /Fragments/Format/TimePreferences_Table, value &>
+%   }
+  </tr>
+</table>
+% }
+
+% if (@lectures_as_assistant) {
+  <h3>Von Ihnen verwaltete Vorlesungen</h3>
+
+  <ul>
+%   for my lecture (@lectures_as_assistant) {
+    <li>(<& /Fragments/Format/Term, lecture->term &>) <a href="<% c->uri_for("/lecture/view", lecture->id) %>"><% lecture->name %></a> (<a href="<% c->uri_for("/lecture/edit", lecture->id) %>">bearbeiten</a>)</li>
+%   }
+  </ul>
+
+% }
+
+% unless (show_all) {
+<p>Es werden nur aktuelle Veranstaltungen angezeigt. <a href="<% c->uri_for("start", {show_all => 1}) %>">Alle anzeigen</a>.</p>
+% } else {
+<p>Es werden alle Veranstaltungen angezeigt. <a href="<% c->uri_for("/start") %>">Nur aktuelle anzeigen</a>.</p>
+% }
+
+<%args>
+@tutorials             => ()
+@tutorials_as_tutor    => ()
+multi_tutorials
+@lectures_as_assistant => ()
+%time_preferences      => ()
+show_all
+</%args>
+%# vim: ft=mason sw=2
+]]>-->
+  </metal:main>
+</metal:main>

@@ -54,3 +54,7 @@ class Overview(object):
 		self.request = request
 	def __call__(self):
 		return {}
+
+@view_config(route_name='start', renderer='muesli.web:templates/start.pt')
+def start(request):
+	return {}
