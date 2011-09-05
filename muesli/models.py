@@ -31,22 +31,26 @@ Base = sqlalchemy.ext.declarative.declarative_base()
 engine = muesli.engine()
 Session = sessionmaker(bind=engine)
 
-class Term(object):
+class WrappedColumn(object):
 	def __init__(self, value):
 		self.value = value
 	def __str__(self):
 		return self.value
+
+def ColumnWrapper(type):
+	class Wrapped(types.TypeDecorator):
+		impl = types.Unicode
+		def process_bind_param(self, value, dialect):
+			if isinstance(value, type):
+				return value.value
+			return value
+		def process_result_value(self, value, dialect):
+			return type(value)
+	return Wrapped
+
+class Term(WrappedColumn):
 	def __html__(self):
 		return self.value[0:4]+' '+('SS' if self.value[4] == 1 else 'WS') if self.value else '-'
-
-class TermType(types.TypeDecorator):
-	impl = types.Unicode
-	def process_bind_param(self, value, dialect):
-		if isinstance(value, Term):
-			return value.value
-		return value
-	def process_result_value(self, value, dialect):
-		return Term(value)
 
 
 lecture_tutors_table = Table('lecture_tutors', Base.metadata,
@@ -93,7 +97,7 @@ class Lecture(Base):
 	#  Format: yyyyt
 	#  where "yyyy" is the year the term starts and "t" is "1" for summer term
 	#  and "2" for winter term
-	term = Column(TermType(length=5))
+	term = Column(ColumnWrapper(Term)(length=5))
 	# lecture id used in LSF.
 	lsf_id = Column(Text)
 	lecturer = Column(Text)
