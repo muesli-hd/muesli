@@ -33,7 +33,7 @@ from hashlib import sha1
 import re
 import os
 
-@view_config(route_name='login', renderer='muesli.web:templates/login.pt')
+@view_config(route_name='user_login', renderer='muesli.web:templates/login.pt')
 def login(request):
 	form = Form(UserLogin())
 	if request.method == 'POST' and form.validate(request.POST):
@@ -45,7 +45,7 @@ def login(request):
 			return HTTPFound(location=url)
 	return { 'form': form, 'user': security.authenticated_userid(request) }
 
-@view_config(route_name='logout', renderer='muesli.web:templates/logout.pt')
+@view_config(route_name='user_logout', renderer='muesli.web:templates/logout.pt')
 def logout(request):
 	security.forget(request)
 	request.session.invalidate()

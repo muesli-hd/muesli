@@ -8,7 +8,7 @@ Sie sind zur Zeit als ${request.user.email} angemeldet.
   pyramid.security glaubt, sie seien ${user}.
 </p>
 
-<form action="/login" tal:attributes="action request.route_path('login')" method="POST">
+<form action="/user/login" tal:attributes="action request.route_path('user_login')" method="POST">
 <table>
 <tr>
   <td><label for="email">E-Mail:</label></td>

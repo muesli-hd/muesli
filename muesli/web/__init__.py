@@ -90,8 +90,6 @@ def main(global_config=None, **settings):
 
 	config.add_static_view('static', 'muesli.web:static')
 
-	config.add_route('login', '/login')
-	config.add_route('logout', '/logout')
 	config.add_route('start', '/start')
 	config.add_route('contact', '/contact')
 	config.add_route('admin', '/admin')
@@ -99,7 +97,7 @@ def main(global_config=None, **settings):
 	config.add_route('user_change_email', '/user/change_email')
 	config.add_route('user_change_password', '/user/change_password')
 	config.add_route('user_logout', '/user/logout')
-	config.add_route('user_login', '/user/logout')
+	config.add_route('user_login', '/user/login')
 	config.add_route('user_register', '/user/register')
 
 	config.add_route('overview', '/')
