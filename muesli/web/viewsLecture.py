@@ -37,8 +37,10 @@ class List(object):
 		self.request = request
 		self.db = self.request.db
 	def __call__(self):
-		lectures = self.db.query(models.Lecture).all()
-		return {'lectures': lectures}
+		lectures = self.db.query(models.Lecture).order_by(models.Lecture.term)
+		if self.request.GET.get('show_all', '0')=='0':
+			lectures = lectures.filter(models.Lecture.is_visible == True)
+		return {'lectures': lectures.all()}
 
 @view_config(route_name='lecture_view', renderer='muesli.web:templates/lecture/view.pt', context=LectureContext, permission='view')
 class View(object):
