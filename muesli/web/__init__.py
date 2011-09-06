@@ -49,6 +49,7 @@ def add_session_to_request(event):
 	else:
 		event.request.user = None
 	event.request.userInfo = utils.UserInfo(event.request.user)
+	event.request.permissionInfo = utils.PermissionInfo(event.request)
 
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):

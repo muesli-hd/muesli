@@ -20,6 +20,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import pyramid.security
 
 preferences = [\
 	{'penalty': 1, 'name': 'Gut'},
@@ -37,6 +38,12 @@ def getSemesterLimit():
 	term = '1' if now.month>=3 and now.month <=8 else '2'
 	semesterlimit = '%4i%s' % (semesterlimit, term)
 	return semesterlimit
+
+class PermissionInfo:
+	def __init__(self, request):
+		self.request = request
+	def has_permission(self, permission):
+		return pyramid.security.has_permission(permission, self.request.context, self.request)
 
 class UserInfo:
 	def __init__(self, user):

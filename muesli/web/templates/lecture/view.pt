@@ -7,7 +7,7 @@
   Internetseite zu dieser Vorlesung: <a href="${lecture.url}">${lecture.url}</a>
   </p>
 
-  <p tal:condition="request.userInfo.is_assistant()">
+  <p tal:condition="request.permissionInfo.has_permission('edit')">
   Sie können <a tal:attributes='href request.route_path("lecture_edit", lecture_id=lecture.id)'>diese Vorlesung bearbeiten</a>.
   </p>
 
