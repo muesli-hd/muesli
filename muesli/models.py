@@ -79,6 +79,12 @@ class User(Base):
 				else:
 					tps[tp.lecture.id] = [tp]
 		return tps
+	def hasPreferences(self, lecture=None):
+		session = Session.object_session(self)
+		query = session.query(TimePreference).filter(TimePreference.student_id == self.id)
+		if lecture:
+			query = query.filter(TimePreference.lecture_id == lecture.id)
+		return query.count()>0
 
 class Confirmation(Base):
 	__tablename__ = 'confirmations'

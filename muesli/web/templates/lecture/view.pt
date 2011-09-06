@@ -84,11 +84,10 @@
   <input type='submit' value='Ausgewählte Präferenzen speichern'/>
   </form>
 
-<!--!   if (user_has_prefs) {
-  <form method="post" action="<% c->uri_for("/lecture/remove_preferences", lecture->id) %>">
-  <input type="submit" value="Präferenzen vergessen"/>
+  <form tal:condition="request.user.hasPreferences(lecture)"
+    method="post" action="request.route_path('lecture_remove_preferences', lecture.id)">
+    <input type="submit" value="Präferenzen vergessen"/>
   </form>
-%   }-->
 
   </div>
 
