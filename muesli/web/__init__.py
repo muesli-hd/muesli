@@ -107,7 +107,7 @@ def main(global_config=None, **settings):
 	config.add_route('overview', '/')
 	config.add_route('lecture_add', '/lecture/add')
 	config.add_route('lecture_list', '/lecture/list')
-	config.add_route('lecture_edit', '/lecture/edit')
+	config.add_route('lecture_edit', '/lecture/edit/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_email_tutors', '/lecture/email_tutors')
 	config.add_route('lecture_view', '/lecture/view/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_set_preferences', '/lecture/set_preferences/{lecture_id}')

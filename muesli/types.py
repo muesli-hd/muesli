@@ -28,6 +28,8 @@ class WrappedColumn(object):
 		self.value = value
 	def __str__(self):
 		return self.value
+	def __eq__(self, other):
+		return self.value == other.value
 
 def ColumnWrapper(type):
 	class Wrapped(types.TypeDecorator):

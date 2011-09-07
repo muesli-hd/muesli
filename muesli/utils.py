@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 # utils.py
 #
 # This file is part of MUESLI.
@@ -17,10 +19,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# -*- coding: utf-8 -*-
-
 import datetime
 import pyramid.security
+
+from muesli.types import Term
 
 preferences = [\
 	{'penalty': 1, 'name': 'Gut'},
@@ -30,6 +32,28 @@ preferences = [\
 
 penalty_names = dict([[pref['penalty'], pref['name']] for pref in preferences])
 
+lecture_types={
+	'lecture':
+		 {'name':  'Vorlesung',
+			'tutorial': 'Übungsgruppe',
+			'tutorials': 'Übungsgruppen',
+			'tutor':     'Übungsleiter',
+			'tutors':    'Übungsleiter',
+			'comment':   'Kommentar'},
+	'modul':
+		{'name':     'Modul',
+			'tutorial': 'Veranstaltung',
+			'tutorials': 'Veranstaltungen',
+			'tutor':     'Dozent',
+			'tutors':    'Dozenten',
+			'comment':   'Titel'}
+	}
+
+modes = [['off', 'Keine Anmeldung'],
+	['direct', 'Direkte Anmeldung'],
+	['prefs', 'Praeferenzen'],
+	['static', 'Weder An- noch Abmeldung']]
+
 def getSemesterLimit():
 	now = datetime.datetime.now()
 	semesterlimit = now.year
@@ -38,6 +62,23 @@ def getSemesterLimit():
 	term = '1' if now.month>=3 and now.month <=8 else '2'
 	semesterlimit = '%4i%s' % (semesterlimit, term)
 	return semesterlimit
+
+def getTerms():
+	first_term = 20082
+	terms_per_year = 2
+
+	now = datetime.datetime.now()
+	year = now.year
+	last_term = year * 10 + 11
+	terms = []
+	term = first_term
+	while term < last_term:
+		terms.append([Term(str(term)),Term(str(term))])
+		if term % 10 >= terms_per_year:
+			term = term + 11 - (term % 10)
+		else:
+			term += 1
+	return terms
 
 class PermissionInfo:
 	def __init__(self, request):

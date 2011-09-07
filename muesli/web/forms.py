@@ -1,6 +1,16 @@
 import formencode
 from formencode import validators
 
+class FormField(object):
+	def __init__(self, name, label="", type="text", options=None, value=None, size=40, comment=None):
+		self.name = name
+		self.label = label
+		self.type = type
+		self.options = options
+		self.value = value
+		self.size = size
+		self.comment = comment
+
 class Form(object):
 	def __init__(self, schema, obj=None, fields=[]):
 		self.schema = schema
@@ -33,5 +43,9 @@ class Form(object):
 			setattr(obj, f, self[f])
 
 class UserLogin(formencode.Schema):
+	email = validators.String(not_empty=True)
+	password = validators.String(not_empty=True)
+
+class LectureEdit(formencode.Schema):
 	email = validators.String(not_empty=True)
 	password = validators.String(not_empty=True)
