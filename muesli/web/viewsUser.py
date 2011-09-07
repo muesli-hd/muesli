@@ -45,9 +45,9 @@ def login(request):
 			return HTTPFound(location=url)
 	return { 'form': form, 'user': security.authenticated_userid(request) }
 
-@view_config(route_name='user_logout', renderer='muesli.web:templates/user/logout.pt')
+@view_config(route_name='user_logout')
 def logout(request):
 	security.forget(request)
 	request.session.invalidate()
-	return {}
+	return HTTPFound(location=request.route_url('index'))
 

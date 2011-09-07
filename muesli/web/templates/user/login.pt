@@ -1,3 +1,6 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
 <h2>Anmelden</h2>
 
 <p tal:condition="request.user is not None">
@@ -27,3 +30,12 @@ Sie sind zur Zeit als ${request.user.email} angemeldet.
 </tr>
 </table>
 </form>
+
+<p>
+Wenn Sie noch keinen Account haben, müssen Sie sich zuerst <a tal:attributes="href request.route_path('user_register')">bei MÜSLI registrieren</a>.
+Falls Sie Ihr Passwort vergessen haben, können Sie Ihr <a tal:attributes="href request.route_path('user_reset_password')">Passwort zurücksetzen</a>.
+Sollten Sie dennoch Probleme bei der Anmeldung haben, <a tal:attributes="href request.route_path('contact')">wenden Sie sich an uns</a>.
+</p>
+
+  </metal:main>
+</metal:main>
