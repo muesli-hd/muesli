@@ -124,6 +124,10 @@ class Lecture(Base):
 	mode = Column(Text, nullable=False, default='off')
 	minimum_preferences = Column(Integer, default=None)
 	tutors = relationship(User, secondary=lecture_tutors_table, backref = "lectures_as_tutor")
+	@property
+	def students(self):
+		session = Session.object_session(self)
+		return session.query(User).filter(User.lecture_students.any(LectureStudent.lecture_id==self.id))
 #	@property
 #	def tutors(self):
 #		session = Session.object_session(self)

@@ -16,6 +16,6 @@ class LectureContext(object):
     self.lecture = request.db.query(Lecture).get(lecture_id)
     self.__acl__ = [
 		(Allow, Authenticated, 'view'),
-        (Allow, 'user:{0}'.format(self.lecture.assistant_id), ('view', 'edit')),
+        (Allow, 'user:{0}'.format(self.lecture.assistant_id), ('view', 'edit', 'view_tutorials')),
         (Allow, 'group:administrators', ALL_PERMISSIONS),
-        ]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take')) for tutor in self.lecture.tutors]
+        ]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials')) for tutor in self.lecture.tutors]

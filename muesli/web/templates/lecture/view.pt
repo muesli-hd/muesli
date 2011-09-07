@@ -32,22 +32,26 @@
       <tr tal:repeat='tutorial lecture.tutorials'>
         <td>${tutorial.time}</td>
         <td>${tutorial.place}</td>
-        <!-- <td><& /Fragments/HTML/TutorialOccupancy, tutorial => $tutorial &></td> -->
-        <td>TODO: Occupancy</td>
+        <td>
+          <metal:main metal:use-macro="templates('Fragments/HTML/tutorial_occupancy.pt').macros['tutorial_occupancy']" />
+        </td>
         <td>
           <span tal:omit-tag='' tal:condition='tutorial.tutor'>
             ${tutorial.tutor.first_name} ${tutorial.tutor.last_name}
           </span>
-          <span tal:omit-tag='' tal:condition='not tutorial.tutor'> <!-- TODO: and (is assistant or is_tutor) -->
-            <!-- <a href="<% c->uri_for('/tutorial/set_tutor', $tutorial->id) %>">Übernehmen</a> -->
+          <span tal:omit-tag='' tal:condition="not tutorial.tutor and request.permissionInfo.has_permission('take_tutorial')"> <!-- TODO: and (is assistant or is_tutor) -->
+            <a tal:attributes="href request.route_path('tutorial_set_tutor', tutorial_id=tutorial.id)">Übernehmen</a>
           </span>
         </td>
         <td>${tutorial.comment}</td>
-        <!-- %     if (is_assistant || is_tutor) { -->
-        <td tal:condition='True'><!-- <a href="<% c->uri_for('/tutorial/view', $tutorial->id) %>"> -->Details<!-- </a> --></td>
+        <td tal:condition="request.permissionInfo.has_permission('view_tutorials')">
+          <a tal:attributes="href request.route_path('tutorial_view', tutorial_id=tutorial.id)">Details</a>
+        </td>
         <td>
-          <!-- href="<% c->uri_for('/tutorial/subscribe', $tutorial->id) %>"> -->
-          <a tal:condition='tutorial.students.count() &lt; tutorial.max_students' ><!-- <% is_lecturestudent?'Wechseln':'Beitreten' %> --></a>
+          <a tal:condition='tutorial.students.count() &lt; tutorial.max_students'
+             tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)">
+             ${'Wechseln' if request.user in lecture.students else 'Beitreten'}
+          </a>
         </td>
       </tr>
    </table>
