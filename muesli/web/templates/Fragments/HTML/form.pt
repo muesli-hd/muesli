@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:define-macro="form">
+  <table>
+    <tr tal:repeat="field formdata">
+      <td><label tal:attributes="for field.name">${field.label}:</label></td>
+      <td>
+        <div tal:condition="field.type=='select'" tal:omit-tag="">
+          <select tal:attributes="name field.name">
+            <option tal:repeat="option field.options"
+               tal:attributes="value option[0]; selected 'selected' if option[0]==field.value else None">
+                ${option[1]}
+            </option>
+          </select>
+        </div>
+        <div tal:condition="field.type=='radio'" tal:omit-tag="">
+          <div tal:repeat="option field.options" tal:omit-tag="">
+            <input type="radio" tal:attributes="name field.name+'_'+str(option[0]); value option[0]; checked 'checked' if option[0]==field.value else None" />
+            <label tal:attributes="for field.name+'_'+str(option[0])">${option[1]}</label>
+          </div>
+        </div>
+        <div tal:condition="field.type=='text'" tal:omit-tag="">
+          <input tal:attributes="name field.name; size str(field.size); value field.value"/>
+        </div>
+        <span tal:condition="field.comment and field.name not in form.errors">${field.comment}</span>
+      </td>
+    </tr>
+  </table>
+</metal:main>
