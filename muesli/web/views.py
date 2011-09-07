@@ -33,7 +33,7 @@ from hashlib import sha1
 import re
 import os
 
-@view_config(route_name='overview', renderer='muesli.web:templates/overview.pt')
+@view_config(route_name='index', renderer='muesli.web:templates/index.pt')
 class Overview(object):
 	def __init__(self, request):
 		self.request = request
