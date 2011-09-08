@@ -51,3 +51,7 @@ def logout(request):
 	request.session.invalidate()
 	return HTTPFound(location=request.route_url('index'))
 
+@view_config(route_name='user_list', renderer='muesli.web:templates/user/list.pt', context=GeneralContext, permission='admin')
+def list(request):
+	users = request.db.query(models.User).order_by(models.User.last_name, models.User.first_name)
+	return {'users': users}

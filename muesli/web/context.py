@@ -10,6 +10,12 @@ class UserContext(object):
         (Allow, 'group:administrators', ALL_PERMISSIONS),
         ]
 
+class GeneralContext(object):
+  def __init__(self, request):
+    self.__acl__ = [
+        (Allow, 'group:administrators', ALL_PERMISSIONS),
+        ]
+
 class LectureContext(object):
   def __init__(self, request):
     lecture_id = request.matchdict['lecture_id']
