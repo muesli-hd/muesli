@@ -126,11 +126,17 @@ class Edit(object):
 			   type='select',
 			   options=[[a.id, a.name()] for a in assistants],
 			   value=lecture.assistant.id))
+		pref_subjects = lecture.pref_subjects()
+		pref_count = sum([pref[0] for pref in pref_subjects])
+		subjects = lecture.subjects()
+		student_count = sum([subj[0] for subj in subjects])
 		return {'lecture': lecture,
 		        'names': names,
 		        'formdata': formdata,
-		        'prefs': utils.preferences,
-		        'types': utils.lecture_types,
-		        'terms': utils.getTerms(),
-		        'modes': utils.modes,
+		        'pref_subjects': pref_subjects,
+		        'pref_count': pref_count,
+		        'subjects': subjects,
+		        'student_count': student_count,
+		        'categories': utils.categories,
+		        'exams': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
 		        'form': self.form}

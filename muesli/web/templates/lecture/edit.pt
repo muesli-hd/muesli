@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+<h2>${names['name']} bearbeiten</h2>
+
+
+<form action="/lecture/edit" tal:attributes="action request.route_path('lecture_edit', lecture_id=lecture.id)" method="POST">
+<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['form']" />
+</form>
+
+
+
+<div tal:condition="lecture.mode=='prefs'" tal:omit-tag="">
+  <h3>Einteilung vornehmen</h3>
+  <p>Verteilung der angemeldeten Studenten:</p>
+  <table>
+    <thead>
+      <tr><th>Studiengang</th><th>Anzahl Teilnehmer</th></tr>
+    </thead>
+    <tbody>
+
+      <tr tal:repeat="subject pref_subjects">
+        <td>${subject[1] if subject[1] else 'Keine Angabe'}</td><td>${subject[0]}</td></tr>
+    <tr>
+      <td>Gesamt</td><td>${pref_count}</td>
+    </tr>
+    </tbody>
+  </table>
+  <p>
+  Es haben sich insgesamt ${pref_count} Studenten angemeldet.
+  Gruppeneinteilung nach Präferenzen vornehmen.
+  <strong>Dies überschreibt vorherige Einteilungen!</strong>
+  </p>
+
+ <form method="post" tal:attributes="action request.route_path('lecture_do_allocation', lecture_id=lecture.id)">
+    <input type="submit" value="Einteilung vornehmen"/>
+  </form>
+</div>
+
+<h3>${names['tutorials']}</h3>
+
+
+<p>
+Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
+</p>
+
+<table>
+  <tr><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>${names['tutor']}</th><th>Kommentar</th><th></th><th></th></tr>
+  <tr tal:repeat="tutorial lecture.tutorials">
+    <td>${tutorial.time}</td>
+    <td>${tutorial.place}</td>
+    <td><metal:main metal:use-macro="templates('Fragments/HTML/tutorial_occupancy.pt').macros['tutorial_occupancy']" /></td>
+    <td>
+      ${tutorial.tutor.name() if tutorial.tutor else ''}
+    </td>
+    <td>${tutorial.comment}</td>
+    <td><a tal:attributes="href request.route_path('tutorial_view', tutorial_id=tutorial.id)">Details</a></td>
+    <td><a tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">Bearbeiten</a></td>
+  </tr>
+  <tr>
+    <td colspan="3">
+      Neue <a tal:attributes="href request.route_path('tutorial_add', lecture_id = lecture.id)">${names['tutorial']} hinzufügen</a>
+    </td>
+  </tr>
+</table>
+
+<h3>${names['tutors']}</h3>
+
+<table>
+  <tr tal:repeat="tutor lecture.tutors">
+    <td><a tal:attributes="href 'mailto:'+tutor.email">${tutor.name()}</a>
+      (<a tal:attributes="href request.route_path('lecture_remove_tutor', lecture_id=lecture.id, tutor_id=tutor.id)">entfernen</a>)</td>
+  </tr>
+</table>
+<h3>Testate</h3>
+
+<p><a tal:attributes="href request.route_path('lecture_add_exam', lecture_id=lecture.id)">Testat hinzufügen</a></p>
+
+<div tal:repeat="category categories" tal:omit-tag="">
+  <h4 tal:condition="exams[category['id']].count()!=0">${category['name']}</h4>
+  <ul>
+    <li tal:repeat="exam exams[category['id']]">
+        <a tal:attributes="href request.route_path('exam_edit', exam_id=exam.id)">${exam.name}</a> (<a tal:attributes="href request.route_path('exam_statistics', exam_id=exam.id)">Statistiken</a>,
+        <a tal:attributes="href request.route_path('exam_enter_points', exam_id=exam.id)">Eintragen</a>,
+        <a tal:attributes="href request.route_path('lecture_export_exam', lecture_id=lecture.id, exam_id=exam.id)">Exportieren</a>)</li>
+  </ul>
+</div>
+
+<h3>Benotungen</h3>
+
+<p><a tal:attributes="href request.route_path('lecture_add_grading', lecture_id=lecture.id)">Benotung hinzufügen</a></p>
+
+  <ul>
+    <li tal:repeat="grading lecture.gradings"><a tal:attributes="href request.route_path('grading_edit', grading_id=grading.id)">${grading.name}</a></li>
+  </ul>
+
+
+<h3>Teilnehmer nach Studiengängen</h3>
+
+<table>
+  <thead>
+    <tr><th>Studiengang</th><th>Anzahl Teilnehmer</th></tr>
+  </thead>
+  <tbody>
+    <tr tal:repeat="subject subjects">
+      <td><a tal:attributes="href request.route_path('lecture_export_students_html', lecture_id=lecture.id, _query= {'subject': subject[1]})">${subject[1] if subject[1] else "(Keine Angabe)"}</a></td><td>${subject[0]}</td></tr>
+    <tr>
+      <td>Gesamt</td><td>${student_count}</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Sonstiges</h3>
+<ul>
+  <li><a tal:attributes="href request.route_path('lecture_email_tutors', lecture_id=lecture.id)">E-Mail an alle Übungsleiter schreiben</a></li>
+  <li><a tal:attributes="href request.route_path('lecture_email_students', lecture_id=lecture.id)">E-Mail an alle Studenten schreiben</a></li>
+  <li><a tal:attributes="href request.route_path('lecture_export_students_html', lecture_id=lecture.id)">Liste aller Teilnehmer</a></li>
+  <li><a tal:attributes="href request.route_path('lecture_view_removed_students', lecture_id=lecture.id)">Liste der abgemeldeten/entfernten Teilnehmer</a></li>
+  <li><a tal:attributes="href request.route_path('lecture_export_totals', lecture_id=lecture.id)">Punktzahlen exportieren</a> (kann mit Copy&amp;Paste in OpenOffice.org eingefügt werden)</li>
+</ul>
+
+  </metal:main>
+</metal:main>

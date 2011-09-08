@@ -155,12 +155,22 @@ class Lecture(Base):
 		else:
 			times = []
 		return times
+	def pref_subjects(self):
+		session = Session.object_session(self)
+		return session.query(sqlalchemy.func.count(User.id), User.subject).\
+			filter(User.time_preferences.any(TimePreference.lecture_id == self.id)).\
+			group_by(User.subject).order_by(User.subject)
+	def subjects(self):
+		session = Session.object_session(self)
+		return session.query(sqlalchemy.func.count(User.id), User.subject).\
+			filter(User.lecture_students.any(LectureStudent.lecture_id == self.id)).\
+			group_by(User.subject).order_by(User.subject)
 
 class Exam(Base):
 	__tablename__ = 'exams'
 	id = Column(Integer, primary_key=True)
 	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id))
-	lecture = relationship(Lecture, backref='exams')
+	lecture = relationship(Lecture, backref=backref('exams', lazy='dynamic'))
 	name = Column(Text)
 	# exam type
 	#  'exam'

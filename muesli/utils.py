@@ -35,10 +35,10 @@ penalty_names = dict([[pref['penalty'], pref['name']] for pref in preferences])
 lecture_types={
 	'lecture':
 		 {'name':  'Vorlesung',
-			'tutorial': 'Übungsgruppe',
-			'tutorials': 'Übungsgruppen',
-			'tutor':     'Übungsleiter',
-			'tutors':    'Übungsleiter',
+			'tutorial': u'Übungsgruppe',
+			'tutorials': u'Übungsgruppen',
+			'tutor':     u'Übungsleiter',
+			'tutors':    u'Übungsleiter',
 			'comment':   'Kommentar'},
 	'modul':
 		{'name':     'Modul',
@@ -53,6 +53,11 @@ modes = [['off', 'Keine Anmeldung'],
 	['direct', 'Direkte Anmeldung'],
 	['prefs', 'Praeferenzen'],
 	['static', 'Weder An- noch Abmeldung']]
+
+categories = [{'id': 'assignment', 'name': u'Übungszettel'},
+	{'id': 'exam', 'name': 'Klausur'},
+	{'id': 'presence_assignment', 'name': u'Präsenzübung'},
+	{'id': 'mock_exam', 'name': 'Probeklausur'}]
 
 def getSemesterLimit():
 	now = datetime.datetime.now()
