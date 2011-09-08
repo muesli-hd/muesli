@@ -1,0 +1,17 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+<h2>Administration</h2>
+
+<ul>
+  <li><a tal:attributes="href request.route_path('user_list')">Nutzerliste</a></li>
+  <li><a tal:attributes="href request.route_path('user_list_subjects')">Studiengangsliste</a></li>
+  <li><a tal:attributes="href request.route_path('lecture_list', _query={'show_all': 1 })">Liste aller Vorlesungen</a></li>
+  <li><a tal:attributes="href request.route_path('lecture_export_yaml')">Aktuelle Vorlesungen als YAML exportieren</a>
+    (<a tal:attributes="href request.route_path('lecture_export_yaml', _query={'show_all': 1})">Alle exportieren</a>)
+  </li>
+  <li><a tal:attributes="href request.route_path('lecture_add')">Neue Vorlesung</a></li>
+</ul>
+
+  </metal:main>
+</metal:main>

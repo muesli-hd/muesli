@@ -101,6 +101,8 @@ def main(global_config=None, **settings):
 	config.add_route('user_change_password', '/user/change_password')
 	config.add_route('user_logout', '/user/logout')
 	config.add_route('user_login', '/user/login')
+	config.add_route('user_list', '/user/list')
+	config.add_route('user_list_subjects', '/user/list_subjects')
 	config.add_route('user_register', '/user/register')
 	config.add_route('user_reset_password', '/user/reset_password')
 
@@ -121,6 +123,8 @@ def main(global_config=None, **settings):
 	config.add_route('lecture_export_exam', '/lecture/export_exam/{lecture_id}/{exam_id}', factory = LectureContext)
 	config.add_route('lecture_export_students_html', '/lecture/export_students_html/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_export_totals', '/lecture/export_totals/{lecture_id}', factory = LectureContext)
+	config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory = LectureContext)
+
 
 	config.add_route('tutorial_add', '/tutorial/add/{lecture_id}')
 	config.add_route('tutorial_view', '/tutorial/view/{tutorial_id}')

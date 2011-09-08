@@ -33,13 +33,6 @@ from hashlib import sha1
 import re
 import os
 
-@view_config(route_name='index', renderer='muesli.web:templates/index.pt')
-class Overview(object):
-	def __init__(self, request):
-		self.request = request
-	def __call__(self):
-		return {}
-
 @view_config(route_name='start', renderer='muesli.web:templates/start.pt')
 def start(request):
 	tutorials_as_tutor = request.user.tutorials_as_tutor
@@ -55,3 +48,7 @@ def start(request):
 	        'tutorials_as_tutor': tutorials_as_tutor.all(),
 	        'tutorials': tutorials.all(),
 	        'lectures_as_assistant': lectures_as_assistant.all()}
+
+@view_config(route_name='admin', renderer='muesli.web:templates/admin.pt')
+def admin(request):
+	return {}
