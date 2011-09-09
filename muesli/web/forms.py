@@ -78,7 +78,7 @@ class Form(object):
 		else:
 			self.errors = self.formValidator.errors
 			return False
-	__getitem__ = lambda self, key: self.named_fields.get(key, None).value
+	__getitem__ = lambda self, key: self.named_fields[key].value
 
 class FormValidator(object):
 	def __init__(self, schema, obj=None, fields=[]):
@@ -111,12 +111,24 @@ class FormValidator(object):
 		for f in fields:
 			setattr(obj, f, self[f])
 
+class ObjectForm(Form):
+	def __init__(self, obj, formfields, send="Ändern"):
+		Form.__init__(self, formfields, send=send)
+		self.obj = obj
+	def saveField(self, fieldName):
+		setattr(self.obj, fieldName, self[fieldName])
+	def saveValues(self):
+		for name in self.named_fields:
+			self.saveField(name)
+
+
 class UserLogin(formencode.Schema):
 	email = validators.String(not_empty=True)
 	password = validators.String(not_empty=True)
 
-class LectureEdit(Form):
+class LectureEdit(ObjectForm):
 	def __init__(self, request, lecture):
+		self.request =  request
 		formfields = [
 			FormField('type',
 			   label='Typ',
@@ -179,10 +191,19 @@ class LectureEdit(Form):
 			   type='select',
 			   options=[[a.id, a.name()] for a in assistants],
 			   value=lecture.assistant.id,
-			   required=True))
-		Form.__init__(self, formfields, send=u'Ändern')
+			   required=True,
+			   validator=validators.Int()))
+		ObjectForm.__init__(self, lecture, formfields, send=u'Ändern')
+	def saveField(self, fieldName):
+		if fieldName == 'is_visible':
+			self.obj.is_visible = self['is_visible']==1
+		elif fieldName == 'assistant':
+			assistant = self.request.db.query(models.User).get(self['assistant'])
+			self.obj.assistant = assistant
+		else:
+			ObjectForm.saveField(self, fieldName)
 
-class UserEdit(Form):
+class UserEdit(ObjectForm):
 	def __init__(self, request, user):
 		formfields = [
 			FormField('email',
@@ -229,4 +250,4 @@ class UserEdit(Form):
 			   options=[[1, 'Ja'], [0, 'Nein']],
 			   value=1 if user.is_admin else 0)
 			]
-		Form.__init__(self, formfields, send=u'Änderungen übernehmen')
+		ObjectForm.__init__(self, user, formfields, send=u'Änderungen übernehmen')

@@ -68,23 +68,13 @@ class Edit(object):
 		lecture = self.db.query(models.Lecture).get(self.lecture_id)
 		form = LectureEdit(self.request, lecture)
 		if self.request.method == 'POST' and form.processPostData(self.request.POST):
-			lecture.type =     form['type']
-			lecture.name =     form['name']
-			lecture.term =     form['term']
-			lecture.lsf_id =   form['lsf_id']
-			lecture.lecturer = form['lecturer']
-			lecture.url =      form['url']
-			lecture.mode =     form['mode']
-			lecture.minimum_preferences = form['minimum_preferences']
-			lecture.password = form['password']
-			lecture.is_visible=form['is_visible']==1
+			form.saveValues()
 			self.request.db.commit()
 		names = utils.lecture_types[lecture.type]
 		pref_subjects = lecture.pref_subjects()
 		pref_count = sum([pref[0] for pref in pref_subjects])
 		subjects = lecture.subjects()
 		student_count = sum([subj[0] for subj in subjects])
-
 		return {'lecture': lecture,
 		        'names': names,
 		        'pref_subjects': pref_subjects,

@@ -40,6 +40,13 @@ lecture_types={
 			'tutor':     u'Übungsleiter',
 			'tutors':    u'Übungsleiter',
 			'comment':   'Kommentar'},
+	'seminar':
+		 {'name':  'Seminar',
+			'tutorial': u'Vortrag',
+			'tutorials': u'Vorträge',
+			'tutor':     u'Vortragender',
+			'tutors':    u'Vortragende',
+			'comment':   'Thema'},
 	'modul':
 		{'name':     'Modul',
 			'tutorial': 'Veranstaltung',
