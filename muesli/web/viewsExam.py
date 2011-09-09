@@ -47,6 +47,15 @@ class Edit(object):
 			form.saveValues()
 			self.request.db.commit()
 			form.message = u"Änderungen gespeichert."
+		if exam.admission!=None or exam.registration!=None:
+			students = exam.lecture.lecture_students
+			if exam.admission != None:
+				students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.admission==True))))
+				print students.statement
+			if exam.registration != None:
+				students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.registration==True))))
+		else: students = None
 		return {'exam': exam,
-		        'form': form
+		        'form': form,
+		        'students': students
 		       }

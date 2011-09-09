@@ -14,28 +14,17 @@
 </form>
 
 
-<!--
 <ul>
-% for my exercise (exam->exercises) {
-  <li><a href="<% c->uri_for("/exam/add_exercise", exam->id, exercise->id) %>">Aufgabe <% exercise->nr %></a>: <% exercise->maxpoints %> Punkte</li>
-% }
-  <li><a href='<% c->uri_for("/exam/add_exercise", exam->id) %>'>Aufgabe hinzufügen</a></li>
+  <li tal:repeat="exercise exam.exercises">
+    <a tal:attributes="href request.route_path('exam_add_or_edit_exercise', exam_id=exam.id, exercise_id=exercise.id)">Aufgabe ${exercise.nr}</a>: ${exercise.maxpoints} Punkte</li>
+  <li><a tal:attributes="href request.route_path('exam_add_or_edit_exercise', exam_id=exam.id, exercise_id=None)">Aufgabe hinzufügen</a></li>
 </ul>
 
-% if (@students) {
 
-%   if (defined exam->admission && defined exam->registration) {
-    <h3>Angemeldete und zugelassene Studenten</h3>
-%   }
-%   elsif (defined exam->admission) {
-    <h3>Zugelassene Studenten</h3>
-%   }
-%   elsif (defined exam->registration) {
-    <h3>Angemeldete Studenten</h3>
-%   }
-%   else {
-%     c->log->error("Unknown admission state");
-%   }
+<div tal:condition="students">
+    <h3 tal:condition="exam.admission!=None and exam.registration!=None">Angemeldete und zugelassene Studenten</h3>
+    <h3 tal:condition="exam.admission!=None and exam.registration==None">Zugelassene Studenten</h3>
+    <h3 tal:condition="exam.admission==None and exam.registration!=None">Angemeldete Studenten</h3>
 
   <table>
 
@@ -50,27 +39,19 @@
   </thead>
 
   <tbody>
-%   for my s (@students) {
-%     my student = s->student;
-%     my tutor   = s->tutorial->tutor;
-    <tr>
+    <tr tal:repeat="ls students">
       <td>
-%     if (defined tutor) {
-        <% tutor->last_name %>
-%     }
+        ${ls.tutorial.tutor.last_name if ls.tutorial.tutor else ''}
       </td>
-      <td><% student->last_name %>, <% student->first_name %></td>
-      <td><% student->matrikel %></td>
-      <td><% student->subject %></td>
-      <td><% student->birth_date %>, <% student->birth_place %></td>
+      <td>${ls.student.last_name}, ${ls.student.first_name}</td>
+      <td>${ls.student.matrikel}</td>
+      <td>${ls.student.subject}</td>
+      <td>${ls.student.birth_date}, ${ls.student.birth_place}</td>
     </tr>
-%   }
   </tbody>
 
   </table>
-% }
-
--->
+</div>
 
   </metal:main>
 </metal:main>

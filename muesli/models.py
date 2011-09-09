@@ -235,9 +235,9 @@ class TutorialPreference(Base):
 class LectureStudent(Base):
 	__tablename__ = 'lecture_students'
 	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)
-	lecture = relationship(Lecture, backref='lecture_students')
+	lecture = relationship(Lecture, backref=backref('lecture_students', lazy='dynamic'))
 	student_id = Column('student', Integer, ForeignKey(User.id), primary_key=True)
-	student = relationship(User, backref='lecture_students')
+	student = relationship(User, backref=backref('lecture_students', lazy='dynamic'))
 	tutorial_id = Column('tutorial', Integer, ForeignKey(Tutorial.id))
 	tutorial = relationship(Tutorial, backref='lecture_students')
 
