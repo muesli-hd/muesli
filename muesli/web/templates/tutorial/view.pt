@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<script><![CDATA[
+set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lecture_view", lecture_id=tutorial.lecture.id)}']])
+]]>
+</script>
+
+<h2>${names['tutorial']} zur <a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
+  ${names['name']} ${tutorial.lecture.name}
+</a> am ${tutorial.time} (${tutorial.place})
+<span tal:repeat="ctutorial tutorials" tal:omit-tag="">${tutorial.time} (${tutorial.place}) </span>
+
+</h2>
+
+<p tal:condition="tutorial.tutor">
+  ${names['tutor']}: <a tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a>
+</p>
+
+
+<h3>Mitglieder</h3>
+
+<table class="colored">
+
+<thead>
+  <tr>
+    <th>Name (E-Mail)</th>
+    <th>Matrikel</th>
+    <th>Geburtstag, -ort</th>
+    <th>Studiengang</th>
+    <th tal:condition="request.permissionInfo.has_permission('edit')">Verschieben</th>
+    <th>Entfernen</th>
+  </tr>
+</thead>
+
+<tbody>
+  <tr tal:repeat="student students">
+    <td><a tal:attributes="href 'mailto:'+student.email">${student.name()}</a></td>
+    <td>${student.matrikel}</td>
+    <td>${student.birth_date}, ${student.birth_place}</td>
+    <td>${student.subject}</td>
+    <td tal:condition="request.permissionInfo.has_permission('edit')">TODO: Move<!--<& /Fragments/Form/MoveStudent, student => student, tutorials => tutorials &>--></td>
+    <td>
+      <form method="post" tal:attributes="action request.route_path('tutorial_remove_student', tutorial_id=tutorial.id, student_id=student.id)">
+        <input type="submit" value="Entfernen"/>
+      </form>
+    </td>
+  </tr>
+
+</tbody>
+
+</table>
+
+<h3>Testate</h3>
+
+<div tal:repeat="category categories" tal:omit-tag="">
+  <h4 tal:condition="exams[category['id']].count()!=0">${category['name']}</h4>
+
+  <ul>
+    <li tal:repeat="exam exams[category['id']]">
+      <a tal:attributes="href request.route_path('exam_enter_points', exam_id=exam.id, tutorial_ids=tutorial_ids)">${exam.name}</a>
+      <a tal:attributes="href request.route_path('exam_enter_points_single', exam_id=exam.id, tutorial_ids=tutorial_ids)">(Interaktiv)</a></li>
+  </ul>
+
+</div>
+
+<form method="get" tal:attributes="action request.route_path('exam_correlation')">
+  <input type="hidden" name="type1" value="exam"/>
+  <input type="hidden" name="type2" value="exam"/>
+  <select name="id1">
+    <option tal:repeat="exam tutorial.lecture.exams" tal:attributes="value exam.id">
+      ${exam.name}
+    </option>
+  </select>
+  <select name="id2">
+    <option tal:repeat="exam tutorial.lecture.exams" tal:attributes="value exam.id">
+      ${exam.name}
+    </option>
+  </select>
+  <input type="submit" value="Korrelation"/>
+</form>
+
+
+<h3>Administrativa</h3>
+
+<ul>
+  <li><a tal:attributes="href request.route_path('tutorial_results', tutorial_ids=tutorial_ids)">Punkteübersicht</a></li>
+  <li><a tal:attributes="href request.route_path('tutorial_email', tutorial_ids=tutorial_ids)">E-Mail an Teilnehmer schreiben</a></li>
+  <li tal:condition="request.permissionInfo.has_permission('edit') and len(tutorials) &lt; 2">
+    <a tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">${names['tutorial']} bearbeiten</a></li>
+  <li tal:conditon="request.userInfo.is_tutor(tutorial.lecture)">
+     <a tal:attributes="href request.route_path('tutorial_remove_tutor', tutorial_ids=tutorial_ids)">Als ${names['tutor']} zurücktreten</a></li>
+</ul>
+  </metal:main>
+</metal:main>

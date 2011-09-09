@@ -35,6 +35,27 @@ import PIL.Image
 import PIL.ImageDraw
 import StringIO
 
+@view_config(route_name='tutorial_view', renderer='muesli.web:templates/tutorial/view.pt', context=TutorialContext, permission='view')
+class View(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.tutorial_ids = request.matchdict['tutorial_ids']
+	def __call__(self):
+		tutorials = [self.db.query(models.Tutorial).get(tutorial_id) for tutorial_id in self.tutorial_ids.split(',')]
+		filterClause = models.User.lecture_students.any(models.LectureStudent.tutorial_id==tutorials[0].id)
+		for tutorial in tutorials[1:]:
+			filterClause = filterClause | (models.User.lecture_students.any(models.LectureStudent.tutorial_id==tutorial.id))
+		students = self.db.query(models.User).filter(filterClause)
+		tutorial = tutorials[0]
+		return {'tutorial': tutorial,
+		        'tutorials': tutorials,
+		        'tutorial_ids': self.tutorial_ids,
+		        'students': students,
+		        'categories': utils.categories,
+		        'exams': dict([[cat['id'], tutorial.lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
+		        'names': utils.lecture_types[tutorial.lecture.type]}
+
 @view_config(route_name='tutorial_occupancy_bar')
 class OccupancyBar(object):
 	def __init__(self, request):

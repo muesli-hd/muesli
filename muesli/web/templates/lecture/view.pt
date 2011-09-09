@@ -45,7 +45,7 @@
         </td>
         <td>${tutorial.comment}</td>
         <td tal:condition="request.permissionInfo.has_permission('view_tutorials')">
-          <a tal:attributes="href request.route_path('tutorial_view', tutorial_id=tutorial.id)">Details</a>
+          <a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">Details</a>
         </td>
         <td>
           <a tal:condition='tutorial.students.count() &lt; tutorial.max_students'

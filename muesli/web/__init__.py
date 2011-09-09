@@ -129,9 +129,14 @@ def main(global_config=None, **settings):
 
 
 	config.add_route('tutorial_add', '/tutorial/add/{lecture_id}')
-	config.add_route('tutorial_view', '/tutorial/view/{tutorial_id}')
+	config.add_route('tutorial_view', '/tutorial/view/{tutorial_ids}', factory = TutorialContext)
+	config.add_route('tutorial_results', '/tutorial/results/{tutorial_ids}', factory = TutorialContext)
+	config.add_route('tutorial_email', '/tutorial/email/{tutorial_ids}', factory = TutorialContext)
+	config.add_route('tutorial_remove_tutor', '/tutorial/remove_tutor/{tutorial_ids}', factory = TutorialContext)
+
 	config.add_route('tutorial_edit', '/tutorial/edit/{tutorial_id}')
 	config.add_route('tutorial_set_tutor', '/tutorial/set_tutor/{tutorial_id}')
+	config.add_route('tutorial_remove_student', '/tutorial/remove_student/{tutorial_id}/{student_id}')
 	config.add_route('tutorial_subscribe', '/tutorial/subscribe/{tutorial_id}')
 	config.add_route('tutorial_unsubscribe', '/tutorial/unsubscribe/{tutorial_id}')
 	config.add_route('tutorial_occupancy_bar', '/tutorial/occupancy_bar/{count}/{max_count}/{max_count_total}')
@@ -139,7 +144,9 @@ def main(global_config=None, **settings):
 	config.add_route('exam_view_points', '/exam/view_points/{lecture_id}')
 	config.add_route('exam_edit', '/exam/edit/{exam_id}')
 	config.add_route('exam_statistics', '/exam/statistics/{exam_id}')
-	config.add_route('exam_enter_points', '/exam/enter_points/{exam_id}')
+	config.add_route('exam_correlation', '/exam/correlation')
+	config.add_route('exam_enter_points', '/exam/enter_points/{exam_id}/{tutorial_ids}')
+	config.add_route('exam_enter_points_single', '/exam/enter_points_single/{exam_id}/{tutorial_ids}')
 
 	config.add_route('grading_edit', '/grading/edit/{grading_id}')
 

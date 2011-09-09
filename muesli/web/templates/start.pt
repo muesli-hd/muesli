@@ -23,13 +23,13 @@
       </a></td>
       <td>${tutorial.time}</td>
       <td>${tutorial.place}</td>
-      <td><a tal:attributes="href request.route_path('tutorial_view', tutorial_id=tutorial.id)">
+      <td><a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">
          [&nbsp;Details&nbsp;]
          </a>
           <a tal:define="multi_tutorials request.user.prepareMultiTutorials()"
             tal:condition="len(multi_tutorials[tutorial.lecture.id])&gt; 1"
             tal:attributes="href request.route_path('tutorial_view',
-              tutorial_id=','.join([str(t.id) for t in multi_tutorials[tutorial.lecture.id]]))"
+              tutorial_ids=','.join([str(t.id) for t in multi_tutorials[tutorial.lecture.id]]))"
             title="Alle eigenen Übungsgruppen zu dieser Vorlesung verwalten">[&nbsp;+&nbsp;]</a>
       </td>
   </tr>

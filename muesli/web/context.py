@@ -25,3 +25,12 @@ class LectureContext(object):
         (Allow, 'user:{0}'.format(self.lecture.assistant_id), ('view', 'edit', 'view_tutorials')),
         (Allow, 'group:administrators', ALL_PERMISSIONS),
         ]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials')) for tutor in self.lecture.tutors]
+
+class TutorialContext(object):
+  def __init__(self, request):
+    tutorial_ids = request.matchdict['tutorial_ids']
+    self.tutorials = [request.db.query(Tutorial).get(tutorial_id) for tutorial_id in tutorial_ids.split(',')]
+    self.__acl__ = [
+        (Allow, 'user:{0}'.format(self.tutorials[0].lecture.assistant_id), ('view', 'edit')),
+        (Allow, 'group:administrators', ALL_PERMISSIONS),
+        ]+[(Allow, 'user:{0}'.format(tutor.id), ('view')) for tutorial in self.tutorials for tutor in tutorial.lecture.tutors]

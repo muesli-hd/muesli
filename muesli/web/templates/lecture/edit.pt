@@ -54,7 +54,7 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
       ${tutorial.tutor.name() if tutorial.tutor else ''}
     </td>
     <td>${tutorial.comment}</td>
-    <td><a tal:attributes="href request.route_path('tutorial_view', tutorial_id=tutorial.id)">Details</a></td>
+    <td><a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">Details</a></td>
     <td><a tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">Bearbeiten</a></td>
   </tr>
   <tr>
@@ -81,7 +81,7 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   <ul>
     <li tal:repeat="exam exams[category['id']]">
         <a tal:attributes="href request.route_path('exam_edit', exam_id=exam.id)">${exam.name}</a> (<a tal:attributes="href request.route_path('exam_statistics', exam_id=exam.id)">Statistiken</a>,
-        <a tal:attributes="href request.route_path('exam_enter_points', exam_id=exam.id)">Eintragen</a>,
+        <a tal:attributes="href request.route_path('exam_enter_points', exam_id=exam.id, tutorial_ids=None)">Eintragen</a>,
         <a tal:attributes="href request.route_path('lecture_export_exam', lecture_id=lecture.id, exam_id=exam.id)">Exportieren</a>)</li>
   </ul>
 </div>
