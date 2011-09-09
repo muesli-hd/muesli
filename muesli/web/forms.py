@@ -27,7 +27,7 @@ from muesli import models
 from muesli import utils
 
 class FormField(object):
-	def __init__(self, name, label="", type="text", options=None, value=None, size=40, comment=None, validator=None):
+	def __init__(self, name, label="", type="text", options=None, value=None, size=40, comment=None, validator=None, required=False):
 		self.name = name
 		self.label = label
 		self.type = type
@@ -36,6 +36,7 @@ class FormField(object):
 		self.size = size
 		self.comment = comment
 		self.validator = validator
+		self.required = required
 
 class Form(object):
 	def __init__(self, formfields):
@@ -52,6 +53,7 @@ class Form(object):
 						kwargs[field.name] = field.validator
 					else:
 						kwargs[field.name] = formencode.validators.UnicodeString()
+					kwargs[field.name].not_empty = field.required
 				formencode.Schema.__init__(self, *args, **kwargs)
 		self.formValidator = FormValidator(Schema())
 	def updateNames(self):
@@ -119,13 +121,14 @@ class LectureEdit(Form):
 			   label='Typ',
 			   type='select',
 			   options=[[type, utils.lecture_types[type]['name']] for type in utils.lecture_types],
-			   value=lecture.type),
+			   value=lecture.type,
+			   required=True),
 			FormField('name',
 			   label='Name',
 			   type='text',
 			   size=100,
 			   value=lecture.name,
-			   validator=validators.String(not_empty=True)),
+			   required=True),
 			FormField('term',
 			   label='Semester',
 			   type='select',
@@ -174,5 +177,6 @@ class LectureEdit(Form):
 			   label='Assistent',
 			   type='select',
 			   options=[[a.id, a.name()] for a in assistants],
-			   value=lecture.assistant.id))
+			   value=lecture.assistant.id,
+			   required=True))
 		Form.__init__(self, formfields)

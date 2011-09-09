@@ -2,7 +2,7 @@
 <metal:main metal:define-macro="formmacro">
   <table>
     <tr tal:repeat="field form.formfields">
-      <td><label tal:attributes="for field.name">${field.label}:</label></td>
+      <td><label tal:attributes="for field.name"><b tal:omit-tag="field.required==False">${field.label}:</b></label></td>
       <td>
         <div tal:condition="field.type=='select'" tal:omit-tag="">
           <select tal:attributes="name field.name">
