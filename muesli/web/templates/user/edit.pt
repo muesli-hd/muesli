@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+<h2>Benutzer bearbeiten</h2>
+
+<h3>Daten ändern</h3>
+
+<form action="/user/edit" tal:attributes="action request.route_path('user_edit', user_id=user.id)" method="POST">
+<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+</form>
+
+<div tal:condition="not user.confirmed()">
+<h3>Registrierung</h3>
+<p>Der Nutzer muss seine Anmeldung noch bestätigen.</p>
+<form method="post" tal:attributes="action request.route_path('user_resend_confirmation_mail', user_id=user.id)">
+  <input type="submit" value="Bestätigungsmail erneut verschicken" />
+</form>
+</div>
+
+<div tal:condition="user.tutorials.count() !=0">
+<h3>Teilnahme an Übungsgruppen</h3>
+<ul>
+  <li tal:repeat="tutorial user.tutorials">(${tutorial.lecture.term})
+    <a tal:attributes="href request.route_path('tutorial_view', tutorial_id=tutorial.id)">${tutorial.lecture.name}</a></li>
+</ul>
+</div>
+
+<div tal:condition="len(time_preferences)!=0">
+<h3>Vorläufige Eintragungen in Übungsgruppen</h3>
+<table>
+  <tr>
+    <th>Vorlesung</th>
+    <th>Zeit</th>
+    <th>Präferenz</th>
+  </tr>
+  <div tal:omit-tag="" tal:repeat="lecture_id time_preferences">
+    <metal:main
+      metal:use-macro="templates('Fragments/Format/time_preferences_table.pt').macros['time_preferences_table']" />
+  </div>
+</table>
+</div>
+
+<div tal:condition="len(lectures_as_assistant)!=0">
+<h3>Betreute Vorlesungen</h3>
+<ul>
+  <li tal:repeat="lecture lectures_as_assistant">(${lecture.term})
+    <a tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">
+      ${lecture.name}
+    </a>
+  </li>
+</ul>
+</div>
+
+<div tal:condition="len(tutorials_as_tutor)!=0">
+<h3>Betreute Übungsgruppen</h3>
+<ul>
+  <li tal:repeat="tutorial tutorials_as_tutor">(${tutorial.lecture.term})
+    <a tal:attributes="href request.route_path('tutorial_view', tutorial_id=tutorial.id)">${tutorial.lecture.name}
+    (${tutorial.time})</a></li>
+</ul>
+</div>
+
+
+  </metal:main>
+</metal:main>

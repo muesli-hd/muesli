@@ -59,6 +59,32 @@ categories = [{'id': 'assignment', 'name': u'Übungszettel'},
 	{'id': 'presence_assignment', 'name': u'Präsenzübung'},
 	{'id': 'mock_exam', 'name': 'Probeklausur'}]
 
+subjects = [
+	'Mathematik (BSc)',
+	'Mathematik (MSc)',
+	'Mathematik (Dipl.)',
+	'Mathematik (LA)',
+	'Physik (BSc)',
+	'Physik (MSc)',
+	'Physik (Dipl.)',
+	'Physik (LA)',
+	'Angewandte Informatik (BSc)',
+	'Anwendungsorientierte Informatik (MSc)',
+	'Computerlinguistik (BA)',
+	'Computerlinguistik (Magister)',
+	'Medizinische Informatik (BSc)',
+	'Medizinische Informatik (MSc)',
+	'Medizinische Informatik (Dipl.)',
+	'Sonstiges'
+	]
+
+def getSubjects(user):
+	hisSubjects = list(subjects)
+	if not user.subject in hisSubjects:
+		hisSubjects.append(user.subject)
+	hisSubjects = zip(hisSubjects,hisSubjects)
+	return hisSubjects
+
 def getSemesterLimit():
 	now = datetime.datetime.now()
 	semesterlimit = now.year

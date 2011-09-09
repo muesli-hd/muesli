@@ -181,3 +181,52 @@ class LectureEdit(Form):
 			   value=lecture.assistant.id,
 			   required=True))
 		Form.__init__(self, formfields, send=u'Ändern')
+
+class UserEdit(Form):
+	def __init__(self, request, user):
+		formfields = [
+			FormField('email',
+			   label='E-Mail', size=40,
+			   value=user.email,
+			   required=True,
+			   validator=validators.Email()),
+			FormField('title',
+			   label='Titel', size=20,
+			   value=user.title),
+			FormField('first_name',
+			   label='Vorname', size=40,
+			   value=user.first_name,
+			   required=True),
+			FormField('last_name',
+			   label='Nachname', size=40,
+			   value=user.last_name,
+			   required=True),
+			FormField('matrikel',
+			   label='Matrikelnummer', size=10,
+			   value=user.matrikel),
+			FormField('subject',
+			   label='Studiengang',
+			   type='select',
+			   value=user.subject,
+			   options=utils.getSubjects(user)),
+			FormField('subject_alt',
+			   label='Studiengang', size=30, comment=u'Genauer Studiengang (falls Sonstiges gewählt)',
+			   value=''),
+			FormField('birth_date',
+			   label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
+			   value=user.birth_date),
+			FormField('birth_place',
+			   label='Geburtsort', size=20,
+			   value=user.birth_place),
+			FormField('is_assistant',
+			   label='Assistent',
+			   type='radio',
+			   options=[[1, 'Ja'], [0, 'Nein']],
+			   value=1 if user.is_assistant else 0),
+			FormField('is_admin',
+			   label='Admin',
+			   type='radio',
+			   options=[[1, 'Ja'], [0, 'Nein']],
+			   value=1 if user.is_admin else 0)
+			]
+		Form.__init__(self, formfields, send=u'Änderungen übernehmen')

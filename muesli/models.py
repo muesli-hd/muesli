@@ -85,6 +85,8 @@ class User(Base):
 		if lecture:
 			query = query.filter(TimePreference.lecture_id == lecture.id)
 		return query.count()>0
+	def confirmed(self):
+		return self.password != None
 
 class Confirmation(Base):
 	__tablename__ = 'confirmations'

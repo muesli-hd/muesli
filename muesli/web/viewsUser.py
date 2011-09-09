@@ -55,3 +55,15 @@ def logout(request):
 def list(request):
 	users = request.db.query(models.User).order_by(models.User.last_name, models.User.first_name)
 	return {'users': users}
+
+@view_config(route_name='user_edit', renderer='muesli.web:templates/user/edit.pt', context=UserContext, permission='edit')
+def edit(request):
+	user_id = request.matchdict['user_id']
+	user = request.db.query(models.User).get(user_id)
+	form = UserEdit(request, user)
+	return {'user': user,
+	        'form': form,
+	        'time_preferences': user.prepareTimePreferences(),
+	        'lectures_as_assistant': user.lectures_as_assistant.all(),
+	        'tutorials_as_tutor': user.tutorials_as_tutor.all(),
+	        'penalty_names': utils.penalty_names}
