@@ -27,7 +27,7 @@
     </tr>
 <tr>
   <td></td>
-  <td><input type="submit" value="Senden" /></td>
+  <td><input type="submit" tal:attributes="value form.send" /></td>
   <td></td>
 </tr>
   </table>

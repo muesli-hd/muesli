@@ -39,11 +39,12 @@ class FormField(object):
 		self.required = required
 
 class Form(object):
-	def __init__(self, formfields):
+	def __init__(self, formfields, send="Senden"):
 		self.formfields = formfields
 		self.updateNames()
 		self.createSchema()
 		self.errors = {}
+		self.send=send
 	def createSchema(self):
 		fields = self.formfields
 		class Schema(formencode.Schema):
@@ -179,4 +180,4 @@ class LectureEdit(Form):
 			   options=[[a.id, a.name()] for a in assistants],
 			   value=lecture.assistant.id,
 			   required=True))
-		Form.__init__(self, formfields)
+		Form.__init__(self, formfields, send=u'Ändern')
