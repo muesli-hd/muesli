@@ -61,6 +61,9 @@ def edit(request):
 	user_id = request.matchdict['user_id']
 	user = request.db.query(models.User).get(user_id)
 	form = UserEdit(request, user)
+	if request.method == 'POST' and form.processPostData(request.POST):
+		form.saveValues()
+		request.db.commit()
 	return {'user': user,
 	        'form': form,
 	        'time_preferences': user.prepareTimePreferences(),

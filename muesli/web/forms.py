@@ -251,3 +251,13 @@ class UserEdit(ObjectForm):
 			   value=1 if user.is_admin else 0)
 			]
 		ObjectForm.__init__(self, user, formfields, send=u'Änderungen übernehmen')
+	def saveField(self, fieldName):
+		if fieldName == 'subject':
+			if self['subject']=='Sonstiges':
+				self.obj.subject = self['subject_alt']
+			else:
+				self.obj.subject = self['subject']
+		elif fieldName == 'alt_subject':
+			pass
+		else:
+			ObjectForm.saveField(self, fieldName)
