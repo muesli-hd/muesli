@@ -26,6 +26,22 @@ from formencode import validators
 from muesli import models
 from muesli import utils
 
+def boolToValue(boolean):
+	if boolean==True:
+		return 1
+	elif boolean==False:
+		return 0
+	elif boolean==None:
+		return 'None'
+
+def valueToBool(value):
+	if value==1:
+		return True
+	if value==0:
+		return False
+	if value=='None':
+		return None
+
 class FormField(object):
 	def __init__(self, name, label="", type="text", options=None, value=None, size=40, comment=None, validator=None, required=False):
 		self.name = name
@@ -182,7 +198,7 @@ class LectureEdit(ObjectForm):
 			   label='Sichtbar',
 			   type='radio',
 			   options=[[1, 'Ja'], [0, 'Nein']],
-			   value=1 if lecture.is_visible else 0)
+			   value=boolToValu(lecture.is_visible)
 			]
 		if request.permissionInfo.has_permission('change_assistant'):
 			assistants = request.db.query(models.User).filter(models.User.is_assistant==1).all()
@@ -197,7 +213,7 @@ class LectureEdit(ObjectForm):
 		ObjectForm.__init__(self, lecture, formfields, send=u'Ändern')
 	def saveField(self, fieldName):
 		if fieldName == 'is_visible':
-			self.obj.is_visible = self['is_visible']==1
+			self.obj.is_visible = valueToBool(self['is_visible'])
 		elif fieldName == 'assistant':
 			assistant = self.request.db.query(models.User).get(self['assistant'])
 			self.obj.assistant = assistant
@@ -277,3 +293,36 @@ class LectureAddExam(ObjectForm):
 			   label='URL', size=100)
 			]
 		ObjectForm.__init__(self, None, formfields, send=u'Anlegen')
+
+class LectureEditExam(ObjectForm):
+	def __init__(self, request, exam):
+		formfields = [
+			FormField('name',
+			   label='Name', size=100,
+			   value=exam.name,
+			   required=True),
+			FormField('category',
+			   label='Kategorie',
+			   type='select',
+			   value=exam.category,
+			   options=[[cat['id'], cat['name']] for cat in utils.categories]),
+			FormField('url',
+			   value=exam.url,
+			   label='URL', size=100),
+			FormField('admission',
+			   label='Zulassung',
+			   type='radio',
+			   value=boolToValue(exam.admission),
+			   options=[[1, 'Editieren erlaubt'], [0, 'Editieren gesperrt'], ['None', 'Nicht notwendig']]),
+			FormField('registration',
+			   label='Anmeldung',
+			   type='radio',
+			   value=boolToValue(exam.registration),
+			   options=[[1, 'Editieren erlaubt'], [0, 'Editieren gesperrt'], ['None', 'Nicht notwendig']]),
+			]
+		ObjectForm.__init__(self, exam, formfields, send=u'Änderungen speichern')
+	def saveField(self, fieldName):
+		if fieldName in ['admission', 'registration']:
+			setattr(self.obj, fieldName, valueToBool(self[fieldName]))
+		else:
+			ObjectForm.saveField(self, fieldName)

@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Übungszettel bearbeiten</h2>
+
+<p>
+  ${exam.name},
+  <a tal:attributes="href request.route_path('lecture_edit', lecture_id=exam.lecture.id)">${exam.lecture.name}</a>
+</p>
+
+<form action="/exam/edit" tal:attributes="action request.route_path('exam_edit', exam_id=exam.id)" method="POST">
+<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+</form>
+
+
+<!--
+<ul>
+% for my exercise (exam->exercises) {
+  <li><a href="<% c->uri_for("/exam/add_exercise", exam->id, exercise->id) %>">Aufgabe <% exercise->nr %></a>: <% exercise->maxpoints %> Punkte</li>
+% }
+  <li><a href='<% c->uri_for("/exam/add_exercise", exam->id) %>'>Aufgabe hinzufügen</a></li>
+</ul>
+
+% if (@students) {
+
+%   if (defined exam->admission && defined exam->registration) {
+    <h3>Angemeldete und zugelassene Studenten</h3>
+%   }
+%   elsif (defined exam->admission) {
+    <h3>Zugelassene Studenten</h3>
+%   }
+%   elsif (defined exam->registration) {
+    <h3>Angemeldete Studenten</h3>
+%   }
+%   else {
+%     c->log->error("Unknown admission state");
+%   }
+
+  <table>
+
+  <thead>
+    <tr>
+      <th>Tutor</th>
+      <th>Name</th>
+      <th>Matrikel</th>
+      <th>Studienfach</th>
+      <th>Geburtstag, -ort</th>
+    </tr>
+  </thead>
+
+  <tbody>
+%   for my s (@students) {
+%     my student = s->student;
+%     my tutor   = s->tutorial->tutor;
+    <tr>
+      <td>
+%     if (defined tutor) {
+        <% tutor->last_name %>
+%     }
+      </td>
+      <td><% student->last_name %>, <% student->first_name %></td>
+      <td><% student->matrikel %></td>
+      <td><% student->subject %></td>
+      <td><% student->birth_date %>, <% student->birth_place %></td>
+    </tr>
+%   }
+  </tbody>
+
+  </table>
+% }
+
+-->
+
+  </metal:main>
+</metal:main>

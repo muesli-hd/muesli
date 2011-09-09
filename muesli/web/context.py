@@ -34,3 +34,13 @@ class TutorialContext(object):
         (Allow, 'user:{0}'.format(self.tutorials[0].lecture.assistant_id), ('view', 'edit')),
         (Allow, 'group:administrators', ALL_PERMISSIONS),
         ]+[(Allow, 'user:{0}'.format(tutor.id), ('view')) for tutorial in self.tutorials for tutor in tutorial.lecture.tutors]
+
+class ExamContext(object):
+  def __init__(self, request):
+    exam_id = request.matchdict['exam_id']
+    self.exam = request.db.query(Exam).get(exam_id)
+    self.__acl__ = [
+		(Allow, Authenticated, 'view_points'),
+        (Allow, 'user:{0}'.format(self.exam.lecture.assistant_id), ('view_points', 'edit', 'enter_points')),
+        (Allow, 'group:administrators', ALL_PERMISSIONS),
+        ]+[(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points')) for tutor in self.exam.lecture.tutors]
