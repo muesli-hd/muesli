@@ -45,6 +45,7 @@ class Form(object):
 		self.createSchema()
 		self.errors = {}
 		self.send=send
+		self.message=""
 	def createSchema(self):
 		fields = self.formfields
 		class Schema(formencode.Schema):
