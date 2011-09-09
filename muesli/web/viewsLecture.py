@@ -58,6 +58,26 @@ class View(object):
 		        'times': times,
 		        'prefs': utils.preferences}
 
+@view_config(route_name='lecture_add_exam', renderer='muesli.web:templates/lecture/add_exam.pt', context=LectureContext, permission='edit')
+class AddExam(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.lecture_id = request.matchdict['lecture_id']
+	def __call__(self):
+		lecture = self.db.query(models.Lecture).get(self.lecture_id)
+		form = LectureAddExam(self.request)
+		if self.request.method == 'POST' and form.processPostData(self.request.POST):
+			exam = models.Exam()
+			exam.lecture = lecture
+			form.obj = exam
+			form.saveValues()
+			self.request.db.commit()
+			form.message = "Neues Testat angelegt."
+		return {'lecture': lecture,
+		        'form': form
+		       }
+
 @view_config(route_name='lecture_edit', renderer='muesli.web:templates/lecture/edit.pt', context=LectureContext, permission='edit')
 class Edit(object):
 	def __init__(self, request):

@@ -1,0 +1,17 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Neuen Übungszettel anlegen</h2>
+
+<p>
+Vorlesung: <a tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">${lecture.name}</a>
+</p>
+
+<form action="/lecture/add_exam" tal:attributes="action request.route_path('lecture_add_exam', lecture_id=lecture.id)" method="POST">
+<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+</form>
+
+
+  </metal:main>
+</metal:main>
