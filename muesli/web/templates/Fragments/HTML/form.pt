@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<metal:main metal:define-macro="form">
+<metal:main metal:define-macro="formmacro">
   <table>
     <tr tal:repeat="field formdata">
       <td><label tal:attributes="for field.name">${field.label}:</label></td>
@@ -23,6 +23,12 @@
         </div>
         <span tal:condition="field.comment and field.name not in form.errors">${field.comment}</span>
       </td>
+      <td><span tal:condition="field.name in form.errors" tal:content="form.errors[field.name]"></span></td>
     </tr>
+<tr>
+  <td></td>
+  <td><input type="submit" value="Senden" /></td>
+  <td></td>
+</tr>
   </table>
 </metal:main>

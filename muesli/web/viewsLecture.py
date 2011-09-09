@@ -67,8 +67,7 @@ class Edit(object):
 		self.form = Form(UserLogin())
 	def __call__(self):
 		lecture = self.db.query(models.Lecture).get(self.lecture_id)
-		names = utils.lecture_types[lecture.type]
-		formdata = [
+		formfields = [
 			FormField('type',
 			   label='Typ',
 			   type='select',
@@ -118,21 +117,42 @@ class Edit(object):
 			   type='radio',
 			   options=[[1, 'Ja'], [0, 'Nein']],
 			   value=1 if lecture.is_visible else 0)]
+
 		if self.request.permissionInfo.has_permission('change_assistant'):
 			assistants = self.db.query(models.User).filter(models.User.is_assistant==1).all()
-			formdata.append(
+			formfields.append(
 			  FormField('assistant',
 			   label='Assistent',
 			   type='select',
 			   options=[[a.id, a.name()] for a in assistants],
 			   value=lecture.assistant.id))
+
+		formData = FormData(formfields)
+		form = Form(LectureEdit(allow_extra_fields=True))
+		if self.request.method == 'POST' and form.validate(self.request.POST):
+			formData.processPostData(self.request.POST)
+			lecture.type =     formData['type']
+			lecture.name =     formData['name']
+			lecture.term =     formData['term']
+			lecture.lsf_id =   formData['lsf_id']
+			lecture.lecturer = formData['lecturer']
+			lecture.url =      formData['url']
+			lecture.mode =     formData['mode']
+			lecture.minimum_preferences = int(formData['minimum_preferences']) if formData['minimum_preferences'] else None
+			lecture.password = formData['password']
+			lecture.is_visible=formData['is_visible']==True
+			self.request.db.commit()
+		else:
+			print form.errors
+		names = utils.lecture_types[lecture.type]
 		pref_subjects = lecture.pref_subjects()
 		pref_count = sum([pref[0] for pref in pref_subjects])
 		subjects = lecture.subjects()
 		student_count = sum([subj[0] for subj in subjects])
+
 		return {'lecture': lecture,
 		        'names': names,
-		        'formdata': formdata,
+		        'formdata': formfields,
 		        'pref_subjects': pref_subjects,
 		        'pref_count': pref_count,
 		        'subjects': subjects,

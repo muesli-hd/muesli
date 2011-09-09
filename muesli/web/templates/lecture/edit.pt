@@ -5,7 +5,7 @@
 
 
 <form action="/lecture/edit" tal:attributes="action request.route_path('lecture_edit', lecture_id=lecture.id)" method="POST">
-<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['form']" />
+<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
 
 

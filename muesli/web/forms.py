@@ -11,6 +11,32 @@ class FormField(object):
 		self.size = size
 		self.comment = comment
 
+class FormData(object):
+	def __init__(self, formfields):
+		self.formfields = formfields
+		self.updateNames()
+	def updateNames(self):
+		self.named_fields = {}
+		for field in self.formfields:
+			self.named_fields[field.name] = field
+	def processPostData(self, postData):
+		self.values = {}
+		for name in self.named_fields:
+			field = self.named_fields[name]
+			if field.type == 'radio':
+				for option in field.options:
+					if name+'_'+str(option[0]) in postData:
+						field.value = option[0]
+			elif field.type == 'select':
+				for option in field.options:
+					if postData[name] == str(option[0]):
+						field.value = option[0]
+			else:
+				field.value = postData[name]
+			self.values[name] = field.value
+		#print self.values
+	__getitem__ = lambda self, key: self.named_fields.get(key, None).value
+
 class Form(object):
 	def __init__(self, schema, obj=None, fields=[]):
 		self.schema = schema
@@ -47,5 +73,4 @@ class UserLogin(formencode.Schema):
 	password = validators.String(not_empty=True)
 
 class LectureEdit(formencode.Schema):
-	email = validators.String(not_empty=True)
-	password = validators.String(not_empty=True)
+	name = validators.String(not_empty=True)
