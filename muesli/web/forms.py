@@ -198,7 +198,7 @@ class LectureEdit(ObjectForm):
 			   label='Sichtbar',
 			   type='radio',
 			   options=[[1, 'Ja'], [0, 'Nein']],
-			   value=boolToValu(lecture.is_visible))
+			   value=boolToValue(lecture.is_visible))
 			]
 		if request.permissionInfo.has_permission('change_assistant'):
 			assistants = request.db.query(models.User).filter(models.User.is_assistant==1).all()
