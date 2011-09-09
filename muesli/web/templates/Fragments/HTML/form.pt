@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:define-macro="formmacro">
   <table>
-    <tr tal:repeat="field formdata">
+    <tr tal:repeat="field form.formfields">
       <td><label tal:attributes="for field.name">${field.label}:</label></td>
       <td>
         <div tal:condition="field.type=='select'" tal:omit-tag="">
@@ -14,7 +14,7 @@
         </div>
         <div tal:condition="field.type=='radio'" tal:omit-tag="">
           <div tal:repeat="option field.options" tal:omit-tag="">
-            <input type="radio" tal:attributes="name field.name+'_'+str(option[0]); value option[0]; checked 'checked' if option[0]==field.value else None" />
+            <input type="radio" tal:attributes="name field.name; value str(option[0]); checked 'checked' if option[0]==field.value else None" />
             <label tal:attributes="for field.name+'_'+str(option[0])">${option[1]}</label>
           </div>
         </div>

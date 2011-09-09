@@ -64,86 +64,21 @@ class Edit(object):
 		self.request = request
 		self.db = self.request.db
 		self.lecture_id = request.matchdict['lecture_id']
-		self.form = Form(UserLogin())
 	def __call__(self):
 		lecture = self.db.query(models.Lecture).get(self.lecture_id)
-		formfields = [
-			FormField('type',
-			   label='Typ',
-			   type='select',
-			   options=[[type, utils.lecture_types[type]['name']] for type in utils.lecture_types],
-			   value=lecture.type),
-			FormField('name',
-			   label='Name',
-			   type='text',
-			   size=100,
-			   value=lecture.name),
-			FormField('term',
-			   label='Semester',
-			   type='select',
-			   options=utils.getTerms(),
-			   value=lecture.term),
-			FormField('lsf_id',
-			   label='Veranstaltungsnummer',
-			   type='text',
-			   size=20,
-			   value=lecture.lsf_id),
-			FormField('lecturer',
-			   label='Dozent',
-			   type='text',
-			   size=40,
-			   value=lecture.lecturer),
-			FormField('url',
-			   label='Homepage',
-			   size=100,
-			   value=lecture.url),
-			FormField('mode',
-			   label='Anmeldemodus',
-			   type='select',
-			   options=utils.modes,
-			   value=lecture.mode),
-			FormField('minimum_preferences',
-			   label=u'Minimum möglicher Termine',
-			   size=5,
-			   comment=u'Bei Präferenzenanmeldung: Studenten müssen mindestens an soviel Terminen können. (Leer: Defaultformel)',
-			   value=lecture.minimum_preferences),
-			FormField('password',
-			   label=u'Passwort für Übungsleiter',
-			   size=40,
-			   comment=u'Bei leerem Passwort keine Anmeldung als Übungsleiter möglich',
-			   value=lecture.password),
-			FormField('is_visible',
-			   label='Sichtbar',
-			   type='radio',
-			   options=[[1, 'Ja'], [0, 'Nein']],
-			   value=1 if lecture.is_visible else 0)]
-
-		if self.request.permissionInfo.has_permission('change_assistant'):
-			assistants = self.db.query(models.User).filter(models.User.is_assistant==1).all()
-			formfields.append(
-			  FormField('assistant',
-			   label='Assistent',
-			   type='select',
-			   options=[[a.id, a.name()] for a in assistants],
-			   value=lecture.assistant.id))
-
-		formData = FormData(formfields)
-		form = Form(LectureEdit(allow_extra_fields=True))
-		if self.request.method == 'POST' and form.validate(self.request.POST):
-			formData.processPostData(self.request.POST)
-			lecture.type =     formData['type']
-			lecture.name =     formData['name']
-			lecture.term =     formData['term']
-			lecture.lsf_id =   formData['lsf_id']
-			lecture.lecturer = formData['lecturer']
-			lecture.url =      formData['url']
-			lecture.mode =     formData['mode']
-			lecture.minimum_preferences = int(formData['minimum_preferences']) if formData['minimum_preferences'] else None
-			lecture.password = formData['password']
-			lecture.is_visible=formData['is_visible']==True
+		form = LectureEdit(self.request, lecture)
+		if self.request.method == 'POST' and form.processPostData(self.request.POST):
+			lecture.type =     form['type']
+			lecture.name =     form['name']
+			lecture.term =     form['term']
+			lecture.lsf_id =   form['lsf_id']
+			lecture.lecturer = form['lecturer']
+			lecture.url =      form['url']
+			lecture.mode =     form['mode']
+			lecture.minimum_preferences = form['minimum_preferences']
+			lecture.password = form['password']
+			lecture.is_visible=form['is_visible']==1
 			self.request.db.commit()
-		else:
-			print form.errors
 		names = utils.lecture_types[lecture.type]
 		pref_subjects = lecture.pref_subjects()
 		pref_count = sum([pref[0] for pref in pref_subjects])
@@ -152,11 +87,10 @@ class Edit(object):
 
 		return {'lecture': lecture,
 		        'names': names,
-		        'formdata': formfields,
 		        'pref_subjects': pref_subjects,
 		        'pref_count': pref_count,
 		        'subjects': subjects,
 		        'student_count': student_count,
 		        'categories': utils.categories,
 		        'exams': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
-		        'form': self.form}
+		        'form': form}
