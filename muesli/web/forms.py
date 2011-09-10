@@ -96,6 +96,8 @@ class Form(object):
 			self.errors = self.formValidator.errors
 			return False
 	__getitem__ = lambda self, key: self.named_fields[key].value
+	def __setitem__(self, key, value):
+		self.named_fields[key].value=value
 
 class FormValidator(object):
 	def __init__(self, schema, obj=None, fields=[]):
@@ -326,3 +328,18 @@ class LectureEditExam(ObjectForm):
 			setattr(self.obj, fieldName, valueToBool(self[fieldName]))
 		else:
 			ObjectForm.saveField(self, fieldName)
+
+class ExamAddOrEditExercise(ObjectForm):
+	def __init__(self, request, exercise):
+		formfields = [
+			FormField('nr',
+			   label='Nr.', size=4,
+			   value=exercise.nr if exercise else None,
+			   required=True,
+			   validator=validators.Int()),
+			FormField('maxpoints',
+			   label='Punkte', size=4,
+			   value=exercise.maxpoints if exercise else None,
+			   validator=validators.Int(min=0)),
+			]
+		ObjectForm.__init__(self, exercise, formfields, send=u'Anlegen/Ändern')

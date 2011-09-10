@@ -59,3 +59,30 @@ class Edit(object):
 		        'form': form,
 		        'students': students
 		       }
+
+@view_config(route_name='exam_add_or_edit_exercise', renderer='muesli.web:templates/exam/add_or_edit_exercise.pt', context=ExamContext, permission='edit')
+class AddOrEditExercise(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.exam_id = request.matchdict['exam_id']
+		self.exercise_id = request.matchdict.get('exercise_id', None)
+	def __call__(self):
+		exam = self.db.query(models.Exam).get(self.exam_id)
+		if self.exercise_id:
+			exercise = self.db.query(models.Exercise).get(self.exercise_id)
+		else: exercise = None
+		form = ExamAddOrEditExercise(self.request, exercise)
+		if self.request.method == 'POST' and form.processPostData(self.request.POST):
+			if exercise == None:
+				exercise = models.Exercise()
+				exercise.exam = exam
+				form.obj = exercise
+				creating = True
+			else: creating = False
+			form.saveValues()
+			self.request.db.commit()
+			if creating: form['nr'] = form['nr'] + 1
+			form.message = u"Änderungen gespeichert."
+		return {'form': form,
+		        'exam': exam}

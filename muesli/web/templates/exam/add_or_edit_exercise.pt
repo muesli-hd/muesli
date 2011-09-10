@@ -1,0 +1,23 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Aufgabe hinzufügen/bearbeiten</h2>
+
+<p>
+<a tal:attributes="href request.route_path('lecture_edit', lecture_id=exam.lecture.id)">${exam.lecture.name}</a>,
+<a tal:attributes="href request.route_path('exam_edit', exam_id=exam.id)">${exam.name}</a>
+</p>
+
+<ul>
+  <li tal:repeat="exercise exam.exercises">
+    Aufgabe ${exercise.nr}: ${exercise.maxpoints} Punkte
+  </li>
+</ul>
+
+<form action="/exam/add_or_edit_exercise" tal:attributes="action request.route_path('exam_add_or_edit_exercise', exam_id=exam.id, exercise_id=request.matchdict['exercise_id'])" method="POST">
+<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+</form>
+
+  </metal:main>
+</metal:main>
