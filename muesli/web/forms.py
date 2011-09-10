@@ -340,6 +340,7 @@ class ExamAddOrEditExercise(ObjectForm):
 			FormField('maxpoints',
 			   label='Punkte', size=4,
 			   value=exercise.maxpoints if exercise else None,
-			   validator=validators.Int(min=0)),
+			   # TODO: Nur eine Nachkommastelle erlaubt
+			   validator=validators.Number(min=0)),
 			]
 		ObjectForm.__init__(self, exercise, formfields, send=u'Anlegen/Ändern')

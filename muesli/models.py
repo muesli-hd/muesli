@@ -261,7 +261,7 @@ class Exercise(Base):
 	__tablename__ = 'exercises'
 	id = Column(Integer, primary_key=True)
 	exam_id = Column('exam', Integer, ForeignKey(Exam.id))
-	exam = relationship(Exam, backref='exercises')
+	exam = relationship(Exam, backref=backref('exercises', order_by='Exercise.nr'))
 	nr = Column(Integer, nullable=False)
 	maxpoints = Column(Numeric(precision=8, scale=1), nullable=False)
 
