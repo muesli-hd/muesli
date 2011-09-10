@@ -17,7 +17,7 @@
 <ul>
   <li tal:repeat="exercise exam.exercises">
     <a tal:attributes="href request.route_path('exam_add_or_edit_exercise', exam_id=exam.id, exercise_id=exercise.id)">Aufgabe ${exercise.nr}</a>: ${exercise.maxpoints} Punkte</li>
-  <li><a tal:attributes="href request.route_path('exam_add_or_edit_exercise', exam_id=exam.id, exercise_id=None)">Aufgabe hinzufügen</a></li>
+  <li><a tal:attributes="href request.route_path('exam_add_or_edit_exercise', exam_id=exam.id, exercise_id='')">Aufgabe hinzufügen</a></li>
 </ul>
 
 
