@@ -130,6 +130,11 @@ class Lecture(Base):
 	def students(self):
 		session = Session.object_session(self)
 		return session.query(User).filter(User.lecture_students.any(LectureStudent.lecture_id==self.id))
+	def lecture_students_for_tutorials(self, tutorials):
+		ls = self.lecture_students
+		if tutorials:
+			ls = ls.filter(sqlalchemy.or_(*[LectureStudent.tutorial_id==tut.id for tut in tutorials]))
+		return ls
 #	@property
 #	def tutors(self):
 #		session = Session.object_session(self)
@@ -183,6 +188,10 @@ class Exam(Base):
 	admission = Column(Boolean)
 	registration = Column(Boolean)
 	url = Column(Text)
+	@property
+	def exercise_points(self):
+		session = Session.object_session(self)
+		return session.query(ExerciseStudent).filter(ExerciseStudent.exercise.has(Exercise.exam_id==self.id))
 
 class Tutorial(Base):
 	__tablename__ = 'tutorials'
