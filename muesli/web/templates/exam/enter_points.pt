@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<script><![CDATA[
+set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture_view", lecture_id=exam.lecture.id)}']
+                ${",['Übungsgruppe','"+request.route_path('tutorial_view', tutorial_ids=tutorial_ids)+"']" if tutorial_ids else ''}
+     ]);
+]]>
+</script>
+
+
+<h2>Punkte eintragen</h2>
+
+<h3>${exam.name} der Vorlesung ${exam.lecture.name}</h3>
+
+  <p tal:condition="exam.admission!=None and exam.registration!=None">
+  Zu dieser Prüfung ist eine <a tal:attributes="href request.route_path('exam_admission', exam_id=exam.id, tutorial_ids=tutorial_ids)">Anmeldung und Zulassung</a> erforderlich.
+  </p>
+  <p tal:condition="exam.admission!=None and exam.registration==None">
+  Zu dieser Prüfung ist eine <a tal:attributes="href request.route_path('exam_admission', exam_id=exam.id, tutorial_ids=tutorial_ids)">Zulassung</a> erforderlich.
+  </p>
+  <p tal:condition="exam.admission==None and exam.registration!=None">
+  Zu dieser Prüfung ist eine <a tal:attributes="href request.route_path('exam_admission', exam_id=exam.id, tutorial_ids=tutorial_ids)">Anmeldung</a> erforderlich.
+  </p>
+
+  <p class="error" tal:condition="error_msg">${error_msg}</p>
+
+
+<script><![CDATA[
+  function update_total(row)
+  {
+    var objs = ("#row-" + row + " input.points");
+    var total = 0;
+    var current = 0;
+
+    for (i = 0; i < objs.length; i++) {
+      current = parseFloat(objs[i].value.replace(/,/, "."));
+      if (!isNaN(current)) {
+        total += current;
+      }
+    }
+
+    return ("total-" + row).value = Number(total).toFixed(2);
+  }
+]]>
+</script>
+
+<form method="post">
+<input type="hidden" name="submit" value="1"/>
+<table class="colored">
+  <tr>
+    <th tal:condition="not tutorial_ids">Tutor</th>
+    <th>Name</th>
+    <th tal:repeat="e exam.exercises">${e.nr}</th>
+    <th>Σ</th>
+  </tr>
+
+  <tr tal:repeat="ls students" tal:attributes="id 'row-'+str(ls.student_id)" tal:define="total 0">
+      <td tal:condition="not tutorial_ids">
+        <span tal:condition="ls.tutorial.tutor" tal:content="ls.tutorial.tutor.last_name" />
+      </td>
+    <td>${ls.student.name()}</td>
+      <td tal:repeat="e exam.exercises">
+        <input class="points" tal:attributes="name 'points-'+str(ls.student.id)+'-'+str(e.id); onchange 'update_total('+str(ls.student.id)+')'; value points[ls.student_id][e.id]" size="3" type="text" />
+     </td>
+    <td><input tal:attributes="id 'total-'+str(ls.student.id); value points[ls.student.id]['total']" readonly="readonly" size="4" /></td>
+  </tr>
+
+  <tfoot>
+<!--  <tr>
+    <td>Durchschnitt (Gruppe/Gesamt)</td>
+%   if (show_tutor) {
+      <td></td>
+%   }
+%    my (tut_avg, tut_var, lec_avg, lec_var);
+%   for my ex (@exercises) {
+%     if (defined statistics) {
+%       tut_avg = defined statistics->{ ex->id } ? statistics->{ ex->id }->avg : undef;
+%       tut_var = defined statistics->{ ex->id } ? statistics->{ ex->id }->variance : undef;
+%     }
+%     lec_avg = defined lecture_statistics->{ ex->id } ? lecture_statistics->{ ex->id }->avg : undef;
+%     lec_var = defined lecture_statistics->{ ex->id } ? lecture_statistics->{ ex->id }->variance : undef;
+    <td><& /Fragments/Format/AvgStd, lec_avg, sqrt(lec_var), tut_avg, sqrt(tut_var) &></td>
+%   }
+%     if (defined statistics) {
+%       tut_avg = defined statistics ? statistics->{avg} : undef;
+%       tut_var = defined statistics ? statistics->{std} : undef;
+%     }
+%     lec_avg = defined lecture_statistics ? lecture_statistics->{avg} : undef;
+%     lec_var = defined lecture_statistics ? lecture_statistics->{std} : undef;
+    <td><& /Fragments/Format/AvgStd, lec_avg, lec_var, tut_avg, tut_var &></td>
+  </tr>-->
+  </tfoot>
+
+</table>
+<input type="submit" value="Speichern"/>
+</form>
+<!--
+<h3>Statistiken</h3>
+
+<ul>
+  <li><a href="<% c->uri_for("/exam/statistics", exam->id, defined tutorial ? tutorial->id : undef) %>">Statistik/Histogramme</a></li>
+  <li>
+    <form method="get" action="<% c->uri_for("/exam/correlation") %>">
+      <input type="hidden" name="type1" value="exercise"/>
+      <input type="hidden" name="type2" value="exercise"/>
+      <select name="id1">
+% for my exercise (@exercises) {
+        <option value="<% exercise->id %>">Aufgabe <% exercise->nr %></option>
+% }
+      </select>
+      <select name="id2">
+% for my exercise (@exercises) {
+        <option value="<% exercise->id %>">Aufgabe <% exercise->nr %></option>
+% }
+      </select>
+      <input type="submit" value="Korrelation"/>
+    </form>
+  </li>
+  <li><a href="<% c->uri_for("/exam/correlation/assignments/".lecture->id."/exam", exam->id)  %>">Korrelation Testat/Übungszettel gesamt</a></li>
+</ul>
+-->
+
+  </metal:main>
+</metal:main>

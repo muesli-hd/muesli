@@ -86,3 +86,32 @@ class AddOrEditExercise(object):
 			form.message = u"Änderungen gespeichert."
 		return {'form': form,
 		        'exam': exam}
+
+@view_config(route_name='exam_enter_points', renderer='muesli.web:templates/exam/enter_points.pt', context=ExamContext, permission='enter_points')
+class EnterPoints(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.exam_id = request.matchdict['exam_id']
+		self.tutorial_ids = request.matchdict['tutorial_ids'].split(',')
+		if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
+			self.tutorial_ids = []
+	def __call__(self):
+		exam = self.db.query(models.Exam).get(self.exam_id)
+		tutorials = [self.db.query(models.Tutorial).get(tutorial_id) for tutorial_id in self.tutorial_ids]
+		students = exam.lecture.lecture_students_for_tutorials(tutorials)
+		pointsQuery = exam.exercise_points.filter(models.ExerciseStudent.student_id.in_([s.student.id for s  in students]))
+		points = utils.DictOfObjects(lambda: {})
+		for s in students:
+			for e in exam.exercises:
+				points[s.student_id][e.id] = None
+		for point in pointsQuery:
+			points[point.student_id][point.exercise_id] = point.points
+		for student in points:
+			points[student]['total'] = sum([v for v in points[student].values() if v])
+		error_msgs = []
+		return {'exam': exam,
+		        'tutorial_ids': self.request.matchdict['tutorial_ids'],
+		        'students': students,
+		        'points': points,
+		        'error_msg': '\n'.join(error_msgs)}
