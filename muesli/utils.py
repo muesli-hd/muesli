@@ -141,3 +141,18 @@ class UserInfo:
 		if self.is_loggedin():
 			return self in lecture.tutors
 		else: return False
+
+class DictOfObjects(object):
+	def __init__(self, createFunction):
+		self.d = {}
+		self.createFunction=createFunction
+	def __getitem__(self, key):
+		if not key in self.d:
+			self.d[key] = self.createFunction()
+		return self.d[key]
+	def __setitem__(self, key, value):
+		self.d[key] = value
+	def __iter__(self):
+		return self.d.__iter__()
+	def __str__(self):
+		return "%r" % self.d
