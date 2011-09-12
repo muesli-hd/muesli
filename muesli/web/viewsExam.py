@@ -29,6 +29,7 @@ from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest
 from pyramid.url import route_url
 from sqlalchemy.orm import exc
+from sqlalchemy.sql import func
 import sqlalchemy
 
 import re
@@ -100,8 +101,8 @@ class EnterPoints(object):
 		exam = self.db.query(models.Exam).get(self.exam_id)
 		tutorials = [self.db.query(models.Tutorial).get(tutorial_id) for tutorial_id in self.tutorial_ids]
 		students = exam.lecture.lecture_students_for_tutorials(tutorials)
-		pointsQuery = exam.exercise_points.filter(models.ExerciseStudent.student_id.in_([s.student.id for s  in students]))
-		points = utils.DictOfObjects(lambda: {})
+		pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students]))
+		points = DictOfObjects(lambda: {})
 		for s in students:
 			for e in exam.exercises:
 				points[s.student_id][e.id] = None
@@ -109,9 +110,11 @@ class EnterPoints(object):
 			points[point.student_id][point.exercise_id] = point.points
 		for student in points:
 			points[student]['total'] = sum([v for v in points[student].values() if v])
+		statistics = exam.getStatistics(students=students)
 		error_msgs = []
 		return {'exam': exam,
 		        'tutorial_ids': self.request.matchdict['tutorial_ids'],
 		        'students': students,
 		        'points': points,
+		        'statistics': statistics,
 		        'error_msg': '\n'.join(error_msgs)}

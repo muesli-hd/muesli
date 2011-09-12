@@ -68,59 +68,44 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
   </tr>
 
   <tfoot>
-<!--  <tr>
+  <tr>
     <td>Durchschnitt (Gruppe/Gesamt)</td>
-%   if (show_tutor) {
-      <td></td>
-%   }
-%    my (tut_avg, tut_var, lec_avg, lec_var);
-%   for my ex (@exercises) {
-%     if (defined statistics) {
-%       tut_avg = defined statistics->{ ex->id } ? statistics->{ ex->id }->avg : undef;
-%       tut_var = defined statistics->{ ex->id } ? statistics->{ ex->id }->variance : undef;
-%     }
-%     lec_avg = defined lecture_statistics->{ ex->id } ? lecture_statistics->{ ex->id }->avg : undef;
-%     lec_var = defined lecture_statistics->{ ex->id } ? lecture_statistics->{ ex->id }->variance : undef;
-    <td><& /Fragments/Format/AvgStd, lec_avg, sqrt(lec_var), tut_avg, sqrt(tut_var) &></td>
-%   }
-%     if (defined statistics) {
-%       tut_avg = defined statistics ? statistics->{avg} : undef;
-%       tut_var = defined statistics ? statistics->{std} : undef;
-%     }
-%     lec_avg = defined lecture_statistics ? lecture_statistics->{avg} : undef;
-%     lec_var = defined lecture_statistics ? lecture_statistics->{std} : undef;
-    <td><& /Fragments/Format/AvgStd, lec_avg, lec_var, tut_avg, tut_var &></td>
-  </tr>-->
+    <td tal:condition="not tutorial_ids"></td>
+    <td tal:repeat="e exam.exercises">
+      <span tal:define="statisticsData statistics[e.id]" tal:omit-tag="">
+        <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
+      </span>
+    </td>
+    <td tal:define="statisticsData statistics['exam']">
+      <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
+    </td>
+  </tr>
   </tfoot>
 
 </table>
 <input type="submit" value="Speichern"/>
 </form>
-<!--
+
 <h3>Statistiken</h3>
 
 <ul>
-  <li><a href="<% c->uri_for("/exam/statistics", exam->id, defined tutorial ? tutorial->id : undef) %>">Statistik/Histogramme</a></li>
+  <li><a tal:attributes="href request.route_path('exam_statistics', exam_id=exam.id, tutorial_ids=tutorial_ids)">Statistik/Histogramme</a></li>
   <li>
-    <form method="get" action="<% c->uri_for("/exam/correlation") %>">
+    <form method="get" tal:attributes="action request.route_path('exam_correlation')">
       <input type="hidden" name="type1" value="exercise"/>
       <input type="hidden" name="type2" value="exercise"/>
       <select name="id1">
-% for my exercise (@exercises) {
-        <option value="<% exercise->id %>">Aufgabe <% exercise->nr %></option>
-% }
+        <option tal:repeat="e exam.exercises" tal:attributes="value e.id">Aufgabe ${e.nr}</option>
       </select>
       <select name="id2">
-% for my exercise (@exercises) {
-        <option value="<% exercise->id %>">Aufgabe <% exercise->nr %></option>
-% }
+        <option tal:repeat="e exam.exercises" tal:attributes="value e.id">Aufgabe ${e.nr}</option>
       </select>
       <input type="submit" value="Korrelation"/>
     </form>
   </li>
-  <li><a href="<% c->uri_for("/exam/correlation/assignments/".lecture->id."/exam", exam->id)  %>">Korrelation Testat/Übungszettel gesamt</a></li>
+  <li><a tal:attributes="href request.route_path('exam_correlation', _query={'type1': 'assignments', 'id1': exam.lecture.id, 'type2': 'exam', 'id2': exam.id})">Korrelation Testat/Übungszettel gesamt</a></li>
 </ul>
--->
+
 
   </metal:main>
 </metal:main>
