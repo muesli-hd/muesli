@@ -19,6 +19,8 @@
 
 # -*- coding: utf-8 -*-
 
+import math
+
 import muesli
 
 import sqlalchemy
@@ -26,6 +28,8 @@ import sqlalchemy.ext.declarative
 from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table
 from sqlalchemy.orm import relationship, sessionmaker, backref
 from muesli.types import *
+from muesli.utils import DictOfObjects
+
 Base = sqlalchemy.ext.declarative.declarative_base()
 
 engine = muesli.engine()
@@ -192,6 +196,42 @@ class Exam(Base):
 	def exercise_points(self):
 		session = Session.object_session(self)
 		return session.query(ExerciseStudent).filter(ExerciseStudent.exercise.has(Exercise.exam_id==self.id))
+	def getStatistics(self, tutorials=None, students=None):
+		session = Session.object_session(self)
+		if not students:
+			students = self.lecture.lecture_students_for_tutorials(tutorials)
+		pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students]))
+		pointsStmt = pointsQuery.subquery()
+		exerciseStatistics = session.query(\
+				pointsStmt.c.exercise.label('exercise_id'),
+				func.count(pointsStmt.c.student).label('count'),
+				func.avg(pointsStmt.c.points).label('avg'),
+				func.variance(pointsStmt.c.points).label('variance')
+			).group_by(pointsStmt.c.exercise)
+		examPoints = session.query(\
+				pointsStmt.c.student.label('student_id'),
+				func.sum(pointsStmt.c.points).label('points'),
+			).group_by(pointsStmt.c.student).subquery()
+		examStatistics = session.query(\
+				func.count(examPoints.c.student_id).label('count'),
+				func.avg(examPoints.c.points).label('avg'),
+				func.variance(examPoints.c.points).label('variance'),
+			).one()
+		statistics = {
+			'exam': {
+				'lec_avg': examStatistics.avg,
+				'lec_std': math.sqrt(examStatistics.variance) if examStatistics.variance else None,
+				'lec_count': examStatistics.count}
+			}
+		for e in self.exercises:
+			statistics[e.id] = {'lec_avg': None, 'lec_std': None, 'lec_count': 0}
+		for e in exerciseStatistics.all():
+			statistics[e.exercise_id] = {
+				'lec_avg': e.avg,
+				'lec_std': math.sqrt(e.variance) if e.variance else None,
+				'lec_count': e.count
+				}
+		return statistics
 
 class Tutorial(Base):
 	__tablename__ = 'tutorials'
