@@ -35,7 +35,7 @@ import os
 
 @view_config(route_name='user_login', renderer='muesli.web:templates/user/login.pt')
 def login(request):
-	form = Form(UserLogin())
+	form = FormValidator(UserLogin())
 	if request.method == 'POST' and form.validate(request.POST):
 		user = request.db.query(models.User).filter_by(email=form['email'], password=sha1(form['password']).hexdigest()).first()
 		if user is not None:
