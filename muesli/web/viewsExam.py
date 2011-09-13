@@ -142,3 +142,36 @@ class EnterPoints(object):
 		        'points': points,
 		        'statistics': statistics,
 		        'error_msg': '\n'.join(error_msgs)}
+
+@view_config(route_name='exam_export', renderer='muesli.web:templates/exam/export.pt', context=ExamContext, permission='enter_points')
+class Export(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.exam_id = request.matchdict['exam_id']
+		self.tutorial_ids = request.matchdict['tutorial_ids'].split(',')
+		if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
+			self.tutorial_ids = []
+	def __call__(self):
+		exam = self.db.query(models.Exam).get(self.exam_id)
+		tutorials = [self.db.query(models.Tutorial).get(tutorial_id) for tutorial_id in self.tutorial_ids]
+		students = exam.lecture.lecture_students_for_tutorials(tutorials).join(models.User).order_by(models.User.last_name, models.User.first_name).options(sqlalchemy.orm.joinedload(LectureStudent.student))
+		pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
+		points = DictOfObjects(lambda: {})
+		for point in pointsQuery:
+			points[point.student_id][point.exercise_id] = point
+		for student in students:
+			for e in exam.exercises:
+				if not e.id in points[student.student_id]:
+					exerciseStudent = models.ExerciseStudent()
+					exerciseStudent.student = student.student
+					exerciseStudent.exercise = e
+					points[student.student_id][e.id] = exerciseStudent
+					self.db.add(exerciseStudent)
+		self.db.commit()
+		for student in points:
+			points[student]['total'] = sum([v.points for v in points[student].values() if v.points])
+		return {'exam': exam,
+		        'tutorial_ids': self.request.matchdict['tutorial_ids'],
+		        'students': students,
+		        'points': points}

@@ -82,7 +82,7 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
     <li tal:repeat="exam exams[category['id']]">
         <a tal:attributes="href request.route_path('exam_edit', exam_id=exam.id)">${exam.name}</a> (<a tal:attributes="href request.route_path('exam_statistics', exam_id=exam.id)">Statistiken</a>,
         <a tal:attributes="href request.route_path('exam_enter_points', exam_id=exam.id, tutorial_ids='')">Eintragen</a>,
-        <a tal:attributes="href request.route_path('lecture_export_exam', lecture_id=lecture.id, exam_id=exam.id)">Exportieren</a>)</li>
+        <a tal:attributes="href request.route_path('exam_export', exam_id=exam.id, tutorial_ids='')">Exportieren</a>)</li>
   </ul>
 </div>
 

@@ -122,7 +122,6 @@ def main(global_config=None, **settings):
 	config.add_route('lecture_remove_preferences', '/lecture/remove_preferences/{lecture_id}')
 	config.add_route('lecture_add_exam', '/lecture/add_exam/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_add_grading', '/lecture/add_grading/{lecture_id}', factory = LectureContext)
-	config.add_route('lecture_export_exam', '/lecture/export_exam/{lecture_id}/{exam_id}', factory = LectureContext)
 	config.add_route('lecture_export_students_html', '/lecture/export_students_html/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_export_totals', '/lecture/export_totals/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory = LectureContext)
@@ -149,6 +148,7 @@ def main(global_config=None, **settings):
 	config.add_route('exam_correlation', '/exam/correlation')
 	config.add_route('exam_enter_points', '/exam/enter_points/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
 	config.add_route('exam_enter_points_single', '/exam/enter_points_single/{exam_id}/{tutorial_ids:[^/]*}')
+	config.add_route('exam_export', '/exam/export/{exam_id}/{tutorial_ids:[^/]*}', factory = ExamContext)
 
 	config.add_route('grading_edit', '/grading/edit/{grading_id}')
 
