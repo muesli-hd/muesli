@@ -78,6 +78,26 @@ class AddExam(object):
 		        'form': form
 		       }
 
+@view_config(route_name='lecture_add_grading', renderer='muesli.web:templates/lecture/add_grading.pt', context=LectureContext, permission='edit')
+class AddGrading(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.lecture_id = request.matchdict['lecture_id']
+	def __call__(self):
+		lecture = self.db.query(models.Lecture).get(self.lecture_id)
+		form = LectureAddGrading(self.request)
+		if self.request.method == 'POST' and form.processPostData(self.request.POST):
+			grading = models.Grading()
+			grading.lecture = lecture
+			form.obj = grading
+			form.saveValues()
+			self.request.db.commit()
+			form.message = "Neue Benotung angelegt."
+		return {'lecture': lecture,
+		        'form': form
+		       }
+
 @view_config(route_name='lecture_edit', renderer='muesli.web:templates/lecture/edit.pt', context=LectureContext, permission='edit')
 class Edit(object):
 	def __init__(self, request):
@@ -122,3 +142,4 @@ class RemoveTutor(object):
 		lecture.tutors.remove(tutor)
 		self.db.commit()
 		return HTTPFound(location=self.request.route_url('lecture_edit', lecture_id=lecture.id))
+

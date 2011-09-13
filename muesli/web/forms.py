@@ -399,3 +399,12 @@ class ExamAddOrEditExercise(ObjectForm):
 			   validator=validators.Number(min=0)),
 			]
 		ObjectForm.__init__(self, exercise, formfields, send=u'Anlegen/Ändern')
+
+class LectureAddGrading(ObjectForm):
+	def __init__(self, request):
+		formfields = [
+			FormField('name',
+			   label='Name', size=100,
+			   required=True),
+			]
+		ObjectForm.__init__(self, None, formfields, send=u'Anlegen')
