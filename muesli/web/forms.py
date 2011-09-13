@@ -329,6 +329,54 @@ class LectureEditExam(ObjectForm):
 		else:
 			ObjectForm.saveField(self, fieldName)
 
+class TutorialAdd(ObjectForm):
+	def __init__(self, request):
+		# TODO: Übungsleiter angeben. Aber wurde das jemals genutzt?
+		formfields = [
+			#FormField('tutor',
+			#   label=u'Übungsleiter', size=64),
+			FormField('place',
+			   label='Ort', size=64,
+			   required=True),
+			FormField('wday',
+			   label='Wochentag',
+			   type='select',
+			   options=enumerate(['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']),
+			   required=True),
+			FormField('timeofday',
+			   label='Uhrzeit', size=5,
+			   comment='(HH:MM oder HH)',
+			   validator=validators.Regex(r'^[012]?[0-9](:[0-5][0-9])?$'),
+			   required=True),
+			FormField('max_students',
+			   label='Max. Teilnehmerzahl', size=5,
+			   validator=validators.Int,
+			   required=True),
+			FormField('comment',
+			   label='Kommentar', size=64),
+			FormField('is_special',
+			   label='Spezial',
+			   type='radio',
+			   value=0,
+			   options=[[1, 'Ja'], [0, 'Nein']])
+			]
+		ObjectForm.__init__(self, None, formfields, send=u'Anlegen')
+	def saveField(self, fieldName):
+		if fieldName == 'is_special':
+			setattr(self.obj, fieldName, valueToBool(self[fieldName]))
+		elif fieldName == 'wday':
+			pass
+		elif fieldName == 'timeofday':
+			timeofday = self['timeofday']
+			if not ':' in timeofday:
+				timeofday += ':00'
+			if len(timeofday) <5:
+				timeofday = '0' + timeofday
+			timeString = '%s %s' % (self['wday'], timeofday)
+			setattr(self.obj, 'time', timeString)
+		else:
+			ObjectForm.saveField(self, fieldName)
+
 class ExamAddOrEditExercise(ObjectForm):
 	def __init__(self, request, exercise):
 		formfields = [

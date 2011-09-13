@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 # muesli/web/viewsTutorial.py
 #
 # This file is part of MUESLI.
@@ -19,6 +21,7 @@
 
 from muesli import models
 from muesli import utils
+from muesli.web.forms import *
 from muesli.web.context import *
 
 from pyramid.view import view_config
@@ -80,3 +83,24 @@ class OccupancyBar(object):
 		output.close()
 		return response
 
+@view_config(route_name='tutorial_add', renderer='muesli.web:templates/tutorial/add.pt', context=LectureContext, permission='edit')
+class Add(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.lecture_id = request.matchdict['lecture_id']
+	def __call__(self):
+		error_msg = ''
+		lecture = self.db.query(models.Lecture).get(self.lecture_id)
+		form = TutorialAdd(self.request)
+		if self.request.method == 'POST' and form.processPostData(self.request.POST):
+			tutorial = models.Tutorial()
+			tutorial.lecture = lecture
+			form.obj = tutorial
+			form.saveValues()
+			self.request.db.commit()
+			form.message = u"Neue Übungsgruppe angelegt."
+		return {'lecture': lecture,
+		        'names': utils.lecture_types[lecture.type],
+		        'form': form,
+		        'error_msg': error_msg}
