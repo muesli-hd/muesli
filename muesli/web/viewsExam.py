@@ -98,20 +98,44 @@ class EnterPoints(object):
 		if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
 			self.tutorial_ids = []
 	def __call__(self):
+		error_msgs = []
 		exam = self.db.query(models.Exam).get(self.exam_id)
 		tutorials = [self.db.query(models.Tutorial).get(tutorial_id) for tutorial_id in self.tutorial_ids]
-		students = exam.lecture.lecture_students_for_tutorials(tutorials)
+		students = exam.lecture.lecture_students_for_tutorials(tutorials).join(models.User).order_by(models.User.last_name, models.User.first_name)
 		pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students]))
 		points = DictOfObjects(lambda: {})
-		for s in students:
-			for e in exam.exercises:
-				points[s.student_id][e.id] = None
+		#for s in students:
+		#	for e in exam.exercises:
+		#		points[s.student_id][e.id] = None
 		for point in pointsQuery:
-			points[point.student_id][point.exercise_id] = point.points
+			points[point.student_id][point.exercise_id] = point
+		if self.request.method == 'POST':
+			for student in students:
+				for e in exam.exercises:
+					if not e.id in points[student.student_id]:
+						exerciseStudent = models.ExerciseStudent()
+						exerciseStudent.student = student.student
+						exerciseStudent.exercise = e
+						points[student.student_id][e.id] = exerciseStudent
+						self.db.add(exerciseStudent)
+					param = 'points-%u-%u' % (student.student_id, e.id)
+					if param in self.request.POST:
+						value = self.request.POST[param]
+						if not value:
+							points[student.student_id][e.id].points = None
+						else:
+							value = value.replace(',','.')
+							try:
+								value = float(value)
+								points[student.student_id][e.id].points = value
+							except:
+								error_msgs.append('Could not convert "%s" (%s, Exercise %i)'%(value, student.student.name(), e.nr))
+			self.db.commit()
 		for student in points:
-			points[student]['total'] = sum([v for v in points[student].values() if v])
+			points[student]['total'] = sum([v.points for v in points[student].values() if v.points])
+		# TODO: Die Statistik scheint recht langsm zu sein. Evt lohnt es sich,
+		#       die selber auszurechnen...
 		statistics = exam.getStatistics(students=students)
-		error_msgs = []
 		return {'exam': exam,
 		        'tutorial_ids': self.request.matchdict['tutorial_ids'],
 		        'students': students,
