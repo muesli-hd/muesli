@@ -26,7 +26,7 @@ from muesli.web.forms import *
 
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest
+from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound
 from pyramid.url import route_url
 from sqlalchemy.orm import exc
 import sqlalchemy
@@ -104,3 +104,21 @@ class Edit(object):
 		        'categories': utils.categories,
 		        'exams': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
 		        'form': form}
+
+@view_config(route_name='lecture_remove_tutor', context=LectureContext, permission='edit')
+class RemoveTutor(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.lecture_id = request.matchdict['lecture_id']
+		self.tutor_id = request.matchdict['tutor_id']
+	def __call__(self):
+		lecture = self.db.query(models.Lecture).get(self.lecture_id)
+		tutor = self.db.query(models.User).get(self.tutor_id)
+		if not tutor:
+			return
+		if not tutor in lecture.tutors:
+			return
+		lecture.tutors.remove(tutor)
+		self.db.commit()
+		return HTTPFound(location=self.request.route_url('lecture_edit', lecture_id=lecture.id))
