@@ -92,7 +92,7 @@ class Add(object):
 	def __call__(self):
 		error_msg = ''
 		lecture = self.db.query(models.Lecture).get(self.lecture_id)
-		form = TutorialAdd(self.request)
+		form = TutorialEdit(self.request, None)
 		if self.request.method == 'POST' and form.processPostData(self.request.POST):
 			tutorial = models.Tutorial()
 			tutorial.lecture = lecture
@@ -102,5 +102,24 @@ class Add(object):
 			form.message = u"Neue Übungsgruppe angelegt."
 		return {'lecture': lecture,
 		        'names': utils.lecture_types[lecture.type],
+		        'form': form,
+		        'error_msg': error_msg}
+
+@view_config(route_name='tutorial_edit', renderer='muesli.web:templates/tutorial/edit.pt', context=TutorialContext, permission='edit')
+class Add(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.tutorial_id = request.matchdict['tutorial_id']
+	def __call__(self):
+		error_msg = ''
+		tutorial = self.db.query(models.Tutorial).get(self.tutorial_id)
+		form = TutorialEdit(self.request, tutorial)
+		if self.request.method == 'POST' and form.processPostData(self.request.POST):
+			form.saveValues()
+			self.request.db.commit()
+			form.message = u"Änderungen gespeichert"
+		return {'tutorial': tutorial,
+		        'names': utils.lecture_types[tutorial.lecture.type],
 		        'form': form,
 		        'error_msg': error_msg}

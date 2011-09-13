@@ -25,6 +25,7 @@ from formencode import validators
 
 from muesli import models
 from muesli import utils
+from muesli.types import TutorialTime
 
 def boolToValue(boolean):
 	if boolean==True:
@@ -329,38 +330,43 @@ class LectureEditExam(ObjectForm):
 		else:
 			ObjectForm.saveField(self, fieldName)
 
-class TutorialAdd(ObjectForm):
-	def __init__(self, request):
+class TutorialEdit(ObjectForm):
+	def __init__(self, request, tutorial):
 		# TODO: Übungsleiter angeben. Aber wurde das jemals genutzt?
 		formfields = [
 			#FormField('tutor',
 			#   label=u'Übungsleiter', size=64),
 			FormField('place',
 			   label='Ort', size=64,
+			   value=tutorial.place if tutorial else None,
 			   required=True),
 			FormField('wday',
 			   label='Wochentag',
 			   type='select',
-			   options=enumerate(['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']),
-			   required=True),
+			   options=list(enumerate(['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'])),
+			   required=True,
+			   value = int(tutorial.time.weekday()) if tutorial else None),
 			FormField('timeofday',
 			   label='Uhrzeit', size=5,
 			   comment='(HH:MM oder HH)',
 			   validator=validators.Regex(r'^[012]?[0-9](:[0-5][0-9])?$'),
-			   required=True),
+			   required=True,
+			   value=tutorial.time.time() if tutorial else None),
 			FormField('max_students',
 			   label='Max. Teilnehmerzahl', size=5,
 			   validator=validators.Int,
-			   required=True),
+			   required=True,
+			   value=tutorial.max_students if tutorial else None),
 			FormField('comment',
-			   label='Kommentar', size=64),
+			   label='Kommentar', size=64,
+			   value=tutorial.comment if tutorial else None),
 			FormField('is_special',
 			   label='Spezial',
 			   type='radio',
-			   value=0,
-			   options=[[1, 'Ja'], [0, 'Nein']])
+			   options=[[1, 'Ja'], [0, 'Nein']],
+			   value=boolToValue(tutorial.is_special) if tutorial else 0)
 			]
-		ObjectForm.__init__(self, None, formfields, send=u'Anlegen')
+		ObjectForm.__init__(self, tutorial, formfields, send=u'Ändern')
 	def saveField(self, fieldName):
 		if fieldName == 'is_special':
 			setattr(self.obj, fieldName, valueToBool(self[fieldName]))
@@ -373,7 +379,8 @@ class TutorialAdd(ObjectForm):
 			if len(timeofday) <5:
 				timeofday = '0' + timeofday
 			timeString = '%s %s' % (self['wday'], timeofday)
-			setattr(self.obj, 'time', timeString)
+			time = TutorialTime(timeString)
+			setattr(self.obj, 'time', time)
 		else:
 			ObjectForm.saveField(self, fieldName)
 
