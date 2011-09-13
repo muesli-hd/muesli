@@ -237,7 +237,7 @@ class Tutorial(Base):
 	__tablename__ = 'tutorials'
 	id = Column(Integer, primary_key=True)
 	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id))
-	lecture = relationship(Lecture, backref='tutorials')
+	lecture = relationship(Lecture, backref=backref('tutorials',lazy='dynamic'))
 	tutor_id = Column('tutor', Integer, ForeignKey(User.id))
 	tutor = relationship(User, order_by=Lecture.term)
 	place = Column(Text)
