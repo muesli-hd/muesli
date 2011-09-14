@@ -66,3 +66,18 @@ class AssociateExam(object):
 				grading.exams.append(exam)
 				self.db.commit()
 		return HTTPFound(location=self.request.route_url('grading_edit', grading_id=grading.id))
+
+@view_config(route_name='grading_delete_exam_association', context=GradingContext, permission='edit')
+class DeleteExamAssociation(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.grading_id = request.matchdict['grading_id']
+		self.exam_id = request.matchdict['exam_id']
+	def __call__(self):
+		grading = self.db.query(models.Grading).get(self.grading_id)
+		exam = self.db.query(models.Exam).get(self.exam_id)
+		if exam in grading.exams:
+			grading.exams.remove(exam)
+			self.db.commit()
+		return HTTPFound(location=self.request.route_url('grading_edit', grading_id=grading.id))
