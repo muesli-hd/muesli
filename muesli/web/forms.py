@@ -408,3 +408,25 @@ class LectureAddGrading(ObjectForm):
 			   required=True),
 			]
 		ObjectForm.__init__(self, None, formfields, send=u'Anlegen')
+
+class GradingEdit(ObjectForm):
+	def __init__(self, request, grading):
+		formfields = [
+			FormField('name',
+			   label='Name', size=100,
+			   value=grading.name,
+			   required=True),
+			FormField('hispos_type',
+			   label='Termin',
+			   type='select',
+			   options=[['01', 'Haupttermin'],['02', 'Nachtermin']],
+			   value=grading.hispos_type),
+			FormField('hispos_date',
+			   label='Datum', size=10,
+			   comment='(TT.MM.JJJJ)',
+			   value=grading.hispos_date),
+			FormField('examiner_id',
+			   label=u'Prüfer-Id', size=10,
+			   value=grading.examiner_id),
+			]
+		ObjectForm.__init__(self, grading, formfields, send=u'Ändern')

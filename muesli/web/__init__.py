@@ -150,7 +150,10 @@ def main(global_config=None, **settings):
 	config.add_route('exam_enter_points_single', '/exam/enter_points_single/{exam_id}/{tutorial_ids:[^/]*}')
 	config.add_route('exam_export', '/exam/export/{exam_id}/{tutorial_ids:[^/]*}', factory = ExamContext)
 
-	config.add_route('grading_edit', '/grading/edit/{grading_id}')
+	config.add_route('grading_edit', '/grading/edit/{grading_id}', factory=GradingContext)
+	config.add_route('grading_associate_exam', '/grading/associate_exam/{grading_id}', factory=GradingContext)
+	config.add_route('grading_delete_exam_association', '/grading/delete_exam_association/{grading_id}/{exam_id}', factory=GradingContext)
+	config.add_route('grading_enter_grades', '/grading/enter_grades/{grading_id}', factory=GradingContext)
 
 
 	config.scan()

@@ -16,6 +16,16 @@ class GeneralContext(object):
         (Allow, 'group:administrators', ALL_PERMISSIONS),
         ]
 
+class GradingContext(object):
+  def __init__(self, request):
+    grading_id = request.matchdict['grading_id']
+    self.grading = request.db.query(Grading).get(grading_id)
+    self.__acl__ = [
+		(Allow, 'user:{0}'.format(self.grading.lecture.assistant_id), ('view', 'edit')),
+        (Allow, 'group:administrators', ALL_PERMISSIONS),
+        ]
+
+
 class LectureContext(object):
   def __init__(self, request):
     lecture_id = request.matchdict['lecture_id']

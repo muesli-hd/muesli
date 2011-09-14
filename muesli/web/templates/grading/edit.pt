@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Benotung bearbeiten</h2>
+
+<p>
+${grading.name}: <a tal:attributes="href request.route_path('lecture_edit', lecture_id=grading.lecture.id)">${grading.lecture.name}</a>
+</p>
+
+<form action="/grading/edit" tal:attributes="action request.route_path('grading_edit', grading_id=grading.id)" method="POST">
+<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+</form>
+
+<h3>Testate zur Notenbildung</h3>
+
+<ul>
+  <li tal:repeat="exam grading.exams">${exam.name}
+    <a tal:attributes="href request.route_path('grading_delete_exam_association', grading_id=grading.id, exam_id=exam.id)">(Entfernen)</a>
+  </li>
+</ul>
+
+<form method="POST" tal:attributes="action request.route_path('grading_associate_exam', grading_id=grading.id)">
+  <select name="new_exam">
+    <option tal:repeat="exam grading.lecture.exams" tal:attributes="value exam.id">
+    ${exam.name}
+    </option>
+  </select>
+  <input type="submit" value="Hinzufügen"/>
+</form>
+
+<p><a tal:attributes="href request.route_path('grading_enter_grades', grading_id=grading.id)">Noten eintragen</a></p>
+
+
+
+  </metal:main>
+</metal:main>
