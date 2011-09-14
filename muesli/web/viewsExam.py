@@ -155,7 +155,7 @@ class Export(object):
 	def __call__(self):
 		exam = self.db.query(models.Exam).get(self.exam_id)
 		tutorials = [self.db.query(models.Tutorial).get(tutorial_id) for tutorial_id in self.tutorial_ids]
-		students = exam.lecture.lecture_students_for_tutorials(tutorials).join(models.User).order_by(models.User.last_name, models.User.first_name).options(sqlalchemy.orm.joinedload(LectureStudent.student))
+		students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))
 		pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
 		points = DictOfObjects(lambda: {})
 		for point in pointsQuery:
