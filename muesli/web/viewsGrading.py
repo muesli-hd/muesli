@@ -26,7 +26,7 @@ from muesli.web.forms import *
 
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest
+from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound
 from pyramid.url import route_url
 from sqlalchemy.orm import exc
 from sqlalchemy.sql import func
@@ -48,14 +48,21 @@ class Edit(object):
 			form.saveValues()
 			self.request.db.commit()
 			form.message = u"Änderungen gespeichert."
-		#if exam.admission!=None or exam.registration!=None:
-		#	students = exam.lecture.lecture_students
-		#	if exam.admission != None:
-		#		students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.admission==True))))
-		#		print students.statement
-		#	if exam.registration != None:
-		#		students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.registration==True))))
-		#else: students = None
 		return {'grading': grading,
 		        'form': form,
 		       }
+
+@view_config(route_name='grading_associate_exam', context=GradingContext, permission='edit')
+class AssociateExam(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.grading_id = request.matchdict['grading_id']
+	def __call__(self):
+		grading = self.db.query(models.Grading).get(self.grading_id)
+		exam = self.db.query(models.Exam).get(self.request.POST['new_exam'])
+		if grading.lecture_id == exam.lecture_id:
+			if not exam in grading.exams:
+				grading.exams.append(exam)
+				self.db.commit()
+		return HTTPFound(location=self.request.route_url('grading_edit', grading_id=grading.id))
