@@ -40,6 +40,18 @@ lecture_tutors_table = Table('lecture_tutors', Base.metadata,
 	Column('tutor', Integer, ForeignKey('users.id'), primary_key=True)
 )
 
+grading_exam_table = Table('grading_exams', Base.metadata,
+	Column('grading', Integer, ForeignKey('gradings.id', ondelete='CASCADE'), nullable=False, primary_key=True),
+	Column('exam', Integer, ForeignKey('exams.id', ondelete='CASCADE'), nullable=False, primary_key=True)
+)
+
+#class GradingExam(Base):
+#	__tablename__ = 'grading_exams'
+#	grading_id = Column('grading', Integer, ForeignKey(Grading.id, ondelete='CASCADE'), nullable=False, primary_key=True)
+#	grading = relationship(Grading, backref='grading_exams')
+#	exam_id = Column('exam', Integer, ForeignKey(Exam.id, ondelete='CASCADE'), nullable=False, primary_key=True)
+#	exam = relationship(Exam, backref='grading_exams')
+
 class User(Base):
 	__tablename__ = 'users'
 	id = Column(Integer, primary_key=True)
@@ -334,7 +346,7 @@ class ExamAdmission(Base):
 class Grading(Base):
 	__tablename__ = 'gradings'
 	id = Column(Integer, primary_key=True)
-	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), nullable=False, primary_key=True)
+	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), nullable=False)
 	lecture = relationship(Lecture, backref='gradings')
 	name = Column(Text)
 	formula = Column(Text)
@@ -344,6 +356,7 @@ class Grading(Base):
 	hispos_type = Column(Text)
 	hispos_date = Column(Text)
 	examiner_id = Column(Text)
+	exams = relationship(Exam, secondary=grading_exam_table, backref = "exams")
 
 class StudentGrade(Base):
 	__tablename__ = 'student_grades'
@@ -352,10 +365,3 @@ class StudentGrade(Base):
 	student_id = Column('student', Integer, ForeignKey(User.id), nullable=False, primary_key=True)
 	student = relationship(User, backref='student_grades')
 	grade = Column(Numeric(precision=2, scale=1), CheckConstraint('grade >= 1.0 AND grade <= 5.0'))
-  
-class GradingExam(Base):
-	__tablename__ = 'grading_exams'
-	grading_id = Column('grading', Integer, ForeignKey(Grading.id, ondelete='CASCADE'), nullable=False, primary_key=True)
-	grading = relationship(Grading, backref='grading_exams')
-	exam_id = Column('exam', Integer, ForeignKey(Exam.id, ondelete='CASCADE'), nullable=False, primary_key=True)
-	exam = relationship(Exam, backref='grading_exams')
