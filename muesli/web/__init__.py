@@ -51,6 +51,10 @@ def add_session_to_request(event):
 	event.request.userInfo = utils.UserInfo(event.request.user)
 	event.request.permissionInfo = utils.PermissionInfo(event.request)
 
+@subscriber(NewRequest)
+def add_javascript_to_request(event):
+	event.request.javascript = set()
+
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):
 	event['templates'] = lambda name: get_renderer('templates/{0}'.format(name)).implementation()
@@ -151,6 +155,7 @@ def main(global_config=None, **settings):
 	config.add_route('exam_export', '/exam/export/{exam_id}/{tutorial_ids:[^/]*}', factory = ExamContext)
 
 	config.add_route('grading_edit', '/grading/edit/{grading_id}', factory=GradingContext)
+	config.add_route('grading_export', '/grading/export/{grading_id}', factory=GradingContext)
 	config.add_route('grading_associate_exam', '/grading/associate_exam/{grading_id}', factory=GradingContext)
 	config.add_route('grading_delete_exam_association', '/grading/delete_exam_association/{grading_id}/{exam_id}', factory=GradingContext)
 	config.add_route('grading_enter_grades', '/grading/enter_grades/{grading_id}', factory=GradingContext)

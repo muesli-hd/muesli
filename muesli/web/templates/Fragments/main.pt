@@ -9,7 +9,7 @@
   -->
   <title>MÜSLI</title>
   <link rel="stylesheet" type="text/css" href="/static/css/muesli.css"></link>
-  <script type="text/javascript" src="/static/overview.js"></script>
+  <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src '/static/js/%s' % filename"></script>
 </head>
 <body>
 <div id="header">
@@ -19,7 +19,7 @@
 <metal:main metal:use-macro="templates('Fragments/menu.pt').macros['menu']" />
 
 <script>
-<![CDATA[
+/* <![CDATA[ */
 function set_navigation(nav) {
   var str = "<ul>\n";
   for (var i = 0; i<nav.length; i++) {
@@ -32,7 +32,7 @@ function set_navigation(nav) {
   str += '</ul>';
   document.getElementById('history').innerHTML = str;
 }
-]]>
+/* ]]> */
 </script>
 <div id="history">
 </div>

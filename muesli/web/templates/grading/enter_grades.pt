@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+
+<script>/* <![CDATA[ */
+  function hide_help ()
+  {
+    var fields = $$(".help");
+    for (i=0; i<fields.length; i++) {
+      Element.hide(fields[i]);
+    }
+    var fields = $$(".nohelp");
+    for (i=0; i<fields.length; i++) {
+      Element.show(fields[i]);
+    }
+  }
+
+  function show_help ()
+  {
+    var fields = $$(".help");
+    for (i=0; i<fields.length; i++) {
+      Element.show(fields[i]);
+    }
+    var fields = $$(".nohelp");
+    for (i=0; i<fields.length; i++) {
+      Element.hide(fields[i]);
+    }
+  }
+/* ]]> */
+</script>
+
+<h2>Noten eintragen</h2>
+
+<h3>${grading.name} der Vorlesung ${grading.lecture.name}</h3>
+
+<p tal:condition="error_msg" class="error">${error_msg}</p>
+
+
+<a tal:attributes="href request.route_path('grading_export', grading_id=grading.id)">Als Excel für HISPOS exportieren</a>
+
+
+<form method="get">
+  Berechnungsformel <input type="text" name="formula" size="80" tal:attributes="value formula" />
+  <input type="submit" value="Berechnen"/> <input type="submit" name="fill" value="Berechnen &amp; übertragen"/>
+  <a class="nohelp" href="javascript:show_help()">Hilfe</a><a class="help" style="display:none" href="javascript:hide_help()">Hilfe verbergen</a>
+</form>
+<div class="help" style="display:none"><p>
+Die Formel muss ein algebraischer Ausdruck in den Variablen 1, 2, ... sein, wobei i für
+die erreichten Punktzahlen in den gewählten Testaten steht (Siehe Kopfzeile der Tabelle unten).
+Desweiteren können folgende Funktionen benutzt werden:
+</p>
+<ul>
+<li>max(a, b, ...): Liefert das Maximum der Ausdrücke a, b, ...</li>
+<li>min(a, b, ...): Liefert das Minimum der Ausdrücke a, b, ...</li>
+<li>cases(val,r<sub>0</sub>, b<sub>1</sub>, r<sub>1</sub>, ..., b<sub>n</sub>, r<sub>n</sub>):
+Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &ge; b<sub>i</sub>.</li>
+</ul>
+</div>
+
+<form method="get">
+  <select name="students">
+    <option value="">Alle</option>
+    <option tal:repeat="exam grading.exams" tal:attributes="selected str(exam.id)==exam_id; value exam.id">${exam.name}</option>
+  </select>
+  <input type="submit" value="Anzeigen"/>
+</form>
+
+<form method="post">
+<input type="hidden" name="submit" value="1" />
+<table class="colored">
+  <tr>
+    <th tal:conditions="not tutorial_ids">Tutor</th>
+    <th tal:repeat="exam grading.exams">${exam.name} (${varsForExam[exam.id]})</th>
+    <th>Name</th>
+    <th>Berechnete Note</th>
+    <th>Note</th>
+  </tr>
+
+  <tr tal:repeat="ls lecture_students"
+      tal:attributes="id 'row-%i' % ls.student_id">
+      <td tal:condition="not tutorial_ids">
+        <span tal:condition="ls.tutorial.tutor" tal:content="ls.tutorial.tutor.last_name" tal:omit-tag="" />
+      </td>
+      <td tal:repeat="exam grading.exams">
+        ${grades[ls.student_id]['exams'][exam.id]}
+      </td>
+    <td>${ls.student.name()}</td>
+    <td>TODO<!--<% calcgrades->{student->id} // ''%>--></td>
+     
+    <td><input tal:attributes="class 'invalid' if grades[ls.student_id]['invalid'] else 'points';
+             name 'grade-%i' % ls.student_id;
+             value grades[ls.student_id]['grade'].grade if grades[ls.student_id]['grade'].grade else ''" size="4" /></td>
+  </tr>
+</table>
+<input type="submit" value="Speichern"/>
+</form>
+
+  </metal:main>
+</metal:main>

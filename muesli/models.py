@@ -147,7 +147,7 @@ class Lecture(Base):
 		session = Session.object_session(self)
 		return session.query(User).filter(User.lecture_students.any(LectureStudent.lecture_id==self.id))
 	def lecture_students_for_tutorials(self, tutorials):
-		ls = self.lecture_students
+		ls = self.lecture_students.join(LectureStudent.student).order_by(User.last_name, User.first_name)
 		if tutorials:
 			ls = ls.filter(sqlalchemy.or_(*[LectureStudent.tutorial_id==tut.id for tut in tutorials]))
 		return ls
@@ -208,6 +208,17 @@ class Exam(Base):
 	def exercise_points(self):
 		session = Session.object_session(self)
 		return session.query(ExerciseStudent).filter(ExerciseStudent.exercise.has(Exercise.exam_id==self.id))
+	def getResults(self, students=None):
+		session = Session.object_session(self)
+		pointsQuery = self.exercise_points
+		if students:
+			pointsQuery = pointsQuery.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students]))
+		pointsStmt = pointsQuery.subquery()
+		examPoints = session.query(\
+				pointsStmt.c.student.label('student_id'),
+				func.sum(pointsStmt.c.points).label('points'),
+			).group_by(pointsStmt.c.student)
+		return examPoints
 	def getStatistics(self, tutorials=None, students=None):
 		session = Session.object_session(self)
 		if not students:
@@ -361,7 +372,7 @@ class Grading(Base):
 class StudentGrade(Base):
 	__tablename__ = 'student_grades'
 	grading_id = Column('grading', Integer, ForeignKey(Grading.id), nullable=False, primary_key=True)
-	grading = relationship(Grading, backref='student_grades')
+	grading = relationship(Grading, backref=backref('student_grades', lazy='dynamic'))
 	student_id = Column('student', Integer, ForeignKey(User.id), nullable=False, primary_key=True)
 	student = relationship(User, backref='student_grades')
 	grade = Column(Numeric(precision=2, scale=1), CheckConstraint('grade >= 1.0 AND grade <= 5.0'))
