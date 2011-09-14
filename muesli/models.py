@@ -356,7 +356,7 @@ class Grading(Base):
 	hispos_type = Column(Text)
 	hispos_date = Column(Text)
 	examiner_id = Column(Text)
-	exams = relationship(Exam, secondary=grading_exam_table, backref = "exams")
+	exams = relationship(Exam, secondary=grading_exam_table, backref = "gradings", order_by=Exam.id)
 
 class StudentGrade(Base):
 	__tablename__ = 'student_grades'
