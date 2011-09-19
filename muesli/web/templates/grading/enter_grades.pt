@@ -76,7 +76,6 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
     <th>Berechnete Note</th>
     <th>Note</th>
   </tr>
-
   <tr tal:repeat="ls lecture_students"
       tal:attributes="id 'row-%i' % ls.student_id">
       <td tal:condition="not tutorial_ids">
@@ -86,7 +85,7 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
         ${grades[ls.student_id]['exams'][exam.id]}
       </td>
     <td>${ls.student.name()}</td>
-    <td>TODO<!--<% calcgrades->{student->id} // ''%>--></td>
+    <td>${grades[ls.student_id]['calc']}</td>
      
     <td><input tal:attributes="class 'invalid' if grades[ls.student_id]['invalid'] else 'points';
              name 'grade-%i' % ls.student_id;

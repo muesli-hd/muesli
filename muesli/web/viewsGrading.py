@@ -21,6 +21,7 @@
 
 from muesli import models
 from muesli import utils
+from muesli.parser import Parser
 from muesli.web.context import *
 from muesli.web.forms import *
 
@@ -90,16 +91,24 @@ class EnterGrades(object):
 		self.grading_id = request.matchdict['grading_id']
 	def __call__(self):
 		grading = self.db.query(models.Grading).get(self.grading_id)
-		formula = self.request.GET.get('formula', grading.formula)
+		formula = self.request.GET.get('formula', None)
+		if formula:
+			grading.formula = formula
+			self.db.commit()
+		else:
+			formula = grading.formula
 		exam_id = self.request.GET.get('students', None)
-		lecture_students = grading.lecture.lecture_students_for_tutorials([]).options(sqlalchemy.orm.joinedload(models.LectureStudent.student))
+		lecture_students = grading.lecture.lecture_students_for_tutorials([]).options(sqlalchemy.orm.joinedload(models.LectureStudent.student)).all()
 		gradesQuery = grading.student_grades.filter(models.StudentGrade.student_id.in_([ls.student_id for ls in lecture_students]))
 		grades = DictOfObjects(lambda: {})
 		exam_ids = [e.id for e in grading.exams]
+		examvars = dict([['$%i' % i, e.id] for i,e in enumerate(grading.exams)])
+		varsForExam = dict([[examvars[var], var] for var in examvars ])
 		for ls in lecture_students:
 			grades[ls.student_id]['grade'] = ''
 			grades[ls.student_id]['invalid'] = None
 			grades[ls.student_id]['exams'] = dict([[i, ''] for i in exam_ids])
+			grades[ls.student_id]['calc'] = ''
 		for grade in gradesQuery:
 			grades[grade.student_id]['grade'] = grade
 		for ls in lecture_students:
@@ -128,9 +137,23 @@ class EnterGrades(object):
 			results = exam.getResults(students = lecture_students)
 			for result in results:
 				grades[result.student_id]['exams'][exam.id] = result.points
-		examvars = dict([['$%i' % i, e.id] for i,e in enumerate(grading.exams)])
-		varsForExam = dict([[examvars[var], var] for var in examvars ])
 		error_msgs = []
+		if formula:
+			parser = Parser()
+			try:
+				parser.parseString(formula)
+				for ls in lecture_students:
+				#print student
+					d = {}
+					for exam in grading.exams:
+						result = grades[ls.student_id]['exams'][exam.id]
+						if result == '':
+							result = None
+						d[varsForExam[exam.id]] = result
+					result = parser.calculate(d)
+					grades[ls.student_id]['calc'] = result if result != None else ''
+			except Exception, err:
+				error_msgs.append(str(err))
 		self.request.javascript.add('prototype.js')
 		return {'grading': grading,
 		        'error_msg': '\n'.join(error_msgs),
