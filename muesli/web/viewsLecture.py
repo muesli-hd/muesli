@@ -143,3 +143,16 @@ class RemoveTutor(object):
 		self.db.commit()
 		return HTTPFound(location=self.request.route_url('lecture_edit', lecture_id=lecture.id))
 
+@view_config(route_name='lecture_export_students_html', renderer='muesli.web:templates/lecture/export_students_html.pt', context=LectureContext, permission='edit')
+class ExportStudentsHtml(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.lecture_id = request.matchdict['lecture_id']
+	def __call__(self):
+		lecture = self.db.query(models.Lecture).get(self.lecture_id)
+		students = lecture.lecture_students_for_tutorials([])
+		if 'subject' in self.request.GET:
+			students = students.filter(models.LectureStudent.student.has(models.User.subject==self.request.GET['subject']))
+		return {'lecture': lecture,
+		        'lecture_students': students}

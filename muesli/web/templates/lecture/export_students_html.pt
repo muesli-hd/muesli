@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<table>
+
+<thead>
+  <tr>
+    <th>Name</th>
+    <th>Vorname</th>
+    <th>Übungsleiter</th>
+    <th>Matrikel</th>
+    <th>Geburtsort</th>
+    <th>Geburtstag</th>
+    <th>Studiengang</th>
+    <th>E-Mail</th>
+  </tr>
+</thead>
+
+<tbody>
+  <tr tal:repeat="ls lecture_students">
+    <td>${ls.student.last_name}</td>
+    <td>${ls.student.first_name}</td>
+    <td>${ls.tutorial.tutor.last_name if ls.tutorial.tutor else ''}</td>
+    <td>${ls.student.matrikel}</td>
+    <td>${ls.student.birth_place}</td>
+    <td>${ls.student.birth_date}</td>
+    <td>${ls.student.subject}</td>
+    <td><a tal:attributes="href 'mailto:'+ls.student.email">${ls.student.email}</a></td>
+  </tr>
+</tbody>
+
+</table>
+  </metal:main>
+</metal:main>
