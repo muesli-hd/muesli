@@ -25,6 +25,13 @@
         <div tal:condition="field.type=='text'" tal:omit-tag="">
           <input tal:attributes="name field.name; size str(field.size); value field.value"/>
         </div>
+        <div tal:condition="field.type=='textarea'" tal:omit-tag="">
+          <textarea tal:attributes="name field.name; cols str(field.cols); rows str(field.rows); value field.value"></textarea>
+        </div>
+        <div tal:condition="field.type=='file'" tal:omit-tag="">
+          <input type="file" tal:attributes="name field.name; size str(field.size); value field.value" />
+          <input tal:condition="field.growable" type="button" tal:attributes="onclick 'javascript:fb_grow('+field.name+')'" value="Weitere" />
+        </div>
         <span tal:condition="field.comment and field.name not in form.errors">${field.comment}</span>
       </td>
       <td><span tal:condition="field.name in form.errors" tal:content="form.errors[field.name]"></span></td>

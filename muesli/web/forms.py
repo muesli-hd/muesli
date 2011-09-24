@@ -44,7 +44,11 @@ def valueToBool(value):
 		return None
 
 class FormField(object):
-	def __init__(self, name, label="", type="text", options=None, value=None, size=40, comment=None, validator=None, required=False):
+	def __init__(self, name, label="", type="text", options=None,
+		value=None, size=40, comment=None,
+		validator=None, required=False,
+		cols=64,
+		rows=24):
 		self.name = name
 		self.label = label
 		self.type = type
@@ -54,6 +58,14 @@ class FormField(object):
 		self.comment = comment
 		self.validator = validator
 		self.required = required
+		self.cols = cols
+		self.rows = rows
+
+class FileField(FormField):
+	def __init__(self, name, growable=False, **kwargs):
+		kwargs['type'] = 'file'
+		FormField.__init__(self, name, **kwargs)
+		self.growable = growable
 
 class Form(object):
 	def __init__(self, formfields, send="Senden"):
