@@ -1,0 +1,21 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>E-Mail an alle Übungsleiter schreiben</h2>
+
+<p>
+Auf dieser Seite können Sie eine Nachricht an alle Übungsleiter dieser Vorlesung schreiben.
+Geben Sie hierzu in das Formular unten einen Betreff und die Nachricht ein und klicken dann auf "E-Mail senden".
+Der Betreuer der Vorlesung erhält ebenfalls eine Kopie der Mitteilung.
+</p>
+
+
+<form action="/lecture/email_tutors" tal:attributes="action request.route_path('lecture_email_tutors', lecture_id=lecture.id)" method="POST"
+  enctype="multipart/form-data">
+<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+</form>
+
+
+  </metal:main>
+</metal:main>

@@ -28,6 +28,9 @@ from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound
 from pyramid.url import route_url
+from pyramid_mailer import get_mailer
+from pyramid_mailer.message import Message, Attachment
+
 from sqlalchemy.orm import exc
 import sqlalchemy
 
@@ -156,3 +159,27 @@ class ExportStudentsHtml(object):
 			students = students.filter(models.LectureStudent.student.has(models.User.subject==self.request.GET['subject']))
 		return {'lecture': lecture,
 		        'lecture_students': students}
+
+@view_config(route_name='lecture_email_tutors', renderer='muesli.web:templates/lecture/email_tutors.pt', context=LectureContext, permission='edit')
+def emailTutors(request):
+	db = request.db
+	lecture = request.context.lecture
+	form = LectureEmailTutors()
+	if request.method == 'POST' and form.processPostData(request.POST):
+		tutors = lecture.tutors
+		mailer = get_mailer(request)
+		message = Message(subject=form['subject'],
+			sender=request.user.email,
+			recipients= [lecture.assistant.email],
+			# Due to a bug, bcc does not work in pyramid_mailer at the moment.
+			# Thus the email will be sent to the assistent only
+			bcc=[t.email for t in tutors],
+			body=form['body'])
+		if request.POST['attachments'] not in ['', None]:
+			a = Attachment(request.POST['attachments'].filename, data=request.POST['attachments'].file)
+			message.attach(a)
+		# As we are not using transactions,
+		# we send the mail immediately.
+		mailer.send_immediately(message)
+	return {'lecture': lecture,
+	        'form': form}

@@ -94,6 +94,7 @@ def main(global_config=None, **settings):
 		settings=settings,
 		)
 
+	config.include('pyramid_mailer')
 	config.add_static_view('static', 'muesli.web:static')
 
 	config.add_route('start', '/start')
@@ -120,7 +121,7 @@ def main(global_config=None, **settings):
 	config.add_route('lecture_add_tutor', '/lecture/add_tutor/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_do_allocation', '/lecture/do_allocation/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_email_students', '/lecture/email_students/{lecture_id}')
-	config.add_route('lecture_email_tutors', '/lecture/email_tutors/{lecture_id}')
+	config.add_route('lecture_email_tutors', '/lecture/email_tutors/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_view', '/lecture/view/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_view_removed_students', '/lecture/view_removed_students/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_set_preferences', '/lecture/set_preferences/{lecture_id}')

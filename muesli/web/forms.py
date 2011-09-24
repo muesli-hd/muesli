@@ -421,6 +421,23 @@ class LectureAddGrading(ObjectForm):
 			]
 		ObjectForm.__init__(self, None, formfields, send=u'Anlegen')
 
+class LectureEmailTutors(Form):
+	def __init__(self):
+		formfields = [
+			FormField('subject',
+			   label='Betreff', size=64,
+			   required=True),
+			FormField('body',
+			   label='Nachricht', cols=64, rows=24,
+			   type='textarea',
+			   required=True),
+			FileField('attachments',
+			   label=u'Anhänge', size=64,
+			   growable=False
+			   ),
+			]
+		Form.__init__(self, formfields, send=u'Senden')
+
 class GradingEdit(ObjectForm):
 	def __init__(self, request, grading):
 		formfields = [
