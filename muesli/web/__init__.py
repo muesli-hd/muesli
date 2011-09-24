@@ -68,13 +68,20 @@ def principals_for_user(user_id, request):
 
 
 def main(global_config=None, **settings):
+	engine = muesli.engine()
+	initializeSession(engine)
 	#settings.update({
 	#})
 
 	# XXX: ugly
 	import sqlalchemy as sa
 	beaker.ext.sqla.sa = sa
-	session_table = beaker.ext.sqla.make_cache_table(Base.metadata)
+	# Even more ugly, but otherwise the tests won't work
+	# as the metadata is shared between tests
+	if not 'beaker_cache' in Base.metadata.tables:
+		session_table = beaker.ext.sqla.make_cache_table(Base.metadata)
+	else:
+		session_table = Base.metadata.tables['beaker_cache']
 	session_table.create(bind=engine, checkfirst=True)
 	settings.update({
 		'beaker.session.type': 'ext:sqla',

@@ -20,5 +20,7 @@
 
 from sqlalchemy import create_engine
 
+databaseName = 'postgresql:///muesli'
+
 def engine():
-	return create_engine('postgresql:///muesli')
+	return create_engine(databaseName)

@@ -32,8 +32,14 @@ from muesli.utils import DictOfObjects
 
 Base = sqlalchemy.ext.declarative.declarative_base()
 
-engine = muesli.engine()
-Session = sessionmaker(bind=engine)
+print "test"
+
+Session = sessionmaker()
+
+def initializeSession(engine):
+	Session.configure(bind=engine)
+
+#Session = sessionmaker(bind=engine)
 
 lecture_tutors_table = Table('lecture_tutors', Base.metadata,
 	Column('lecture', Integer, ForeignKey('lectures.id'), primary_key=True),
