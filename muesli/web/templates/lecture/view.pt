@@ -95,5 +95,29 @@
 
   </div>
 
+  <div tal:condition="lecture.password and not request.user in lecture.tutors" tal:omit-tag="">
+  <h3>Als Übungsleiter anmelden</h3>
+
+  <p>
+  Um sich als Übungsleiter für diese Vorlesung anzumelden, geben Sie bitte das Passwort ein, das Ihnen vom Assistenten mitgeteilt wurde:
+  </p>
+
+  <form method="post" tal:attributes="action request.route_path('lecture_add_tutor', lecture_id=lecture.id)">
+  <table>
+    <tr>
+      <td>Passwort:</td>
+      <td><input type="text" size="30" name="password"/></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><input type="submit" value="Anmelden"/></td>
+    </tr>
+  </table>
+  </form>
+
+  </div>
+
+
+
   </metal:main>
 </metal:main>
