@@ -146,8 +146,10 @@ class Lecture(Base):
 	def students(self):
 		session = Session.object_session(self)
 		return session.query(User).filter(User.lecture_students.any(LectureStudent.lecture_id==self.id))
-	def lecture_students_for_tutorials(self, tutorials):
-		ls = self.lecture_students.join(LectureStudent.student).order_by(User.last_name, User.first_name)
+	def lecture_students_for_tutorials(self, tutorials, order=True):
+		ls = self.lecture_students
+		if order:
+			ls = ls.join(LectureStudent.student).order_by(User.last_name, User.first_name)
 		if tutorials:
 			ls = ls.filter(sqlalchemy.or_(*[LectureStudent.tutorial_id==tut.id for tut in tutorials]))
 		return ls

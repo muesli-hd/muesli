@@ -45,8 +45,10 @@ class LectureContext(object):
 
 class TutorialContext(object):
 	def __init__(self, request):
-		tutorial_ids = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', ''))
-		self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(tutorial_ids.split(',')))
+		self.tutorial_ids = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', ''))
+		if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
+				self.tutorial_ids = []
+		self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(self.tutorial_ids)).all()
 		if None in self.tutorials:
 			raise HTTPNotFound(detail='Tutorial not found')
 		self.__acl__ = [
@@ -60,6 +62,11 @@ class ExamContext(object):
 		self.exam = request.db.query(Exam).get(exam_id)
 		if self.exam is None:
 			raise HTTPNotFound(detail='Exam not found')
+		if 'tutorial_ids' in request.matchdict:
+			self.tutorial_ids = request.matchdict['tutorial_ids'].split(',')
+			if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
+				self.tutorial_ids = []
+			self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(self.tutorial_ids)).all()
 		self.__acl__ = [
 			(Allow, Authenticated, 'view_points'),
 			(Allow, 'user:{0}'.format(self.exam.lecture.assistant_id), ('view_points', 'edit', 'enter_points')),

@@ -4,7 +4,7 @@
 
 <script><![CDATA[
 set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture_view", lecture_id=exam.lecture.id)}']
-                ${",['Übungsgruppe','"+request.route_path('tutorial_view', tutorial_ids=tutorial_ids)+"']" if tutorial_ids else ''}
+                ${",['Uebungsgruppe','"+request.route_path('tutorial_view', tutorial_ids=tutorial_ids)+"']" if tutorial_ids else ''}
      ]);
 ]]>
 </script>

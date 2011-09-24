@@ -40,9 +40,8 @@ class Edit(object):
 	def __init__(self, request):
 		self.request = request
 		self.db = self.request.db
-		self.exam_id = request.matchdict['exam_id']
 	def __call__(self):
-		exam = self.db.query(models.Exam).get(self.exam_id)
+		exam = self.request.context.exam
 		form = LectureEditExam(self.request, exam)
 		if self.request.method == 'POST' and form.processPostData(self.request.POST):
 			form.saveValues()
@@ -66,10 +65,9 @@ class AddOrEditExercise(object):
 	def __init__(self, request):
 		self.request = request
 		self.db = self.request.db
-		self.exam_id = request.matchdict['exam_id']
 		self.exercise_id = request.matchdict.get('exercise_id', None)
 	def __call__(self):
-		exam = self.db.query(models.Exam).get(self.exam_id)
+		exam = self.request.context.exam
 		if self.exercise_id:
 			exercise = self.db.query(models.Exercise).get(self.exercise_id)
 		else: exercise = None
@@ -93,15 +91,12 @@ class EnterPoints(object):
 	def __init__(self, request):
 		self.request = request
 		self.db = self.request.db
-		self.exam_id = request.matchdict['exam_id']
-		self.tutorial_ids = request.matchdict['tutorial_ids'].split(',')
-		if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
-			self.tutorial_ids = []
+		self.tutorial_ids = self.request.context.tutorial_ids
 	def __call__(self):
 		error_msgs = []
-		exam = self.db.query(models.Exam).get(self.exam_id)
-		tutorials = [self.db.query(models.Tutorial).get(tutorial_id) for tutorial_id in self.tutorial_ids]
-		students = exam.lecture.lecture_students_for_tutorials(tutorials).join(models.User).order_by(models.User.last_name, models.User.first_name).options(sqlalchemy.orm.joinedload(LectureStudent.student))
+		exam = self.request.context.exam
+		tutorials = self.request.context.tutorials
+		students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))
 		pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
 		points = DictOfObjects(lambda: {})
 		#for s in students:
@@ -109,8 +104,7 @@ class EnterPoints(object):
 		#		points[s.student_id][e.id] = None
 		for point in pointsQuery:
 			points[point.student_id][point.exercise_id] = point
-		if self.request.method == 'POST':
-			for student in students:
+		for student in students:
 				for e in exam.exercises:
 					if not e.id in points[student.student_id]:
 						exerciseStudent = models.ExerciseStudent()
@@ -118,6 +112,9 @@ class EnterPoints(object):
 						exerciseStudent.exercise = e
 						points[student.student_id][e.id] = exerciseStudent
 						self.db.add(exerciseStudent)
+		if self.request.method == 'POST':
+			for student in students:
+				for e in exam.exercises:
 					param = 'points-%u-%u' % (student.student_id, e.id)
 					if param in self.request.POST:
 						value = self.request.POST[param]
@@ -129,8 +126,8 @@ class EnterPoints(object):
 								value = float(value)
 								points[student.student_id][e.id].points = value
 							except:
-								error_msgs.append('Could not convert "%s" (%s, Exercise %i)'%(value, student.student.name(), e.nr))
-			self.db.commit()
+								error_msgs.append(u'Could not convert "%s" (%s, Exercise %i)'%(value, student.student.name(), e.nr))
+		self.db.commit()
 		for student in points:
 			points[student]['total'] = sum([v.points for v in points[student].values() if v.points])
 		# TODO: Die Statistik scheint recht langsm zu sein. Evt lohnt es sich,
@@ -141,20 +138,17 @@ class EnterPoints(object):
 		        'students': students,
 		        'points': points,
 		        'statistics': statistics,
-		        'error_msg': '\n'.join(error_msgs)}
+		        'error_msg': u'\n'.join(error_msgs)}
 
 @view_config(route_name='exam_export', renderer='muesli.web:templates/exam/export.pt', context=ExamContext, permission='enter_points')
 class Export(object):
 	def __init__(self, request):
 		self.request = request
 		self.db = self.request.db
-		self.exam_id = request.matchdict['exam_id']
-		self.tutorial_ids = request.matchdict['tutorial_ids'].split(',')
-		if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
-			self.tutorial_ids = []
+		self.tutorial_ids = request.context.tutorial_ids
 	def __call__(self):
-		exam = self.db.query(models.Exam).get(self.exam_id)
-		tutorials = [self.db.query(models.Tutorial).get(tutorial_id) for tutorial_id in self.tutorial_ids]
+		exam = self.request.context.exam
+		tutorials = self.request.context.tutorials
 		students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))
 		pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
 		points = DictOfObjects(lambda: {})
