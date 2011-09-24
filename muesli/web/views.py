@@ -25,7 +25,7 @@ from muesli.web.context import *
 from pyramid import security
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPInternalServerError
+from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPInternalServerError, HTTPFound
 from pyramid.url import route_url
 from sqlalchemy.orm import exc
 from hashlib import sha1
@@ -37,6 +37,8 @@ import traceback
 
 @view_config(route_name='start', renderer='muesli.web:templates/start.pt')
 def start(request):
+	if not request.user:
+		return HTTPFound(location = request.route_url('user_login'))
 	tutorials_as_tutor = request.user.tutorials_as_tutor
 	tutorials = request.user.tutorials
 	lectures_as_assistant = request.user.lectures_as_assistant
