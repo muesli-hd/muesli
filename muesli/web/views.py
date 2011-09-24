@@ -25,13 +25,14 @@ from muesli.web.context import *
 from pyramid import security
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest
+from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPInternalServerError
 from pyramid.url import route_url
 from sqlalchemy.orm import exc
 from hashlib import sha1
 
 import re
 import os
+import datetime
 
 @view_config(route_name='start', renderer='muesli.web:templates/start.pt')
 def start(request):
@@ -52,3 +53,10 @@ def start(request):
 @view_config(route_name='admin', renderer='muesli.web:templates/admin.pt')
 def admin(request):
 	return {}
+
+@view_config(context = Exception, renderer='muesli.web:templates/error.pt')
+def internalServerError(request):
+	now = datetime.datetime.now()
+	email = request.user.email if request.user else '<nobody>'
+	return {'now': now,
+	        'email': email}
