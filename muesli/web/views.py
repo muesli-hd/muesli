@@ -33,6 +33,7 @@ from hashlib import sha1
 import re
 import os
 import datetime
+import traceback
 
 @view_config(route_name='start', renderer='muesli.web:templates/start.pt')
 def start(request):
@@ -55,8 +56,9 @@ def admin(request):
 	return {}
 
 @view_config(context = Exception, renderer='muesli.web:templates/error.pt')
-def internalServerError(request):
+def internalServerError(exc, request):
 	now = datetime.datetime.now()
+	traceback.print_exc()
 	email = request.user.email if request.user else '<nobody>'
 	return {'now': now,
 	        'email': email}
