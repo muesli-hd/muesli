@@ -1,0 +1,20 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>E-Mail an alle Studenten schreiben</h2>
+
+<p>
+Auf dieser Seite können Sie eine Nachricht an alle Studenten, die für Übungsgruppen eingeteilt sind, schicken.
+Geben Sie hierzu in das Formular unten einen Betreff und die Nachricht ein und klicken dann auf "E-Mail senden".
+</p>
+
+
+<form action="/lecture/email_students" tal:attributes="action request.route_path('lecture_email_students', lecture_id=lecture.id)" method="POST"
+  enctype="multipart/form-data">
+<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+</form>
+
+
+  </metal:main>
+</metal:main>

@@ -181,5 +181,31 @@ def emailTutors(request):
 		# As we are not using transactions,
 		# we send the mail immediately.
 		mailer.send_immediately(message)
+		request.session.flash('A Mail has been send to all tutors of this lecture', queue='messages')
+	return {'lecture': lecture,
+	        'form': form}
+
+@view_config(route_name='lecture_email_students', renderer='muesli.web:templates/lecture/email_students.pt', context=LectureContext, permission='edit')
+def emailStudents(request):
+	db = request.db
+	lecture = request.context.lecture
+	form = LectureEmailTutors()
+	if request.method == 'POST' and form.processPostData(request.POST):
+		students = lecture.students
+		mailer = get_mailer(request)
+		message = Message(subject=form['subject'],
+			sender=request.user.email,
+			recipients= [lecture.assistant.email],
+			# Due to a bug, bcc does not work in pyramid_mailer at the moment.
+			# Thus the email will be sent to the assistent only
+			bcc=[s.email for s in students],
+			body=form['body'])
+		if request.POST['attachments'] not in ['', None]:
+			a = Attachment(request.POST['attachments'].filename, data=request.POST['attachments'].file)
+			message.attach(a)
+		# As we are not using transactions,
+		# we send the mail immediately.
+		mailer.send_immediately(message)
+		request.session.flash('A Mail has been send to all tutors of this lecture', queue='messages')
 	return {'lecture': lecture,
 	        'form': form}
