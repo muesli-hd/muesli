@@ -46,7 +46,7 @@ class LectureContext(object):
 class TutorialContext(object):
 	def __init__(self, request):
 		tutorial_ids = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', ''))
-		self.tutorials = [request.db.query(Tutorial).get(tutorial_id) for tutorial_id in tutorial_ids.split(',')]
+		self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(tutorial_ids.split(',')))
 		if None in self.tutorials:
 			raise HTTPNotFound(detail='Tutorial not found')
 		self.__acl__ = [
