@@ -41,9 +41,8 @@ class Edit(object):
 	def __init__(self, request):
 		self.request = request
 		self.db = self.request.db
-		self.grading_id = request.matchdict['grading_id']
 	def __call__(self):
-		grading = self.db.query(models.Grading).get(self.grading_id)
+		grading = self.request.context.grading
 		form = GradingEdit(self.request, grading)
 		if self.request.method == 'POST' and form.processPostData(self.request.POST):
 			form.saveValues()
@@ -58,9 +57,8 @@ class AssociateExam(object):
 	def __init__(self, request):
 		self.request = request
 		self.db = self.request.db
-		self.grading_id = request.matchdict['grading_id']
 	def __call__(self):
-		grading = self.db.query(models.Grading).get(self.grading_id)
+		grading = self.request.context.grading
 		exam = self.db.query(models.Exam).get(self.request.POST['new_exam'])
 		if grading.lecture_id == exam.lecture_id:
 			if not exam in grading.exams:
@@ -73,10 +71,9 @@ class DeleteExamAssociation(object):
 	def __init__(self, request):
 		self.request = request
 		self.db = self.request.db
-		self.grading_id = request.matchdict['grading_id']
 		self.exam_id = request.matchdict['exam_id']
 	def __call__(self):
-		grading = self.db.query(models.Grading).get(self.grading_id)
+		grading = self.request.context.grading
 		exam = self.db.query(models.Exam).get(self.exam_id)
 		if exam in grading.exams:
 			grading.exams.remove(exam)
@@ -88,9 +85,8 @@ class EnterGrades(object):
 	def __init__(self, request):
 		self.request = request
 		self.db = self.request.db
-		self.grading_id = request.matchdict['grading_id']
 	def __call__(self):
-		grading = self.db.query(models.Grading).get(self.grading_id)
+		grading = self.request.context.grading
 		formula = self.request.GET.get('formula', None)
 		if formula:
 			grading.formula = formula
