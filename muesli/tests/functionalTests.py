@@ -65,7 +65,7 @@ class BaseTests(unittest.TestCase):
 		self.session = muesli.models.Session()
 		for table in reversed(muesli.models.Base.metadata.sorted_tables):
 			self.session.execute(table.delete())
-			self.session.commit()
+		self.session.commit()
 
 		self.populate()
 
