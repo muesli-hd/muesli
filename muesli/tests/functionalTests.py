@@ -19,6 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from hashlib import sha1
+
 import unittest
 import muesli.web
 
@@ -62,28 +64,28 @@ class BaseTests(unittest.TestCase):
 	
 	def populate(self):
 		pass
-	#def __init__(self, *args, **kwargs):
-		#unittest.TestCase.__init__(self, *args, **kwargs)
-		#urls = ['/user/login',
-			#'/lecture/list']
-		#for url in urls:
-			#name = url.replace('/', '_')
-			#setattr(self, name, lambda: self.testapp.get(url, status=200))
+
+	def test_start(self):
+		res = self.testapp.get('/start', status=302)
+
+	def test_admin(self):
+		res = self.testapp.get('/admin', status=403)
 
 	def test_user_login(self):
 		res = self.testapp.get('/user/login', status=200)
 	
+	def test_user_logout(self):
+		res = self.testapp.get('/user/logout', status=302)
+
+	def test_user_list(self):
+		res = self.testapp.get('/user/list', status=403)
+
 	def test_lecture_view(self):
 		res = self.testapp.get('/lecture/list', status=200)
 
-	#def test_start(self):
-		#res = self.testapp.get('/start', status=200)
-
-
-	#def test_zzz(self):
-		##session = muesli.models.Session()
-		###print "Anzahl lectures", session.query(muesli.models.Lecture).count()
-		#res = self.testapp.get('/lecture/list', status=200)
+def setUserPassword(user, password):
+	user.realpassword = password
+	user.password = sha1(password).hexdigest()
 
 class UnloggedTests(BaseTests):
 	def populate(self):
@@ -99,8 +101,49 @@ class UnloggedTests(BaseTests):
 		self.lecture.assistant = self.assistant
 		self.session.add(self.lecture)
 		self.session.commit()
+		self.user = muesli.models.User()
+		self.user.first_name = u'Stefan'
+		self.user.last_name = u'Student'
+		self.user.email = 'user@muesli.org'
+		setUserPassword(self.user, 'userpassword')
+		self.session.add(self.user)
+		self.session.commit()
+		self.admin = muesli.models.User()
+		self.admin.first_name = u'Anton'
+		self.admin.last_name = u'Admin'
+		self.admin.email = 'admin@muesli.org'
+		self.admin.is_admin = 1
+		setUserPassword(self.admin, 'adminpassword')
+		self.session.add(self.admin)
+		self.session.commit()
 	
 	def test_lecture_view(self):
 		res = self.testapp.get('/lecture/list', status=200)
 		self.assertTrue('Irgendwas' in res.body)
 		self.assertTrue('Nachname' in res.body)
+
+class UserLoggedInTests(UnloggedTests):
+	def setUp(self):
+		UnloggedTests.setUp(self)
+		self.setUser(self.user)
+	def setUser(self, user):
+		self.testapp.post('/user/login',{'email': user.email, 'password': user.realpassword}, status=302)
+	def tearDown(self):
+		#pyramid.security.authenticated_userid = pyramid.security.authenticated_userid_old
+		UnloggedTests.tearDown(self)
+
+	def test_start(self):
+		# Now we are logged in, thus we should
+		# get 200 instead of 302
+		res = self.testapp.get('/start', status=200)
+
+class AdminLoggedInTests(UserLoggedInTests):
+	def setUp(self):
+		UserLoggedInTests.setUp(self)
+		self.setUser(self.admin)
+
+	def test_admin(self):
+		res = self.testapp.get('/admin', status=200)
+
+	def test_user_list(self):
+		res = self.testapp.get('/user/list', status=200)
