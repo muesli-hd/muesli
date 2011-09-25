@@ -23,6 +23,7 @@ from hashlib import sha1
 
 import unittest
 import muesli.web
+import muesli.types
 
 class OrigDatabaseTests(unittest.TestCase):
 	def setUp(self):
@@ -95,6 +96,14 @@ class PopulatedTests(BaseTests):
 		self.session.add(self.tutor)
 		self.session.commit()
 
+		self.tutor2 = muesli.models.User()
+		self.tutor2.first_name = u'Thor2sten'
+		self.tutor2.last_name = u'Tu2tor'
+		self.tutor2.email = 'tutor2@muesli.org'
+		setUserPassword(self.tutor2, 'tutor2password')
+		self.session.add(self.tutor2)
+		self.session.commit()
+
 		self.assistant = muesli.models.User()
 		self.assistant.first_name = u'Armin'
 		self.assistant.last_name = u'Assistent'
@@ -126,13 +135,22 @@ class PopulatedTests(BaseTests):
 		self.lecture.name = "Irgendwas"
 		self.lecture.assistant = self.assistant
 		self.session.add(self.lecture)
-		self.lecture.tutors.append(self.tutor)
+		self.lecture.tutors.append(self.tutor2)
 		self.session.commit()
 
 		self.lecture2 = muesli.models.Lecture()
 		self.lecture2.name = "Irgendwas2"
 		self.lecture2.assistant = self.assistant2
 		self.session.add(self.lecture2)
+		self.session.commit()
+		
+		self.tutorial = muesli.models.Tutorial()
+		self.tutorial.lecture = self.lecture
+		self.tutorial.tutor = self.tutor
+		self.tutorial.place = 'In einer weit entfernten Galaxis'
+		self.tutorial.max_students = 42
+		self.tutorial.time = muesli.types.TutorialTime('0 12:00')
+		self.session.add(self.tutorial)
 		self.session.commit()
 
 	def setUser(self, user):
