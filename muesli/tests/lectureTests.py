@@ -112,6 +112,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
 	def test_lecture_edit(self):
 		res = self.testapp.get('/lecture/edit/%s' % self.lecture.id, status=200)
+		self.testForm(res, 'name', 'Irgendwie anders')
 
 	def test_lecture2_edit(self):
 		res = self.testapp.get('/lecture/edit/%s' % self.lecture2.id, status=403)
@@ -125,10 +126,8 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 	def test_lecture_remove_tutor(self):
 		self.assertTrue(self.tutor2 in self.lecture.tutors)
 		res = self.testapp.get('/lecture/remove_tutor/%s/%s' % (self.lecture.id,self.tutor2.id), status=302)
-		# Does not work...why?
-		#self.assertTrue(self.tutor not in self.lecture.tutors)
-		res = self.testapp.get('/lecture/edit/%s' % (self.lecture.id), status=200)
-		self.assertTrue(self.tutor2.first_name.encode(res.charset) not in res.body)
+		self.session.expire_all()
+		self.assertTrue(self.tutor2 not in self.lecture.tutors)
 
 	def test_lecture_export_students_html(self):
 		res = self.testapp.get('/lecture/export_students_html/%s' % self.lecture.id, status=200)

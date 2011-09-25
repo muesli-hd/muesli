@@ -73,14 +73,21 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 		res = self.testapp.get('/grading/edit/%s' % self.grading.id, status=200)
 
 	def test_grading_associate_exam(self):
+		self.assertTrue(self.exam2 not in self.grading.exams)
 		res = self.testapp.post('/grading/associate_exam/%s' % self.grading.id, {'new_exam': self.exam2.id}, status=302)
-		#self.assertTrue(self.exam2.name.encode(res.charset) in res.body)
+		self.session.expire_all()
+		self.assertTrue(self.exam2 in self.grading.exams)
 
 	def test_grading_delete_exam_association(self):
+		self.assertTrue(self.exam in self.grading.exams)
 		res = self.testapp.get('/grading/delete_exam_association/%s/%s' % (self.grading.id, self.exam.id), status=302)
+		self.session.expire_all()
+		self.assertTrue(self.exam not in self.grading.exams)
 
 	def test_grading_enter_grades(self):
 		res = self.testapp.get('/grading/enter_grades/%s' % self.grading.id, status=200)
+		# Caution: Need format 'x.y', otherwise test will fail
+		self.testForm(res, 'grade-%i' % self.user.id, '2.0', formindex=2)
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):
