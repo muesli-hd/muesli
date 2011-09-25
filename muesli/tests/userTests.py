@@ -78,7 +78,7 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 
 	def test_user_edit(self):
 		res = self.testapp.get('/user/edit/%s' % self.user.id, status=200)
-		self.testForm(res, 'first_name', 'Neuer Vorname')
+		self.assertForm(res, 'first_name', 'Neuer Vorname')
 		res = self.testapp.get('/user/edit/%s' % self.tutor.id, status=200)
 		res = self.testapp.get('/user/edit/%s' % self.assistant.id, status=200)
 		res = self.testapp.get('/user/edit/%s' % self.admin.id, status=200)

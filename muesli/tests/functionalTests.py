@@ -83,7 +83,7 @@ class BaseTests(unittest.TestCase):
 	def assertResContainsNot(self, res, content):
 		self.assertTrue(content.encode(res.charset) not in res.body)
 
-	def testForm(self, res, name, newvalue, formindex=None):
+	def assertForm(self, res, name, newvalue, formindex=None):
 		def getForm(res):
 			if formindex != None:
 				return res.forms[formindex]

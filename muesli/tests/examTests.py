@@ -82,16 +82,16 @@ class TutorLoggedInTests(UserLoggedInTests):
 
 	def test_exam_enter_points(self):
 		res = self.testapp.get('/exam/enter_points/%s/' % self.exam.id, status=200)
-		self.testForm(res, 'points-%s-%s' % (self.user.id, self.exercise.id), '1.5', formindex=0)
-		self.testForm(res, 'points-%s-%s' % (self.user2.id, self.exercise.id), '3.5', formindex=0)
+		self.assertForm(res, 'points-%s-%s' % (self.user.id, self.exercise.id), '1.5', formindex=0)
+		self.assertForm(res, 'points-%s-%s' % (self.user2.id, self.exercise.id), '3.5', formindex=0)
 
 
 	def test_exam_enter_points_tuts(self):
 		res = self.testapp.get('/exam/enter_points/%s/%s,%s' % (self.exam.id, self.tutorial.id, self.tutorial2.id), status=200)
-		self.testForm(res, 'points-%s-%s' % (self.user.id, self.exercise.id), '1.5', formindex=0)
-		self.testForm(res, 'points-%s-%s' % (self.user2.id, self.exercise.id), '3.5', formindex=0)
+		self.assertForm(res, 'points-%s-%s' % (self.user.id, self.exercise.id), '1.5', formindex=0)
+		self.assertForm(res, 'points-%s-%s' % (self.user2.id, self.exercise.id), '3.5', formindex=0)
 		res = self.testapp.get('/exam/enter_points/%s/%s' % (self.exam.id, self.tutorial.id), status=200)
-		self.testForm(res, 'points-%s-%s' % (self.user.id, self.exercise.id), '2.5', formindex=0)
+		self.assertForm(res, 'points-%s-%s' % (self.user.id, self.exercise.id), '2.5', formindex=0)
 		self.assertResContainsNot(res, 'points-%s-%s' % (self.user2.id, self.exercise.id))
 
 	def test_exam_export(self):
@@ -108,7 +108,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
 	def test_exam_edit(self):
 		res = self.testapp.get('/exam/edit/%s' % self.exam.id, status=200)
-		self.testForm(res, 'name', 'Neuer Name')
+		self.assertForm(res, 'name', 'Neuer Name')
 
 	def test_exam_add_exercise(self):
 		self.assertTrue(len(self.exam.exercises)==1)
@@ -122,7 +122,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
 	def test_exam_edit_exercise(self):
 		res = self.testapp.get('/exam/add_or_edit_exercise/%s/%s' % (self.exam.id, self.exercise.id), status=200)
-		self.testForm(res, 'maxpoints', '5')
+		self.assertForm(res, 'maxpoints', '5')
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):

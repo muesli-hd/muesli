@@ -87,7 +87,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 	def test_grading_enter_grades(self):
 		res = self.testapp.get('/grading/enter_grades/%s' % self.grading.id, status=200)
 		# Caution: Need format 'x.y', otherwise test will fail
-		self.testForm(res, 'grade-%i' % self.user.id, '2.0', formindex=2)
+		self.assertForm(res, 'grade-%i' % self.user.id, '2.0', formindex=2)
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):
