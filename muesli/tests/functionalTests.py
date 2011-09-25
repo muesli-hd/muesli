@@ -61,7 +61,7 @@ class BaseTests(unittest.TestCase):
 
 	def tearDown(self):
 		muesli.engine = muesli.old_engine
-	
+
 	def populate(self):
 		pass
 
@@ -89,18 +89,6 @@ def setUserPassword(user, password):
 
 class UnloggedTests(BaseTests):
 	def populate(self):
-		self.assistant = muesli.models.User()
-		self.assistant.first_name = u'Vorname'
-		self.assistant.last_name = u'Nachname'
-		self.assistant.email = 'assistant@muesli.org'
-		self.assistant.is_assistant=True
-		self.session.add(self.assistant)
-		self.session.commit()
-		self.lecture = muesli.models.Lecture()
-		self.lecture.name = "Irgendwas"
-		self.lecture.assistant = self.assistant
-		self.session.add(self.lecture)
-		self.session.commit()
 		self.user = muesli.models.User()
 		self.user.first_name = u'Stefan'
 		self.user.last_name = u'Student'
@@ -108,6 +96,24 @@ class UnloggedTests(BaseTests):
 		setUserPassword(self.user, 'userpassword')
 		self.session.add(self.user)
 		self.session.commit()
+
+		self.tutor = muesli.models.User()
+		self.tutor.first_name = u'Thorsten'
+		self.tutor.last_name = u'Tutor'
+		self.tutor.email = 'tutor@muesli.org'
+		setUserPassword(self.tutor, 'tutorpassword')
+		self.session.add(self.tutor)
+		self.session.commit()
+
+		self.assistant = muesli.models.User()
+		self.assistant.first_name = u'Armin'
+		self.assistant.last_name = u'Assistent'
+		self.assistant.email = 'assistant@muesli.org'
+		setUserPassword(self.assistant, 'assistantpassword')
+		self.assistant.is_assistant=True
+		self.session.add(self.assistant)
+		self.session.commit()
+
 		self.admin = muesli.models.User()
 		self.admin.first_name = u'Anton'
 		self.admin.last_name = u'Admin'
@@ -116,11 +122,17 @@ class UnloggedTests(BaseTests):
 		setUserPassword(self.admin, 'adminpassword')
 		self.session.add(self.admin)
 		self.session.commit()
+
+		self.lecture = muesli.models.Lecture()
+		self.lecture.name = "Irgendwas"
+		self.lecture.assistant = self.assistant
+		self.session.add(self.lecture)
+		self.session.commit()
 	
 	def test_lecture_view(self):
 		res = self.testapp.get('/lecture/list', status=200)
 		self.assertTrue('Irgendwas' in res.body)
-		self.assertTrue('Nachname' in res.body)
+		self.assertTrue('Assistent' in res.body)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -129,7 +141,6 @@ class UserLoggedInTests(UnloggedTests):
 	def setUser(self, user):
 		self.testapp.post('/user/login',{'email': user.email, 'password': user.realpassword}, status=302)
 	def tearDown(self):
-		#pyramid.security.authenticated_userid = pyramid.security.authenticated_userid_old
 		UnloggedTests.tearDown(self)
 
 	def test_start(self):
@@ -137,9 +148,19 @@ class UserLoggedInTests(UnloggedTests):
 		# get 200 instead of 302
 		res = self.testapp.get('/start', status=200)
 
-class AdminLoggedInTests(UserLoggedInTests):
+class TutorLoggedInTests(UserLoggedInTests):
 	def setUp(self):
 		UserLoggedInTests.setUp(self)
+		self.setUser(self.tutor)
+
+class AssistantLoggedInTests(TutorLoggedInTests):
+	def setUp(self):
+		TutorLoggedInTests.setUp(self)
+		self.setUser(self.assistant)
+
+class AdminLoggedInTests(AssistantLoggedInTests):
+	def setUp(self):
+		AssistantLoggedInTests.setUp(self)
 		self.setUser(self.admin)
 
 	def test_admin(self):
