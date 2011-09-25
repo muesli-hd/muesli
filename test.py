@@ -1,16 +1,17 @@
 import unittest
 import sys
 
-from muesli.tests import functionalTests
-
 loader = unittest.TestLoader()
 
 if len(sys.argv) > 1:
 	loader.testMethodPrefix = sys.argv[1]
 
-suites = [loader.loadTestsFromModule(functionalTests),
-	#unittest.TestLoader().loadTestsFromTestCase(functionalTests.OrigDatabaseTests),
-	#unittest.TestLoader().loadTestsFromTestCase(functionalTests.BaseTests),
+names = ['muesli.tests.functionalTests',
+	     'muesli.tests.rootTests',
+	     'muesli.tests.userTests',
+	     'muesli.tests.lectureTests']
+
+suites = [loader.loadTestsFromNames(names),
 	]
 
 for suite in suites:

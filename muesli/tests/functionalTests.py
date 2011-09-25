@@ -65,40 +65,11 @@ class BaseTests(unittest.TestCase):
 	def populate(self):
 		pass
 
-	def test_start(self):
-		res = self.testapp.get('/start', status=302)
-
-	def test_admin(self):
-		res = self.testapp.get('/admin', status=403)
-
-	def test_user_login(self):
-		res = self.testapp.get('/user/login', status=200)
-	
-	def test_user_logout(self):
-		res = self.testapp.get('/user/logout', status=302)
-
-	def test_user_list(self):
-		res = self.testapp.get('/user/list', status=403)
-
-	def test_user_edit(self):
-		res = self.testapp.get('/user/edit/%s' % 1234, status=404)
-
-	def test_lecture_list(self):
-		res = self.testapp.get('/lecture/list', status=200)
-
-	def test_lecture_view(self):
-		res = self.testapp.get('/lecture/view/%s' % 12456, status=404)
-
-	def test_lecture_edit(self):
-		res = self.testapp.get('/lecture/edit/%s' % 123456, status=404)
-
-
-
 def setUserPassword(user, password):
 	user.realpassword = password
 	user.password = sha1(password).hexdigest()
 
-class UnloggedTests(BaseTests):
+class PopulatedTests(BaseTests):
 	def populate(self):
 		self.user = muesli.models.User()
 		self.user.first_name = u'Stefan'
@@ -164,84 +135,36 @@ class UnloggedTests(BaseTests):
 		self.session.add(self.lecture2)
 		self.session.commit()
 
-	def test_user_edit(self):
-		res = self.testapp.get('/user/edit/%s' % self.user.id, status=403)
-
-	def test_lecture_view(self):
-		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=403)
-
-	def test_lecture_view(self):
-		res = self.testapp.get('/lecture/list', status=200)
-		self.assertTrue('Irgendwas' in res.body)
-		self.assertTrue('Assistent' in res.body)
-
-	def test_lecture_view(self):
-		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=403)
-
-	def test_lecture_edit(self):
-		res = self.testapp.get('/lecture/edit/%s' % self.lecture.id, status=403)
-
-	def test_lecture_edit(self):
-		res = self.testapp.get('/lecture/edit/%s' % self.lecture.id, status=403)
-
-class UserLoggedInTests(UnloggedTests):
-	def setUp(self):
-		UnloggedTests.setUp(self)
-		self.setUser(self.user)
 	def setUser(self, user):
 		self.testapp.post('/user/login',{'email': user.email, 'password': user.realpassword}, status=302)
-	def tearDown(self):
-		UnloggedTests.tearDown(self)
 
-	def test_start(self):
-		# Now we are logged in, thus we should
-		# get 200 instead of 302
-		res = self.testapp.get('/start', status=200)
 
-	def test_user_edit(self):
-		res = self.testapp.get('/user/edit/%s' % self.user.id, status=200)
 
-	def test_user2_edit(self):
-		res = self.testapp.get('/user/edit/%s' % self.user2.id, status=403)
 
-	def test_lecture_view(self):
-		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=200)
+class UserLoggedInTests(PopulatedTests):
+	def setUp(self):
+		PopulatedTests.setUp(self)
+		self.setUser(self.user)
+
 
 class TutorLoggedInTests(UserLoggedInTests):
 	def setUp(self):
 		UserLoggedInTests.setUp(self)
 		self.setUser(self.tutor)
 
-	def test_user_edit(self):
-		res = self.testapp.get('/user/edit/%s' % self.user.id, status=403)
 
-	def test_user2_edit(self):
-		pass
 
 class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
 		TutorLoggedInTests.setUp(self)
 		self.setUser(self.assistant)
 
-	def test_lecture_edit(self):
-		res = self.testapp.get('/lecture/edit/%s' % self.lecture.id, status=200)
 
-	def test_lecture2_edit(self):
-		res = self.testapp.get('/lecture/edit/%s' % self.lecture2.id, status=403)
+
 
 class AdminLoggedInTests(AssistantLoggedInTests):
 	def setUp(self):
 		AssistantLoggedInTests.setUp(self)
 		self.setUser(self.admin)
 
-	def test_user_edit(self):
-		res = self.testapp.get('/user/edit/%s' % self.user.id, status=200)
 
-	def test_admin(self):
-		res = self.testapp.get('/admin', status=200)
-
-	def test_user_list(self):
-		res = self.testapp.get('/user/list', status=200)
-
-	def test_lecture2_edit(self):
-		res = self.testapp.get('/lecture/edit/%s' % self.lecture2.id, status=200)
