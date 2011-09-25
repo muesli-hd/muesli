@@ -160,6 +160,12 @@ class PopulatedTests(BaseTests):
 		self.exercise.maxpoints = 4
 		self.exercise.exam = self.exam
 		self.session.add(self.exercise)
+
+		self.exam2 = muesli.models.Exam()
+		self.exam2.name = u"Aufgabenblatt 2"
+		self.exam2.lecture = self.lecture
+		self.exam2.category = utils.categories[0]['id']
+		self.session.add(self.exam2)
 		#self.session.commit()
 
 		self.lecture2 = muesli.models.Lecture()
@@ -184,6 +190,12 @@ class PopulatedTests(BaseTests):
 		self.tutorial2.max_students = 42
 		self.tutorial2.time = muesli.types.TutorialTime('0 14:00')
 		self.session.add(self.tutorial2)
+		
+		self.grading = muesli.models.Grading()
+		self.grading.name = 'Endnote'
+		self.grading.lecture = self.lecture
+		self.grading.exams.append(self.exam)
+		self.session.add(self.grading)
 		self.session.commit()
 
 	def setUser(self, user):

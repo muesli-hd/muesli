@@ -11,6 +11,7 @@ names = ['muesli.tests.functionalTests',
 	     'muesli.tests.userTests',
 	     'muesli.tests.lectureTests',
 	     'muesli.tests.examTests',
+	     'muesli.tests.gradingTests',
 	     'muesli.tests.tutorialTests']
 
 suites = [loader.loadTestsFromNames(names),
