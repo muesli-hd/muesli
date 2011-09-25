@@ -1,0 +1,23 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Entfernte und abgemeldete Studenten</h2>
+
+<table class="colored">
+  <tr>
+    <th>Name</th>
+    <th>Übungsgruppe</th>
+    <th>Verschieben</th>
+  </tr>
+
+  <tr tal:repeat="ls removed_students">
+    <td><a tal:attributes="href 'mailto:'+ls.student.email">${ls.student.last_name}, ${ls.student.first_name}</a></td>
+    <td>${ls.tutorial.time} - ${ls.tutorial.place} (${ls.tutorial.tutor.last_name if ls.tutorial.tutor else ''})</td>
+    <td>TODO: Move</td>
+  </tr>
+
+</table>
+
+  </metal:main>
+</metal:main>

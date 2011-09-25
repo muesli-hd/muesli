@@ -32,8 +32,6 @@ from muesli.utils import DictOfObjects
 
 Base = sqlalchemy.ext.declarative.declarative_base()
 
-print "test"
-
 Session = sessionmaker()
 
 def initializeSession(engine):
@@ -324,9 +322,9 @@ class LectureStudent(Base):
 class LectureRemovedStudent(Base):
 	__tablename__ = 'lecture_removed_students'
 	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)
-	lecture = relationship(Lecture, backref='lecture_removed_students')
+	lecture = relationship(Lecture, backref=backref('lecture_removed_students', lazy='dynamic'))
 	student_id = Column('student', Integer, ForeignKey(User.id), primary_key=True)
-	student = relationship(User, backref='lecture_removed_students')
+	student = relationship(User, backref=backref('lecture_removed_students', lazy='dynamic'))
 	tutorial_id = Column('tutorial', Integer, ForeignKey(Tutorial.id))
 	tutorial = relationship(Tutorial, backref='lecture_removed_students')
 

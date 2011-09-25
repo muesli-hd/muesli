@@ -209,3 +209,12 @@ def emailStudents(request):
 		request.session.flash('A Mail has been send to all tutors of this lecture', queue='messages')
 	return {'lecture': lecture,
 	        'form': form}
+
+@view_config(route_name='lecture_view_removed_students', renderer='muesli.web:templates/lecture/view_removed_students.pt', context=LectureContext, permission='edit')
+def viewRemovedStudents(request):
+	db = request.db
+	lecture = request.context.lecture
+	ls = lecture.lecture_removed_students
+	ls = ls.join(LectureRemovedStudent.student).order_by(User.last_name, User.first_name)
+	return {'lecture': lecture,
+	        'removed_students': ls}
