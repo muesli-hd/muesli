@@ -106,7 +106,7 @@ class Add(object):
 		        'error_msg': error_msg}
 
 @view_config(route_name='tutorial_edit', renderer='muesli.web:templates/tutorial/edit.pt', context=TutorialContext, permission='edit')
-class Add(object):
+class Edit(object):
 	def __init__(self, request):
 		self.request = request
 		self.db = self.request.db
