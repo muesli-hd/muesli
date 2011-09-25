@@ -1,8 +1,14 @@
 import unittest
+import sys
 
 from muesli.tests import functionalTests
 
-suites = [unittest.TestLoader().loadTestsFromModule(functionalTests),
+loader = unittest.TestLoader()
+
+if len(sys.argv) > 1:
+	loader.testMethodPrefix = sys.argv[1]
+
+suites = [loader.loadTestsFromModule(functionalTests),
 	#unittest.TestLoader().loadTestsFromTestCase(functionalTests.OrigDatabaseTests),
 	#unittest.TestLoader().loadTestsFromTestCase(functionalTests.BaseTests),
 	]
