@@ -78,6 +78,9 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 
 	def test_user_edit(self):
 		res = self.testapp.get('/user/edit/%s' % self.user.id, status=200)
+		res = self.testapp.get('/user/edit/%s' % self.tutor.id, status=200)
+		res = self.testapp.get('/user/edit/%s' % self.assistant.id, status=200)
+		res = self.testapp.get('/user/edit/%s' % self.admin.id, status=200)
 
 	def test_user_list(self):
 		res = self.testapp.get('/user/list', status=200)
