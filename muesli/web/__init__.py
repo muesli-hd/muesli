@@ -104,9 +104,9 @@ def main(global_config=None, **settings):
 	config.include('pyramid_mailer')
 	config.add_static_view('static', 'muesli.web:static')
 
-	config.add_route('start', '/start')
+	config.add_route('start', '/start', factory = GeneralContext)
 	config.add_route('contact', '/contact')
-	config.add_route('admin', '/admin')
+	config.add_route('admin', '/admin', factory = GeneralContext)
 	config.add_route('index', '/')
 	config.add_route('user_update', '/user/update')
 	config.add_route('user_change_email', '/user/change_email')

@@ -53,7 +53,7 @@ def start(request):
 	        'tutorials': tutorials.all(),
 	        'lectures_as_assistant': lectures_as_assistant.all()}
 
-@view_config(route_name='admin', renderer='muesli.web:templates/admin.pt')
+@view_config(route_name='admin', renderer='muesli.web:templates/admin.pt', context=GeneralContext, permission='admin')
 def admin(request):
 	return {}
 
