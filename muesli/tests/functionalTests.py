@@ -80,6 +80,22 @@ class BaseTests(unittest.TestCase):
 	def assertResContains(self, res, content):
 		self.assertTrue(content.encode(res.charset) in res.body)
 
+	def assertResContainsNot(self, res, content):
+		self.assertTrue(content.encode(res.charset) not in res.body)
+
+	def testForm(self, res, name, newvalue, formindex=None):
+		def getForm(res):
+			if formindex != None:
+				return res.forms[formindex]
+			else:
+				return res.form
+		form = getForm(res)
+		form[name] = newvalue
+		res2 = form.submit()
+		form = getForm(res2)
+		self.assertTrue(form[name].value == newvalue)
+		return res2
+
 def setUserPassword(user, password):
 	user.realpassword = password
 	user.password = sha1(password).hexdigest()
@@ -193,6 +209,7 @@ class PopulatedTests(BaseTests):
 		self.lecture_student.lecture = self.lecture
 		self.lecture_student.tutorial = self.tutorial
 		self.session.add(self.lecture_student)
+
 		#self.session.commit()
 		
 		self.tutorial2 = muesli.models.Tutorial()
@@ -202,7 +219,13 @@ class PopulatedTests(BaseTests):
 		self.tutorial2.max_students = 42
 		self.tutorial2.time = muesli.types.TutorialTime('0 14:00')
 		self.session.add(self.tutorial2)
-		
+
+		self.lecture_student2 = muesli.models.LectureStudent()
+		self.lecture_student2.student = self.user2
+		self.lecture_student2.lecture = self.lecture
+		self.lecture_student2.tutorial = self.tutorial2
+		self.session.add(self.lecture_student2)
+
 		self.grading = muesli.models.Grading()
 		self.grading.name = 'Endnote'
 		self.grading.lecture = self.lecture

@@ -78,10 +78,7 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 
 	def test_user_edit(self):
 		res = self.testapp.get('/user/edit/%s' % self.user.id, status=200)
-		form =  res.form
-		form['first_name'] = u"Neuer Vorname"
-		res = form.submit()
-		self.assertResContains(res, u'Neuer Vorname')
+		self.testForm(res, 'first_name', 'Neuer Vorname')
 		res = self.testapp.get('/user/edit/%s' % self.tutor.id, status=200)
 		res = self.testapp.get('/user/edit/%s' % self.assistant.id, status=200)
 		res = self.testapp.get('/user/edit/%s' % self.admin.id, status=200)
