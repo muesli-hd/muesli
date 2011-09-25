@@ -24,6 +24,7 @@ from hashlib import sha1
 import unittest
 import muesli.web
 import muesli.types
+from muesli import utils
 
 class OrigDatabaseTests(unittest.TestCase):
 	def setUp(self):
@@ -137,6 +138,18 @@ class PopulatedTests(BaseTests):
 		self.session.add(self.lecture)
 		self.lecture.tutors.append(self.tutor2)
 		self.lecture.tutors.append(self.tutor)
+		self.session.commit()
+
+		self.exam = muesli.models.Exam()
+		self.exam.name = u"Aufgabenblatt 1"
+		self.exam.lecture = self.lecture
+		self.exam.category = utils.categories[0]['id']
+		self.session.add(self.exam)
+		self.exercise = muesli.models.Exercise()
+		self.exercise.nr = 1
+		self.exercise.maxpoints = 4
+		self.exercise.exam = self.exam
+		self.session.add(self.exercise)
 		self.session.commit()
 
 		self.lecture2 = muesli.models.Lecture()
