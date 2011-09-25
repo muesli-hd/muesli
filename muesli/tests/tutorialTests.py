@@ -29,10 +29,20 @@ class BaseTests(functionalTests.BaseTests):
 	def test_tutorial_view(self):
 		res = self.testapp.get('/tutorial/view/%s' % 12456, status=403)
 
+	def test_tutorial_occupancy_bar(self):
+		res = self.testapp.get('/tutorial/occupancy_bar/10/20/30', status=200)
+		self.assertTrue(res.content_type=='image/png')
+
+	def test_tutorial_add(self):
+		res = self.testapp.get('/tutorial/add/%s' % 12456, status=404)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_tutorial_view(self):
 		res = self.testapp.get('/tutorial/view/%s' % self.tutorial.id, status=403)
-		
+
+	def test_tutorial_add(self):
+		res = self.testapp.get('/tutorial/add/%s' % self.lecture.id, status=403)
+
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
 		UnloggedTests.setUp(self)
@@ -50,6 +60,9 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
 		TutorLoggedInTests.setUp(self)
 		self.setUser(self.assistant)
+
+	def test_tutorial_add(self):
+		res = self.testapp.get('/tutorial/add/%s' % self.lecture.id, status=200)
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):
