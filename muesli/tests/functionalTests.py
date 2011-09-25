@@ -80,8 +80,19 @@ class BaseTests(unittest.TestCase):
 	def test_user_list(self):
 		res = self.testapp.get('/user/list', status=403)
 
-	def test_lecture_view(self):
+	def test_user_edit(self):
+		res = self.testapp.get('/user/edit/%s' % 1234, status=404)
+
+	def test_lecture_list(self):
 		res = self.testapp.get('/lecture/list', status=200)
+
+	def test_lecture_view(self):
+		res = self.testapp.get('/lecture/view/%s' % 12456, status=404)
+
+	def test_lecture_edit(self):
+		res = self.testapp.get('/lecture/edit/%s' % 123456, status=404)
+
+
 
 def setUserPassword(user, password):
 	user.realpassword = password
@@ -95,6 +106,14 @@ class UnloggedTests(BaseTests):
 		self.user.email = 'user@muesli.org'
 		setUserPassword(self.user, 'userpassword')
 		self.session.add(self.user)
+		self.session.commit()
+
+		self.user2 = muesli.models.User()
+		self.user2.first_name = u'Sigmund'
+		self.user2.last_name = u'Student'
+		self.user2.email = 'user2@muesli.org'
+		setUserPassword(self.user2, 'user2password')
+		self.session.add(self.user2)
 		self.session.commit()
 
 		self.tutor = muesli.models.User()
@@ -114,6 +133,15 @@ class UnloggedTests(BaseTests):
 		self.session.add(self.assistant)
 		self.session.commit()
 
+		self.assistant2 = muesli.models.User()
+		self.assistant2.first_name = u'Armin'
+		self.assistant2.last_name = u'Assistent2'
+		self.assistant2.email = 'assistant2@muesli.org'
+		setUserPassword(self.assistant2, 'assistant2password')
+		self.assistant2.is_assistant=True
+		self.session.add(self.assistant2)
+		self.session.commit()
+
 		self.admin = muesli.models.User()
 		self.admin.first_name = u'Anton'
 		self.admin.last_name = u'Admin'
@@ -127,12 +155,34 @@ class UnloggedTests(BaseTests):
 		self.lecture.name = "Irgendwas"
 		self.lecture.assistant = self.assistant
 		self.session.add(self.lecture)
+		self.lecture.tutors.append(self.tutor)
 		self.session.commit()
-	
+
+		self.lecture2 = muesli.models.Lecture()
+		self.lecture2.name = "Irgendwas2"
+		self.lecture2.assistant = self.assistant2
+		self.session.add(self.lecture2)
+		self.session.commit()
+
+	def test_user_edit(self):
+		res = self.testapp.get('/user/edit/%s' % self.user.id, status=403)
+
+	def test_lecture_view(self):
+		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=403)
+
 	def test_lecture_view(self):
 		res = self.testapp.get('/lecture/list', status=200)
 		self.assertTrue('Irgendwas' in res.body)
 		self.assertTrue('Assistent' in res.body)
+
+	def test_lecture_view(self):
+		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=403)
+
+	def test_lecture_edit(self):
+		res = self.testapp.get('/lecture/edit/%s' % self.lecture.id, status=403)
+
+	def test_lecture_edit(self):
+		res = self.testapp.get('/lecture/edit/%s' % self.lecture.id, status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -148,23 +198,50 @@ class UserLoggedInTests(UnloggedTests):
 		# get 200 instead of 302
 		res = self.testapp.get('/start', status=200)
 
+	def test_user_edit(self):
+		res = self.testapp.get('/user/edit/%s' % self.user.id, status=200)
+
+	def test_user2_edit(self):
+		res = self.testapp.get('/user/edit/%s' % self.user2.id, status=403)
+
+	def test_lecture_view(self):
+		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=200)
+
 class TutorLoggedInTests(UserLoggedInTests):
 	def setUp(self):
 		UserLoggedInTests.setUp(self)
 		self.setUser(self.tutor)
+
+	def test_user_edit(self):
+		res = self.testapp.get('/user/edit/%s' % self.user.id, status=403)
+
+	def test_user2_edit(self):
+		pass
 
 class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
 		TutorLoggedInTests.setUp(self)
 		self.setUser(self.assistant)
 
+	def test_lecture_edit(self):
+		res = self.testapp.get('/lecture/edit/%s' % self.lecture.id, status=200)
+
+	def test_lecture2_edit(self):
+		res = self.testapp.get('/lecture/edit/%s' % self.lecture2.id, status=403)
+
 class AdminLoggedInTests(AssistantLoggedInTests):
 	def setUp(self):
 		AssistantLoggedInTests.setUp(self)
 		self.setUser(self.admin)
+
+	def test_user_edit(self):
+		res = self.testapp.get('/user/edit/%s' % self.user.id, status=200)
 
 	def test_admin(self):
 		res = self.testapp.get('/admin', status=200)
 
 	def test_user_list(self):
 		res = self.testapp.get('/user/list', status=200)
+
+	def test_lecture2_edit(self):
+		res = self.testapp.get('/lecture/edit/%s' % self.lecture2.id, status=200)
