@@ -44,6 +44,15 @@ class BaseTests(functionalTests.BaseTests):
 	def test_lecture_remove_tutor(self):
 		res = self.testapp.get('/lecture/remove_tutor/%s/%s' % (123456,123), status=404)
 
+	def test_lecture_export_students_html(self):
+		res = self.testapp.get('/lecture/export_students_html/%s' % 123456, status=404)
+
+	def test_lecture_email_tutors(self):
+		res = self.testapp.get('/lecture/email_tutors/%s' % 123456, status=404)
+
+	def test_lecture_email_students(self):
+		res = self.testapp.get('/lecture/email_students/%s' % 123456, status=404)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_lecture_view(self):
 		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=403)
@@ -67,6 +76,15 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 	def test_lecture_remove_tutor(self):
 		res = self.testapp.get('/lecture/remove_tutor/%s/%s' % (self.lecture.id,self.tutor.id), status=403)
+
+	def test_lecture_export_students_html(self):
+		res = self.testapp.get('/lecture/export_students_html/%s' % self.lecture.id, status=403)
+
+	def test_lecture_email_tutors(self):
+		res = self.testapp.get('/lecture/email_tutors/%s' % self.lecture.id, status=403)
+
+	def test_lecture_email_students(self):
+		res = self.testapp.get('/lecture/email_students/%s' % self.lecture.id, status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -106,6 +124,14 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 		res = self.testapp.get('/lecture/edit/%s' % (self.lecture.id), status=200)
 		self.assertTrue(self.tutor.first_name.encode(res.charset) not in res.body)
 
+	def test_lecture_export_students_html(self):
+		res = self.testapp.get('/lecture/export_students_html/%s' % self.lecture.id, status=200)
+
+	def test_lecture_email_tutors(self):
+		res = self.testapp.get('/lecture/email_tutors/%s' % self.lecture.id, status=200)
+
+	def test_lecture_email_students(self):
+		res = self.testapp.get('/lecture/email_students/%s' % self.lecture.id, status=200)
 
 class AdminLoggedInTests(AssistantLoggedInTests):
 	def setUp(self):

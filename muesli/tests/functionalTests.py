@@ -138,29 +138,20 @@ class PopulatedTests(BaseTests):
 	def setUser(self, user):
 		self.testapp.post('/user/login',{'email': user.email, 'password': user.realpassword}, status=302)
 
-
-
-
 class UserLoggedInTests(PopulatedTests):
 	def setUp(self):
 		PopulatedTests.setUp(self)
 		self.setUser(self.user)
-
 
 class TutorLoggedInTests(UserLoggedInTests):
 	def setUp(self):
 		UserLoggedInTests.setUp(self)
 		self.setUser(self.tutor)
 
-
-
 class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
 		TutorLoggedInTests.setUp(self)
 		self.setUser(self.assistant)
-
-
-
 
 class AdminLoggedInTests(AssistantLoggedInTests):
 	def setUp(self):
