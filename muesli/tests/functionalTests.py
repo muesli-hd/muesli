@@ -136,6 +136,7 @@ class PopulatedTests(BaseTests):
 		self.lecture.assistant = self.assistant
 		self.session.add(self.lecture)
 		self.lecture.tutors.append(self.tutor2)
+		self.lecture.tutors.append(self.tutor)
 		self.session.commit()
 
 		self.lecture2 = muesli.models.Lecture()
@@ -143,7 +144,7 @@ class PopulatedTests(BaseTests):
 		self.lecture2.assistant = self.assistant2
 		self.session.add(self.lecture2)
 		self.session.commit()
-		
+
 		self.tutorial = muesli.models.Tutorial()
 		self.tutorial.lecture = self.lecture
 		self.tutorial.tutor = self.tutor

@@ -9,7 +9,8 @@ if len(sys.argv) > 1:
 names = ['muesli.tests.functionalTests',
 	     'muesli.tests.rootTests',
 	     'muesli.tests.userTests',
-	     'muesli.tests.lectureTests']
+	     'muesli.tests.lectureTests',
+	     'muesli.tests.tutorialTests']
 
 suites = [loader.loadTestsFromNames(names),
 	]
