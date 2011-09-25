@@ -181,6 +181,12 @@ class PopulatedTests(BaseTests):
 		self.tutorial.max_students = 42
 		self.tutorial.time = muesli.types.TutorialTime('0 12:00')
 		self.session.add(self.tutorial)
+		
+		self.lecture_student = muesli.models.LectureStudent()
+		self.lecture_student.student = self.user
+		self.lecture_student.lecture = self.lecture
+		self.lecture_student.tutorial = self.tutorial
+		self.session.add(self.lecture_student)
 		#self.session.commit()
 		
 		self.tutorial2 = muesli.models.Tutorial()
