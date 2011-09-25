@@ -218,3 +218,13 @@ def viewRemovedStudents(request):
 	ls = ls.join(LectureRemovedStudent.student).order_by(User.last_name, User.first_name)
 	return {'lecture': lecture,
 	        'removed_students': ls}
+
+#@view_config(route_name='lecture_export_totals', renderer='muesli.web:templates/lecture/export_totals.pt', context=LectureContext, permission='edit')
+#def exporTotals(request):
+	#db = request.db
+	#lecture = request.context.lecture
+	#ls = lecture.lecture_removed_students
+	#ls = ls.join(LectureRemovedStudent.student).order_by(User.last_name, User.first_name)
+	#return {'lecture': lecture,
+	        #'categories': utils.categories,
+	       #}

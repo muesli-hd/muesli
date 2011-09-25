@@ -77,6 +77,9 @@ class BaseTests(unittest.TestCase):
 	def populate(self):
 		pass
 
+	def assertResContains(self, res, content):
+		self.assertTrue(content.encode(res.charset) in res.body)
+
 def setUserPassword(user, password):
 	user.realpassword = password
 	user.password = sha1(password).hexdigest()
@@ -87,6 +90,7 @@ class PopulatedTests(BaseTests):
 		self.user.first_name = u'Stefan'
 		self.user.last_name = u'Student'
 		self.user.email = 'user@muesli.org'
+		self.user.subject = utils.subjects[0]
 		setUserPassword(self.user, 'userpassword')
 		self.session.add(self.user)
 		#self.session.commit()
@@ -95,6 +99,7 @@ class PopulatedTests(BaseTests):
 		self.user2.first_name = u'Sigmund'
 		self.user2.last_name = u'Student'
 		self.user2.email = 'user2@muesli.org'
+		self.user2.subject = utils.subjects[1]
 		setUserPassword(self.user2, 'user2password')
 		self.session.add(self.user2)
 		#self.session.commit()
@@ -103,6 +108,7 @@ class PopulatedTests(BaseTests):
 		self.tutor.first_name = u'Thorsten'
 		self.tutor.last_name = u'Tutor'
 		self.tutor.email = 'tutor@muesli.org'
+		self.tutor.subject = utils.subjects[2]
 		setUserPassword(self.tutor, 'tutorpassword')
 		self.session.add(self.tutor)
 		#self.session.commit()
@@ -181,7 +187,7 @@ class PopulatedTests(BaseTests):
 		self.tutorial.max_students = 42
 		self.tutorial.time = muesli.types.TutorialTime('0 12:00')
 		self.session.add(self.tutorial)
-		
+
 		self.lecture_student = muesli.models.LectureStudent()
 		self.lecture_student.student = self.user
 		self.lecture_student.lecture = self.lecture
