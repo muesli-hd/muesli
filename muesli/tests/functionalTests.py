@@ -26,6 +26,8 @@ import muesli.web
 import muesli.types
 from muesli import utils
 
+from sqlalchemy.orm import relationship, sessionmaker
+
 class OrigDatabaseTests(unittest.TestCase):
 	def setUp(self):
 		import muesli.web
@@ -48,9 +50,11 @@ class BaseTests(unittest.TestCase):
 	def setUp(self):
 		import muesli
 		import sqlalchemy
-		self.engine = sqlalchemy.create_engine('sqlite:///:memory:')
+		self.engine = sqlalchemy.create_engine('postgresql:///mueslitest')
+
 		import muesli.models
 		muesli.models.Base.metadata.create_all(self.engine)
+
 		muesli.old_engine = muesli.engine
 		muesli.engine = lambda: self.engine
 		import muesli.web
@@ -59,9 +63,15 @@ class BaseTests(unittest.TestCase):
 		from webtest import TestApp
 		self.testapp = TestApp(app)
 		self.session = muesli.models.Session()
+		for table in reversed(muesli.models.Base.metadata.sorted_tables):
+			self.session.execute(table.delete())
+			self.session.commit()
+
 		self.populate()
 
 	def tearDown(self):
+		self.session.close()
+		self.engine.dispose()
 		muesli.engine = muesli.old_engine
 
 	def populate(self):
@@ -79,7 +89,7 @@ class PopulatedTests(BaseTests):
 		self.user.email = 'user@muesli.org'
 		setUserPassword(self.user, 'userpassword')
 		self.session.add(self.user)
-		self.session.commit()
+		#self.session.commit()
 
 		self.user2 = muesli.models.User()
 		self.user2.first_name = u'Sigmund'
@@ -87,7 +97,7 @@ class PopulatedTests(BaseTests):
 		self.user2.email = 'user2@muesli.org'
 		setUserPassword(self.user2, 'user2password')
 		self.session.add(self.user2)
-		self.session.commit()
+		#self.session.commit()
 
 		self.tutor = muesli.models.User()
 		self.tutor.first_name = u'Thorsten'
@@ -95,7 +105,7 @@ class PopulatedTests(BaseTests):
 		self.tutor.email = 'tutor@muesli.org'
 		setUserPassword(self.tutor, 'tutorpassword')
 		self.session.add(self.tutor)
-		self.session.commit()
+		#self.session.commit()
 
 		self.tutor2 = muesli.models.User()
 		self.tutor2.first_name = u'Thor2sten'
@@ -103,25 +113,25 @@ class PopulatedTests(BaseTests):
 		self.tutor2.email = 'tutor2@muesli.org'
 		setUserPassword(self.tutor2, 'tutor2password')
 		self.session.add(self.tutor2)
-		self.session.commit()
+		#self.session.commit()
 
 		self.assistant = muesli.models.User()
 		self.assistant.first_name = u'Armin'
 		self.assistant.last_name = u'Assistent'
 		self.assistant.email = 'assistant@muesli.org'
 		setUserPassword(self.assistant, 'assistantpassword')
-		self.assistant.is_assistant=True
+		self.assistant.is_assistant=1
 		self.session.add(self.assistant)
-		self.session.commit()
+		#self.session.commit()
 
 		self.assistant2 = muesli.models.User()
 		self.assistant2.first_name = u'Armin'
 		self.assistant2.last_name = u'Assistent2'
 		self.assistant2.email = 'assistant2@muesli.org'
 		setUserPassword(self.assistant2, 'assistant2password')
-		self.assistant2.is_assistant=True
+		self.assistant2.is_assistant=1
 		self.session.add(self.assistant2)
-		self.session.commit()
+		#self.session.commit()
 
 		self.admin = muesli.models.User()
 		self.admin.first_name = u'Anton'
@@ -130,7 +140,7 @@ class PopulatedTests(BaseTests):
 		self.admin.is_admin = 1
 		setUserPassword(self.admin, 'adminpassword')
 		self.session.add(self.admin)
-		self.session.commit()
+		#self.session.commit()
 
 		self.lecture = muesli.models.Lecture()
 		self.lecture.name = "Irgendwas"
@@ -138,7 +148,7 @@ class PopulatedTests(BaseTests):
 		self.session.add(self.lecture)
 		self.lecture.tutors.append(self.tutor2)
 		self.lecture.tutors.append(self.tutor)
-		self.session.commit()
+		#self.session.commit()
 
 		self.exam = muesli.models.Exam()
 		self.exam.name = u"Aufgabenblatt 1"
@@ -150,13 +160,13 @@ class PopulatedTests(BaseTests):
 		self.exercise.maxpoints = 4
 		self.exercise.exam = self.exam
 		self.session.add(self.exercise)
-		self.session.commit()
+		#self.session.commit()
 
 		self.lecture2 = muesli.models.Lecture()
 		self.lecture2.name = "Irgendwas2"
 		self.lecture2.assistant = self.assistant2
 		self.session.add(self.lecture2)
-		self.session.commit()
+		#self.session.commit()
 
 		self.tutorial = muesli.models.Tutorial()
 		self.tutorial.lecture = self.lecture
@@ -165,6 +175,15 @@ class PopulatedTests(BaseTests):
 		self.tutorial.max_students = 42
 		self.tutorial.time = muesli.types.TutorialTime('0 12:00')
 		self.session.add(self.tutorial)
+		#self.session.commit()
+		
+		self.tutorial2 = muesli.models.Tutorial()
+		self.tutorial2.lecture = self.lecture
+		self.tutorial2.tutor = self.tutor
+		self.tutorial2.place = 'In einer weit entfernten Galaxis'
+		self.tutorial2.max_students = 42
+		self.tutorial2.time = muesli.types.TutorialTime('0 14:00')
+		self.session.add(self.tutorial2)
 		self.session.commit()
 
 	def setUser(self, user):
