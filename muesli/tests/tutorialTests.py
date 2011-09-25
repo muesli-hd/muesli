@@ -36,12 +36,18 @@ class BaseTests(functionalTests.BaseTests):
 	def test_tutorial_add(self):
 		res = self.testapp.get('/tutorial/add/%s' % 12456, status=404)
 
+	def test_tutorial_edit(self):
+		res = self.testapp.get('/tutorial/edit/%s' % 12456, status=403)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_tutorial_view(self):
 		res = self.testapp.get('/tutorial/view/%s' % self.tutorial.id, status=403)
 
 	def test_tutorial_add(self):
 		res = self.testapp.get('/tutorial/add/%s' % self.lecture.id, status=403)
+
+	def test_tutorial_edit(self):
+		res = self.testapp.get('/tutorial/edit/%s' % self.tutorial.id, status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -64,6 +70,8 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 	def test_tutorial_add(self):
 		res = self.testapp.get('/tutorial/add/%s' % self.lecture.id, status=200)
 
+	def test_tutorial_edit(self):
+		res = self.testapp.get('/tutorial/edit/%s' % self.tutorial.id, status=200)
 
 class AdminLoggedInTests(AssistantLoggedInTests):
 	def setUp(self):
