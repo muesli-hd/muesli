@@ -45,16 +45,15 @@ class LectureContext(object):
 
 class TutorialContext(object):
 	def __init__(self, request):
-		self.tutorial_ids = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', ''))
+		self.tutorial_ids = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', '')).split(',')
 		if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
 				self.tutorial_ids = []
 		self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(self.tutorial_ids)).all()
-		if None in self.tutorials:
-			raise HTTPNotFound(detail='Tutorial not found')
 		self.__acl__ = [
-			(Allow, 'user:{0}'.format(self.tutorials[0].lecture.assistant_id), ('view', 'edit')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
 			]+[(Allow, 'user:{0}'.format(tutor.id), ('view')) for tutorial in self.tutorials for tutor in tutorial.lecture.tutors]
+		if len(self.tutorials)>0:
+			self.__acl__.append((Allow, 'user:{0}'.format(self.tutorials[0].lecture.assistant_id), ('view', 'edit')))
 
 class ExamContext(object):
 	def __init__(self, request):
