@@ -21,7 +21,7 @@
 <h3>Teilnahme an Übungsgruppen</h3>
 <ul>
   <li tal:repeat="tutorial user.tutorials">(${tutorial.lecture.term})
-    <a tal:attributes="href request.route_path('tutorial_view', tutorial_id=tutorial.id)">${tutorial.lecture.name}</a></li>
+    <a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">${tutorial.lecture.name}</a></li>
 </ul>
 </div>
 
@@ -55,7 +55,7 @@
 <h3>Betreute Übungsgruppen</h3>
 <ul>
   <li tal:repeat="tutorial tutorials_as_tutor">(${tutorial.lecture.term})
-    <a tal:attributes="href request.route_path('tutorial_view', tutorial_id=tutorial.id)">${tutorial.lecture.name}
+    <a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">${tutorial.lecture.name}
     (${tutorial.time})</a></li>
 </ul>
 </div>
