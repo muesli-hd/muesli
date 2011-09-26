@@ -1,0 +1,22 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<div style="text-align:right; float:right; margin-left:3em">
+<i>Liber scriptus proferetur,<br />In quo totum continetur,<br />Unde mundus iudicetur.</i>
+</div>
+
+<h2>Kontakt</h2>
+
+<p>
+Bei Problemen mit Übungsgruppen wenden Sie sich bitte an den die Vorlesung betreuenden Assistenten.
+Bei Problemen mit MÜSLI selbst <a href="mailto:muesli@mathi.uni-heidelberg.de">schreiben Sie uns bitte eine Mail</a>.
+</p>
+
+<p>
+Es gibt auch eine <a href="http://www.mathi.uni-heidelberg.de/~ansgar/muesli">Webseite zu MÜSLI</a> selbst.
+</p>
+
+
+  </metal:main>
+</metal:main>

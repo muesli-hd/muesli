@@ -57,6 +57,10 @@ def start(request):
 def admin(request):
 	return {}
 
+@view_config(route_name='contact', renderer='muesli.web:templates/contact.pt')
+def contact(request):
+	return {}
+
 #@view_config(context = Exception, renderer='muesli.web:templates/error.pt')
 #def internalServerError(exc, request):
 #	now = datetime.datetime.now()
