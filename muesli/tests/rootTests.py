@@ -32,6 +32,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_admin(self):
 		res = self.testapp.get('/admin', status=403)
 
+	def test_contact(self):
+		res = self.testapp.get('/contact', status=200)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	pass
 
