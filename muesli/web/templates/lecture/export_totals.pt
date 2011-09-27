@@ -39,7 +39,7 @@
       <td>${results[ls.student.id]['totals'].get(cat['id'], '') or ''}</td>
     </div>
     <td tal:repeat="grading lecture.gradings">
-      ${student_grades[ls.student_id].get(grading.id, '')}</td>
+      ${student_grades[ls.student_id].get(grading.id, '') or ''}</td>
   </tr>
 </tbody>
 </table>

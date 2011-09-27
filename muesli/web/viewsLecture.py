@@ -224,7 +224,9 @@ def exportTotals(request):
 	db = request.db
 	lecture = request.context.lecture
 	# TODO: Order by tutor/student
-	ls = lecture.lecture_students_for_tutorials()
+	ls = lecture.lecture_students_for_tutorials(order=False)
+	Tutor = sqlalchemy.orm.aliased(models.User)
+	ls = ls.join(models.LectureStudent.student).join(models.LectureStudent.tutorial).join(Tutor, models.Tutorial.tutor).order_by(Tutor.last_name, models.User.last_name, models.User.first_name)
 	lecture_results = lecture.getLectureResults(students=ls)
 	results = DictOfObjects(lambda: DictOfObjects(lambda: {}))
 	for res in lecture_results:
@@ -234,10 +236,11 @@ def exportTotals(request):
 		results[res.student_id]['totals'][res.category] = res.points
 	gresults = lecture.getGradingResults(students = ls)
 	grading_results = DictOfObjects(lambda: {})
-	for res in grading_results:
+	for res in gresults:
 		grading_results[res.student_id][res.grading_id] = res.grade
 	exams_by_category = [
 		{'id':cat['id'], 'name': cat['name'], 'exams': lecture.exams.filter(models.Exam.category==cat['id']).all()} for cat in utils.categories]
+	exams_by_category = [cat for cat in exams_by_category if cat['exams']]
 	return {'lecture': lecture,
 	        'lecture_students': ls.all(),
 	        'categories': utils.categories,

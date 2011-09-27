@@ -223,7 +223,7 @@ class Exam(Base):
 	__tablename__ = 'exams'
 	id = Column(Integer, primary_key=True)
 	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id))
-	lecture = relationship(Lecture, backref=backref('exams', lazy='dynamic'))
+	lecture = relationship(Lecture, backref=backref('exams', lazy='dynamic', order_by='Exam.name'))
 	name = Column(Text)
 	# exam type
 	#  'exam'
