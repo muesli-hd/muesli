@@ -56,6 +56,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_lecture_view_removed_students(self):
 		res = self.testapp.get('/lecture/view_removed_students/%s' % 12456, status=404)
 
+	def test_lecture_export_totals(self):
+		res = self.testapp.get('/lecture/export_totals/%s' % 123456, status=404)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_lecture_view(self):
 		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=403)
@@ -91,6 +94,10 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 	def test_lecture_view_removed_students(self):
 		res = self.testapp.get('/lecture/view_removed_students/%s' % self.lecture.id, status=403)
+
+	def test_lecture_export_totals(self):
+		res = self.testapp.get('/lecture/export_totals/%s' % self.lecture.id, status=403)
+
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -140,6 +147,9 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
 	def test_lecture_view_removed_students(self):
 		res = self.testapp.get('/lecture/view_removed_students/%s' % self.lecture.id, status=200)
+
+	def test_lecture_export_totals(self):
+		res = self.testapp.get('/lecture/export_totals/%s' % self.lecture.id, status=200)
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):
