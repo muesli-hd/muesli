@@ -219,12 +219,29 @@ def viewRemovedStudents(request):
 	return {'lecture': lecture,
 	        'removed_students': ls}
 
-#@view_config(route_name='lecture_export_totals', renderer='muesli.web:templates/lecture/export_totals.pt', context=LectureContext, permission='edit')
-#def exporTotals(request):
-	#db = request.db
-	#lecture = request.context.lecture
-	#ls = lecture.lecture_removed_students
-	#ls = ls.join(LectureRemovedStudent.student).order_by(User.last_name, User.first_name)
-	#return {'lecture': lecture,
-	        #'categories': utils.categories,
-	       #}
+@view_config(route_name='lecture_export_totals', renderer='muesli.web:templates/lecture/export_totals.pt', context=LectureContext, permission='edit')
+def exportTotals(request):
+	db = request.db
+	lecture = request.context.lecture
+	# TODO: Order by tutor/student
+	ls = lecture.lecture_students_for_tutorials()
+	lecture_results = lecture.getLectureResults(students=ls)
+	results = DictOfObjects(lambda: DictOfObjects(lambda: {}))
+	for res in lecture_results:
+		results[res.student_id]['results'][res.Exam.id] = res.points
+	cat_results = lecture.getLectureResultsByCategory(students=ls)
+	for res in cat_results:
+		results[res.student_id]['totals'][res.category] = res.points
+	gresults = lecture.getGradingResults(students = ls)
+	grading_results = DictOfObjects(lambda: {})
+	for res in grading_results:
+		grading_results[res.student_id][res.grading_id] = res.grade
+	exams_by_category = [
+		{'id':cat['id'], 'name': cat['name'], 'exams': lecture.exams.filter(models.Exam.category==cat['id']).all()} for cat in utils.categories]
+	return {'lecture': lecture,
+	        'lecture_students': ls.all(),
+	        'categories': utils.categories,
+	        'results': results,
+	        'student_grades': grading_results,
+	        'exams_by_category': exams_by_category,
+	       }

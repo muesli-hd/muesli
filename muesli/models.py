@@ -150,7 +150,7 @@ class Lecture(Base):
 	def students(self):
 		session = Session.object_session(self)
 		return session.query(User).filter(User.lecture_students.any(LectureStudent.lecture_id==self.id))
-	def lecture_students_for_tutorials(self, tutorials, order=True):
+	def lecture_students_for_tutorials(self, tutorials=[], order=True):
 		ls = self.lecture_students
 		if order:
 			ls = ls.join(LectureStudent.student).order_by(User.last_name, User.first_name)
@@ -194,6 +194,30 @@ class Lecture(Base):
 		return session.query(sqlalchemy.func.count(User.id), User.subject).\
 			filter(User.lecture_students.any(LectureStudent.lecture_id == self.id)).\
 			group_by(User.subject).order_by(User.subject)
+	def getLectureResults(self, tutorials=[], students=None):
+		session = Session.object_session(self)
+		if not students:
+			students = self.lecture_students_for_tutorials(tutorials)
+		exercises = session.query(Exercise).filter(Exercise.exam_id.in_([e.id for e in self.exams])).all()
+		lecture_results=session.query(\
+				sqlalchemy.func.sum(ExerciseStudent.points).label('points'),
+				ExerciseStudent.student_id.label('student_id'),
+				Exam, Exam.id)\
+			.filter(ExerciseStudent.exercise_id.in_([e.id  for e in exercises]))\
+			.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students]))\
+			.join(Exercise).join(Exam)\
+			.group_by(ExerciseStudent.student_id, Exam)
+		return lecture_results
+	def getLectureResultsByCategory(self, *args, **kwargs):
+		session = Session.object_session(self)
+		results = self.getLectureResults(*args, **kwargs).subquery()
+		return session.query(func.sum(results.c.points).label('points'), results.c.student_id, results.c.category)\
+			.group_by(results.c.category, results.c.student_id)
+	def getGradingResults(self, tutorials = [], students = None):
+		session = Session.object_session(self)
+		return session.query(StudentGrade).filter(StudentGrade.grading_id.in_([g.id for g in self.gradings]))
+
+
 
 class Exam(Base):
 	__tablename__ = 'exams'

@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="/static/css/muesli.css"></link>
+</head>
+
+<body id="content">
+<table>
+<thead>
+  <tr>
+    <th colspan="5"></th>
+    <th tal:repeat="cat exams_by_category" tal:attributes="colspan 1+len(cat['exams'])">${cat['name']}</th>
+    <th tal:attributes="colspan len(lecture.gradings)">Benotungen</th>
+  </tr>
+  <tr>
+    <th>Tutor</th>
+    <th>Name</th>
+    <th>Matrikel</th>
+    <th>Studiengang</th>
+    <th>Geburtstag, -ort</th>
+    <div tal:repeat="cat exams_by_category">
+      <th tal:repeat="exam cat['exams']">${exam.name}</th>
+      <th>Σ</th>
+    </div>
+    <th tal:repeat="grading lecture.gradings">${grading.name}</th>
+  </tr>
+</thead>
+<tbody>
+  <tr tal:repeat="ls lecture_students">
+    <td>${ls.tutorial.tutor.last_name if ls.tutorial.tutor else ''}</td>
+    <td>${ls.student.last_name}, ${ls.student.first_name}</td>
+    <td>${ls.student.matrikel}</td>
+    <td>${ls.student.subject}</td>
+    <td>${ls.student.birth_date}, ${ls.student.birth_place}</td>
+    <div tal:repeat="cat exams_by_category">
+      <td tal:repeat="exam cat['exams']">
+        ${results[ls.student_id]['results'].get(exam.id, '') or ''}
+      </td>
+      <td>${results[ls.student.id]['totals'].get(cat['id'], '') or ''}</td>
+    </div>
+    <td tal:repeat="grading lecture.gradings">
+      ${student_grades[ls.student_id].get(grading.id, '')}</td>
+  </tr>
+</tbody>
+</table>
+
+</body>
+</html>
