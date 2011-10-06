@@ -156,3 +156,28 @@ class DictOfObjects(object):
 		return self.d.__iter__()
 	def __str__(self):
 		return "%r" % self.d
+
+class AutoVivification(dict):
+	"""Implementation of perl's autovivification feature.
+	   from: http://stackoverflow.com/q/635483"""
+	def __getitem__(self, item):
+		try:
+			return dict.__getitem__(self, item)
+		except KeyError:
+			value = self[item] = type(self)()
+			return value
+	def update(self, other):
+		for key in other:
+			if isinstance(other[key], dict):
+				self[key].update(other[key])
+			else: self[key] = other[key]
+	def update_available(self, other):
+		for key in other:
+			if isinstance(other[key], dict):
+				if key in self:
+					if isinstance(other[key], AutoVivification):
+						self[key].update_available(other[key])
+					else:
+						self[key].update(other[key])
+			else: self[key] = other[key]
+
