@@ -3,8 +3,12 @@
 
       <span class="popup">
         <span tal:define="fF lambda f: '%.1f' % f if f else '-'">
-          <span tal:condition="'tut_avg'     in statisticsData" class="points">${'%s / %s' % (fF(statisticsData['tut_avg']), fF(statisticsData['lec_avg']))}</span>
-          <span tal:condition="'tut_avg' not in statisticsData" class="points">${'%s' % fF(statisticsData['lec_avg'])}</span>
+          <span tal:condition="'tut_avg'     in statisticsData" class="points" tal:attributes="style 'display:none' if statistics_images else False">${'%s / %s' % (fF(statisticsData['tut_avg']), fF(statisticsData['lec_avg']))}</span>
+          <span tal:condition="'tut_avg' not in statisticsData" class="points" tal:attributes="style 'display:none' if statistics_images else False">${'%s' % fF(statisticsData['lec_avg'])}</span>
+          <span tal:condition='statistics_images'>
+            <img tal:condition="'tut_avg'     in statisticsData" tal:attributes="src request.route_path('exam_statistics_bar', max=statisticsData.get('max', 4), lecture_points=statisticsData.get('lec_avg', 0) or 0, tutorial_points=statisticsData.get('tut_avg', 0) or 0)" />
+            <img tal:condition="'tut_avg' not in statisticsData" tal:attributes="src request.route_path('exam_statistics_bar', max=statisticsData.get('max', 4), lecture_points=statisticsData.get('lec_avg', 0) or 0, tutorial_points='')" />
+          </span>
           <span class="balloon">
             <table>
             <tr tal:condition="'tut_avg' in statisticsData">
@@ -14,7 +18,7 @@
             </tr>
             <tr>
                <td>${'Vorlesung' if tutorial_ids else ''}</td>
-               <td>${u'%s±%s (%u Personen)' % (fF(statisticsData['lec_avg']), fF(statisticsData['lec_std']), statisticsData['lec_count'])}</td>
+               <td>${u'%s±%s (%u Personen)' % (fF(statisticsData.get('lec_avg', None)), fF(statisticsData.get('lec_std',None)), statisticsData.get('lec_count',0))}</td>
 <!--               <td> <% sprintf("%.1f±%.1f", lec_avg, lec_std) %></td>-->
             </tr>
           </table>
