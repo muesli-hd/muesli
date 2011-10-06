@@ -32,6 +32,10 @@ from sqlalchemy.orm import exc
 from sqlalchemy.sql import func
 import sqlalchemy
 
+import PIL.Image
+import PIL.ImageDraw
+import StringIO
+
 import re
 import os
 
@@ -170,3 +174,32 @@ class Export(object):
 		        'tutorial_ids': self.request.matchdict['tutorial_ids'],
 		        'students': students,
 		        'points': points}
+
+@view_config(route_name='exam_statistics_bar')
+class ExamStatisticsBar(object):
+	def __init__(self, request):
+		self.request = request
+		self.width = 60
+		self.height = 10
+		self.color1 = (0,0,255)
+		self.color2 = (140,140,255)
+		self.max = float(request.matchdict['max'])
+		self.lecture_points = float(request.matchdict['lecture_points'])
+		self.tutorial_points = float(request.matchdict['tutorial_points']) if request.matchdict['tutorial_points']!=None else None
+		self.values = [[self.lecture_points, self.max]]
+		if self.tutorial_points != None:
+			self.values.insert(0,[self.tutorial_points, self.max])
+	def __call__(self):
+		image = PIL.Image.new('RGB', (self.width,self.height),(255,255,255))
+		draw = PIL.ImageDraw.Draw(image)
+		barheight = float(self.height)/len(self.values)
+		for i,bar in enumerate(self.values):
+			draw.rectangle([(0,i*barheight),(float(self.width)*bar[1]/self.max,(i+1)*barheight)], fill=self.color2)
+			draw.rectangle([(0,i*barheight),(float(self.width)*bar[0]/self.max,(i+1)*barheight)], fill=self.color1)
+		output = StringIO.StringIO()
+		image.save(output, format='PNG')
+		response = Response()
+		response.content_type = 'image/png'
+		response.body = output.getvalue()
+		output.close()
+		return response
