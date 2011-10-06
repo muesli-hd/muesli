@@ -175,6 +175,45 @@ class Export(object):
 		        'students': students,
 		        'points': points}
 
+
+@view_config(route_name='exam_statistics', renderer='muesli.web:templates/exam/statistics.pt', context=ExamContext, permission='enter_points')
+def statistics(request):
+	db = request.db
+	tutorial_ids = request.context.tutorial_ids
+	exam = request.context.exam
+	tutorials = request.context.tutorials
+	lecturestudents = exam.lecture.lecture_students
+	statistics = exam.getStatistics(students=lecturestudents)
+	statistics_by_subject = exam.getStatisticsBySubjects(students=lecturestudents)# exam.getStatisticsBySubject(students=students)
+	if tutorials:
+		tutorialstudents = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))
+		tutstat = exam.getStatistics(students=tutorialstudents, prefix='tut')
+		statistics.update(exam.getStatistics(students=tutorialstudents, prefix='tut'))
+		old_statistics_by_subject = statistics_by_subject
+		statistics_by_subject = exam.getStatisticsBySubjects(students=tutorialstudents, prefix='tut')
+		statistics_by_subject.update_available(old_statistics_by_subject)
+	request.javascript.add('prototype.js')
+	#pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
+	#points = DictOfObjects(lambda: {})
+	#for point in pointsQuery:
+		#points[point.student_id][point.exercise_id] = point
+	#for student in students:
+		#for e in exam.exercises:
+			#if not e.id in points[student.student_id]:
+				#exerciseStudent = models.ExerciseStudent()
+				#exerciseStudent.student = student.student
+				#exerciseStudent.exercise = e
+				#points[student.student_id][e.id] = exerciseStudent
+				#self.db.add(exerciseStudent)
+	#self.db.commit()
+	#for student in points:
+		#points[student]['total'] = sum([v.points for v in points[student].values() if v.points])
+	return {'exam': exam,
+			'tutorial_ids': request.matchdict['tutorial_ids'],
+			#'students': students,
+			'statistics': statistics,
+			'statistics_by_subject': statistics_by_subject}
+
 @view_config(route_name='exam_statistics_bar')
 class ExamStatisticsBar(object):
 	def __init__(self, request):
