@@ -27,10 +27,10 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
   <p class="error" tal:condition="error_msg">${error_msg}</p>
 
 
-<script><![CDATA[
+<script>/* <![CDATA[ */
   function update_total(row)
   {
-    var objs = ("#row-" + row + " input.points");
+    var objs = $$("#row-" + row + " input.points");
     var total = 0;
     var current = 0;
 
@@ -41,9 +41,9 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
       }
     }
 
-    return ("total-" + row).value = Number(total).toFixed(2);
+    return $("total-" + row).value = Number(total).toFixed(2);
   }
-]]>
+/* ]]> */
 </script>
 
 <form method="post">
@@ -72,11 +72,11 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
     <td>Durchschnitt (Gruppe/Gesamt)</td>
     <td tal:condition="not tutorial_ids"></td>
     <td tal:repeat="e exam.exercises">
-      <span tal:define="statisticsData statistics[e.id]" tal:omit-tag="">
+      <span tal:define="statisticsData statistics[e.id]; statistics_images=False" tal:omit-tag="">
         <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
       </span>
     </td>
-    <td tal:define="statisticsData statistics['exam']">
+    <td tal:define="statisticsData statistics['exam']; statistics_images=False">
       <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
     </td>
   </tr>
