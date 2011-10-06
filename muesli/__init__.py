@@ -21,6 +21,7 @@
 from sqlalchemy import create_engine
 
 databaseName = 'postgresql:///muesli'
+#databaseName = 'postgresql:///mueslitest'
 
 def engine():
 	return create_engine(databaseName)
