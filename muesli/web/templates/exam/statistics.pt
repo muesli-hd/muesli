@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<script>/* <![CDATA[ */
+  function hide_points ()
+  {
+    var fields = $$(".points");
+    for (i=0; i<fields.length; i++) {
+      Element.hide(fields[i]);
+    }
+    var fields = $$(".nopoints");
+    for (i=0; i<fields.length; i++) {
+      Element.show(fields[i]);
+    }
+  }
+
+  function show_points ()
+  {
+    var fields = $$(".points");
+    for (i=0; i<fields.length; i++) {
+      Element.show(fields[i]);
+    }
+    var fields = $$(".nopoints");
+    for (i=0; i<fields.length; i++) {
+      Element.hide(fields[i]);
+    }
+  }
+/* ]]> */
+</script>
+
+<h2>Statistiken für ${exam.name}</h2>
+
+<h3>Punkteverteilung nach Fächern</h3>
+
+
+<p>Anzeigemodus: <span class="points" style="display:none"><a href="javascript:hide_points()">Nur Diagramme</a> | Punkte und Diagramme</span><span class="nopoints">Nur Diagramme | <a href="javascript:show_points()">Punkte und Diagramme</a></span></p>
+
+<p tal:condition="tutorial_ids">In den Diagrammen entspricht der erste Balken dem Wert in der Übungsgruppe, der zwei Wert dem in der
+gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der Form <i>Übungsgruppe/Vorlesung</i> ausgegeben</span></p>
+
+<table>
+  <tr>
+    <th>Fach</th>
+    <th tal:repeat="e exam.exercises">${e.nr}</th>
+    <th>Σ</th>
+  </tr>
+  <tr tal:repeat="subject sorted(statistics_by_subject.keys())">
+    <td>${subject or '(Keine Angabe)'}</td>
+    <td tal:repeat="e exam.exercises">
+      <span tal:define="statisticsData statistics_by_subject[subject][e.id]; statistics_images=True" tal:omit-tag="">
+        <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
+      </span>
+    </td>
+    <td>
+      <span tal:define="statisticsData statistics_by_subject[subject]['exam']; statistics_images=True" tal:omit-tag="">
+        <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
+      </span>
+    </td>
+  </tr>
+  <tr class="footerstart">
+    <td>Insgesamt</td>
+    <td tal:repeat="e exam.exercises">
+      <span tal:define="statisticsData statistics[e.id]; statistics_images=True" tal:omit-tag="">
+        <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
+      </span>
+    </td>
+    <td>
+      <span tal:define="statisticsData statistics['exam']; statistics_images=True" tal:omit-tag="">
+        <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
+      </span>
+    </td>
+  </tr>
+  <tr>
+    <td>Maximalpunktzahl</td>
+    <td tal:repeat="e exam.exercises">${e.maxpoints}</td>
+    <td>${exam.getMaxpoints()}</td>
+  </tr>
+</table>
+
+<h3>Histogramme</h3>
+
+<h4>Gesamt</h4>
+  <img tal:condition="tutorial_ids" tal:attributes="src request.route_path('exam_histogram_for_exam', exam_id=exam.id, tutorial_ids=tutorial_ids)"/>
+  <img tal:attributes="src request.route_path('exam_histogram_for_exam', exam_id=exam.id, tutorial_ids='')"/>
+  
+  <div tal:repeat="exercise exam.exercises" tal:omit-tag="">
+  <h4>Aufgabe ${exercise.nr}</h4>
+
+  <img tal:condition="tutorial_ids" tal:attributes="src request.route_path('exam_histogram_for_exercise', exercise_id=exercise.id, tutorial_ids=tutorial_ids)"/>
+  <img tal:attributes="src request.route_path('exam_histogram_for_exercise', exercise_id=exercise.id, tutorial_ids='')"/>
+
+  </div>
+  </metal:main>
+</metal:main>
