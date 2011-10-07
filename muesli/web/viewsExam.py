@@ -273,7 +273,8 @@ class Histogram(MatplotlibView):
 		if not self.bins:
 			self.getBins()
 		ax = self.fig.add_subplot(111)
-		n, bins, patches = ax.hist(self.points, bins=self.bins, color='red')
+		if self.points:
+			ax.hist(self.points, bins=self.bins, color='red')
 		ax.set_title(self.label)
 		return self.createResponse()
 	def getBins(self):
