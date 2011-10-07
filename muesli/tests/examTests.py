@@ -38,6 +38,15 @@ class BaseTests(functionalTests.BaseTests):
 	def test_exam_enter_points(self):
 		res = self.testapp.get('/exam/enter_points/%s/' % 12345, status=404)
 
+	def test_exam_statistics(self):
+		res = self.testapp.get('/exam/statistics/%s/' % 12345, status=404)
+
+	def test_exam_histogram_for_exercise(self):
+		res = self.testapp.get('/exam/histogram_for_exercise/%s/' % 12345, status=404)
+
+	def test_exam_histogram_for_exam(self):
+		res = self.testapp.get('/exam/histogram_for_exam/%s/' % 12345, status=404)
+
 	def test_exam_enter_points_tuts(self):
 		res = self.testapp.get('/exam/enter_points/%s/%s' % (12345, '12,23'), status=404)
 
@@ -62,6 +71,18 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 	def test_exam_enter_points_tuts(self):
 		res = self.testapp.get('/exam/enter_points/%s/%s,%s' % (self.exam.id, self.tutorial.id, self.tutorial2.id), status=403)
+
+	def test_exam_statistics(self):
+		res = self.testapp.get('/exam/statistics/%s/' % self.exam.id, status=403)
+		res = self.testapp.get('/exam/statistics/%s/%s,%s' % (self.exam.id, self.tutorial.id, self.tutorial2.id), status=403)
+
+	def test_exam_histogram_for_exercise(self):
+		res = self.testapp.get('/exam/histogram_for_exercise/%s/' % self.exercise.id, status=403)
+		res = self.testapp.get('/exam/histogram_for_exercise/%s/%s,%s' % (self.exercise.id, self.tutorial.id, self.tutorial2.id), status=403)
+
+	def test_exam_histogram_for_exam(self):
+		res = self.testapp.get('/exam/histogram_for_exam/%s/' % self.exam.id, status=403)
+		res = self.testapp.get('/exam/histogram_for_exam/%s/%s,%s' % (self.exam.id, self.tutorial.id, self.tutorial2.id), status=403)
 
 	def test_exam_export(self):
 		res = self.testapp.get('/exam/export/%s/' % self.exam.id, status=403)
@@ -93,6 +114,18 @@ class TutorLoggedInTests(UserLoggedInTests):
 		res = self.testapp.get('/exam/enter_points/%s/%s' % (self.exam.id, self.tutorial.id), status=200)
 		self.assertForm(res, 'points-%s-%s' % (self.user.id, self.exercise.id), '2.5', formindex=0)
 		self.assertResContainsNot(res, 'points-%s-%s' % (self.user2.id, self.exercise.id))
+
+	def test_exam_statistics(self):
+		res = self.testapp.get('/exam/statistics/%s/' % self.exam.id, status=200)
+		res = self.testapp.get('/exam/statistics/%s/%s,%s' % (self.exam.id, self.tutorial.id, self.tutorial2.id), status=200)
+
+	def test_exam_histogram_for_exercise(self):
+		res = self.testapp.get('/exam/histogram_for_exercise/%s/' % self.exercise.id, status=200)
+		res = self.testapp.get('/exam/histogram_for_exercise/%s/%s,%s' % (self.exercise.id, self.tutorial.id, self.tutorial2.id), status=200)
+
+	def test_exam_histogram_for_exam(self):
+		res = self.testapp.get('/exam/histogram_for_exam/%s/' % self.exam.id, status=200)
+		res = self.testapp.get('/exam/histogram_for_exam/%s/%s,%s' % (self.exam.id, self.tutorial.id, self.tutorial2.id), status=200)
 
 	def test_exam_export(self):
 		res = self.testapp.get('/exam/export/%s/' % self.exam.id, status=200)
