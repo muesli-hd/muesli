@@ -155,7 +155,7 @@ class Lecture(Base):
 		if order:
 			ls = ls.join(LectureStudent.student).order_by(User.last_name, User.first_name)
 		if tutorials:
-			ls = ls.filter(sqlalchemy.or_(*[LectureStudent.tutorial_id==tut.id for tut in tutorials]))
+			ls = ls.filter(LectureStudent.tutorial_id.in_([tut.id for tut in tutorials]))#sqlalchemy.or_(*[LectureStudent.tutorial_id==tut.id for tut in tutorials]))
 		return ls
 #	@property
 #	def tutors(self):
@@ -416,7 +416,7 @@ class Exercise(Base):
 class ExerciseStudent(Base):
 	__tablename__ = 'exercise_students'
 	exercise_id = Column('exercise', Integer, ForeignKey(Exercise.id), primary_key=True)
-	exercise = relationship(Exercise, backref='exercise_points')
+	exercise = relationship(Exercise, backref=backref('exercise_points', lazy='dynamic'))
 	student_id = Column('student', Integer, ForeignKey(User.id), primary_key=True)
 	student = relationship(User, backref='exercise_points')
 	points = Column(Numeric(precision=8, scale=1))
