@@ -76,3 +76,23 @@ class ExamContext(object):
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
 			]+[(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points', 'statistics')) for tutor in self.exam.lecture.tutors]
 
+class ExerciseContext(object):
+	def __init__(self, request):
+		exercise_id = request.matchdict['exercise_id']
+		self.exercise = request.db.query(Exercise).get(exercise_id)
+		if self.exercise is None:
+			raise HTTPNotFound(detail='Exercise not found')
+		self.exam = self.exercise.exam
+		if 'tutorial_ids' in request.matchdict:
+			self.tutorial_ids = request.matchdict['tutorial_ids'].split(',')
+			if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
+				self.tutorial_ids = []
+				self.tutorials = []
+			else:
+				self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(self.tutorial_ids)).all()
+		self.__acl__ = [
+			(Allow, Authenticated, 'view_points'),
+			(Allow, 'user:{0}'.format(self.exam.lecture.assistant_id), ('statistics')),
+			(Allow, 'group:administrators', ALL_PERMISSIONS),
+			]+[(Allow, 'user:{0}'.format(tutor.id), ('statistics')) for tutor in self.exam.lecture.tutors]
+

@@ -36,8 +36,13 @@ import PIL.Image
 import PIL.ImageDraw
 import StringIO
 
+import matplotlib
+matplotlib.use( 'Agg' )
+from matplotlib import pyplot
+
 import re
 import os
+import math
 
 @view_config(route_name='exam_edit', renderer='muesli.web:templates/exam/edit.pt', context=ExamContext, permission='edit')
 class Edit(object):
@@ -242,3 +247,62 @@ class ExamStatisticsBar(object):
 		response.body = output.getvalue()
 		output.close()
 		return response
+
+class MatplotlibView(object):
+	def __init__(self):
+		self.fig = pyplot.figure()
+	def createResponse(self):
+		output = StringIO.StringIO()
+		self.fig.savefig(output, format='png', dpi=50, bbox_inches='tight')
+		pyplot.close(self.fig)
+		response = Response()
+		response.content_type = 'image/png'
+		response.body = output.getvalue()
+		output.close()
+		return response
+
+class Histogram(MatplotlibView):
+	def __init__(self, request):
+		MatplotlibView.__init__(self)
+		self.request = request
+		self.points = []
+		self.bins = None
+		self.max = None
+		self.label = None
+	def __call__(self):
+		if not self.bins:
+			self.getBins()
+		ax = self.fig.add_subplot(111)
+		n, bins, patches = ax.hist(self.points, bins=self.bins, color='red')
+		ax.set_title(self.label)
+		return self.createResponse()
+	def getBins(self):
+		if self.max==None:
+			self.max = max(self.points)
+		factor = 1
+		while (self.max+2)/factor > 10:
+			factor += 1
+		self.bins = [i*factor-0.5 for i in range(int(math.ceil((self.max+2)/factor)))]
+
+@view_config(route_name='exam_histogram_for_exercise', context=ExerciseContext, permission='statistics')
+class HistogramForExercise(Histogram):
+	def __init__(self, request):
+		Histogram.__init__(self, request)
+		self.label = u'Punkteverteilung diese Gruppe' if self.request.context.tutorials else u'Punkteverteilung alle Gruppen'
+		self.exercise = self.request.context.exercise
+		exercise_points = self.exercise.exercise_points
+		students = self.exercise.exam.lecture.lecture_students_for_tutorials(tutorials=self.request.context.tutorials, order=False)
+		exercise_points = exercise_points.filter(ExerciseStudent.student_id.in_([s.student_id for s in students]))
+		self.points = [round(float(p.points)) for p in exercise_points if p.points!=None]
+		self.max = self.exercise.maxpoints
+
+@view_config(route_name='exam_histogram_for_exam', context=ExamContext, permission='statistics')
+class HistogramForExam(Histogram):
+	def __init__(self, request):
+		Histogram.__init__(self, request)
+		self.label = u'Punkteverteilung diese Gruppe' if self.request.context.tutorials else u'Punkteverteilung alle Gruppen'
+		self.exam = self.request.context.exam
+		students = self.exam.lecture.lecture_students_for_tutorials(tutorials=self.request.context.tutorials, order=False)
+		exercise_points = self.exam.getResults(students=students)
+		self.points = [round(float(p.points)-0.01) for p in exercise_points if p.points!=None]
+		self.max = self.exam.getMaxpoints()

@@ -159,6 +159,8 @@ def main(global_config=None, **settings):
 	config.add_route('exam_admission', '/exam/admission/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
 	config.add_route('exam_statistics', '/exam/statistics/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
 	config.add_route('exam_statistics_bar', '/exam/statistics_bar/{max}/{lecture_points}/{tutorial_points:[^/]*}')
+	config.add_route('exam_histogram_for_exercise', '/exam/histogram_for_exercise/{exercise_id}/{tutorial_ids:[^/]*}', factory=ExerciseContext)
+	config.add_route('exam_histogram_for_exam', '/exam/histogram_for_exam/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
 	config.add_route('exam_correlation', '/exam/correlation')
 	config.add_route('exam_enter_points', '/exam/enter_points/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
 	config.add_route('exam_enter_points_single', '/exam/enter_points_single/{exam_id}/{tutorial_ids:[^/]*}')
