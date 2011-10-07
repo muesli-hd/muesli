@@ -47,8 +47,10 @@ class TutorialContext(object):
 	def __init__(self, request):
 		self.tutorial_ids = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', '')).split(',')
 		if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
-				self.tutorial_ids = []
-		self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(self.tutorial_ids)).all()
+			self.tutorial_ids = []
+			self.tutorials = []
+		else:
+			self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(self.tutorial_ids)).all()
 		self.__acl__ = [
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
 			]+[(Allow, 'user:{0}'.format(tutor.id), ('view')) for tutorial in self.tutorials for tutor in tutorial.lecture.tutors]
@@ -65,9 +67,12 @@ class ExamContext(object):
 			self.tutorial_ids = request.matchdict['tutorial_ids'].split(',')
 			if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
 				self.tutorial_ids = []
-			self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(self.tutorial_ids)).all()
+				self.tutorials = []
+			else:
+				self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(self.tutorial_ids)).all()
 		self.__acl__ = [
 			(Allow, Authenticated, 'view_points'),
-			(Allow, 'user:{0}'.format(self.exam.lecture.assistant_id), ('view_points', 'edit', 'enter_points')),
+			(Allow, 'user:{0}'.format(self.exam.lecture.assistant_id), ('view_points', 'edit', 'enter_points', 'statistics')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
-			]+[(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points')) for tutor in self.exam.lecture.tutors]
+			]+[(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points', 'statistics')) for tutor in self.exam.lecture.tutors]
+
