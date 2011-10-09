@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+    
+<metal:main metal:define-macro="user_list">
+      <span tal:condition="not users">
+         kein
+      </span>
+      <div tal:condition="users">
+        <table border="1">
+          <tr>
+            <td> </td>
+            <td>Lieblingstermine</td>
+            <td>Ist-Zustand</td>
+          </tr>
+
+          <tr tal:repeat="u users">
+            <td><a tal:attributes="href 'mailto:'+u.email">${u.name()}</a></td>
+            <td>
+              <span tal:repeat="p prefs[u.id]" tal:omit-tag="">
+                ${p.time}
+              </span>
+            </td>
+            <td>
+              <span tal:define="ls [l for l in u.lecture_students if l.lecture_id == lecture.id]">
+                <span tal:condition="ls" tal:omit-tag="">
+                  ${ls[0].tutorial.time}
+                </span>
+                <span tal:condition="not ls" tal:omit-tag="">
+                  <strong>keine</strong>
+                </span>
+              </span>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </metal:main>

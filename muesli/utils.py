@@ -32,6 +32,11 @@ preferences = [\
 
 penalty_names = dict([[pref['penalty'], pref['name']] for pref in preferences])
 
+ghostpenalty = 20000
+ghostcapacity = 10000
+lpsolve = '/usr/bin/lp_solve'
+students_unhappiness = 50
+
 lecture_types={
 	'lecture':
 		 {'name':  'Vorlesung',

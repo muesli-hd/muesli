@@ -35,6 +35,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_lecture_edit(self):
 		res = self.testapp.get('/lecture/edit/%s' % 123456, status=404)
 
+	def test_lecture_do_allocation(self):
+		res = self.testapp.get('/lecture/do_allocation/%s' % 123456, status=404)
+
 	def test_lecture_add_exam(self):
 		res = self.testapp.get('/lecture/add_exam/%s' % 123456, status=404)
 
@@ -73,6 +76,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 	def test_lecture_edit(self):
 		res = self.testapp.get('/lecture/edit/%s' % self.lecture.id, status=403)
+
+	def test_lecture_do_allocation(self):
+		res = self.testapp.get('/lecture/do_allocation/%s' % self.prefLecture.id, status=403)
 
 	def test_lecture_add_exam(self):
 		res = self.testapp.get('/lecture/add_exam/%s' % self.lecture.id, status=403)
@@ -123,6 +129,11 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
 	def test_lecture2_edit(self):
 		res = self.testapp.get('/lecture/edit/%s' % self.lecture2.id, status=403)
+
+	def test_lecture_do_allocation(self):
+		res = self.testapp.get('/lecture/do_allocation/%s' % self.prefLecture.id, status=200)
+		# Should be catched:
+		res = self.testapp.get('/lecture/do_allocation/%s' % self.lecture.id, status=403)
 
 	def test_lecture_add_exam(self):
 		res = self.testapp.get('/lecture/add_exam/%s' % self.lecture.id, status=200)

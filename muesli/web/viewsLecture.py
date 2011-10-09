@@ -23,10 +23,11 @@ from muesli import models
 from muesli import utils
 from muesli.web.context import *
 from muesli.web.forms import *
+from muesli.allocation import Allocation
 
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound
+from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTPForbidden
 from pyramid.url import route_url
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message, Attachment
@@ -248,3 +249,21 @@ def exportTotals(request):
 	        'student_grades': grading_results,
 	        'exams_by_category': exams_by_category,
 	       }
+
+@view_config(route_name='lecture_do_allocation', renderer='muesli.web:templates/lecture/do_allocation.pt', context=LectureContext, permission='edit')
+def doAllocation(request):
+	db = request.db
+	lecture = request.context.lecture
+	if not lecture.mode == 'prefs':
+		return HTTPForbidden('This lecture is not in preferences mode')
+	allocation = Allocation(lecture)
+	result = allocation.doAllocation()
+	prefs = {}
+	for student in set(result['students_unhappy']+result['students_without_group']):
+		p = [tp for tp in student.time_preferences if tp.lecture_id==lecture.id and tp.penalty < utils.students_unhappiness]
+		prefs[student.id] = p
+	lecture.mode = 'off'
+	db.commit()
+	return {'lecture': lecture,
+			'result': result,
+			'prefs': prefs}

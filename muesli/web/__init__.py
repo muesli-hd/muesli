@@ -127,6 +127,7 @@ def main(global_config=None, **settings):
 	config.add_route('lecture_remove_tutor', '/lecture/remove_tutor/{lecture_id}/{tutor_id}', factory = LectureContext)
 	config.add_route('lecture_add_tutor', '/lecture/add_tutor/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_do_allocation', '/lecture/do_allocation/{lecture_id}', factory = LectureContext)
+	config.add_route('lecture_remove_allocation', '/lecture/remove_allocation/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_email_students', '/lecture/email_students/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_email_tutors', '/lecture/email_tutors/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_view', '/lecture/view/{lecture_id}', factory = LectureContext)

@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Statistik</h2>
+
+<p>
+In der folgenden Statistik können Sie einsehen, wieviele Studenten nicht zugeordnet werden konnten oder "unglücklich" sind, d.h. zu einem Termin zugeordnet wurden, an dem sie nicht anwesend sein können.
+Sie können dannach auf "zurück" klicken um die Größen der Übungsgruppen zu verändern um die "unglücklichen" Studenten "glücklich" zu machen.
+Danach kann das Programm erneut ausgeführt werden.
+Falls Sie mit der Belegung einverstanden sind, drücken Sie "OK".
+Dieser Vorgang ist reversibel: Sie können später im Hauptmenü wieder auf den Prioritätenmodus wechseln.
+Dabei gehen alle Eintragungen von Studenten verloren, die sich zwischenzeitlich im "direkten Modus" angemeldet haben.
+</p>
+
+<center>
+<table border="1">
+  <tr>
+    <td>Status:</td>
+    <td>
+      ${'Erfolreich' if not result['error_value'] else result['error_value']}
+    </td>
+  </tr>
+  <tr>
+    <td>Studenten insgesamt:</td>
+    <td>${result['students_processed']}</td>
+  </tr>
+  <tr>
+    <td>Studenten ohne Gruppe:</td>
+    <td>
+      <div tal:define="users=result['students_without_group']" tal:omit-tag="">
+        <metal:main metal:use-macro="templates('Fragments/Format/user_list.pt').macros['user_list']" />
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td>Unglückliche Studenten:</td>
+    <td>
+      <div tal:define="users=result['students_unhappy']" tal:omit-tag="">
+        <metal:main metal:use-macro="templates('Fragments/Format/user_list.pt').macros['user_list']" />
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td>Zufriedenheitsindex:</td>
+    <td>${result['global_happiness']}%</td>
+  </tr>
+  <tr>
+    <td>
+      <form method="post" tal:attributes="action request.route_path('lecture_remove_allocation', lecture_id=lecture.id)">
+        <input type="submit" value="Zurück"/>
+      </form>
+    </td>
+    <td>
+      <form method="get" tal:attributes="action request.route_path('lecture_edit', lecture_id=lecture.id)">
+        <input type="submit" value="OK"/>
+      </form>
+   </td>
+  </tr>
+</table>
+</center>
+
+
+
+  </metal:main>
+</metal:main>

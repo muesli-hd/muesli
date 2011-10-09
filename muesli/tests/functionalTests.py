@@ -231,6 +231,24 @@ class PopulatedTests(BaseTests):
 		self.grading.lecture = self.lecture
 		self.grading.exams.append(self.exam)
 		self.session.add(self.grading)
+
+		self.prefLecture = muesli.models.Lecture()
+		self.prefLecture.name = "Vorlieben"
+		self.prefLecture.mode = 'prefs'
+		self.prefLecture.assistant = self.assistant
+		self.session.add(self.prefLecture)
+
+		self.prefTutorial = muesli.models.Tutorial()
+		self.prefTutorial.lecture = self.lecture
+		self.prefTutorial.tutor = self.tutor2
+		self.prefTutorial.place = 'In einer weit entfernten Galaxis'
+		self.prefTutorial.max_students = 42
+		self.prefTutorial.time = muesli.types.TutorialTime('0 14:00')
+		self.session.add(self.prefTutorial)
+
+		self.timePreference = muesli.models.TimePreference(self.prefLecture, self.user, self.prefTutorial.time, 3)
+		self.session.add(self.timePreference)
+
 		self.session.commit()
 
 	def setUser(self, user):
