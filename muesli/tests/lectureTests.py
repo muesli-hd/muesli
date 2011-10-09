@@ -132,6 +132,12 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
 	def test_lecture_do_allocation(self):
 		res = self.testapp.get('/lecture/do_allocation/%s' % self.prefLecture.id, status=200)
+		self.session.expire_all()
+		#self.assertTrue(self.prefLecture.lecture_students.count()>0)
+		res = res.forms[0].submit()
+		self.assertTrue(res.status.startswith('302'))
+		self.session.expire_all()
+		self.assertTrue(self.prefLecture.lecture_students.count()==0)
 		# Should be catched:
 		res = self.testapp.get('/lecture/do_allocation/%s' % self.lecture.id, status=403)
 

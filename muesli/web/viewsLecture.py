@@ -267,3 +267,13 @@ def doAllocation(request):
 	return {'lecture': lecture,
 			'result': result,
 			'prefs': prefs}
+
+@view_config(route_name='lecture_remove_allocation', context=LectureContext, permission='edit')
+def removeAllocation(request):
+	db = request.db
+	lecture = request.context.lecture
+	lecture.lecture_students.delete()
+	lecture.mode = 'prefs'
+	request.session.flash(u'Eintragung zurückgesetzt', queue='messages')
+	db.commit()
+	return HTTPFound(location=request.route_url('lecture_edit', lecture_id = lecture.id))
