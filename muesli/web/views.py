@@ -62,7 +62,7 @@ def contact(request):
 	return {}
 
 @view_config(route_name='index', renderer='muesli.web:templates/index.pt')
-def contact(request):
+def index(request):
 	return {}
 
 #@view_config(context = Exception, renderer='muesli.web:templates/error.pt')
