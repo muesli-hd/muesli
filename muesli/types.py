@@ -29,7 +29,10 @@ class WrappedColumn(object):
 	def __str__(self):
 		return self.value
 	def __eq__(self, other):
-		return self.value == other.value
+		if not isinstance(other, WrappedColumn):
+			return False
+		else:
+			return self.value == other.value
 
 def ColumnWrapper(type):
 	class Wrapped(types.TypeDecorator):
