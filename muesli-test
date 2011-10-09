@@ -24,7 +24,9 @@ import sys
 import subprocess
 import traceback
 import time
+import os
 
+os.environ['PYRAMID_DEBUG_TEMPLATES']='1'
 while True:
 	try:
 		start = time.time()
