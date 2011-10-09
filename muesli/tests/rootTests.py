@@ -26,6 +26,9 @@ import muesli.web
 from muesli.tests import functionalTests
 
 class BaseTests(functionalTests.BaseTests):
+	def test_index(self):
+		res = self.testapp.get('/', status=200)
+
 	def test_start(self):
 		res = self.testapp.get('/start', status=302)
 
