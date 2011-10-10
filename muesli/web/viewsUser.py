@@ -32,6 +32,9 @@ from pyramid.url import route_url
 from sqlalchemy.orm import exc
 from hashlib import sha1
 
+from pyramid_mailer import get_mailer
+from pyramid_mailer.message import Message, Attachment
+
 import re
 import os
 
@@ -81,3 +84,59 @@ def update(request):
 		request.db.commit()
 		request.session.flash(u'Angaben geändert', queue='messages')
 	return {'form': form}
+
+@view_config(route_name='user_register', renderer='muesli.web:templates/user/register.pt', context=GeneralContext)
+def register(request):
+	form = UserRegister(request)
+	if request.method == 'POST' and form.processPostData(request.POST):
+		registerCommon(request, form)
+		return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
+	return {'form': form}
+
+def registerCommon(request, form):
+	if request.db.query(models.User).filter(models.User.email==form['email']).first():
+		request.session.flash(u'Ein Benutzer mit dieser E-Mail-Adresse existiert bereits.', queue='messages')
+		return
+	else:
+		user = models.User()
+		form.obj = user
+		form.saveValues()
+		request.db.add(user)
+		confirmation = models.Confirmation()
+		confirmation.source = u'user/register'
+		confirmation.user = user
+		request.db.add(confirmation)
+		send_confirmation_mail(request, user, confirmation)
+		request.db.commit()
+
+def send_confirmation_mail(request, user, confirmation):
+	mailer = get_mailer(request)
+	body =u"""
+Hallo!
+
+Sie haben sich bei MÜSLI mit den folgenden Daten angemeldet:
+
+Name:   %s
+E-Mail: %s
+
+Um die Anmeldung abzuschließen, gehen Sie bitte auf die Seite
+
+%s
+
+Haben Sie sich nicht selbst angemeldet, ignorieren Sie diese Mail bitte
+einfach.
+
+Mit freudlichen Grüßen,
+  Das MÜSLI-Team
+	""" %(user.name(), user.email, request.route_path('user_confirm', confirmation=confirmation.hash))
+	message = Message(subject=u'MÜSLI: Ihre Registrierung bei MÜSLI',
+		sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
+		recipients=[user.email],
+		body=body)
+	# As we are not using transactions,
+	# we send the mail immediately.
+	mailer.send_immediately(message)
+
+@view_config(route_name='user_wait_for_confirmation', renderer='muesli.web:templates/user/wait_for_confirmation.pt', context=GeneralContext)
+def waitForConfirmation(request):
+	return {}

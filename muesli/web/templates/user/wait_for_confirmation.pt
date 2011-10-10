@@ -1,0 +1,13 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+<h2>Bei MÜSLI registrieren</h2>
+
+<p>
+Ihr Zugang wurde angelegt, muss aber noch freigeschaltet werden.
+In den nächsten Minuten sollten Sie einen Link zur Bestätigung der Registrierung per Mail erhalten.
+Sollten Sie keine Mail erhalten, so <a tal:attributes="href request.route_path('contact')">wenden Sie sich bitte an uns</a>.
+</p>
+
+  </metal:main>
+</metal:main>

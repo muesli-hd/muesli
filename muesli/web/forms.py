@@ -354,6 +354,63 @@ class UserUpdate(ObjectForm):
 		else:
 			ObjectForm.saveField(self, fieldName)
 
+class UserRegister(ObjectForm):
+	def __init__(self, request):
+		formfields = [
+			FormField('email',
+			   label='E-Mail', size=40,
+			   #value=user.email,
+			   required=True,
+			   validator=validators.Email()),
+			FormField('title',
+			   label='Titel', size=20,
+			   #value=user.title
+			   ),
+			FormField('first_name',
+			   label='Vorname', size=40,
+			   #value=user.first_name,
+			   required=True),
+			FormField('last_name',
+			   label='Nachname', size=40,
+			   #value=user.last_name,
+			   required=True),
+			FormField('matrikel',
+			   label='Matrikelnummer', size=10,
+			   #value=user.matrikel,
+			   required=True
+			   ),
+			FormField('subject',
+			   label='Studiengang',
+			   type='select',
+			   #value=user.subject,
+			   options=utils.getSubjects(),
+			   required=True),
+			FormField('subject_alt',
+			   label='Studiengang', size=30, comment=u'Genauer Studiengang (falls Sonstiges gewählt)',
+			   value=''),
+			FormField('birth_date',
+			   label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
+			   #value=user.birth_date,
+			   required=True
+			   ),
+			FormField('birth_place',
+			   label='Geburtsort', size=20,
+			   #value=user.birth_place,
+			   required=True
+			   )
+			]
+		ObjectForm.__init__(self, None, formfields, send=u'Registrieren')
+	def saveField(self, fieldName):
+		if fieldName == 'subject':
+			if self['subject']=='Sonstiges':
+				self.obj.subject = self['subject_alt']
+			else:
+				self.obj.subject = self['subject']
+		elif fieldName == 'alt_subject':
+			pass
+		else:
+			ObjectForm.saveField(self, fieldName)
+
 class LectureAddExam(ObjectForm):
 	def __init__(self, request):
 		formfields = [
