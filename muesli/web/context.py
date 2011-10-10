@@ -26,7 +26,7 @@ class ConfirmationContext(object):
 class GeneralContext(object):
 	def __init__(self, request):
 		self.__acl__ = [
-			(Allow, Authenticated, 'update'),
+			(Allow, Authenticated, ('update', 'change_email')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
 			]
 

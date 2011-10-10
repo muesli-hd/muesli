@@ -27,7 +27,7 @@ from muesli.web.context import *
 from pyramid import security
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound
+from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTPForbidden
 from pyramid.url import route_url
 from sqlalchemy.orm import exc
 from hashlib import sha1
@@ -153,4 +153,73 @@ def confirm(request):
 	#	registerCommon(request, form)
 	#	return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
 	return {'form': form,
+	        'confirmation': request.context.confirmation}
+
+@view_config(route_name='user_change_email', renderer='muesli.web:templates/user/change_email.pt', context=GeneralContext, permission='change_email')
+def changeEmail(request):
+	form = UserChangeEmail(request, request.user)
+	if request.method == 'POST' and form.processPostData(request.POST):
+		email = form['email']
+		if request.db.query(models.User).filter(models.User.email==email).count() > 0:
+			request.session.flash(u'Die Adresse "%s" kann nicht verwendet werden' % email, queue='messages')
+		else:
+			confirmation = models.Confirmation()
+			confirmation.source = u'user/change_email'
+			confirmation.user = request.user
+			confirmation.what = email
+			mailer = get_mailer(request)
+			body =u"""
+Hallo!
+
+Sie haben bei MÜSLI Ihre E-Mail-Adresse geändert.
+
+Neue Adresse: %s
+
+Um die Änderung zu bestätigen, gehen Sie bitte auf die Seite
+
+%s
+
+Möchten Sie die Adresse doch nicht ändern, so ignorieren Sie diese Mail bitte
+einfach.
+
+Mit freundlichen Grüßen,
+  Das MÜSLI-Team
+			""" %(email, request.route_url('user_confirm_email', confirmation=confirmation.hash))
+			message = Message(subject=u'MÜSLI: E-Mail-Adresse ändern',
+				sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
+				recipients=[email],
+				body=body)
+			# As we are not using transactions,
+			# we send the mail immediately.
+			mailer.send_immediately(message)
+			request.db.add(confirmation)
+			request.db.commit()
+			#registerCommon(request, form)
+			return HTTPFound(location=request.route_url('user_change_email_wait_for_confirmation'))
+	return {'form': form}
+
+@view_config(route_name='user_change_email_wait_for_confirmation', renderer='muesli.web:templates/user/change_email_wait_for_confirmation.pt', context=GeneralContext)
+def changeEmailWaitForConfirmation(request):
+	return {}
+
+@view_config(route_name='user_confirm_email', renderer='muesli.web:templates/user/confirm_email.pt', context=ConfirmationContext)
+def confirmEmail(request):
+	done=False
+	aborted=False
+	if request.context.confirmation.source != 'user/change_email':
+		return HTTPForbidden('This confirmation is not for a email change')
+	if request.POST.get('confirm'):
+		user = request.context.confirmation.user
+		user.email = request.context.confirmation.what
+		request.db.delete(request.context.confirmation)
+		request.db.commit()
+		done=True
+	elif request.POST.get('abort'):
+		request.db.delete(request.context.confirmation)
+		aborted = True
+		request.db.commit()
+	#	registerCommon(request, form)
+	#	return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
+	return {'done': done,
+	        'aborted': aborted,
 	        'confirmation': request.context.confirmation}

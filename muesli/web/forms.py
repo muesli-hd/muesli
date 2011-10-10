@@ -446,6 +446,19 @@ class UserConfirm(ObjectForm):
 		ObjectForm.__init__(self, None, formfields, send=u'Registrierung abschließen',
 			chained_validators=[validators.FieldsMatch('password', 'password_repeat')])
 
+class UserChangeEmail(ObjectForm):
+	def __init__(self, request, user):
+		formfields = [
+			FormField('email',
+			   label='E-Mail', size=40,
+			   value=user.email,
+			   required=True,
+			   validator=validators.Email()),
+			]
+		ObjectForm.__init__(self, user, formfields, send=u'E-Mail-Adresse ändern')
+	def saveField(self, fieldName):
+		pass
+
 class LectureAddExam(ObjectForm):
 	def __init__(self, request):
 		formfields = [

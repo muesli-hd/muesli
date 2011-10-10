@@ -80,9 +80,13 @@ class BaseTests(functionalTests.BaseTests):
 		self.assertTrue(confirmation not in user.confirmations)
 		self.assertTrue(user.password != None)
 
+	def test_user_change_email(self):
+		res = self.testapp.get('/user/change_email', status=403)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_user_edit(self):
 		res = self.testapp.get('/user/edit/%s' % self.user.id, status=403)
+		self.assertTrue(res.status.startswith('302'))
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -98,6 +102,40 @@ class UserLoggedInTests(UnloggedTests):
 	def test_user_update(self):
 		res = self.testapp.get('/user/update', status=200)
 		self.assertForm(res, 'matrikel', '2613945')
+
+	def test_user_change_email(self):
+		res = self.testapp.get('/user/change_email', status=200)
+		res.form['email'] = 'test@muesli.org'
+		res = res.form.submit()
+
+	def test_user_confirm_email(self):
+		self.test_user_change_email()
+		self.session.expire_all()
+		confirmation = self.session.query(Confirmation).one()
+		newmail = confirmation.what
+		user = confirmation.user
+		res = self.testapp.get('/user/confirm_email/%s' % confirmation.hash, status=200)
+		res = res.form.submit('abort')
+		self.session.expire_all()
+		self.assertTrue(confirmation not in user.confirmations)
+		self.assertTrue(user.email != newmail)
+
+		self.test_user_change_email()
+		self.session.expire_all()
+		confirmation = self.session.query(Confirmation).one()
+		user = confirmation.user
+		res = self.testapp.get('/user/confirm_email/%s' % confirmation.hash, status=200)
+		res = res.form.submit('confirm')
+		self.session.expire_all()
+		self.assertTrue(confirmation not in user.confirmations)
+		self.assertTrue(user.email == newmail)
+		#form['password'] = 'test'
+		#form['password_repeat'] = 'test'
+		#res = form.submit()
+		#self.session.expire_all()
+		#self.assertTrue(res.status.startswith('302'))
+		#self.assertTrue(confirmation not in user.confirmations)
+		#self.assertTrue(user.password != None)
 
 
 class TutorLoggedInTests(UserLoggedInTests):
