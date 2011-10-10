@@ -16,6 +16,7 @@ class UserContext(object):
 class GeneralContext(object):
 	def __init__(self, request):
 		self.__acl__ = [
+			(Allow, Authenticated, 'update'),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
 			]
 

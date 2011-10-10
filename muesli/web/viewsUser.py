@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 # muesli/web/views.py
 #
 # This file is part of MUESLI.
@@ -70,3 +72,12 @@ def edit(request):
 	        'lectures_as_assistant': user.lectures_as_assistant.all(),
 	        'tutorials_as_tutor': user.tutorials_as_tutor.all(),
 	        'penalty_names': utils.penalty_names}
+
+@view_config(route_name='user_update', renderer='muesli.web:templates/user/update.pt', context=GeneralContext, permission='update')
+def update(request):
+	form = UserUpdate(request, request.user)
+	if request.method == 'POST' and form.processPostData(request.POST):
+		form.saveValues()
+		request.db.commit()
+		request.session.flash(u'Angaben geändert', queue='messages')
+	return {'form': form}

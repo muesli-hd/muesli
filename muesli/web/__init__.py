@@ -108,7 +108,7 @@ def main(global_config=None, **settings):
 	config.add_route('contact', '/contact')
 	config.add_route('admin', '/admin', factory = GeneralContext)
 	config.add_route('index', '/')
-	config.add_route('user_update', '/user/update')
+	config.add_route('user_update', '/user/update', factory = GeneralContext)
 	config.add_route('user_change_email', '/user/change_email')
 	config.add_route('user_change_password', '/user/change_password')
 	config.add_route('user_logout', '/user/logout')

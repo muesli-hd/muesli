@@ -133,6 +133,7 @@ class PopulatedTests(BaseTests):
 		self.tutor2.first_name = u'Thor2sten'
 		self.tutor2.last_name = u'Tu2tor'
 		self.tutor2.email = 'tutor2@muesli.org'
+		self.tutor2.subject = utils.subjects[0]
 		setUserPassword(self.tutor2, 'tutor2password')
 		self.session.add(self.tutor2)
 		#self.session.commit()
@@ -141,6 +142,7 @@ class PopulatedTests(BaseTests):
 		self.assistant.first_name = u'Armin'
 		self.assistant.last_name = u'Assistent'
 		self.assistant.email = 'assistant@muesli.org'
+		self.assistant.subject = utils.subjects[0]
 		setUserPassword(self.assistant, 'assistantpassword')
 		self.assistant.is_assistant=1
 		self.session.add(self.assistant)
@@ -150,6 +152,7 @@ class PopulatedTests(BaseTests):
 		self.assistant2.first_name = u'Armin'
 		self.assistant2.last_name = u'Assistent2'
 		self.assistant2.email = 'assistant2@muesli.org'
+		self.assistant2.subject = utils.subjects[0]
 		setUserPassword(self.assistant2, 'assistant2password')
 		self.assistant2.is_assistant=1
 		self.session.add(self.assistant2)
@@ -159,6 +162,7 @@ class PopulatedTests(BaseTests):
 		self.admin.first_name = u'Anton'
 		self.admin.last_name = u'Admin'
 		self.admin.email = 'admin@muesli.org'
+		self.admin.subject = utils.subjects[0]
 		self.admin.is_admin = 1
 		setUserPassword(self.admin, 'adminpassword')
 		self.session.add(self.admin)

@@ -38,6 +38,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_user_edit(self):
 		res = self.testapp.get('/user/edit/%s' % 1234, status=404)
 
+	def test_user_update(self):
+		res = self.testapp.get('/user/update', status=403)
+
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_user_edit(self):
@@ -53,6 +56,11 @@ class UserLoggedInTests(UnloggedTests):
 
 	def test_user2_edit(self):
 		res = self.testapp.get('/user/edit/%s' % self.user2.id, status=403)
+
+	def test_user_update(self):
+		res = self.testapp.get('/user/update', status=200)
+		self.assertForm(res, 'matrikel', '2613945')
+
 
 class TutorLoggedInTests(UserLoggedInTests):
 	def setUp(self):
