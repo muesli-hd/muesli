@@ -92,6 +92,7 @@ class BaseTests(unittest.TestCase):
 		form = getForm(res)
 		form[name] = newvalue
 		res2 = form.submit()
+		self.assertResContainsNot(res2, u'formerror')
 		form = getForm(res2)
 		self.assertTrue(form[name].value == newvalue)
 		return res2
