@@ -19,7 +19,7 @@
 
 # -*- coding: utf-8 -*-
 
-import math
+import math, random, time, hashlib
 
 import muesli
 
@@ -116,6 +116,8 @@ class Confirmation(Base):
 	source = Column(Text, nullable=False)
 	what = Column(Text)
 	created_on = Column(DateTime, nullable=False, default=func.CURRENT_TIMESTAMP)
+	def __init__(self):
+		self.hash = hashlib.sha1("%s-%s" % (time.time(), random.random())).hexdigest()
 
 class Lecture(Base):
 	__tablename__ = 'lectures'
