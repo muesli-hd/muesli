@@ -107,7 +107,7 @@ def registerCommon(request, form):
 		confirmation.user = user
 		request.db.add(confirmation)
 		send_confirmation_mail(request, user, confirmation)
-		#request.db.commit()
+		request.db.commit()
 
 def send_confirmation_mail(request, user, confirmation):
 	mailer = get_mailer(request)
@@ -146,7 +146,6 @@ def confirm(request):
 	form = UserConfirm(request, request.context.confirmation)
 	if request.method == 'POST' and form.processPostData(request.POST):
 		user = request.context.confirmation.user
-		print form['password']
 		user.password = sha1(form['password']).hexdigest()
 		request.db.delete(request.context.confirmation)
 		request.db.commit()
