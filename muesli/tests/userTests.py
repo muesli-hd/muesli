@@ -24,6 +24,7 @@ from hashlib import sha1
 import unittest
 import muesli.web
 from muesli.tests import functionalTests
+from muesli.models import *
 
 class BaseTests(functionalTests.BaseTests):
 	def test_user_login(self):
@@ -41,6 +42,43 @@ class BaseTests(functionalTests.BaseTests):
 	def test_user_update(self):
 		res = self.testapp.get('/user/update', status=403)
 
+	def test_user_register(self):
+		res = self.testapp.get('/user/register', status=200)
+		form = res.form
+		form['email'] = 'matthias@matthias-k.org'
+		form['first_name'] = 'Matthias'
+		form['subject'] = 'Mathematik (Dipl.)'
+		form['matrikel'] = '1234567'
+		form['birth_date'] = '01.12.1999'
+		form['birth_place'] = 'Hintertupfingen'
+		res = form.submit()
+		self.assertTrue(res.status.startswith('200'))
+		self.assertResContains(res, 'formerror')
+		form = res.form
+		form['email'] = 'matthias@matthias-k.org'
+		form['first_name'] = 'Matthias'
+		form['last_name'] = 'Kümmerer'
+		form['subject'] = 'Mathematik (Dipl.)'
+		form['matrikel'] = '1234567'
+		form['birth_date'] = '01.12.1999'
+		form['birth_place'] = 'Hintertupfingen'
+		res = form.submit()
+		self.assertTrue(res.status.startswith('302'))
+
+	def test_user_confirm(self):
+		self.test_user_register()
+		self.session.expire_all()
+		user = self.session.query(User).filter(User.email=='matthias@matthias-k.org').one()
+		confirmation = user.confirmations[0]
+		res = self.testapp.get('/user/confirm/%s' % confirmation.hash, status=200)
+		form =  res.form
+		form['password'] = 'test'
+		form['password_repeat'] = 'test'
+		res = form.submit()
+		self.session.expire_all()
+		self.assertTrue(res.status.startswith('302'))
+		self.assertTrue(confirmation not in user.confirmations)
+		self.assertTrue(user.password != None)
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_user_edit(self):
