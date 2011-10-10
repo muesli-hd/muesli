@@ -48,7 +48,8 @@ class FormField(object):
 		value=None, size=40, comment=None,
 		validator=None, required=False,
 		cols=64,
-		rows=24):
+		rows=24,
+		readonly=False):
 		self.name = name
 		self.label = label
 		self.type = type
@@ -60,6 +61,7 @@ class FormField(object):
 		self.required = required
 		self.cols = cols
 		self.rows = rows
+		self.readonly = readonly
 
 class FileField(FormField):
 	def __init__(self, name, growable=False, **kwargs):

@@ -9,7 +9,7 @@
       <td><label tal:attributes="for field.name"><b tal:omit-tag="field.required==False">${field.label}:</b></label></td>
       <td>
         <div tal:condition="field.type=='select'" tal:omit-tag="">
-          <select tal:attributes="name field.name">
+          <select tal:attributes="name field.name; disabled='disabled' if field.readonly else None">
             <option tal:repeat="option field.options"
                tal:attributes="value option[0]; selected 'selected' if option[0]==field.value else None">
                 ${option[1]}
@@ -18,15 +18,15 @@
         </div>
         <div tal:condition="field.type=='radio'" tal:omit-tag="">
           <div tal:repeat="option field.options" tal:omit-tag="">
-            <input type="radio" tal:attributes="name field.name; value str(option[0]); checked 'checked' if option[0]==field.value else None" />
+            <input type="radio" tal:attributes="name field.name; value str(option[0]); checked 'checked' if option[0]==field.value else None; readonly='readonly' if field.readonly else None" />
             <label tal:attributes="for field.name+'_'+str(option[0])">${option[1]}</label>
           </div>
         </div>
         <div tal:condition="field.type=='text'" tal:omit-tag="">
-          <input tal:attributes="name field.name; size str(field.size); value field.value"/>
+          <input tal:attributes="name field.name; size str(field.size); value field.value; readonly='readonly' if field.readonly else None"/>
         </div>
         <div tal:condition="field.type=='textarea'" tal:omit-tag="">
-          <textarea tal:attributes="name field.name; cols str(field.cols); rows str(field.rows); value field.value"></textarea>
+          <textarea tal:attributes="name field.name; cols str(field.cols); rows str(field.rows); value field.value; readonly='readonly' if field.readonly else None"></textarea>
         </div>
         <div tal:condition="field.type=='file'" tal:omit-tag="">
           <input type="file" tal:attributes="name field.name; size str(field.size); value field.value" />
