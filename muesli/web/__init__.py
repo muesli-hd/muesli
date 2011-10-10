@@ -101,7 +101,7 @@ def main(global_config=None, **settings):
 		settings=settings,
 		)
 
-	config.include('pyramid_mailer')
+	config.include(muesli.mailerName)
 	config.add_static_view('static', 'muesli.web:static')
 
 	config.add_route('start', '/start', factory = GeneralContext)

@@ -54,7 +54,7 @@ class BaseTests(unittest.TestCase):
 
 		import muesli.models
 		muesli.models.Base.metadata.create_all(self.engine)
-
+		muesli.mailerName = 'pyramid_mailer.testing'
 		muesli.old_engine = muesli.engine
 		muesli.engine = lambda: self.engine
 		import muesli.web
