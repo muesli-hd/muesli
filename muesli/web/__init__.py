@@ -120,7 +120,7 @@ def main(global_config=None, **settings):
 	config.add_route('user_register', '/user/register', factory=GeneralContext)
 	config.add_route('user_register_other', '/user/register_other', factory=GeneralContext)
 	config.add_route('user_wait_for_confirmation', '/user/wait_for_confirmation', factory=GeneralContext)
-	config.add_route('user_confirm', '/user/confirm/{confirmation}', factory=GeneralContext)
+	config.add_route('user_confirm', '/user/confirm/{confirmation}', factory=ConfirmationContext)
 	config.add_route('user_reset_password', '/user/reset_password')
 
 	config.add_route('overview', '/')

@@ -69,16 +69,28 @@ class FileField(FormField):
 		FormField.__init__(self, name, **kwargs)
 		self.growable = growable
 
+class PasswordField(FormField):
+	def __init__(self, name, **kwargs):
+		kwargs['type'] = 'password'
+		FormField.__init__(self, name, **kwargs)
+
+class HiddenField(FormField):
+	def __init__(self, name, **kwargs):
+		kwargs['type'] = 'hidden'
+		FormField.__init__(self, name, **kwargs)
+
 class Form(object):
-	def __init__(self, formfields, send="Senden"):
+	def __init__(self, formfields, send="Senden", chained_validators=[]):
 		self.formfields = formfields
 		self.updateNames()
+		self.chained_validators = chained_validators
 		self.createSchema()
 		self.errors = {}
 		self.send=send
 		self.message=""
 	def createSchema(self):
 		fields = self.formfields
+		chained_validators = self.chained_validators
 		class Schema(formencode.Schema):
 			def __init__(self, *args, **kwargs):
 				for field in fields:
@@ -87,6 +99,8 @@ class Form(object):
 					else:
 						kwargs[field.name] = formencode.validators.UnicodeString()
 					kwargs[field.name].not_empty = field.required
+				if chained_validators:
+					kwargs['chained_validators'] = chained_validators
 				formencode.Schema.__init__(self, *args, **kwargs)
 		self.formValidator = FormValidator(Schema())
 	def updateNames(self):
@@ -146,8 +160,8 @@ class FormValidator(object):
 			setattr(obj, f, self[f])
 
 class ObjectForm(Form):
-	def __init__(self, obj, formfields, send="Ändern"):
-		Form.__init__(self, formfields, send=send)
+	def __init__(self, obj, formfields, send="Ändern", chained_validators=[]):
+		Form.__init__(self, formfields, send=send, chained_validators=chained_validators)
 		self.obj = obj
 	def saveField(self, fieldName):
 		setattr(self.obj, fieldName, self[fieldName])
@@ -410,6 +424,27 @@ class UserRegister(ObjectForm):
 			pass
 		else:
 			ObjectForm.saveField(self, fieldName)
+
+class UserConfirm(ObjectForm):
+	def __init__(self, request, confirmation):
+		formfields = [
+			FormField('email',
+			   label='E-Mail', size=40,
+			   readonly=True,
+			   value=confirmation.user.email),
+			PasswordField('password',
+			   label='Passwort',
+			   required=True
+			   ),
+			PasswordField('password_repeat',
+			   label='Passwort (Wiederholung)',
+			   required=True
+			   ),
+			HiddenField('hash',
+			   value=confirmation.hash),
+			]
+		ObjectForm.__init__(self, None, formfields, send=u'Registrierung abschließen',
+			chained_validators=[validators.FieldsMatch('password', 'password_repeat')])
 
 class LectureAddExam(ObjectForm):
 	def __init__(self, request):

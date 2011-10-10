@@ -13,6 +13,16 @@ class UserContext(object):
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
 			]
 
+class ConfirmationContext(object):
+	def __init__(self, request):
+		confirmation_hash = request.matchdict['confirmation']
+		self.confirmation = request.db.query(Confirmation).get(confirmation_hash)
+		if self.confirmation is None:
+			raise HTTPNotFound(detail='Confirmation not found')
+		self.__acl__ = [
+			(Allow, 'group:administrators', ALL_PERMISSIONS),
+			]
+
 class GeneralContext(object):
 	def __init__(self, request):
 		self.__acl__ = [

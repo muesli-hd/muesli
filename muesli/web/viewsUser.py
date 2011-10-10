@@ -107,7 +107,7 @@ def registerCommon(request, form):
 		confirmation.user = user
 		request.db.add(confirmation)
 		send_confirmation_mail(request, user, confirmation)
-		request.db.commit()
+		#request.db.commit()
 
 def send_confirmation_mail(request, user, confirmation):
 	mailer = get_mailer(request)
@@ -128,7 +128,7 @@ einfach.
 
 Mit freudlichen Grüßen,
   Das MÜSLI-Team
-	""" %(user.name(), user.email, request.route_path('user_confirm', confirmation=confirmation.hash))
+	""" %(user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
 	message = Message(subject=u'MÜSLI: Ihre Registrierung bei MÜSLI',
 		sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
 		recipients=[user.email],
@@ -140,3 +140,18 @@ Mit freudlichen Grüßen,
 @view_config(route_name='user_wait_for_confirmation', renderer='muesli.web:templates/user/wait_for_confirmation.pt', context=GeneralContext)
 def waitForConfirmation(request):
 	return {}
+
+@view_config(route_name='user_confirm', renderer='muesli.web:templates/user/confirm.pt', context=ConfirmationContext)
+def confirm(request):
+	form = UserConfirm(request, request.context.confirmation)
+	if request.method == 'POST' and form.processPostData(request.POST):
+		user = request.context.confirmation.user
+		print form['password']
+		user.password = sha1(form['password']).hexdigest()
+		request.db.delete(request.context.confirmation)
+		request.db.commit()
+		return HTTPFound(location=request.route_url('user_login'))
+	#	registerCommon(request, form)
+	#	return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
+	return {'form': form,
+	        'confirmation': request.context.confirmation}
