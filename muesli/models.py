@@ -25,7 +25,7 @@ import muesli
 
 import sqlalchemy
 import sqlalchemy.ext.declarative
-from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table
+from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table, text
 from sqlalchemy.orm import relationship, sessionmaker, backref
 from muesli.types import *
 from muesli.utils import DictOfObjects, AutoVivification
@@ -115,7 +115,7 @@ class Confirmation(Base):
 	user = relationship(User, backref='confirmations')
 	source = Column(Text, nullable=False)
 	what = Column(Text)
-	created_on = Column(DateTime, nullable=False, default=func.CURRENT_TIMESTAMP)
+	created_on = Column(DateTime, nullable=False, default=text('CURRENT_TIMESTAMP'))
 	def __init__(self):
 		self.hash = hashlib.sha1("%s-%s" % (time.time(), random.random())).hexdigest()
 
