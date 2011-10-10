@@ -90,9 +90,9 @@ subjects = [
 	'Sonstiges'
 	]
 
-def getSubjects(user):
+def getSubjects(user=None):
 	hisSubjects = list(subjects)
-	if not user.subject in hisSubjects:
+	if user and not user.subject in hisSubjects:
 		hisSubjects.append(user.subject)
 	hisSubjects = zip(hisSubjects,hisSubjects)
 	return hisSubjects
