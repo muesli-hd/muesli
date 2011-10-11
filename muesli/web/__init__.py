@@ -123,7 +123,9 @@ def main(global_config=None, **settings):
 	config.add_route('user_change_email_wait_for_confirmation', '/user/change_email_wait_for_confirmation', factory=GeneralContext)
 	config.add_route('user_confirm', '/user/confirm/{confirmation}', factory=ConfirmationContext)
 	config.add_route('user_confirm_email', '/user/confirm_email/{confirmation}', factory=ConfirmationContext)
-	config.add_route('user_reset_password', '/user/reset_password')
+	config.add_route('user_reset_password', '/user/reset_password', factory=GeneralContext)
+	config.add_route('user_reset_password2', '/user/reset_password2', factory=GeneralContext)
+	config.add_route('user_reset_password3', '/user/reset_password3/{confirmation}', factory=ConfirmationContext)
 
 	config.add_route('overview', '/')
 	config.add_route('lecture_add', '/lecture/add')

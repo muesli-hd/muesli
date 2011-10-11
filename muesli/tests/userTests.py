@@ -86,10 +86,45 @@ class BaseTests(functionalTests.BaseTests):
 	def test_user_change_password(self):
 		res = self.testapp.get('/user/change_password', status=403)
 
+	def test_user_reset_password(self):
+		res = self.testapp.get('/user/reset_password', status=200)
+		res.form['email'] = 'does-not-exist@muesli.org'
+		res = res.form.submit()
+		self.assertTrue(res.status.startswith('200'))
+
+	def test_user_reset_password2(self):
+		res = self.testapp.get('/user/reset_password2', status=200)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_user_edit(self):
 		res = self.testapp.get('/user/edit/%s' % self.user.id, status=403)
+
+	def test_user_reset_password(self):
+		res = self.testapp.get('/user/reset_password', status=200)
+		res.form['email'] = self.user.email
+		res = res.form.submit()
 		self.assertTrue(res.status.startswith('302'))
+
+	def test_user_reset_password(self):
+		res = self.testapp.get('/user/reset_password', status=200)
+		res.form['email'] = self.user.email
+		res = res.form.submit()
+		self.assertTrue(res.status.startswith('302'))
+
+	def test_user_reset_password3(self):
+		self.test_user_reset_password()
+		self.session.expire_all()
+		confirmation = self.session.query(Confirmation).one()
+		user = confirmation.user
+		res = self.testapp.get('/user/reset_password3/%s' % confirmation.hash, status=200)
+		res.form['password'] = 'testpasswort'
+		res.form['password_repeat'] = 'testpasswort'
+		res = res.form.submit()
+		self.assertTrue(res.status.startswith('302'))
+		self.assertResContainsNot(res, 'formerror')
+		user.realpassword = 'testpasswort'
+		res = self.testapp.get('/user/logout', status=302)
+		self.setUser(user)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):

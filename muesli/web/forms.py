@@ -474,6 +474,54 @@ class LectureAddExam(ObjectForm):
 			]
 		ObjectForm.__init__(self, None, formfields, send=u'Anlegen')
 
+class UserChangePassword(ObjectForm):
+	def __init__(self, request):
+		formfields = [
+			PasswordField('old_password',
+			   label='Altes Passwort', size=40,
+			   required=True,
+			   ),
+			PasswordField('new_password',
+			   label='Passwort',
+			   required=True
+			   ),
+			PasswordField('new_password_repeat',
+			   label='Passwort (Wiederholung)',
+			   required=True
+			   ),
+			]
+		ObjectForm.__init__(self, None, formfields, send=u'Neues Passwort setzen',
+			chained_validators=[validators.FieldsMatch('new_password', 'new_password_repeat')])
+
+class UserResetPassword(ObjectForm):
+	def __init__(self, request):
+		formfields = [
+			FormField('email',
+			   label='E-Mail', size=40,
+			   required=True,
+			   validator=validators.Email()),
+			]
+		ObjectForm.__init__(self, None, formfields, send=u'Passwort zurücksetzen')
+
+class UserResetPassword3(ObjectForm):
+	def __init__(self, request, confirmation):
+		formfields = [
+			FormField('email',
+			   label='E-Mail', size=40,
+			   readonly=True,
+			   value=confirmation.user.email),
+			PasswordField('password',
+			   label='Passwort',
+			   required=True
+			   ),
+			PasswordField('password_repeat',
+			   label='Passwort (Wiederholung)',
+			   required=True
+			   ),
+			]
+		ObjectForm.__init__(self, None, formfields, send=u'Neues Passwort setzen',
+			chained_validators=[validators.FieldsMatch('password', 'password_repeat')])
+
 class LectureEditExam(ObjectForm):
 	def __init__(self, request, exam):
 		formfields = [

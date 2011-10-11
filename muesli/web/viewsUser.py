@@ -233,3 +233,58 @@ def changePassword(request):
 		request.db.commit()
 	return {'form': form}
 
+@view_config(route_name='user_reset_password', renderer='muesli.web:templates/user/reset_password.pt', context=GeneralContext)
+def resetPassword(request):
+	form = UserResetPassword(request)
+	if request.method == 'POST' and form.processPostData(request.POST):
+		user = request.db.query(models.User).filter(models.User.email==form['email']).first()
+		if not user:
+			request.session.flash(u'User not found', queue='errors')
+		else:
+			confirmation = models.Confirmation()
+			confirmation.user = user
+			confirmation.source = u'user/reset_password'
+			mailer = get_mailer(request)
+			body =u"""
+Hallo!
+
+Um Ihr Passwort bei MÜSLI zurückzusetzen besuchen Sie bitte die Seite
+
+%s
+
+Haben Sie nicht selbst versucht Ihr Passwort zurückzusetzen, ignorieren Sie
+diese Mail bitte einfach.
+
+Mit freundlichen Grüßen,
+  Das MÜSLI-Team
+
+			""" %(request.route_url('user_reset_password3', confirmation=confirmation.hash))
+			message = Message(subject=u'MÜSLI: Passwort zurücksetzen',
+				sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
+				recipients=[user.email],
+				body=body)
+			# As we are not using transactions,
+			# we send the mail immediately.
+			mailer.send_immediately(message)
+			request.db.add(confirmation)
+			request.db.commit()
+			return HTTPFound(location=request.route_url('user_reset_password2'))
+	return {'form': form}
+
+@view_config(route_name='user_reset_password2', renderer='muesli.web:templates/user/reset_password2.pt', context=GeneralContext)
+def resetPassword2(request):
+	return {}
+
+@view_config(route_name='user_reset_password3', renderer='muesli.web:templates/user/reset_password3.pt', context=ConfirmationContext)
+def resetPassword3(request):
+	form = UserResetPassword3(request, request.context.confirmation)
+	if request.method == 'POST' and form.processPostData(request.POST):
+		user = request.context.confirmation.user
+		user.password = sha1(form['password']).hexdigest()
+		request.db.delete(request.context.confirmation)
+		request.db.commit()
+		return HTTPFound(location=request.route_url('user_login'))
+	#	registerCommon(request, form)
+	#	return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
+	return {'form': form,
+	        'confirmation': request.context.confirmation}
