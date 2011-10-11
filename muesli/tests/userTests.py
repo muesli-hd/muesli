@@ -83,6 +83,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_user_change_email(self):
 		res = self.testapp.get('/user/change_email', status=403)
 
+	def test_user_change_password(self):
+		res = self.testapp.get('/user/change_password', status=403)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_user_edit(self):
 		res = self.testapp.get('/user/edit/%s' % self.user.id, status=403)
@@ -107,6 +110,7 @@ class UserLoggedInTests(UnloggedTests):
 		res = self.testapp.get('/user/change_email', status=200)
 		res.form['email'] = 'test@muesli.org'
 		res = res.form.submit()
+		self.assertTrue(res.status.startswith('302'))
 
 	def test_user_confirm_email(self):
 		self.test_user_change_email()
@@ -136,6 +140,19 @@ class UserLoggedInTests(UnloggedTests):
 		#self.assertTrue(res.status.startswith('302'))
 		#self.assertTrue(confirmation not in user.confirmations)
 		#self.assertTrue(user.password != None)
+
+	def test_user_change_password(self):
+		res = self.testapp.get('/user/change_password', status=200)
+		res.form['old_password'] = self.loggedUser.realpassword
+		res.form['new_password'] = 'testpasswort'
+		res.form['new_password_repeat'] = 'testpasswort'
+		res = res.form.submit()
+		self.assertTrue(res.status.startswith('200'))
+		self.assertResContainsNot(res, 'formerror')
+		self.loggedUser.realpassword = 'testpasswort'
+		res = self.testapp.get('/user/logout', status=302)
+		self.setUser(self.loggedUser)
+
 
 
 class TutorLoggedInTests(UserLoggedInTests):

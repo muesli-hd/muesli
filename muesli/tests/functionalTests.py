@@ -257,6 +257,7 @@ class PopulatedTests(BaseTests):
 		self.session.commit()
 
 	def setUser(self, user):
+		self.loggedUser = user
 		self.testapp.post('/user/login',{'email': user.email, 'password': user.realpassword}, status=302)
 
 class UserLoggedInTests(PopulatedTests):

@@ -223,3 +223,13 @@ def confirmEmail(request):
 	return {'done': done,
 	        'aborted': aborted,
 	        'confirmation': request.context.confirmation}
+
+@view_config(route_name='user_change_password', renderer='muesli.web:templates/user/change_password.pt', context=GeneralContext, permission='change_password')
+def changePassword(request):
+	form = UserChangePassword(request)
+	if request.method == 'POST' and form.processPostData(request.POST):
+		request.user.password = sha1(form['new_password']).hexdigest()
+		request.session.flash('Neues Passwort gesetzt', queue='messages')
+		request.db.commit()
+	return {'form': form}
+
