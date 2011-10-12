@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Punkteübersicht</h2>
+
+<table class="colored">
+
+<thead>
+  <tr>
+    <th>Name</th>
+    <th tal:repeat="cat categories">${cat['name']}</th>
+  </tr>
+</thead>
+
+<tbody>
+  <tr tal:repeat="ls lecture_students">
+    <td>${ls.student.name()}</td>
+    <td tal:repeat="cat categories">
+      <span class="popup">
+        ${results[ls.student_id].get(cat['id'],'')}
+        <span tal:condition="results[ls.student_id].get(cat['id'])!=None and cat_maxpoints[cat['id']]">
+        (${'%d%%' % (float(results[ls.student_id][cat['id']])*100.0 / float(cat_maxpoints[cat['id']]))})
+        </span>
+
+        <span class="balloon">
+        <table>
+          <tr tal:repeat="e exams_by_cat[cat['id']]">
+            <td><a tal:attributes="href request.route_path('exam_enter_points', exam_id=e.id, tutorial_ids=tutorial_ids)">${e.name}</a></td>
+            <td>${results[ls.student_id][e.id] if results[ls.student_id].get(e.id)!=None else '---'}</td>
+            <td tal:condition="e.getMaxpoints()">
+              ${'%3d%%' % (float(results[ls.student_id].get(e.id,0) or 0)*100.0/float(e.getMaxpoints()))  if e.id in results[ls.student_id] else '---'}
+            </td>
+            <td tal:condition="not e.getMaxpoints()">
+              N/A
+            </td>
+          </tr>
+        </table>
+        </span>
+      </span>
+    </td>
+  </tr>
+</tbody>
+</table>
+  </metal:main>
+</metal:main>

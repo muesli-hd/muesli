@@ -215,6 +215,14 @@ class Lecture(Base):
 		results = self.getLectureResults(*args, **kwargs).subquery()
 		return session.query(func.sum(results.c.points).label('points'), results.c.student_id, results.c.category)\
 			.group_by(results.c.category, results.c.student_id)
+	def getPreparedLectureResults(self, lecture_results):
+		results = AutoVivification()
+		for res in lecture_results:
+			results[res.student_id][res.Exam.id] = res.points
+		for exam in self.exams:
+			for student_results in results.values():
+				student_results[exam.category] = student_results.get(exam.category,0)+(student_results.get(exam.id,0) or 0)
+		return results
 	def getGradingResults(self, tutorials = [], students = None):
 		session = Session.object_session(self)
 		return session.query(StudentGrade).filter(StudentGrade.grading_id.in_([g.id for g in self.gradings]))
