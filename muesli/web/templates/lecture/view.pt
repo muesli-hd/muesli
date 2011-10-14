@@ -89,7 +89,7 @@
   </form>
 
   <form tal:condition="request.user.hasPreferences(lecture)"
-    method="post" action="request.route_path('lecture_remove_preferences', lecture.id)">
+    method="post" tal:attributes="action request.route_path('lecture_remove_preferences', lecture_id=lecture.id)">
     <input type="submit" value="Präferenzen vergessen"/>
   </form>
 
