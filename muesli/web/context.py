@@ -67,6 +67,10 @@ class TutorialContext(object):
 			]+[(Allow, 'user:{0}'.format(tutor.id), ('view')) for tutorial in self.tutorials for tutor in tutorial.lecture.tutors]
 		if len(self.tutorials)>0:
 			self.__acl__.append((Allow, 'user:{0}'.format(self.tutorials[0].lecture.assistant_id), ('view', 'edit')))
+			if self.tutorials[0].lecture.mode == 'direct':
+				self.__acl__.append((Allow, Authenticated, ('subscribe')))
+			if self.tutorials[0].lecture.mode in ['direct', 'off']:
+				self.__acl__.append((Allow, Authenticated, ('unsubscribe')))
 
 class ExamContext(object):
 	def __init__(self, request):

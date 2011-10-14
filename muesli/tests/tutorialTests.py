@@ -42,6 +42,12 @@ class BaseTests(functionalTests.BaseTests):
 	def test_tutorial_results(self):
 		res = self.testapp.get('/tutorial/results/%s' % 12456, status=403)
 
+	def test_tutorial_subscribe(self):
+		res = self.testapp.get('/tutorial/subscribe/%s' % 12456, status=403)
+
+	def test_tutorial_unsubscribe(self):
+		res = self.testapp.get('/tutorial/unsubscribe/%s' % 12456, status=403)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_tutorial_view(self):
 		res = self.testapp.get('/tutorial/view/%s' % self.tutorial.id, status=403)
@@ -55,10 +61,25 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_tutorial_results(self):
 		res = self.testapp.get('/tutorial/results/%s' % self.tutorial.id, status=403)
 
+	def test_tutorial_subscribe(self):
+		res = self.testapp.get('/tutorial/subscribe/%s' % self.tutorial.id, status=403)
+
+	def test_tutorial_unsubscribe(self):
+		res = self.testapp.get('/tutorial/unsubscribe/%s' % self.tutorial.id, status=403)
+
+
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
 		UnloggedTests.setUp(self)
 		self.setUser(self.user)
+
+	def test_tutorial_subscribe(self):
+		res = self.testapp.get('/tutorial/subscribe/%s' % self.tutorial.id, status=302)
+
+	def test_tutorial_unsubscribe(self):
+		res = self.testapp.get('/tutorial/unsubscribe/%s' % self.tutorial2.id, status=403)
+		res = self.testapp.get('/tutorial/subscribe/%s' % self.tutorial2.id, status=302)
+		res = self.testapp.get('/tutorial/unsubscribe/%s' % self.tutorial2.id, status=302)
 
 class TutorLoggedInTests(UserLoggedInTests):
 	def setUp(self):

@@ -26,8 +26,10 @@ from muesli.web.context import *
 
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest
+from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPForbidden, HTTPFound
 from pyramid.url import route_url
+from pyramid_mailer import get_mailer
+from pyramid_mailer.message import Message
 from sqlalchemy.orm import exc
 import sqlalchemy
 
@@ -143,3 +145,83 @@ def results(request):
 	        'cat_maxpoints': cat_maxpoints,
 	        'exams_by_cat': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
 	        }
+
+@view_config(route_name='tutorial_subscribe', context=TutorialContext, permission='subscribe')
+def subscribe(request):
+	tutorials = request.context.tutorials
+	tutorial = tutorials[0]
+	lecture = tutorial.lecture
+	if tutorial.max_students > tutorial.students.count():
+		lrs = request.db.query(models.LectureRemovedStudent).get((lecture.id, request.user.id))
+		if lrs: request.db.delete(lrs)
+		ls = request.db.query(models.LectureStudent).get((lecture.id, request.user.id))
+		if ls:
+			oldtutorial = ls.tutorial
+		else:
+			ls = models.LectureStudent()
+			ls.lecture = lecture
+			ls.student = request.user
+			oldtutorial = None
+		ls.tutorial = tutorial
+		if not ls in request.db: request.db.add(ls)
+		if oldtutorial:
+			sendChangesMailUnsubscribe(request, oldtutorial, request.user, toTutorial=tutorial)
+		sendChangesMailSubscribe(request, tutorial, request.user, fromTutorial=oldtutorial)
+		request.db.commit()
+		request.session.flash(u'Erfolgreich in Übungsgruppe eingetragen', queue='messages')
+	else:
+		request.session.flash(u'Maximale Teilnehmerzahl bereits erreicht', queue='errors')
+		pass
+	return HTTPFound(location=request.route_url('lecture_view', lecture_id=lecture.id))
+
+@view_config(route_name='tutorial_unsubscribe', context=TutorialContext, permission='unsubscribe')
+def unsubscribe(request):
+	tutorials = request.context.tutorials
+	tutorial = tutorials[0]
+	lecture = tutorial.lecture
+	ls = request.db.query(models.LectureStudent).get((lecture.id, request.user.id))
+	if not ls or ls.tutorial_id != tutorial.id:
+		return HTTPForbidden('Sie sind zu dieser Übungsgruppe nicht angemeldet')
+	lrs = request.db.query(models.LectureRemovedStudent).get((lecture.id, request.user.id))
+	if not lrs:
+		lrs = models.LectureRemovedStudent()
+		lrs.lecture = lecture
+		lrs.student = request.user
+	lrs.tutorial = tutorial
+	if not lrs in request.db: request.db.add(lrs)
+	request.db.delete(ls)
+	sendChangesMailUnsubscribe(request, tutorial, request.user)
+	request.db.commit()
+	request.session.flash(u'Erfolgreich aus Übungsgruppe ausgetragen', queue='messages')
+	return HTTPFound(location=request.route_url('start'))
+
+def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
+	if not tutorial.tutor:
+		return
+	text = u'In Ihre Übungsgruppe zur Vorlesung %s am %s hat sich der Student %s eingetragen'\
+		% (tutorial.lecture.name, tutorial.time, student.name())
+	if fromTutorial:
+		text += ' (Wechsel aus der Gruppe am %s von %s).' % (fromTutorial.time, fromTutorial.tutor.name() if fromTutorial.tutor else 'NN')
+	else:
+		text += '.'
+	sendChangesMail(request, tutorial.tutor, text)
+def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
+	if not tutorial.tutor:
+		return
+	text = u'Aus Ihrer Übungsgruppe zur Vorlesung %s am %s hat sich der Student %s ausgetragen'\
+			% (tutorial.lecture.name, tutorial.time, student.name())
+	if toTutorial:
+		text += ' (Wechsel in die Gruppe am %s von %s).' % (toTutorial.time, toTutorial.tutor.name() if toTutorial.tutor else 'NN')
+	else:
+		text += '.'
+	sendChangesMail(request, tutorial.tutor, text)
+
+def sendChangesMail(request, tutor, text):
+	mailer = get_mailer(request)
+	message = Message(subject=u'MÜSLI: Änderungen in Ihrer Übungsgruppe',
+		sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
+		recipients= [tutor.email],
+		body=u'Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
+	# As we are not using transactions,
+	# we send the mail immediately.
+	mailer.send_immediately(message)

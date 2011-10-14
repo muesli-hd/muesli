@@ -157,8 +157,8 @@ def main(global_config=None, **settings):
 	config.add_route('tutorial_edit', '/tutorial/edit/{tutorial_id}', factory=TutorialContext)
 	config.add_route('tutorial_set_tutor', '/tutorial/set_tutor/{tutorial_id}')
 	config.add_route('tutorial_remove_student', '/tutorial/remove_student/{tutorial_id}/{student_id}')
-	config.add_route('tutorial_subscribe', '/tutorial/subscribe/{tutorial_id}')
-	config.add_route('tutorial_unsubscribe', '/tutorial/unsubscribe/{tutorial_id}')
+	config.add_route('tutorial_subscribe', '/tutorial/subscribe/{tutorial_id}', factory=TutorialContext)
+	config.add_route('tutorial_unsubscribe', '/tutorial/unsubscribe/{tutorial_id}', factory=TutorialContext)
 	config.add_route('tutorial_occupancy_bar', '/tutorial/occupancy_bar/{count}/{max_count}/{max_count_total}')
 
 	config.add_route('exam_view_points', '/exam/view_points/{lecture_id}')
