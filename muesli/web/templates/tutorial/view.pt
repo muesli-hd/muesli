@@ -9,8 +9,7 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
 
 <h2>${names['tutorial']} zur <a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
   ${names['name']} ${tutorial.lecture.name}
-</a> am ${tutorial.time} (${tutorial.place})
-<span tal:repeat="ctutorial tutorials" tal:omit-tag="">${tutorial.time} (${tutorial.place}) </span>
+</a> am ${', '.join(['%s (%s)' %  (ctut.time, ctut.place) for ctut in tutorials])}
 
 </h2>
 
