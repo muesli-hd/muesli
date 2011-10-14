@@ -132,10 +132,7 @@ class UserLoggedInTests(UnloggedTests):
 		self.setUser(self.user)
 
 	def test_user_edit(self):
-		res = self.testapp.get('/user/edit/%s' % self.user.id, status=200)
-
-	def test_user2_edit(self):
-		res = self.testapp.get('/user/edit/%s' % self.user2.id, status=403)
+		res = self.testapp.get('/user/edit/%s' % self.user.id, status=403)
 
 	def test_user_update(self):
 		res = self.testapp.get('/user/update', status=200)
@@ -194,12 +191,6 @@ class TutorLoggedInTests(UserLoggedInTests):
 	def setUp(self):
 		UserLoggedInTests.setUp(self)
 		self.setUser(self.tutor)
-
-	def test_user_edit(self):
-		pass
-
-	def test_user2_edit(self):
-		pass
 
 class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):

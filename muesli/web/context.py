@@ -9,7 +9,7 @@ class UserContext(object):
 		if self.user is None:
 			raise HTTPNotFound(detail='User not found')
 		self.__acl__ = [
-			(Allow, 'user:{0}'.format(user_id), ('view', 'edit')),
+			(Allow, 'user:{0}'.format(user_id), ('view')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
 			]
 
