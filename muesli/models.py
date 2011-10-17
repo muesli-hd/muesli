@@ -34,6 +34,13 @@ Base = sqlalchemy.ext.declarative.declarative_base()
 
 Session = sessionmaker()
 
+def getOrCreate(type, session, primary_key):
+	obj = session.query(type).get(primary_key)
+	if not obj:
+		obj = type(primary_key=primary_key)
+		session.add(obj)
+	return obj
+
 def initializeSession(engine):
 	Session.configure(bind=engine)
 
@@ -374,12 +381,16 @@ class TimePreference(Base):
 	student = relationship(User, backref='time_preferences')
 	time = Column(ColumnWrapper(TutorialTime)(length=7), primary_key=True)
 	penalty = Column(Integer)
-	def __init__(self, lecture, student, time, penalty):
-		self.lecture = lecture
-		self.student = student
-		self.time = time
-		self.penalty = penalty
-
+	def __init__(self, lecture=None, student=None, time=None, penalty=None, primary_key=None):
+		if primary_key:
+			self.lecture_id = primary_key[0]
+			self.student_id = primary_key[1]
+			self.time = primary_key[2]
+		else:
+			self.lecture = lecture
+			self.student = student
+			self.time = time
+			self.penalty = penalty
 class TutorialPreference(Base):
 	__tablename__ = 'tutorial_preferences'
 	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)

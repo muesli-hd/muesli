@@ -35,6 +35,8 @@ from pyramid_mailer.message import Message, Attachment
 from sqlalchemy.orm import exc
 import sqlalchemy
 
+from muesli import types
+
 import re
 import os
 
@@ -277,3 +279,30 @@ def removeAllocation(request):
 	request.session.flash(u'Eintragung zurückgesetzt', queue='messages')
 	db.commit()
 	return HTTPFound(location=request.route_url('lecture_edit', lecture_id = lecture.id))
+
+
+@view_config(route_name='lecture_set_preferences', context=LectureContext, permission='view')
+def setPreferences(request):
+	lecture = request.context.lecture
+	times = lecture.prepareTimePreferences(user=request.user)
+	row = 1
+	tps = []
+	while 'time-%i' % row in request.POST:
+		time = types.TutorialTime(request.POST['time-%i' % row])
+		tp = models.getOrCreate(models.TimePreference, request.db, (lecture.id, request.user.id, time))
+		tp.penalty = int(request.POST['pref-%i' % row])
+		tps.append(tp)
+		row +=  1
+	if lecture.minimum_preferences:
+		valid = len(filter(lambda tp: tp.penalty < 100, tps)) >= lecture.minimum_preferences
+	else:
+		min_number_of_times = len(tps)/100.0+1
+		penalty_count = sum([1.0/tp.penalty for tp in tps])
+		valid = penalty_count > min_number_of_times
+	if not valid:
+		request.db.rollback()
+		request.session.flash(u'Fehler: Sie haben zu wenige Zeiten ausgewählt', queue='errors')
+	else:
+		request.db.commit()
+		request.session.flash(u'Präferenzen gespeichert.', queue='messages')
+	return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))
