@@ -106,8 +106,8 @@ def registerCommon(request, form):
 		confirmation.source = u'user/register'
 		confirmation.user = user
 		request.db.add(confirmation)
-		send_confirmation_mail(request, user, confirmation)
 		request.db.commit()
+		send_confirmation_mail(request, user, confirmation)
 
 def send_confirmation_mail(request, user, confirmation):
 	mailer = get_mailer(request)
@@ -191,9 +191,9 @@ Mit freundlichen Grüßen,
 				body=body)
 			# As we are not using transactions,
 			# we send the mail immediately.
-			mailer.send_immediately(message)
 			request.db.add(confirmation)
 			request.db.commit()
+			mailer.send_immediately(message)
 			#registerCommon(request, form)
 			return HTTPFound(location=request.route_url('user_change_email_wait_for_confirmation'))
 	return {'form': form}
@@ -265,9 +265,9 @@ Mit freundlichen Grüßen,
 				body=body)
 			# As we are not using transactions,
 			# we send the mail immediately.
-			mailer.send_immediately(message)
 			request.db.add(confirmation)
 			request.db.commit()
+			mailer.send_immediately(message)
 			return HTTPFound(location=request.route_url('user_reset_password2'))
 	return {'form': form}
 

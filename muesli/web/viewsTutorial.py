@@ -164,10 +164,10 @@ def subscribe(request):
 			oldtutorial = None
 		ls.tutorial = tutorial
 		if not ls in request.db: request.db.add(ls)
+		request.db.commit()
 		if oldtutorial:
 			sendChangesMailUnsubscribe(request, oldtutorial, request.user, toTutorial=tutorial)
 		sendChangesMailSubscribe(request, tutorial, request.user, fromTutorial=oldtutorial)
-		request.db.commit()
 		request.session.flash(u'Erfolgreich in Übungsgruppe eingetragen', queue='messages')
 	else:
 		request.session.flash(u'Maximale Teilnehmerzahl bereits erreicht', queue='errors')
@@ -190,8 +190,8 @@ def unsubscribe(request):
 	lrs.tutorial = tutorial
 	if not lrs in request.db: request.db.add(lrs)
 	request.db.delete(ls)
-	sendChangesMailUnsubscribe(request, tutorial, request.user)
 	request.db.commit()
+	sendChangesMailUnsubscribe(request, tutorial, request.user)
 	request.session.flash(u'Erfolgreich aus Übungsgruppe ausgetragen', queue='messages')
 	return HTTPFound(location=request.route_url('start'))
 
