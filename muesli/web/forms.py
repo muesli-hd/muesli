@@ -609,6 +609,29 @@ class TutorialEdit(ObjectForm):
 		else:
 			ObjectForm.saveField(self, fieldName)
 
+class TutorialEmail(Form):
+	def __init__(self):
+		formfields = [
+			FormField('subject',
+			   label='Betreff', size=64,
+			   required=True),
+			FormField('body',
+			   label='Nachricht', cols=64, rows=24,
+			   type='textarea',
+			   required=True),
+			FileField('attachments',
+			   label=u'Anhänge', size=64,
+			   growable=False
+			   ),
+			FormField('copytome',
+			   label=u'Kopie an mich',
+			   type='radio',
+			   options=enumerate([u'Senden', u'Nicht senden']),
+			   value=0
+			   ),
+			]
+		Form.__init__(self, formfields, send=u'Senden')
+
 class ExamAddOrEditExercise(ObjectForm):
 	def __init__(self, request, exercise):
 		formfields = [

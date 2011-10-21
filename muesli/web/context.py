@@ -57,6 +57,7 @@ class LectureContext(object):
 class TutorialContext(object):
 	def __init__(self, request):
 		self.tutorial_ids = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', '')).split(',')
+		self.tutorial_ids_str = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', ''))
 		if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
 			self.tutorial_ids = []
 			self.tutorials = []
