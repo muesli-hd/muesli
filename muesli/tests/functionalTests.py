@@ -245,7 +245,7 @@ class PopulatedTests(BaseTests):
 		self.session.add(self.prefLecture)
 
 		self.prefTutorial = muesli.models.Tutorial()
-		self.prefTutorial.lecture = self.lecture
+		self.prefTutorial.lecture = self.prefLecture
 		self.prefTutorial.tutor = self.tutor2
 		self.prefTutorial.place = 'In einer weit entfernten Galaxis'
 		self.prefTutorial.max_students = 42

@@ -376,7 +376,7 @@ class Tutorial(Base):
 class TimePreference(Base):
 	__tablename__ = 'time_preferences'
 	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)
-	lecture = relationship(Lecture, backref='time_preferences')
+	lecture = relationship(Lecture, backref=backref('time_preferences', lazy='dynamic'))
 	student_id = Column('student', Integer, ForeignKey(User.id), primary_key=True)
 	student = relationship(User, backref='time_preferences')
 	time = Column(ColumnWrapper(TutorialTime)(length=7), primary_key=True)

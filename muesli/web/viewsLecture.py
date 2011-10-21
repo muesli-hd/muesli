@@ -306,3 +306,11 @@ def setPreferences(request):
 		request.db.commit()
 		request.session.flash(u'Präferenzen gespeichert.', queue='messages')
 	return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))
+
+@view_config(route_name='lecture_remove_preferences', context=LectureContext, permission='view')
+def removePreferences(request):
+	lecture = request.context.lecture
+	lecture.time_preferences.filter(models.TimePreference.student_id == request.user.id).delete()
+	request.db.commit()
+	request.session.flash(u'Präferenzen wurden entfernt.', queue='messages')
+	return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))

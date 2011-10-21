@@ -62,6 +62,13 @@ class BaseTests(functionalTests.BaseTests):
 	def test_lecture_export_totals(self):
 		res = self.testapp.get('/lecture/export_totals/%s' % 123456, status=404)
 
+	def test_lecture_set_preferences(self):
+		res = self.testapp.get('/lecture/set_preferences/%s' % 123456, status=404)
+
+	def test_lecture_remove_preferences(self):
+		res = self.testapp.get('/lecture/remove_preferences/%s' % 123456, status=404)
+
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_lecture_view(self):
 		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=403)
@@ -104,6 +111,11 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_lecture_export_totals(self):
 		res = self.testapp.get('/lecture/export_totals/%s' % self.lecture.id, status=403)
 
+	def test_lecture_set_preferences(self):
+		res = self.testapp.get('/lecture/set_preferences/%s' % self.prefLecture.id, status=403)
+
+	def test_lecture_remove_preferences(self):
+		res = self.testapp.get('/lecture/remove_preferences/%s' % self.prefLecture.id, status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -112,6 +124,20 @@ class UserLoggedInTests(UnloggedTests):
 
 	def test_lecture_view(self):
 		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=200)
+
+	def test_lecture_set_preferences(self):
+		res = self.testapp.get('/lecture/set_preferences/%s' % self.prefLecture.id, status=302)
+		res = self.testapp.get('/lecture/view/%s' % self.prefLecture.id, status=200)
+		form = res.forms[0]
+		form['time-1'] = str(self.prefTutorial.time)
+		res = form.submit()
+		self.assertTrue(res.status.startswith('302'))
+		self.session.expire_all()
+		self.assertTrue(len(self.loggedUser.time_preferences) > 0)
+
+	def test_lecture_remove_preferences(self):
+		res = self.testapp.get('/lecture/remove_preferences/%s' % self.prefLecture.id, status=302)
+		self.assertTrue(len(self.loggedUser.time_preferences) == 0)
 
 class TutorLoggedInTests(UserLoggedInTests):
 	def setUp(self):
@@ -133,7 +159,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 	def test_lecture_do_allocation(self):
 		res = self.testapp.get('/lecture/do_allocation/%s' % self.prefLecture.id, status=200)
 		self.session.expire_all()
-		#self.assertTrue(self.prefLecture.lecture_students.count()>0)
+		self.assertTrue(self.prefLecture.lecture_students.count()>0)
 		res = res.forms[0].submit()
 		self.assertTrue(res.status.startswith('302'))
 		self.session.expire_all()
