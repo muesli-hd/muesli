@@ -63,6 +63,14 @@ class TutorialContext(object):
 			self.tutorials = []
 		else:
 			self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(self.tutorial_ids)).all()
+		if self.tutorials:
+			self.lecture = self.tutorials[0].lecture
+		else:
+			lecture_id = request.matchdict.get('lecture_id', None)
+			if lecture_id:
+				self.lecture = request.db.query(Lecture).get(lecture_id)
+			else:
+				self.lecture = None
 		self.__acl__ = [
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
 			]+[(Allow, 'user:{0}'.format(tutor.id), ('view')) for tutorial in self.tutorials for tutor in tutorial.lecture.tutors]
@@ -79,6 +87,7 @@ class ExamContext(object):
 		self.exam = request.db.query(Exam).get(exam_id)
 		if self.exam is None:
 			raise HTTPNotFound(detail='Exam not found')
+		self.tutorial_ids_str = request.matchdict.get('tutorial_ids', '')
 		if 'tutorial_ids' in request.matchdict:
 			self.tutorial_ids = request.matchdict['tutorial_ids'].split(',')
 			if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':

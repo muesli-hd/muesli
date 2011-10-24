@@ -95,6 +95,10 @@ class BaseTests(functionalTests.BaseTests):
 	def test_user_reset_password2(self):
 		res = self.testapp.get('/user/reset_password2', status=200)
 
+	def test_user_ajax_complete(self):
+		res = self.testapp.get('/user/ajax_complete/%s/%s' % (123,234), status=403)
+
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_user_edit(self):
 		res = self.testapp.get('/user/edit/%s' % self.user.id, status=403)
@@ -125,6 +129,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 		user.realpassword = 'testpasswort'
 		res = self.testapp.get('/user/logout', status=302)
 		self.setUser(user)
+
+	def test_user_ajax_complete(self):
+		res = self.testapp.get('/user/ajax_complete/%s/%s' % (self.lecture.id,self.tutorial.id), status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -191,6 +198,14 @@ class TutorLoggedInTests(UserLoggedInTests):
 	def setUp(self):
 		UserLoggedInTests.setUp(self)
 		self.setUser(self.tutor)
+
+	def test_user_ajax_complete(self):
+		res = self.testapp.post('/user/ajax_complete/%s/%s' % (self.lecture.id,self.tutorial.id),
+		       {'name': 'GarantiertKeinName'}, status=200)
+		self.assertResContainsNot(res, '</li>')
+		res = self.testapp.post('/user/ajax_complete/%s/%s' % (self.lecture.id,self.tutorial.id),
+		       {'name': self.tutorial.students[0].last_name}, status=200)
+		self.assertResContains(res, self.tutorial.students[0].first_name)
 
 class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):

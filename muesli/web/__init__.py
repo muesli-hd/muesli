@@ -126,6 +126,7 @@ def main(global_config=None, **settings):
 	config.add_route('user_reset_password', '/user/reset_password', factory=GeneralContext)
 	config.add_route('user_reset_password2', '/user/reset_password2', factory=GeneralContext)
 	config.add_route('user_reset_password3', '/user/reset_password3/{confirmation}', factory=ConfirmationContext)
+	config.add_route('user_ajax_complete', '/user/ajax_complete/{lecture_id}/{tutorial_ids:[^/]*}', factory = TutorialContext)
 
 	config.add_route('overview', '/')
 	config.add_route('lecture_add', '/lecture/add')

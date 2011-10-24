@@ -30,6 +30,7 @@ from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTPForbidden
 from pyramid.url import route_url
 from sqlalchemy.orm import exc
+from sqlalchemy import func, or_
 from hashlib import sha1
 
 from pyramid_mailer import get_mailer
@@ -288,3 +289,14 @@ def resetPassword3(request):
 	#	return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
 	return {'form': form,
 	        'confirmation': request.context.confirmation}
+
+@view_config(route_name='user_ajax_complete', renderer='muesli.web:templates/user/ajax_complete.pt', context=TutorialContext, permission='view')
+def ajaxComplete(request):
+	search_str =  request.POST['name']+'%'
+	lecture_students = request.context.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)
+	lecture_students = lecture_students.filter(or_((func.lower(models.User.first_name).like(func.lower(search_str))),\
+		(func.lower(models.User.last_name).like(func.lower(search_str))),\
+		(func.lower(models.User.email).like(func.lower(search_str)))\
+		))
+	students = [ls.student for ls in lecture_students]
+	return {'users': students}
