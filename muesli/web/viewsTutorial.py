@@ -253,3 +253,17 @@ def email(request):
 	        'tutorial_ids': request.context.tutorial_ids_str,
 	        'lecture': lecture,
 	        'form': form}
+
+@view_config(route_name='tutorial_ajax_get_tutorial', renderer='json', context=LectureContext, permission='get_tutorials')
+def ajaxGetTutorial(request):
+	lecture = request.context.lecture
+	student_id = request.POST['student_id']
+	ls = request.db.query(models.LectureStudent).get((lecture.id, student_id))
+	ret = {}
+	if ls and ls.tutorial:
+		ret = {'msg': 'sucessful'}
+		ret['tutor'] = ls.tutorial.tutor.name() if ls.tutorial.tutor else 'N.N.'
+		ret['time'] = ls.tutorial.time.formatted()
+		return ret
+	else:
+		return {'msg': 'No Tutorial found!'}

@@ -161,6 +161,7 @@ def main(global_config=None, **settings):
 	config.add_route('tutorial_subscribe', '/tutorial/subscribe/{tutorial_id}', factory=TutorialContext)
 	config.add_route('tutorial_unsubscribe', '/tutorial/unsubscribe/{tutorial_id}', factory=TutorialContext)
 	config.add_route('tutorial_occupancy_bar', '/tutorial/occupancy_bar/{count}/{max_count}/{max_count_total}')
+	config.add_route('tutorial_ajax_get_tutorial', '/tutorial/ajax_get_tutorial/{lecture_id}', factory=LectureContext)
 
 	config.add_route('exam_view_points', '/exam/view_points/{lecture_id}')
 	config.add_route('exam_add_or_edit_exercise', '/exam/add_or_edit_exercise/{exam_id}/{exercise_id:[^/]*}', factory=ExamContext)

@@ -50,9 +50,9 @@ class LectureContext(object):
 			raise HTTPNotFound(detail='Lecture not found')
 		self.__acl__ = [
 			(Allow, Authenticated, 'view'),
-			(Allow, 'user:{0}'.format(self.lecture.assistant_id), ('view', 'edit', 'view_tutorials')),
+			(Allow, 'user:{0}'.format(self.lecture.assistant_id), ('view', 'edit', 'view_tutorials', 'get_tutorials')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
-			]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials')) for tutor in self.lecture.tutors]
+			]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials', 'get_tutorials')) for tutor in self.lecture.tutors]
 
 class TutorialContext(object):
 	def __init__(self, request):

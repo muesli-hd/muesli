@@ -192,8 +192,6 @@ class UserLoggedInTests(UnloggedTests):
 		res = self.testapp.get('/user/logout', status=302)
 		self.setUser(self.loggedUser)
 
-
-
 class TutorLoggedInTests(UserLoggedInTests):
 	def setUp(self):
 		UserLoggedInTests.setUp(self)

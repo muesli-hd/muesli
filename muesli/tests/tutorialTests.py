@@ -51,6 +51,10 @@ class BaseTests(functionalTests.BaseTests):
 	def test_tutorial_email(self):
 		res = self.testapp.get('/tutorial/email/%s' % 12456, status=403)
 
+	def test_tutorial_ajax_tutorial(self):
+		res = self.testapp.post('/tutorial/ajax_get_tutorial/%s' % (1234),
+		       {'student_id': 1234}, status=404)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_tutorial_view(self):
 		res = self.testapp.get('/tutorial/view/%s' % self.tutorial.id, status=403)
@@ -72,6 +76,10 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 	def test_tutorial_email(self):
 		res = self.testapp.get('/tutorial/email/%s' % self.tutorial.id, status=403)
+
+	def test_tutorial_ajax_tutorial(self):
+		res = self.testapp.post('/tutorial/ajax_get_tutorial/%s' % (self.lecture.id),
+		       {'student_id': self.tutorial.students[0].id}, status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -105,6 +113,10 @@ class TutorLoggedInTests(UserLoggedInTests):
 		res = res.form.submit()
 		self.assertTrue(res.status.startswith('200'))
 
+	def test_tutorial_ajax_tutorial(self):
+		res = self.testapp.post('/tutorial/ajax_get_tutorial/%s' % (self.lecture.id),
+		       {'student_id': self.tutorial.students[0].id}, status=200)
+		self.assertResContains(res, self.tutorial.time.formatted())
 
 class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
