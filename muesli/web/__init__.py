@@ -173,7 +173,9 @@ def main(global_config=None, **settings):
 	config.add_route('exam_histogram_for_exam', '/exam/histogram_for_exam/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
 	config.add_route('exam_correlation', '/exam/correlation')
 	config.add_route('exam_enter_points', '/exam/enter_points/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
-	config.add_route('exam_enter_points_single', '/exam/enter_points_single/{exam_id}/{tutorial_ids:[^/]*}')
+	config.add_route('exam_enter_points_single', '/exam/enter_points_single/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
+	config.add_route('exam_ajax_get_points', '/exam/ajax_get_points/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
+	config.add_route('exam_ajax_save_points', '/exam/ajax_save_points/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
 	config.add_route('exam_export', '/exam/export/{exam_id}/{tutorial_ids:[^/]*}', factory = ExamContext)
 
 	config.add_route('grading_edit', '/grading/edit/{grading_id}', factory=GradingContext)

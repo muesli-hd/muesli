@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+
+<h2>Punkte eintragen</h2>
+
+<h3>${exam.name} der Vorlesung ${exam.lecture.name}</h3>
+
+  <p tal:condition="exam.admission!=None and exam.registration!=None">
+  Zu dieser Prüfung ist eine <a tal:attributes="href request.route_path('exam_admission', exam_id=exam.id, tutorial_ids=tutorial_ids)">Anmeldung und Zulassung</a> erforderlich.
+  </p>
+  <p tal:condition="exam.admission!=None and exam.registration==None">
+  Zu dieser Prüfung ist eine <a tal:attributes="href request.route_path('exam_admission', exam_id=exam.id, tutorial_ids=tutorial_ids)">Zulassung</a> erforderlich.
+  </p>
+  <p tal:condition="exam.admission==None and exam.registration!=None">
+  Zu dieser Prüfung ist eine <a tal:attributes="href request.route_path('exam_admission', exam_id=exam.id, tutorial_ids=tutorial_ids)">Anmeldung</a> erforderlich.
+  </p>
+
+
+<script>/* <![CDATA[ */
+  function update_total(row)
+  {
+    var objs = $$("#row-" + row + " input.points");
+    var total = 0;
+    var current = 0;
+
+    for (i = 0; i < objs.length; i++) {
+      current = parseFloat(objs[i].value.replace(/,/, "."));
+      if (!isNaN(current)) {
+        total += current;
+      }
+    }
+
+    return $("total-" + row).value = Number(total).toFixed(2);
+  }
+/* ]]> */
+</script>
+
+<script>
+${code}
+</script>
+
+<style type="text/css">/* <![CDATA[ */
+div.autocomplete {
+  position:absolute;
+  width:250px;
+  background-color:white;
+  border:1px solid #888;
+  margin:0;
+  padding:0;
+}
+div.autocomplete ul {
+  list-style-type:none;
+  margin:0;
+  padding:0;
+}
+div.autocomplete ul li.selected { background-color: #ffb;}
+div.autocomplete ul li {
+  list-style-type:none;
+  display:block;
+  margin:0;
+  padding:2px;
+  height:32px;
+  cursor:pointer;
+}
+/* ]]> */
+</style>
+
+<form id="enter_points_form" onsubmit="{submit_points(currentrow);return false;}" onkeypressss="{if(event.keycode==1300)this.form.submit();}">
+<input type="hidden" id="student_id" name="student_id" />
+<table id="enter_points_table">
+  <tr>
+    <th tal:condition="show_tutor">Tutor</th>
+    <th tal:condition="show_time">Zeit</th>
+    <th>Name</th>
+    <th tal:repeat="e exercises">${e.nr}</th>
+    <th>Σ</th>
+    <th></th>
+    <th></th>
+  </tr>
+</table>
+</form>
+
+<form id="select_student_form" onsubmit="{student_selected(); return false;}">
+Name:
+<input type="text" id="student" name="student" size="40" value="" autocomplete="off" class="autocomplete" />
+
+<input type="hidden" id="student_hidden" name="student_id" />
+
+<div id="autocomplete_choices" class="autocomplete"></div>
+
+<input type="submit" value="Punkte eintragen" />
+</form>
+
+<script>/* <![CDATA[ */
+function getSelectionId(text, li) {
+    $('student_hidden').value = li.id;
+}
+
+new Ajax.Autocompleter("student", "autocomplete_choices", "${request.route_path('user_ajax_complete', lecture_id=exam.lecture_id, tutorial_ids=tutorial_ids)}", {paramName: "name",
+afterUpdateElement : getSelectionId
+});
+/* ]]> */
+</script>
+
+
+  </metal:main>
+</metal:main>
