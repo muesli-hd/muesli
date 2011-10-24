@@ -314,7 +314,6 @@ def enterPointsSingle(request):
 	exercises = exam.exercises
 	request.javascript.add('prototype.js')
 	request.javascript.add('scriptaculous/scriptaculous.js')
-	print request.context.tutorials
 	show_tutor = not request.context.tutorials
 	show_time = (not request.context.tutorials) or len(request.context.tutorials) > 1
 	code = """
@@ -537,3 +536,16 @@ def ajaxSavePoints(request):
 	request.db.commit()
 	json_data['msg'] = json_data['msg'] or 'sucessfull'
 	return json_data
+
+@view_config(route_name='exam_ajax_get_points', renderer='json', context=ExamContext, permission='enter_points')
+def ajaxGetPoints(request):
+	exam = request.context.exam
+	lecture_students = exam.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)
+	student_id = request.POST['student_id']
+	student = lecture_students.filter(models.LectureStudent.student_id == student_id).one().student
+	exercise_points = exam.exercise_points.filter(models.ExerciseStudent.student_id==student.id)
+	points = {}
+	json_data = {'msg': '', 'format_error_cells': []}
+	for ep in exercise_points:
+		points[ep.exercise_id] = float(ep.points)
+	return {'points': points}
