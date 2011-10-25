@@ -56,6 +56,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_exam_export_tuts(self):
 		res = self.testapp.get('/exam/export/%s/%s,%s' % (12345, 12,23), status=404)
 
+	def test_exam_ajax_save_points(self):
+		res = self.testapp.get('/exam/ajax_save_points/%s/%s,%s' % (12345, 12,23), status=404)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_exam_edit(self):
 		res = self.testapp.get('/exam/edit/%s' % self.exam.id, status=403)
@@ -89,6 +92,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 	def test_exam_export_tuts(self):
 		res = self.testapp.get('/exam/export/%s/%s,%s' % (self.exam.id, self.tutorial.id,self.tutorial2.id), status=403)
+
+	def test_exam_ajax_save_points(self):
+		res = self.testapp.get('/exam/ajax_save_points/%s/%s,%s' % (self.exam.id, self.tutorial.id,self.tutorial2.id), status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -133,6 +139,14 @@ class TutorLoggedInTests(UserLoggedInTests):
 	def test_exam_export_tuts(self):
 		res = self.testapp.get('/exam/export/%s/%s,%s' % (self.exam.id, self.tutorial.id,self.tutorial2.id), status=200)
 
+	def test_exam_ajax_save_points(self):
+		post = {'student_id': self.user.id}
+		post['points-%s' % self.exercise.id] = 3.0
+		self.assertTrue(len(self.user.exercise_points)==0)
+		res = self.testapp.post('/exam/ajax_save_points/%s/%s,%s' % (self.exam.id, self.tutorial.id,self.tutorial2.id), post,status=200)
+		self.assertTrue(res.status.startswith('200'))
+		self.session.expire_all()
+		self.assertTrue(len(self.user.exercise_points)>0)
 
 class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
