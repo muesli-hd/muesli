@@ -24,6 +24,7 @@ from hashlib import sha1
 import unittest
 import muesli.web
 from muesli.tests import functionalTests
+import json
 
 class BaseTests(functionalTests.BaseTests):
 	def test_exam_edit(self):
@@ -58,6 +59,10 @@ class BaseTests(functionalTests.BaseTests):
 
 	def test_exam_ajax_save_points(self):
 		res = self.testapp.get('/exam/ajax_save_points/%s/%s,%s' % (12345, 12,23), status=404)
+
+	def test_exam_ajax_get_points(self):
+		res = self.testapp.get('/exam/ajax_get_points/%s/%s,%s' % (12345, 12,23), status=404)
+
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_exam_edit(self):
@@ -95,6 +100,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 	def test_exam_ajax_save_points(self):
 		res = self.testapp.get('/exam/ajax_save_points/%s/%s,%s' % (self.exam.id, self.tutorial.id,self.tutorial2.id), status=403)
+
+	def test_exam_ajax_get_points(self):
+		res = self.testapp.get('/exam/ajax_get_points/%s/%s,%s' % (self.exam.id, self.tutorial.id,self.tutorial2.id), status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -147,6 +155,19 @@ class TutorLoggedInTests(UserLoggedInTests):
 		self.assertTrue(res.status.startswith('200'))
 		self.session.expire_all()
 		self.assertTrue(len(self.user.exercise_points)>0)
+
+	def test_exam_ajax_get_points(self):
+		post = {'student_id': self.user.id}
+		res = self.testapp.post('/exam/ajax_get_points/%s/%s,%s' % (self.exam.id, self.tutorial.id,self.tutorial2.id), post, status=200)
+		self.assertTrue(res.status.startswith('200'))
+		data = json.loads(res.body)
+		self.assertTrue(len(data['points'])==0)
+		self.test_exam_ajax_save_points()
+		res = self.testapp.post('/exam/ajax_get_points/%s/%s,%s' % (self.exam.id, self.tutorial.id,self.tutorial2.id), post, status=200)
+		self.assertTrue(res.status.startswith('200'))
+		data = json.loads(res.body)
+		self.assertTrue(len(data['points'])==1)
+		self.assertTrue(data['points']['%s' % self.exercise.id]==3)
 
 class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
