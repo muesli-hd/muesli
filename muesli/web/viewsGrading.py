@@ -33,8 +33,12 @@ from sqlalchemy.orm import exc
 from sqlalchemy.sql import func
 import sqlalchemy
 
+import pyExcelerator
+
 import re
 import os
+import StringIO
+import datetime
 
 @view_config(route_name='grading_edit', renderer='muesli.web:templates/grading/edit.pt', context=GradingContext, permission='edit')
 class Edit(object):
@@ -160,3 +164,81 @@ class EnterGrades(object):
 		        'examvars': examvars,
 		        'varsForExam': varsForExam,
 		        'lecture_students': lecture_students}
+
+class ExcelView(object):
+	def __init__(self, request):
+		self.request = request
+		self.w = pyExcelerator.Workbook()
+	def createResponse(self):
+		output = StringIO.StringIO()
+		self.w.save(output)
+		response = Response(content_type='application/vnd.ms-excel')
+		response.body = output.getvalue()
+		output.close()
+		return response
+
+@view_config(route_name='grading_export', context=GradingContext, permission='edit')
+class Export(ExcelView):
+	def __call__(self):
+		grading = self.request.context.grading
+		lecture = grading.lecture
+		w = self.w
+		worksheet_exams = w.add_sheet('Pruefung')
+		worksheet_exams.set_col_default_width(20)
+		header_style = pyExcelerator.XFStyle()
+		header_style.font.bold=True
+		date_style = pyExcelerator.XFStyle()
+		date_style.num_format_str = 'dd.mm.yyyy'
+		header = ['Tabellenname', 'Veranstaltungsnummer', 'Titel', 'Semester', 'Termin', 'Datum', 'PrueferId', 'Pruefername']
+		for i,h in enumerate(header):
+			worksheet_exams.write(0,i,h,header_style)
+		data = ['Pruefungsteilnehmer',
+			lecture.lsf_id,
+			lecture.name,
+			str(lecture.term) if lecture.term!=None else '',
+			grading.hispos_type,
+			None,
+			grading.examiner_id,
+			lecture.lecturer]
+		for i,d in enumerate(data):
+			worksheet_exams.write(1,i,d if d != None else '')
+		date_p = re.compile('(\d{1,2}).(\d{1,2}).(\d{4})$')
+		m = date_p.match(grading.hispos_date or '')
+		if m:
+			date = datetime.datetime(year=int(m.group(3)), month=int(m.group(2)), day=int(m.group(1)))
+			worksheet_exams.write(1,5,date, date_style)
+		worksheet_grades =self.w.add_sheet('Pruefungsteilnehmer')
+		worksheet_grades.set_col_default_width(16)
+		header = ['mtknr', 'name', 'stg', 'stg_txt', 'accnr', 'pnr', 'pnote', 'pstatus', 'ppunkte', 'pbonus']
+		for i,h in enumerate(header):
+			worksheet_grades.write(0,i,h,header_style)
+		grades = grading.student_grades.all()
+		for i,grade in enumerate(grades):
+			if grade.grade != None:
+				g = float(grade.grade*100)
+			else:
+				g = ''
+			data = [grade.student.matrikel, grade.student.last_name, '', grade.student.subject, '', '', g, '']
+			for j,d in enumerate(data):
+				worksheet_grades.write(1+i,j,d if d != None else '')
+		worksheet_data = self.w.add_sheet('Daten')
+		worksheet_data.set_col_default_width(17)
+		header = ['Matrikel', 'Nachname', 'Vorname', 'Geburtsort', 'Geburtsdatum', 'Note', 'Vortragstitel', 'Studiengang']
+		for i,h in enumerate(header):
+			worksheet_data.write(0,i,h,header_style)
+		for i,grade in enumerate(grades):
+			m = date_p.match(grade.student.birth_date or '')
+			if m: date = datetime.datetime(year=int(m.group(3)), month=int(m.group(2)), day=int(m.group(1)))
+			else: date = ''
+			data = [grade.student.matrikel,
+				grade.student.last_name,
+				grade.student.first_name,
+				grade.student.birth_place,
+				None,
+				float(grade.grade) if grade.grade != None else '',
+				'',
+				grade.student.subject]
+			for j,d in enumerate(data):
+				worksheet_data.write(1+i,j,d if d != None else '')
+			worksheet_data.write(1+i,4, date, date_style)
+		return self.createResponse()

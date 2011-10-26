@@ -27,7 +27,7 @@ class WrappedColumn(object):
 	def __init__(self, value):
 		self.value = value
 	def __str__(self):
-		return self.value
+		return self.value or ''
 	def __eq__(self, other):
 		if not isinstance(other, WrappedColumn):
 			return False

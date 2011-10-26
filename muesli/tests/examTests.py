@@ -186,12 +186,10 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 		res = res.form.submit()
 		self.session.expire_all()
 		self.assertTrue(len(self.exam.exercises)==2)
-		
 
 	def test_exam_edit_exercise(self):
 		res = self.testapp.get('/exam/add_or_edit_exercise/%s/%s' % (self.exam.id, self.exercise.id), status=200)
 		self.assertForm(res, 'maxpoints', '5')
-
 
 class AdminLoggedInTests(AssistantLoggedInTests):
 	def setUp(self):

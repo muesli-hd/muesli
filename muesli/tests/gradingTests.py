@@ -38,6 +38,8 @@ class BaseTests(functionalTests.BaseTests):
 	def test_grading_enter_grades(self):
 		res = self.testapp.get('/grading/enter_grades/%s' % 12345, status=404)
 
+	def test_grading_export(self):
+		res = self.testapp.get('/grading/export/%s' % 12345, status=404)
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_grading_edit(self):
@@ -51,6 +53,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 	def test_grading_enter_grades(self):
 		res = self.testapp.get('/grading/enter_grades/%s' % self.grading.id, status=403)
+
+	def test_grading_export(self):
+		res = self.testapp.get('/grading/export/%s' % self.grading.id, status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -88,6 +93,11 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 		res = self.testapp.get('/grading/enter_grades/%s' % self.grading.id, status=200)
 		# Caution: Need format 'x.y', otherwise test will fail
 		self.assertForm(res, 'grade-%i' % self.user.id, '2.0', formindex=2)
+
+	def test_grading_export(self):
+		res = self.testapp.get('/grading/export/%s' % self.grading.id, status=200)
+		self.test_grading_enter_grades()
+		res = self.testapp.get('/grading/export/%s' % self.grading.id, status=200)
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):
