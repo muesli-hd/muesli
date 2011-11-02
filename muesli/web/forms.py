@@ -626,7 +626,7 @@ class TutorialEmail(Form):
 			FormField('copytome',
 			   label=u'Kopie an mich',
 			   type='radio',
-			   options=enumerate([u'Senden', u'Nicht senden']),
+			   options=list(enumerate([u'Senden', u'Nicht senden'])),
 			   value=0
 			   ),
 			]
