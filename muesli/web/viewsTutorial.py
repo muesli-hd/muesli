@@ -237,9 +237,7 @@ def email(request):
 		mailer = get_mailer(request)
 		message = Message(subject=form['subject'],
 			sender=request.user.email,
-			recipients= [request.user.email],
-			# Due to a bug, bcc does not work in pyramid_mailer at the moment.
-			# Thus the email will be sent to the assistent only
+			recipients=[request.user.email] if form['copytome']==0 else [],
 			bcc=[ls.student.email for ls in lecture_students],
 			body=form['body'])
 		if request.POST['attachments'] not in ['', None]:
