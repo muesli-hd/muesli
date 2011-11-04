@@ -24,6 +24,7 @@ from hashlib import sha1
 import unittest
 import muesli.web
 import muesli.types
+import muesli.mail
 from muesli import utils
 
 from sqlalchemy.orm import relationship, sessionmaker
@@ -55,6 +56,7 @@ class BaseTests(unittest.TestCase):
 		import muesli.models
 		muesli.models.Base.metadata.create_all(self.engine)
 		muesli.mailerName = 'pyramid_mailer.testing'
+		muesli.mail.testing=True
 		muesli.old_engine = muesli.engine
 		muesli.engine = lambda: self.engine
 		import muesli.web
