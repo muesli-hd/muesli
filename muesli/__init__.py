@@ -21,7 +21,7 @@
 from sqlalchemy import create_engine
 
 databaseName = 'postgresql:///muesli'
-mailerName = 'pyramid_mailer'
+productive=False
 #databaseName = 'postgresql:///mueslitest'
 
 def engine():
