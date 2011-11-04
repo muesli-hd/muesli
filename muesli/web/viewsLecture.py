@@ -352,11 +352,13 @@ def viewPoints(request):
 	for exam in exams_with_admission:
 		if not exam.id in admissions:
 			admissions[exam.id] = models.ExamAdmission(exam=exam, student=request.user)
+	grades = request.user.student_grades.filter(models.StudentGrade.grading.has(models.Grading.lecture_id == lecture.id)).all()
 	return {
 		'lecture': lecture,
 		'results': results,
 		'exams_by_category': exams_by_category,
 		'registrations': registrations,
 		'admissions': admissions,
+		'grades': grades,
 		}
 	return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))

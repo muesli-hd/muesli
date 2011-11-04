@@ -68,20 +68,16 @@
   <input type="submit" value="Speichern"/>
   </form>
   </div>
-  <!--
 
-% if (@grades) {
+  <div tal:condition="grades" tal:omit-tag="">
   <h3>Benotungen</h3>
   <table>
-%   for my grade (@grades) {
-    <tr>
-      <th><% grade->{grading}->name %></td>
-      <td><% grade->{grade} // "- - -" %></td>
+    <tr tal:repeat="grade grades">
+      <th>${grade.grading.name}</th>
+      <td>${grade.grade}</td>
     </tr>
-%   }
   </table>
-% }
--->
+  </div>
 </div>
   </metal:main>
 </metal:main>

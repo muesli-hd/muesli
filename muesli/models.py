@@ -487,5 +487,5 @@ class StudentGrade(Base):
 	grading_id = Column('grading', Integer, ForeignKey(Grading.id), nullable=False, primary_key=True)
 	grading = relationship(Grading, backref=backref('student_grades', lazy='dynamic'))
 	student_id = Column('student', Integer, ForeignKey(User.id), nullable=False, primary_key=True)
-	student = relationship(User, backref='student_grades')
+	student = relationship(User, backref=backref('student_grades', lazy='dynamic'))
 	grade = Column(Numeric(precision=2, scale=1), CheckConstraint('grade >= 1.0 AND grade <= 5.0'))
