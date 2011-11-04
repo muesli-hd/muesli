@@ -114,6 +114,8 @@ class User(Base):
 		return query.count()>0
 	def confirmed(self):
 		return self.password != None
+	def __unicode__(self):
+		return u'{name} <{email}>'.format(name=self.name(), email=self.email)
 
 class Confirmation(Base):
 	__tablename__ = 'confirmations'
