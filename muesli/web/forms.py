@@ -240,7 +240,7 @@ class LectureEdit(ObjectForm):
 			   options=[[a.id, a.name()] for a in assistants],
 			   value=lecture.assistant.id,
 			   required=True,
-			   validator=validators.Int()))
+			   ))
 		ObjectForm.__init__(self, lecture, formfields, send=u'Ändern')
 	def saveField(self, fieldName):
 		if fieldName == 'is_visible':
