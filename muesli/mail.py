@@ -30,6 +30,7 @@ from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.message import MIMEMessage
 
 import smtplib
 
@@ -77,7 +78,7 @@ class Message(object):
 		self.outer['To'] = ', '.join(self.to)
 		self.outer['Cc'] = ', '.join(self.cc)
 		self.outer['Bcc'] = ', '.join(self.bcc)
-		self.outer.attach(MIMEText(self.body))
+		self.outer.attach(MIMEText(self.body, 'plain', 'utf-8'))
 	@property
 	def send_to(self):
 		return set(self.to) | set(self.cc) | set(self.bcc)
