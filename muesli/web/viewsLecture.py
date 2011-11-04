@@ -24,13 +24,13 @@ from muesli import utils
 from muesli.web.context import *
 from muesli.web.forms import *
 from muesli.allocation import Allocation
+from muesli.mail import Message, sendMail
+
 
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTPForbidden
 from pyramid.url import route_url
-from pyramid_mailer import get_mailer
-from pyramid_mailer.message import Message, Attachment
 
 from sqlalchemy.orm import exc
 import sqlalchemy
@@ -170,20 +170,14 @@ def emailTutors(request):
 	form = LectureEmailTutors()
 	if request.method == 'POST' and form.processPostData(request.POST):
 		tutors = lecture.tutors
-		mailer = get_mailer(request)
 		message = Message(subject=form['subject'],
 			sender=request.user.email,
-			recipients= [lecture.assistant.email],
-			# Due to a bug, bcc does not work in pyramid_mailer at the moment.
-			# Thus the email will be sent to the assistent only
+			to= [lecture.assistant.email],
 			bcc=[t.email for t in tutors],
 			body=form['body'])
 		if request.POST['attachments'] not in ['', None]:
-			a = Attachment(request.POST['attachments'].filename, data=request.POST['attachments'].file)
-			message.attach(a)
-		# As we are not using transactions,
-		# we send the mail immediately.
-		mailer.send_immediately(message)
+			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
+		sendMail(message)
 		request.session.flash('A Mail has been send to all tutors of this lecture', queue='messages')
 	return {'lecture': lecture,
 	        'form': form}
@@ -195,20 +189,14 @@ def emailStudents(request):
 	form = LectureEmailTutors()
 	if request.method == 'POST' and form.processPostData(request.POST):
 		students = lecture.students
-		mailer = get_mailer(request)
 		message = Message(subject=form['subject'],
 			sender=request.user.email,
-			recipients= [lecture.assistant.email],
-			# Due to a bug, bcc does not work in pyramid_mailer at the moment.
-			# Thus the email will be sent to the assistent only
+			to= [lecture.assistant.email],
 			bcc=[s.email for s in students],
 			body=form['body'])
 		if request.POST['attachments'] not in ['', None]:
-			a = Attachment(request.POST['attachments'].filename, data=request.POST['attachments'].file)
-			message.attach(a)
-		# As we are not using transactions,
-		# we send the mail immediately.
-		mailer.send_immediately(message)
+			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
+		sendMail(message)
 		request.session.flash('A Mail has been send to all tutors of this lecture', queue='messages')
 	return {'lecture': lecture,
 	        'form': form}

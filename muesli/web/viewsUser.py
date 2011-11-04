@@ -33,8 +33,7 @@ from sqlalchemy.orm import exc
 from sqlalchemy import func, or_
 from hashlib import sha1
 
-from pyramid_mailer import get_mailer
-from pyramid_mailer.message import Message, Attachment
+from muesli.mail import Message, sendMail
 
 import re
 import os
@@ -111,7 +110,6 @@ def registerCommon(request, form):
 		send_confirmation_mail(request, user, confirmation)
 
 def send_confirmation_mail(request, user, confirmation):
-	mailer = get_mailer(request)
 	body =u"""
 Hallo!
 
@@ -132,11 +130,9 @@ Mit freudlichen Grüßen,
 	""" %(user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
 	message = Message(subject=u'MÜSLI: Ihre Registrierung bei MÜSLI',
 		sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
-		recipients=[user.email],
+		to=[user.email],
 		body=body)
-	# As we are not using transactions,
-	# we send the mail immediately.
-	mailer.send_immediately(message)
+	sendMail(message)
 
 @view_config(route_name='user_wait_for_confirmation', renderer='muesli.web:templates/user/wait_for_confirmation.pt', context=GeneralContext)
 def waitForConfirmation(request):
@@ -168,7 +164,6 @@ def changeEmail(request):
 			confirmation.source = u'user/change_email'
 			confirmation.user = request.user
 			confirmation.what = email
-			mailer = get_mailer(request)
 			body =u"""
 Hallo!
 
@@ -188,13 +183,13 @@ Mit freundlichen Grüßen,
 			""" %(email, request.route_url('user_confirm_email', confirmation=confirmation.hash))
 			message = Message(subject=u'MÜSLI: E-Mail-Adresse ändern',
 				sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
-				recipients=[email],
+				to=[email],
 				body=body)
 			# As we are not using transactions,
 			# we send the mail immediately.
 			request.db.add(confirmation)
 			request.db.commit()
-			mailer.send_immediately(message)
+			sendMail(message)
 			#registerCommon(request, form)
 			return HTTPFound(location=request.route_url('user_change_email_wait_for_confirmation'))
 	return {'form': form}
@@ -245,7 +240,6 @@ def resetPassword(request):
 			confirmation = models.Confirmation()
 			confirmation.user = user
 			confirmation.source = u'user/reset_password'
-			mailer = get_mailer(request)
 			body =u"""
 Hallo!
 
@@ -262,13 +256,13 @@ Mit freundlichen Grüßen,
 			""" %(request.route_url('user_reset_password3', confirmation=confirmation.hash))
 			message = Message(subject=u'MÜSLI: Passwort zurücksetzen',
 				sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
-				recipients=[user.email],
+				to=[user.email],
 				body=body)
 			# As we are not using transactions,
 			# we send the mail immediately.
 			request.db.add(confirmation)
 			request.db.commit()
-			mailer.send_immediately(message)
+			sendMail(message)
 			return HTTPFound(location=request.route_url('user_reset_password2'))
 	return {'form': form}
 
