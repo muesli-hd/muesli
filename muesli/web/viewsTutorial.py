@@ -21,6 +21,8 @@
 
 from muesli import models
 from muesli import utils
+from muesli.mail import Message
+import muesli.mail
 from muesli.web.forms import *
 from muesli.web.context import *
 
@@ -28,8 +30,6 @@ from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPForbidden, HTTPFound
 from pyramid.url import route_url
-from pyramid_mailer import get_mailer
-from pyramid_mailer.message import Message
 from sqlalchemy.orm import exc
 import sqlalchemy
 
@@ -217,14 +217,11 @@ def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
 	sendChangesMail(request, tutorial.tutor, text)
 
 def sendChangesMail(request, tutor, text):
-	mailer = get_mailer(request)
 	message = Message(subject=u'MÜSLI: Änderungen in Ihrer Übungsgruppe',
 		sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
-		recipients= [tutor.email],
+		to = [tutor.email],
 		body=u'Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
-	# As we are not using transactions,
-	# we send the mail immediately.
-	mailer.send_immediately(message)
+	muesli.mail.sendMail(message)
 
 @view_config(route_name='tutorial_email', renderer='muesli.web:templates/tutorial/email.pt', context=TutorialContext, permission='view')
 def email(request):
@@ -234,18 +231,14 @@ def email(request):
 	form = TutorialEmail()
 	if request.method == 'POST' and form.processPostData(request.POST):
 		lecture_students = lecture.lecture_students_for_tutorials(tutorials=tutorials)
-		mailer = get_mailer(request)
-		message = Message(subject=form['subject'],
+		message = muesli.mail.Message(subject=form['subject'],
 			sender=request.user.email,
-			recipients=[request.user.email] if form['copytome']==0 else [],
+			to=[request.user.email] if form['copytome']==0 else [],
 			bcc=[ls.student.email for ls in lecture_students],
 			body=form['body'])
 		if request.POST['attachments'] not in ['', None]:
-			a = Attachment(request.POST['attachments'].filename, data=request.POST['attachments'].file)
-			message.attach(a)
-		# As we are not using transactions,
-		# we send the mail immediately.
-		mailer.send_immediately(message)
+			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
+		muesli.mail.sendMail(message)
 		request.session.flash('A Mail has been send to all students of these tutorial', queue='messages')
 	return {'tutorials': tutorials,
 	        'tutorial_ids': request.context.tutorial_ids_str,
