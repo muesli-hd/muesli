@@ -48,7 +48,7 @@
       <td>${tutorial.place}</td>
       <td>
         <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a></td>
-      <td><a tal:attributes="href request.route_path('exam_view_points', lecture_id=tutorial.lecture.id)">[&nbsp;Details&nbsp;]</a></td>
+      <td><a tal:attributes="href request.route_path('lecture_view_points', lecture_id=tutorial.lecture.id)">[&nbsp;Details&nbsp;]</a></td>
       <td>
         <a tal:condition="tutorial.lecture.mode != 'static'" onclick="return confirm_unsubscribe()"
            tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">[&nbsp;Austreten&nbsp;]</a>

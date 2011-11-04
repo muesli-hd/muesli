@@ -314,3 +314,49 @@ def removePreferences(request):
 	request.db.commit()
 	request.session.flash(u'Präferenzen wurden entfernt.', queue='messages')
 	return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))
+
+@view_config(route_name='lecture_view_points', renderer='muesli.web:templates/lecture/view_points.pt', context=LectureContext, permission='view_own_points')
+def viewPoints(request):
+	lecture = request.context.lecture
+	ls = lecture.lecture_students.filter(models.LectureStudent.student_id == request.user.id).one()
+	exams = lecture.exams.all()
+	exams_by_category = [
+		{'id':cat['id'], 'name': cat['name'], 'exams': lecture.exams.filter(models.Exam.category==cat['id']).all()} for cat in utils.categories]
+	exams_by_category = [cat for cat in exams_by_category if cat['exams']]
+	results = {}
+	for exam in exams:
+		results[exam.id] = exam.getResultsForStudent(ls.student)
+	for exams in exams_by_category:
+		sum_all = sum(filter(lambda x:x, [results[e.id]['sum'] for e in exams['exams']]))
+		max_all = sum(filter(lambda x:x, [e.getMaxpoints() for e in exams['exams']]))
+		exams['sum'] = sum_all
+		exams['max'] = max_all
+	exams_with_registration = [e for e in lecture.exams.all() if e.registration != None]
+	registrations = {}
+	for reg in request.db.query(models.ExamAdmission).filter(models.ExamAdmission.exam_id.in_([e.id for e in exams_with_registration])).filter(models.ExamAdmission.student_id == ls.student_id).all():
+		registrations[reg.exam_id] = reg
+	for exam in exams_with_registration:
+		if not exam.id in registrations:
+			registrations[exam.id] = models.ExamAdmission(exam=exam, student=request.user)
+		if 'registration-%s' % exam.id in request.POST:
+			newreg = request.POST['registration-%s' % exam.id]
+			if newreg=='':
+				newreg=None
+			registrations[exam.id].registration=newreg
+			request.db.merge(registrations[exam.id])
+			request.db.commit()
+	exams_with_admission = [e for e in lecture.exams.all() if e.admission != None]
+	admissions = {}
+	for adm in request.db.query(models.ExamAdmission).filter(models.ExamAdmission.exam_id.in_([e.id for e in exams_with_admission])).filter(models.ExamAdmission.student_id == ls.student_id).all():
+		admissions[adm.exam_id] = adm
+	for exam in exams_with_admission:
+		if not exam.id in admissions:
+			admissions[exam.id] = models.ExamAdmission(exam=exam, student=request.user)
+	return {
+		'lecture': lecture,
+		'results': results,
+		'exams_by_category': exams_by_category,
+		'registrations': registrations,
+		'admissions': admissions,
+		}
+	return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))

@@ -266,6 +266,19 @@ class Exam(Base):
 				func.sum(pointsStmt.c.points).label('points'),
 			).group_by(pointsStmt.c.student)
 		return examPoints
+	def getResultsForStudent(self, student):
+		session = Session.object_session(self)
+		pointsQuery = self.exercise_points
+		pointsQuery = pointsQuery.filter(ExerciseStudent.student_id==student.id)
+		results = {}
+		for points in pointsQuery.all():
+			results[points.exercise_id] = {'points': points.points,
+				'exercise': points.exercise}
+		results['sum'] = sum(filter(lambda x: x, [r['points'] for r in results.values()]))
+		for e in self.exercises:
+			if not e.id in results:
+				results[e.id] = {'points': None, 'exercise': e}
+		return results
 	def getStatistics(self, tutorials=None, students=None, statistics = None, prefix='lec'):
 		if statistics == None:
 			statistics = AutoVivification()
@@ -445,11 +458,14 @@ class ExerciseStudent(Base):
 class ExamAdmission(Base):
 	__tablename__ = 'exam_admissions'
 	exam_id = Column('exam', Integer, ForeignKey(Exam.id), primary_key=True)
-	exam = relationship(Exam, backref='exam_admissions')
+	exam = relationship(Exam, backref=backref('exam_admissions', lazy='dynamic'))
 	student_id = Column('student', Integer, ForeignKey(User.id), primary_key=True)
 	student = relationship(User, backref='exam_admissions')
 	admission = Column(Boolean)
 	registration = Column(Boolean)
+	def __init__(self, exam=None, student=None):
+		self.exam = exam
+		self.student = student
 
 class Grading(Base):
 	__tablename__ = 'gradings'

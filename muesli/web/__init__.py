@@ -147,6 +147,7 @@ def main(global_config=None, **settings):
 	config.add_route('lecture_export_students_html', '/lecture/export_students_html/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_export_totals', '/lecture/export_totals/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory = LectureContext)
+	config.add_route('lecture_view_points', '/lecture/view_points/{lecture_id}', factory = LectureContext)
 
 
 	config.add_route('tutorial_add', '/tutorial/add/{lecture_id}', factory=LectureContext)
@@ -163,7 +164,6 @@ def main(global_config=None, **settings):
 	config.add_route('tutorial_occupancy_bar', '/tutorial/occupancy_bar/{count}/{max_count}/{max_count_total}')
 	config.add_route('tutorial_ajax_get_tutorial', '/tutorial/ajax_get_tutorial/{lecture_id}', factory=LectureContext)
 
-	config.add_route('exam_view_points', '/exam/view_points/{lecture_id}')
 	config.add_route('exam_add_or_edit_exercise', '/exam/add_or_edit_exercise/{exam_id}/{exercise_id:[^/]*}', factory=ExamContext)
 	config.add_route('exam_edit', '/exam/edit/{exam_id}', factory=ExamContext)
 	config.add_route('exam_admission', '/exam/admission/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)

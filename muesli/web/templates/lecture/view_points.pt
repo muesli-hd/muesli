@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Resultate für ${lecture.name}</h2>
+
+<h3>Punkte</h3>
+
+<div tal:define="fF lambda f: '%.1f' % f if f!=None else '-'" >
+  <div tal:repeat="catexams exams_by_category" tal:omit-tag="">
+    <h4>${catexams['name']}</h4>
+    <table>
+      <tr tal:repeat="exam catexams['exams']">
+        <th>
+          <a tal:condition="exam.url" tal:attributes="href exam.url">${exam.name}</a>
+          <span tal:condition="not exam.url" tal:omit-tag="">${exam.name}</span>
+        </th>
+        <td><strong>${fF(results[exam.id]['sum'])}/${fF(exam.getMaxpoints())}</strong></td>
+        <td tal:repeat="e exam.exercises">${fF(results[exam.id][e.id]['points'])}/${fF(results[exam.id][e.id]['exercise'].maxpoints)}</td>
+      </tr>
+    <tr>
+      <th>Insgesamt</th>
+      <td colspan="2"><strong>${fF(catexams['sum'])}/${fF(catexams['max'])}</strong>
+        <span tal:condition="catexams['max']>0">
+         (${'%2.f' % (catexams['sum']/catexams['max']*100)}%)
+        </span>
+     </td>
+    </tr>
+    </table>
+
+  </div>
+
+  <div tal:condition="admissions">
+  <h3>Klausurzulassungen</h3>
+  <table>
+    <tr tal:repeat="adm admissions.values()">
+      <td>${adm.exam.name}</td>
+      <td>
+        <span tal:condition="adm.admission==False" tal:omit-tag="">Nicht zugelassen</span>
+        <span tal:condition="adm.admission==True" tal:omit-tag="">Zugelassen</span>
+        <span tal:condition="adm.admission==None" tal:omit-tag="">Zulassung ausstehend</span>
+      </td>
+    </tr>
+  </table>
+  </div>
+
+  <div tal:condition="registrations" tal:omit-tag="">
+  <h3>Klausuranmeldungen</h3>
+
+  <p>
+  Bitte melden Sie sich ggf. für die Klausuren an.
+  <strong>J</strong> bedeutet, daß Sie an der Klausur teilnehmen möchten; <strong>N</strong>, daß Sie <strong>nicht</strong> an der Klausur teilnehmen möchten.
+  Falls Sie sich noch nicht entschieden haben, können Sie <strong>?</strong> angeben.
+  </p>
+
+  <form method="POST">
+  <table>
+
+    <tr tal:repeat="reg registrations.values()">
+      <td>${reg.exam.name}</td>
+      <td tal:define="name 'registration-%s' % reg.exam.id;value reg.registration;readonly reg.exam.registration!=True">
+         <metal:main metal:use-macro="templates('Fragments/HTML/input_tristate.pt').macros['input_tristate']" />
+      </td>
+    </tr>
+
+  </table>
+
+  <input type="submit" value="Speichern"/>
+  </form>
+  </div>
+  <!--
+
+% if (@grades) {
+  <h3>Benotungen</h3>
+  <table>
+%   for my grade (@grades) {
+    <tr>
+      <th><% grade->{grading}->name %></td>
+      <td><% grade->{grade} // "- - -" %></td>
+    </tr>
+%   }
+  </table>
+% }
+-->
+</div>
+  </metal:main>
+</metal:main>
