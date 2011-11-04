@@ -8,8 +8,8 @@
   Released under the terms of the GNU GPL 3 or later
   -->
   <title>MÜSLI</title>
-  <link rel="stylesheet" type="text/css" href="/static/css/muesli.css"></link>
-  <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src '/static/js/%s' % filename"></script>
+  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_path('muesli.web:static/css/muesli.css')"></link>
+  <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src request.static_path('muesli.web:static/js/%s' % (filename))"></script>
 </head>
 <body>
 <div id="header">
