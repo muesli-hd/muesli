@@ -68,6 +68,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_lecture_remove_preferences(self):
 		res = self.testapp.get('/lecture/remove_preferences/%s' % 123456, status=404)
 
+	def test_lecture_view_points(self):
+		res = self.testapp.get('/lecture/view_points/%s' % 123456, status=404)
+
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_lecture_view(self):
@@ -117,6 +120,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_lecture_remove_preferences(self):
 		res = self.testapp.get('/lecture/remove_preferences/%s' % self.prefLecture.id, status=403)
 
+	def test_lecture_view_points(self):
+		res = self.testapp.get('/lecture/view_points/%s' % self.lecture.id, status=403)
+
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
 		UnloggedTests.setUp(self)
@@ -139,10 +145,17 @@ class UserLoggedInTests(UnloggedTests):
 		res = self.testapp.get('/lecture/remove_preferences/%s' % self.prefLecture.id, status=302)
 		self.assertTrue(len(self.loggedUser.time_preferences) == 0)
 
+	def test_lecture_view_points(self):
+		res = self.testapp.get('/lecture/view_points/%s' % self.lecture.id, status=200)
+
 class TutorLoggedInTests(UserLoggedInTests):
 	def setUp(self):
 		UserLoggedInTests.setUp(self)
 		self.setUser(self.tutor)
+
+	def test_lecture_view_points(self):
+		res = self.testapp.get('/lecture/view_points/%s' % self.lecture.id, status=403)
+
 
 class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):

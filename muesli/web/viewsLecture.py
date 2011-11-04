@@ -318,7 +318,10 @@ def removePreferences(request):
 @view_config(route_name='lecture_view_points', renderer='muesli.web:templates/lecture/view_points.pt', context=LectureContext, permission='view_own_points')
 def viewPoints(request):
 	lecture = request.context.lecture
-	ls = lecture.lecture_students.filter(models.LectureStudent.student_id == request.user.id).one()
+	try:
+		ls = lecture.lecture_students.filter(models.LectureStudent.student_id == request.user.id).one()
+	except exc.NoResultFound:
+		return HTTPForbidden()
 	exams = lecture.exams.all()
 	exams_by_category = [
 		{'id':cat['id'], 'name': cat['name'], 'exams': lecture.exams.filter(models.Exam.category==cat['id']).all()} for cat in utils.categories]
