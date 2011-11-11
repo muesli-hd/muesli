@@ -115,13 +115,16 @@ class EnterPoints(object):
 		for point in pointsQuery:
 			points[point.student_id][point.exercise_id] = point
 		for student in students:
-				for e in exam.exercises:
-					if not e.id in points[student.student_id]:
-						exerciseStudent = models.ExerciseStudent()
-						exerciseStudent.student = student.student
-						exerciseStudent.exercise = e
-						points[student.student_id][e.id] = exerciseStudent
-						self.db.add(exerciseStudent)
+			if not student.student_id in points:
+				points[student.student_id] = {}
+			for e in exam.exercises:
+				if not e.id in points[student.student_id]:
+					exerciseStudent = models.ExerciseStudent()
+					exerciseStudent.student = student.student
+					exerciseStudent.exercise = e
+					points[student.student_id][e.id] = exerciseStudent
+					print points
+					self.db.add(exerciseStudent)
 		if self.request.method == 'POST':
 			for student in students:
 				for e in exam.exercises:
