@@ -47,11 +47,9 @@ class View(object):
 		self.db = self.request.db
 		self.tutorial_ids = request.matchdict['tutorial_ids']
 	def __call__(self):
-		tutorials = [self.db.query(models.Tutorial).get(tutorial_id) for tutorial_id in self.tutorial_ids.split(',')]
-		filterClause = models.User.lecture_students.any(models.LectureStudent.tutorial_id==tutorials[0].id)
-		for tutorial in tutorials[1:]:
-			filterClause = filterClause | (models.User.lecture_students.any(models.LectureStudent.tutorial_id==tutorial.id))
-		students = self.db.query(models.User).filter(filterClause)
+		tutorials = self.request.context.tutorials
+		lecture_students = self.request.context.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))
+		students = [ls.student for ls in lecture_students] #self.db.query(models.User).filter(filterClause)
 		tutorial = tutorials[0]
 		return {'tutorial': tutorial,
 		        'tutorials': tutorials,

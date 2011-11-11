@@ -114,6 +114,8 @@ class User(Base):
 		return query.count()>0
 	def confirmed(self):
 		return self.password != None
+	def __unicode__(self):
+		return u'{name} <{email}>'.format(name=self.name(), email=self.email)
 
 class Confirmation(Base):
 	__tablename__ = 'confirmations'
@@ -184,8 +186,9 @@ class Lecture(Base):
 				if user:
 					pref = session.query(TimePreference).get((self.id, user.id, time['time'].value))
 					if not pref:
-						pref = TimePreference(self, user, time['time'], 100)
-					time['penalty'] = pref.penalty
+						time['penalty'] = 100
+					else:
+						time['penalty'] = pref.penalty
 				else:
 					time['penalty'] = 100
 			if user:

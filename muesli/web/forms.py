@@ -232,12 +232,12 @@ class LectureEdit(ObjectForm):
 			   value=boolToValue(lecture.is_visible))
 			]
 		if request.permissionInfo.has_permission('change_assistant'):
-			assistants = request.db.query(models.User).filter(models.User.is_assistant==1).all()
+			assistants = request.db.query(models.User).filter(models.User.is_assistant==1).order_by(models.User.last_name).all()
 			formfields.append(
 			  FormField('assistant',
 			   label='Assistent',
 			   type='select',
-			   options=[[a.id, a.name()] for a in assistants],
+			   options=[[a.id, unicode(a)] for a in assistants],
 			   value=lecture.assistant.id,
 			   required=True,
 			   ))
