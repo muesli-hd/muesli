@@ -186,8 +186,9 @@ class Lecture(Base):
 				if user:
 					pref = session.query(TimePreference).get((self.id, user.id, time['time'].value))
 					if not pref:
-						pref = TimePreference(self, user, time['time'], 100)
-					time['penalty'] = pref.penalty
+						time['penalty'] = 100
+					else:
+						time['penalty'] = pref.penalty
 				else:
 					time['penalty'] = 100
 			if user:
