@@ -60,7 +60,6 @@ class Edit(object):
 			students = exam.lecture.lecture_students
 			if exam.admission != None:
 				students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.admission==True))))
-				print students.statement
 			if exam.registration != None:
 				students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.registration==True))))
 		else: students = None
@@ -123,7 +122,6 @@ class EnterPoints(object):
 					exerciseStudent.student = student.student
 					exerciseStudent.exercise = e
 					points[student.student_id][e.id] = exerciseStudent
-					print points
 					self.db.add(exerciseStudent)
 		if self.request.method == 'POST':
 			for student in students:
