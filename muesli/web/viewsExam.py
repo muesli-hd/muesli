@@ -142,7 +142,11 @@ class EnterPoints(object):
 			points[student]['total'] = sum([v.points for v in points[student].values() if v.points])
 		# TODO: Die Statistik scheint recht langsm zu sein. Evt lohnt es sich,
 		#       die selber auszurechnen...
-		statistics = exam.getStatistics(students=students)
+		if tutorials:
+			statistics = exam.getStatistics(students=None)
+			statistics.update(exam.getStatistics(students=students, prefix='tut'))
+		else:
+			statistics = exam.getStatistics(students=students)
 		return {'exam': exam,
 		        'tutorial_ids': self.request.matchdict['tutorial_ids'],
 		        'students': students,
