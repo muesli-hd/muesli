@@ -43,6 +43,9 @@ function set_navigation(nav) {
 
 <metal:content define-slot="content" />
 </div>
+<div id="debug">
+loading time: ${'{:.3f}s'.format(request.now() - request.time)}
+</div>
 </body>
 </html>
 </metal:main>
