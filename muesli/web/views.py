@@ -27,7 +27,7 @@ from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPInternalServerError, HTTPFound
 from pyramid.url import route_url
-from sqlalchemy.orm import exc
+from sqlalchemy.orm import exc, joinedload
 from hashlib import sha1
 
 import re
@@ -39,8 +39,8 @@ import traceback
 def start(request):
 	if not request.user:
 		return HTTPFound(location = request.route_url('user_login'))
-	tutorials_as_tutor = request.user.tutorials_as_tutor
-	tutorials = request.user.tutorials
+	tutorials_as_tutor = request.user.tutorials_as_tutor.options(joinedload(Tutorial.tutor, Tutorial.lecture))
+	tutorials = request.user.tutorials.options(joinedload(Tutorial.tutor, Tutorial.lecture))
 	lectures_as_assistant = request.user.lectures_as_assistant
 	if request.GET.get('show_all', '0')=='0':
 		semesterlimit = utils.getSemesterLimit()
