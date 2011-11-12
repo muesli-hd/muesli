@@ -178,3 +178,7 @@ table.colored tr:nth-child(odd) {
   color: black;
 }
 
+#debug {
+  text-align: right;
+  font-size: 70%;
+}

@@ -36,8 +36,12 @@ from muesli.web.viewsLecture import *
 from muesli.web.viewsUser import *
 from muesli import utils
 
+import time
+
 @subscriber(NewRequest)
 def add_session_to_request(event):
+	event.request.time = time.time()
+	event.request.now = time.time
 	event.request.db = Session()
 	def callback(request):
 		request.db.rollback()
