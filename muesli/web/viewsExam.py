@@ -537,7 +537,26 @@ def ajaxSavePoints(request):
 					json_data['msg'] += "Invalid value '%s' for exercise '%s'. " % (p, exercise.id)
 					json_data['format_error_cells'].append(exercise.id)
 			else:
-				session.remove(d_points[exercise.id])
+				if d_points[exercise.id] in request.db:
+					#obj = d_points[exercise.id]
+					#from sqlalchemy.orm import object_session
+					#from sqlalchemy.orm.util import has_identity
+					#if object_session(obj) is None and not has_identity(obj):
+						#print "transient"
+					#if object_session(obj) is not None and not has_identity(obj):
+						#print "pending"
+					#if object_session(obj) is None and has_identity(obj):
+						#print "detached"
+					#if object_session(obj) is not None and has_identity(obj):
+						#print "persistent"
+					try:
+						request.db.delete(d_points[exercise.id])
+						#print "deleted"
+					except sqlalchemy.exc.InvalidRequestError:
+						# Object not really added
+						# Seems not to work really
+						#print "not deleted"
+						pass
 	request.db.commit()
 	json_data['msg'] = json_data['msg'] or 'sucessfull'
 	return json_data
@@ -552,5 +571,5 @@ def ajaxGetPoints(request):
 	points = {}
 	json_data = {'msg': '', 'format_error_cells': []}
 	for ep in exercise_points:
-		points[ep.exercise_id] = float(ep.points)
+		points[ep.exercise_id] = float(ep.points) if ep.points else None
 	return {'points': points}
