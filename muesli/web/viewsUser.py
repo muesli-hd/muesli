@@ -69,6 +69,7 @@ def edit(request):
 	if request.method == 'POST' and form.processPostData(request.POST):
 		form.saveValues()
 		request.db.commit()
+		request.session.flash(u'Daten geändert', queue='messages')
 	return {'user': user,
 	        'form': form,
 	        'time_preferences': user.prepareTimePreferences(),
