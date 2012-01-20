@@ -28,7 +28,7 @@ class GeneralContext(object):
 		self.__acl__ = [
 			(Allow, Authenticated, ('update', 'change_email', 'change_password')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
-			]
+			]+[(Allow, 'user:{0}'.format(a.id), 'create_lecture') for a in request.db.query(User).filter(User.is_assistant==1).all()]
 
 class GradingContext(object):
 	def __init__(self, request):

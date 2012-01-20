@@ -32,6 +32,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_lecture_view(self):
 		res = self.testapp.get('/lecture/view/%s' % 12456, status=404)
 
+	def test_lecture_add(self):
+		res = self.testapp.get('/lecture/add', status=403)
+
 	def test_lecture_edit(self):
 		res = self.testapp.get('/lecture/edit/%s' % 123456, status=404)
 
@@ -161,6 +164,16 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
 		TutorLoggedInTests.setUp(self)
 		self.setUser(self.assistant)
+
+	def test_lecture_add(self):
+		res = self.testapp.get('/lecture/add', status=200)
+		leccount = self.session.query(muesli.models.Lecture).count()
+		res.form['name'] = 'Testvorlesung'
+		res = res.form.submit()
+		self.assertTrue(res.status.startswith('302'))
+		self.session.expire_all()
+		leccount2 = self.session.query(muesli.models.Lecture).count()
+		self.assertEqual(leccount+1, leccount2)
 
 	def test_lecture_edit(self):
 		res = self.testapp.get('/lecture/edit/%s' % self.lecture.id, status=200)
