@@ -251,6 +251,64 @@ class LectureEdit(ObjectForm):
 		else:
 			ObjectForm.saveField(self, fieldName)
 
+class LectureAdd(ObjectForm):
+	def __init__(self, request):
+		self.request =  request
+		formfields = [
+			FormField('type',
+			   label='Typ',
+			   type='select',
+			   options=[[type, utils.lecture_types[type]['name']] for type in utils.lecture_types],
+			   #value=lecture.type,
+			   required=True),
+			FormField('name',
+			   label='Name',
+			   type='text',
+			   size=100,
+			   #value=lecture.name,
+			   required=True),
+			FormField('term',
+			   label='Semester',
+			   type='select',
+			   options=utils.getTerms(),
+			   #value=lecture.term
+			   ),
+			FormField('lsf_id',
+			   label='Veranstaltungsnummer',
+			   type='text',
+			   size=20,
+			   #value=lecture.lsf_id
+			   ),
+			FormField('lecturer',
+			   label='Dozent',
+			   type='text',
+			   size=40,
+			   #value=lecture.lecturer
+			   ),
+			FormField('url',
+			   label='Homepage',
+			   size=100,
+			   #value=lecture.url
+			   ),
+			]
+		if request.permissionInfo.has_permission('change_assistant'):
+			assistants = request.db.query(models.User).filter(models.User.is_assistant==1).order_by(models.User.last_name).all()
+			formfields.append(
+			  FormField('assistant',
+			   label='Assistent',
+			   type='select',
+			   options=[[a.id, unicode(a)] for a in assistants],
+			   #value=lecture.assistant.id,
+			   required=True,
+			   ))
+		ObjectForm.__init__(self, None, formfields, send=u'Anlegen')
+	def saveField(self, fieldName):
+		if fieldName == 'assistant':
+			assistant = self.request.db.query(models.User).get(self['assistant'])
+			self.obj.assistant = assistant
+		else:
+			ObjectForm.saveField(self, fieldName)
+
 class UserEdit(ObjectForm):
 	def __init__(self, request, user):
 		formfields = [

@@ -28,7 +28,7 @@ class GeneralContext(object):
 		self.__acl__ = [
 			(Allow, Authenticated, ('update', 'change_email', 'change_password')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
-			]
+			]+[(Allow, 'user:{0}'.format(a.id), 'create_lecture') for a in request.db.query(User).filter(User.is_assistant==1).all()]
 
 class GradingContext(object):
 	def __init__(self, request):
@@ -80,6 +80,22 @@ class TutorialContext(object):
 				self.__acl__.append((Allow, Authenticated, ('subscribe')))
 			if self.tutorials[0].lecture.mode in ['direct', 'off']:
 				self.__acl__.append((Allow, Authenticated, ('unsubscribe')))
+
+class AssignStudentContext(object):
+	def __init__(self, request):
+		student_id = request.POST['student']
+		tutorial_id = request.POST['new_tutorial']
+		self.student = request.db.query(User).get(student_id)
+		self.tutorial = request.db.query(Tutorial).get(tutorial_id)
+		if self.student is None:
+			raise HTTPNotFound(detail='Student not found')
+		if self.tutorial is None:
+			raise HTTPNotFound(detail='tutorial not found')
+		self.__acl__ = [
+			(Allow, 'user:{0}'.format(self.tutorial.lecture.assistant_id), ('move')),
+			(Allow, 'group:administrators', ALL_PERMISSIONS),
+			]
+
 
 class ExamContext(object):
 	def __init__(self, request):

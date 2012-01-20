@@ -132,6 +132,23 @@ class Edit(object):
 		        'exams': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
 		        'form': form}
 
+@view_config(route_name='lecture_add', renderer='muesli.web:templates/lecture/add.pt', context=GeneralContext, permission='create_lecture')
+class Add(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+	def __call__(self):
+		form = LectureAdd(self.request)
+		if self.request.method == 'POST' and form.processPostData(self.request.POST):
+			lecture = models.Lecture()
+			lecture.assistant = self.request.user
+			form.obj = lecture
+			form.saveValues()
+			self.request.db.add(lecture)
+			self.request.db.commit()
+			return HTTPFound(self.request.route_url('lecture_edit', lecture_id = lecture.id))
+		return {'form': form}
+
 @view_config(route_name='lecture_remove_tutor', context=LectureContext, permission='edit')
 class RemoveTutor(object):
 	def __init__(self, request):
