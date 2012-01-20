@@ -81,6 +81,22 @@ class TutorialContext(object):
 			if self.tutorials[0].lecture.mode in ['direct', 'off']:
 				self.__acl__.append((Allow, Authenticated, ('unsubscribe')))
 
+class AssignStudentContext(object):
+	def __init__(self, request):
+		student_id = request.POST['student']
+		tutorial_id = request.POST['new_tutorial']
+		self.student = request.db.query(User).get(student_id)
+		self.tutorial = request.db.query(Tutorial).get(tutorial_id)
+		if self.student is None:
+			raise HTTPNotFound(detail='Student not found')
+		if self.tutorial is None:
+			raise HTTPNotFound(detail='tutorial not found')
+		self.__acl__ = [
+			(Allow, 'user:{0}'.format(self.tutorial.lecture.assistant_id), ('move')),
+			(Allow, 'group:administrators', ALL_PERMISSIONS),
+			]
+
+
 class ExamContext(object):
 	def __init__(self, request):
 		exam_id = request.matchdict['exam_id']

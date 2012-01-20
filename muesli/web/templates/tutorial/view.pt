@@ -39,7 +39,9 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
     <td>${student.matrikel}</td>
     <td>${student.birth_date}, ${student.birth_place}</td>
     <td>${student.subject}</td>
-    <td tal:condition="request.permissionInfo.has_permission('edit')">TODO: Move<!--<& /Fragments/Form/MoveStudent, student => student, tutorials => tutorials &>--></td>
+    <td tal:condition="request.permissionInfo.has_permission('edit')">
+      <metal:main metal:use-macro="templates('Fragments/HTML/move_student.pt').macros['movestudentmacro']" />
+    </td>
     <td>
       <form method="post" tal:attributes="action request.route_path('tutorial_remove_student', tutorial_id=tutorial.id, student_id=student.id)">
         <input type="submit" value="Entfernen"/>
@@ -88,7 +90,7 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
   <li><a tal:attributes="href request.route_path('tutorial_email', tutorial_ids=tutorial_ids)">E-Mail an Teilnehmer schreiben</a></li>
   <li tal:condition="request.permissionInfo.has_permission('edit') and len(tutorials) &lt; 2">
     <a tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">${names['tutorial']} bearbeiten</a></li>
-  <li tal:conditon="request.userInfo.is_tutor(tutorial.lecture)">
+  <li tal:condition="request.userInfo.is_tutor(tutorial.lecture)">
      <a tal:attributes="href request.route_path('tutorial_remove_tutor', tutorial_ids=tutorial_ids)">Als ${names['tutor']} zurücktreten</a></li>
 </ul>
   </metal:main>

@@ -51,9 +51,11 @@ class View(object):
 		lecture_students = self.request.context.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))
 		students = [ls.student for ls in lecture_students] #self.db.query(models.User).filter(filterClause)
 		tutorial = tutorials[0]
+		other_tutorials = tutorial.lecture.tutorials.order_by(models.Tutorial.time)
 		return {'tutorial': tutorial,
 		        'tutorials': tutorials,
 		        'tutorial_ids': self.tutorial_ids,
+		        'other_tutorials': other_tutorials,
 		        'students': students,
 		        'categories': utils.categories,
 		        'exams': dict([[cat['id'], tutorial.lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
@@ -257,3 +259,28 @@ def ajaxGetTutorial(request):
 		return ret
 	else:
 		return {'msg': 'No Tutorial found!'}
+
+@view_config(route_name='tutorial_assign_student', renderer='muesli.web:templates/tutorial/assign_student.pt', context=AssignStudentContext, permission='move')
+def assign_student(request):
+	student = request.context.student
+	new_tutorial = request.context.tutorial
+	lecture = new_tutorial.lecture
+	lrs = request.db.query(models.LectureRemovedStudent).get((lecture.id, student.id))
+	if lrs: request.db.delete(lrs)
+	ls = request.db.query(models.LectureStudent).get((lecture.id, student.id))
+	if ls:
+		pass
+	#	oldtutorial = ls.tutorial
+	else:
+		ls = models.LectureStudent()
+		ls.lecture = lecture
+		ls.student = student
+	#	oldtutorial = None
+	ls.tutorial = new_tutorial
+	if not ls in request.db: request.db.add(ls)
+	request.db.commit()
+	#if oldtutorial:
+	#	sendChangesMailUnsubscribe(request, oldtutorial, request.user, toTutorial=tutorial)
+	#sendChangesMailSubscribe(request, tutorial, request.user, fromTutorial=oldtutorial)
+	return {'student': student,
+	        'new_tutorial': new_tutorial}

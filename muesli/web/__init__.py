@@ -158,6 +158,8 @@ def main(global_config=None, **settings):
 	config.add_route('tutorial_results', '/tutorial/results/{tutorial_ids}', factory = TutorialContext)
 	config.add_route('tutorial_email', '/tutorial/email/{tutorial_ids}', factory = TutorialContext)
 	config.add_route('tutorial_remove_tutor', '/tutorial/remove_tutor/{tutorial_ids}', factory = TutorialContext)
+	config.add_route('tutorial_assign_student', '/tutorial/assign_student', factory = AssignStudentContext)
+
 
 	config.add_route('tutorial_edit', '/tutorial/edit/{tutorial_id}', factory=TutorialContext)
 	config.add_route('tutorial_set_tutor', '/tutorial/set_tutor/{tutorial_id}')
