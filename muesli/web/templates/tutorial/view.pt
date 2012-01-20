@@ -25,8 +25,8 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
 <thead>
   <tr>
     <th>Name (E-Mail)</th>
-    <th>Matrikel</th>
-    <th>Geburtstag, -ort</th>
+    <!--<th>Matrikel</th>-->
+    <!--<th>Geburtstag, -ort</th>-->
     <th>Studiengang</th>
     <th tal:condition="request.permissionInfo.has_permission('edit')">Verschieben</th>
     <th>Entfernen</th>
@@ -36,8 +36,8 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
 <tbody>
   <tr tal:repeat="student students">
     <td><a tal:attributes="href 'mailto:'+student.email">${student.name()}</a></td>
-    <td>${student.matrikel}</td>
-    <td>${student.birth_date}, ${student.birth_place}</td>
+    <!--<td>${student.matrikel}</td>
+    <td>${student.birth_date}, ${student.birth_place}</td>-->
     <td>${student.subject}</td>
     <td tal:condition="request.permissionInfo.has_permission('edit')">
       <metal:main metal:use-macro="templates('Fragments/HTML/move_student.pt').macros['movestudentmacro']" />
