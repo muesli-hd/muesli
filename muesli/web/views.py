@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 # muesli/web/views.py
 #
 # This file is part of MUESLI.
@@ -21,6 +23,7 @@
 from muesli import models, utils
 from muesli.web.forms import *
 from muesli.web.context import *
+from muesli.mail import Message, sendMail
 
 from pyramid import security
 from pyramid.view import view_config
@@ -64,6 +67,28 @@ def contact(request):
 @view_config(route_name='index', renderer='muesli.web:templates/index.pt')
 def index(request):
 	return {}
+
+@view_config(route_name='email_wrong_subject', renderer='muesli.web:templates/email_wrong_subject.pt', context=GeneralContext, permission='admin')
+def emailWrongSubject(request):
+	form = EmailWrongSubject()
+	students = request.db.query(models.User).filter(models.User.lecture_students.any(models.LectureStudent.lecture.has(models.Lecture.term=='20102'))).all()
+	bad_students = []
+	for student in students:
+		if '(la)' in student.subject.lower():
+			if not student.second_subject:
+				bad_students.append(student)
+	if request.method == 'POST' and form.processPostData(request.POST):
+		message = Message(subject=form['subject'],
+			sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
+			to= [],
+			bcc=[s.email for s in bad_students],
+			body=form['body'])
+		if request.POST['attachments'] not in ['', None]:
+			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
+		sendMail(message)
+		request.session.flash('A Mail has been send to all students with wrong subject', queue='messages')
+	return {'form': form,
+	        'students': bad_students}
 
 @view_config(context = Exception, renderer='muesli.web:templates/error.pt')
 def internalServerError(exc, request):

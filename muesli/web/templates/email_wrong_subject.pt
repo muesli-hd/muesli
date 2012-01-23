@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>E-Mail an alle Studenten mit falschen Fach schreiben</h2>
+
+<p>
+Auf dieser Seite können Sie eine Nachricht an alle Studenten, die ein falsches Fach eingetragen haben, schicken.
+Geben Sie hierzu in das Formular unten einen Betreff und die Nachricht ein und klicken dann auf "E-Mail senden".
+</p>
+
+<p>
+Hallo!
+<br />
+Laut deinen Daten in Müsli studierst du einen Lehramtsstudiengang. In Müsli muss
+man für Lehramtsstudiengänge mittlerweile auch das Beifach angeben. Bitte hole
+dies in Müsli unter "Angaben ergänzen" nach.
+<br />
+Falls du Fragen oder Probleme hast, kannst du dich gerne bei uns melden!
+<br />
+Mit freundlichen Grüßen,<br />
+  Das MÜSLI-Team
+</p>
+
+<form action="/email_wrong_subject" tal:attributes="action request.route_path('email_wrong_subject',)" method="POST"
+  enctype="multipart/form-data">
+<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+</form>
+
+<ul>
+  <li tal:repeat="student students"><a tal:attributes="href request.route_path('user_edit', user_id=student.id)">${student.name()}</a></li>
+</ul>
+
+  </metal:main>
+</metal:main>

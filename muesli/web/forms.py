@@ -741,6 +741,24 @@ class LectureEmailTutors(Form):
 			]
 		Form.__init__(self, formfields, send=u'Senden')
 
+class EmailWrongSubject(Form):
+	def __init__(self):
+		formfields = [
+			FormField('subject',
+			   label='Betreff', size=64,
+			   required=True,
+			   value=u"Bitte Studiengang in Müsli anpassen!"),
+			FormField('body',
+			   label='Nachricht', cols=64, rows=24,
+			   type='textarea',
+			   required=True),
+			FileField('attachments',
+			   label=u'Anhänge', size=64,
+			   growable=False
+			   ),
+			]
+		Form.__init__(self, formfields, send=u'Senden')
+
 class GradingEdit(ObjectForm):
 	def __init__(self, request, grading):
 		formfields = [
