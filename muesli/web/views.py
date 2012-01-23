@@ -71,7 +71,8 @@ def index(request):
 @view_config(route_name='email_wrong_subject', renderer='muesli.web:templates/email_wrong_subject.pt', context=GeneralContext, permission='admin')
 def emailWrongSubject(request):
 	form = EmailWrongSubject()
-	students = request.db.query(models.User).filter(models.User.lecture_students.any(models.LectureStudent.lecture.has(models.Lecture.term=='20102'))).all()
+	semesterlimit = utils.getSemesterLimit()
+	students = request.db.query(models.User).filter(models.User.lecture_students.any(models.LectureStudent.lecture.has(models.Lecture.term >= semesterlimit))).all()
 	bad_students = []
 	for student in students:
 		if '(la)' in student.subject.lower():
