@@ -75,6 +75,8 @@ def emailWrongSubject(request):
 	students = request.db.query(models.User).filter(models.User.lecture_students.any(models.LectureStudent.lecture.has(models.Lecture.term >= semesterlimit))).all()
 	bad_students = []
 	for student in students:
+		if not student.subject:
+			continue
 		if '(la)' in student.subject.lower():
 			if not student.second_subject:
 				bad_students.append(student)
