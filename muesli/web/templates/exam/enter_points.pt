@@ -72,11 +72,11 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
     <td>Durchschnitt (Gruppe/Gesamt)</td>
     <td tal:condition="not tutorial_ids"></td>
     <td tal:repeat="e exam.exercises">
-      <span tal:define="statisticsData statistics[e.id]; statistics_images=False" tal:omit-tag="">
+      <span tal:define="statisticsData statistics[e.id]; statistics_images False" tal:omit-tag="">
         <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
       </span>
     </td>
-    <td tal:define="statisticsData statistics['exam']; statistics_images=False">
+    <td tal:define="statisticsData statistics['exam']; statistics_images False">
       <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
     </td>
   </tr>

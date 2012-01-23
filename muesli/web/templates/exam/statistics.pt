@@ -48,12 +48,12 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
   <tr tal:repeat="subject sorted(statistics_by_subject.keys())">
     <td>${subject or '(Keine Angabe)'}</td>
     <td tal:repeat="e exam.exercises">
-      <span tal:define="statisticsData statistics_by_subject[subject][e.id]; statistics_images=True" tal:omit-tag="">
+      <span tal:define="statisticsData statistics_by_subject[subject][e.id]; statistics_images True" tal:omit-tag="">
         <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
       </span>
     </td>
     <td>
-      <span tal:define="statisticsData statistics_by_subject[subject]['exam']; statistics_images=True" tal:omit-tag="">
+      <span tal:define="statisticsData statistics_by_subject[subject]['exam']; statistics_images True" tal:omit-tag="">
         <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
       </span>
     </td>
@@ -61,12 +61,12 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
   <tr class="footerstart">
     <td>Insgesamt</td>
     <td tal:repeat="e exam.exercises">
-      <span tal:define="statisticsData statistics[e.id]; statistics_images=True" tal:omit-tag="">
+      <span tal:define="statisticsData statistics[e.id]; statistics_images True" tal:omit-tag="">
         <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
       </span>
     </td>
     <td>
-      <span tal:define="statisticsData statistics['exam']; statistics_images=True" tal:omit-tag="">
+      <span tal:define="statisticsData statistics['exam']; statistics_images True" tal:omit-tag="">
         <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
       </span>
     </td>
