@@ -11,7 +11,7 @@
         <div tal:condition="field.type=='select'" tal:omit-tag="">
           <select tal:attributes="name field.name; disabled 'disabled' if field.readonly else None">
             <option tal:repeat="option field.options"
-               tal:attributes="value option[0]; selected 'selected' if option[0]==field.value else None">
+               tal:attributes="value str(option[0]); selected 'selected' if option[0]==field.value else None">
                 ${option[1]}
             </option>
           </select>
