@@ -74,6 +74,7 @@ class User(Base):
 	birth_date = Column(Text)
 	birth_place = Column(Text)
 	subject = Column(Text)
+	second_subject = Column(Text)
 	title = Column(Text)
 	# TODO: Convert to boolean
 	is_admin = Column(Integer, nullable=False, default=0)

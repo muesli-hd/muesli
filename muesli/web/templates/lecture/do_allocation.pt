@@ -28,7 +28,7 @@ Dabei gehen alle Eintragungen von Studenten verloren, die sich zwischenzeitlich 
   <tr>
     <td>Studenten ohne Gruppe:</td>
     <td>
-      <div tal:define="users=result['students_without_group']" tal:omit-tag="">
+      <div tal:define="users result['students_without_group']" tal:omit-tag="">
         <metal:main metal:use-macro="templates('Fragments/Format/user_list.pt').macros['user_list']" />
       </div>
     </td>
@@ -36,7 +36,7 @@ Dabei gehen alle Eintragungen von Studenten verloren, die sich zwischenzeitlich 
   <tr>
     <td>Unglückliche Studenten:</td>
     <td>
-      <div tal:define="users=result['students_unhappy']" tal:omit-tag="">
+      <div tal:define="users result['students_unhappy']" tal:omit-tag="">
         <metal:main metal:use-macro="templates('Fragments/Format/user_list.pt').macros['user_list']" />
       </div>
     </td>

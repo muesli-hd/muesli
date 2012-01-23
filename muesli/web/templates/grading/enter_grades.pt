@@ -70,7 +70,7 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
 <input type="hidden" name="submit" value="1" />
 <table class="colored">
   <tr>
-    <th tal:conditions="not tutorial_ids">Tutor</th>
+    <th tal:condition="not tutorial_ids">Tutor</th>
     <th tal:repeat="exam grading.exams">${exam.name} (${varsForExam[exam.id]})</th>
     <th>Name</th>
     <th>Berechnete Note</th>
