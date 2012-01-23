@@ -339,6 +339,10 @@ class UserEdit(ObjectForm):
 			FormField('subject_alt',
 			   label='Studiengang', size=30, comment=u'Genauer Studiengang (falls Sonstiges gewählt)',
 			   value=''),
+			FormField('second_subject',
+			   label='Beifach',
+			   comment='Falls Lehramt: Beifach',
+			   value=user.second_subject),
 			FormField('birth_date',
 			   label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
 			   value=user.birth_date),
@@ -398,6 +402,10 @@ class UserUpdate(ObjectForm):
 			FormField('subject_alt',
 			   label='Studiengang', size=30, comment=u'Genauer Studiengang (falls Sonstiges gewählt)',
 			   value=''),
+			FormField('second_subject',
+			   label='Beifach',
+			   comment='Falls Lehramt: Beifach',
+			   value=user.second_subject),
 			FormField('birth_date',
 			   label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
 			   value=user.birth_date),
@@ -406,7 +414,7 @@ class UserUpdate(ObjectForm):
 			   value=user.birth_place),
 			]
 		ObjectForm.__init__(self, user, formfields, send=u'Änderungen übernehmen')
-		self.editok = ['title', 'subject', 'subject_alt']
+		self.editok = ['title', 'subject', 'subject_alt', 'second_subject']
 		for field in ['matrikel', 'birth_date', 'birth_place']:
 			if not getattr(user, field):
 				self.editok.append(field)
