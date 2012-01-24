@@ -77,8 +77,11 @@ def emailWrongSubject(request):
 	for student in students:
 		if not student.subject:
 			continue
-		if '(la)' in student.subject.lower():
-			if not student.second_subject:
+		lsub = student.subject.lower()
+		if 'mathematik (la)' in lsub:
+			if not ('hauptfach' in lsub or 'beifach' in lsub):
+				bad_students.append(student)
+			elif not student.second_subject:
 				bad_students.append(student)
 	if request.method == 'POST' and form.processPostData(request.POST):
 		message = Message(subject=form['subject'],
