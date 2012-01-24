@@ -12,11 +12,12 @@ Geben Sie hierzu in das Formular unten einen Betreff und die Nachricht ein und k
 <p>
 Hallo!
 <br />
-Laut deinen Daten in Müsli studierst du einen Lehramtsstudiengang. In Müsli muss
-man für Lehramtsstudiengänge mittlerweile auch das Beifach angeben. Bitte hole
-dies in Müsli unter "Angaben ergänzen" nach.
+Laut Ihren Daten in Müsli studieren Sie Mathematik im Lehramtsstudiengang. Damit das Prüfungssekretariat
+Ihre Noten den entsprechenden Stellen mitteilen kann, müssen Sie in Müsli angeben,
+ob Sie Mathematik auf Hauptfach oder Beifach studieren, sowie, was die weiteren Hauptfächer sind.
+Bitte holen Sie dies in Müsli unter "Angaben ergänzen" nach.
 <br />
-Falls du Fragen oder Probleme hast, kannst du dich gerne bei uns melden!
+Falls Sie Fragen oder Probleme haben, können Sie sich gerne bei uns melden!
 <br />
 Mit freundlichen Grüßen,<br />
   Das MÜSLI-Team
@@ -27,9 +28,21 @@ Mit freundlichen Grüßen,<br />
 <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
 
-<ul>
-  <li tal:repeat="student students"><a tal:attributes="href request.route_path('user_edit', user_id=student.id)">${student.name()}</a></li>
-</ul>
+<p>Anzahl: ${len(students)}</p>
+<table class="colored">
+  <thead>
+    <tr>
+      <td>Name</td>
+      <td>Fach</td>
+      <td>Beifach</td>
+    </tr>
+  </thead>
+  <tr tal:repeat="student students">
+    <td><a tal:attributes="href request.route_path('user_edit', user_id=student.id)">${student.name()}</a></td>
+    <td>${student.subject}</td>
+    <td>${student.second_subject}</td>
+  </tr>
+</table>
 
   </metal:main>
 </metal:main>
