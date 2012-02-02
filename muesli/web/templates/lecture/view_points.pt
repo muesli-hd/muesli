@@ -11,12 +11,16 @@
     <h4>${catexams['name']}</h4>
     <table>
       <tr tal:repeat="exam catexams['exams']">
+        <span tal:condition="not exam.results_hidden" tal:omit-tag="">
         <th>
           <a tal:condition="exam.url" tal:attributes="href exam.url">${exam.name}</a>
           <span tal:condition="not exam.url" tal:omit-tag="">${exam.name}</span>
         </th>
         <td><strong>${fF(results[exam.id]['sum'])}/${fF(exam.getMaxpoints())}</strong></td>
-        <td tal:repeat="e exam.exercises">${fF(results[exam.id][e.id]['points'])}/${fF(results[exam.id][e.id]['exercise'].maxpoints)}</td>
+        <td tal:repeat="e exam.exercises">
+          ${fF(results[exam.id][e.id]['points'])}/${fF(results[exam.id][e.id]['exercise'].maxpoints)}
+        </td>
+        </span>
       </tr>
     <tr>
       <th>Insgesamt</th>

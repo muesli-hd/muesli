@@ -255,6 +255,7 @@ class Exam(Base):
 	admission = Column(Boolean)
 	registration = Column(Boolean)
 	url = Column(Text)
+	results_hidden = Column(Boolean, default=False)
 	@property
 	def exercise_points(self):
 		session = Session.object_session(self)
