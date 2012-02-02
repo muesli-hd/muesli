@@ -603,6 +603,11 @@ class LectureEditExam(ObjectForm):
 			FormField('url',
 			   value=exam.url,
 			   label='URL', size=100),
+			FormField('results_hidden',
+			   label='Ergebnisse anzeigen',
+			   type='radio',
+			   value=boolToValue(exam.results_hidden or False),
+			   options=[[0, 'Anzeigen'], [1, 'Verstecken']]),
 			FormField('admission',
 			   label='Zulassung',
 			   type='radio',
@@ -616,7 +621,7 @@ class LectureEditExam(ObjectForm):
 			]
 		ObjectForm.__init__(self, exam, formfields, send=u'Änderungen speichern')
 	def saveField(self, fieldName):
-		if fieldName in ['admission', 'registration']:
+		if fieldName in ['admission', 'registration', 'results_hidden']:
 			setattr(self.obj, fieldName, valueToBool(self[fieldName]))
 		else:
 			ObjectForm.saveField(self, fieldName)
