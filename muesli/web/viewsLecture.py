@@ -330,9 +330,10 @@ def viewPoints(request):
 		ls = lecture.lecture_students.filter(models.LectureStudent.student_id == request.user.id).one()
 	except exc.NoResultFound:
 		return HTTPForbidden()
-	exams = lecture.exams.all()
+	visible_exams = lecture.exams.filter(models.Exam.results_hidden!=False)
+	exams = visible_exams.all()
 	exams_by_category = [
-		{'id':cat['id'], 'name': cat['name'], 'exams': lecture.exams.filter(models.Exam.category==cat['id']).all()} for cat in utils.categories]
+		{'id':cat['id'], 'name': cat['name'], 'exams': visible_exams.filter(models.Exam.category==cat['id']).all()} for cat in utils.categories]
 	exams_by_category = [cat for cat in exams_by_category if cat['exams']]
 	results = {}
 	for exam in exams:
