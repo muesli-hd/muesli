@@ -109,11 +109,10 @@ class EnterPoints(object):
 		students = students.all()
 		pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
 		points = DictOfObjects(lambda: {})
-		for s in students:
-			for e in exam.exercises:
-				points[s.student_id][e.id] = None
+		#for s in students:
+		#	for e in exam.exercises:
+		#		points[s.student_id][e.id] = None
 		for point in pointsQuery.all():
-			#print point
 			points[point.student_id][point.exercise_id] = point
 		for student in students:
 			if not student.student_id in points:
