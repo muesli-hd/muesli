@@ -104,6 +104,20 @@ afterUpdateElement : getSelectionId
 /* ]]> */
 </script>
 
+<div tal:omit-tag="">
+  <!-- This is a very dirty hack to have always enough space to show the whole list-->
+</div>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
 
   </metal:main>
 </metal:main>
