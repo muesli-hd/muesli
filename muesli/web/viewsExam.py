@@ -180,6 +180,18 @@ class Export(object):
 		self.db.commit()
 		for student in points:
 			points[student]['total'] = sum([v.points for v in points[student].values() if v.points])
+		if exam.admission or exam.registration:
+			admissions = exam.exam_admissions
+			for a in admissions:
+				if exam.admission:
+					points[a.student_id]['admission'] = a.admission
+				if exam.registration:
+					points[a.student_id]['registration'] = a.registration
+			for student in points:
+				if exam.admission and not 'admission' in points[student]:
+					points[student]['admission'] = None
+				if exam.registration and not 'registration' in points[student]:
+					points[student]['registration'] = None
 		return {'exam': exam,
 		        'tutorial_ids': self.request.matchdict['tutorial_ids'],
 		        'students': students,
@@ -234,7 +246,8 @@ class ExamStatisticsBar(object):
 		self.color2 = (140,140,255)
 		self.max = float(request.matchdict['max'])
 		self.lecture_points = float(request.matchdict['lecture_points'])
-		self.tutorial_points = float(request.matchdict['tutorial_points']) if request.matchdict['tutorial_points']!=None else None
+		self.tutorial_points = float(request.matchdict['tutorial_points'])\
+			if (request.matchdict['tutorial_points']!=None and request.matchdict['tutorial_points']!='') else None
 		self.values = [[self.lecture_points, self.max]]
 		if self.tutorial_points != None:
 			self.values.insert(0,[self.tutorial_points, self.max])

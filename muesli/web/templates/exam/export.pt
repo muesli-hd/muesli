@@ -15,6 +15,8 @@
     <th>Geburtstag, -ort</th>
     <th tal:repeat="ex exam.exercises">${ex.nr}</th>
     <th>Σ</th>
+    <th tal:condition="exam.admission">Zulassung</th>
+    <th tal:condition="exam.registration">Anmeldung</th>
   </tr>
 </thead>
 <tbody>
@@ -27,6 +29,20 @@
     <td>${ls.student.birth_date}, ${ls.student.birth_place}</td>
     <td tal:repeat="ex exam.exercises">${points[ls.student_id][ex.id].points if points[ls.student_id][ex.id].points!= None else ''}</td>
     <td>${points[ls.student_id]['total']}</td>
+    <td tal:condition="exam.admission">
+      <div tal:omit-tag="" tal:define="a points[ls.student_id]['admission']">
+        <span tal:condition="a==True" tal:omit-tag="">Zugelassen</span>
+        <span tal:condition="a==False" tal:omit-tag="">Nicht zugelassen</span>
+        <span tal:condition="a==None" tal:omit-tag="">Ausstehend</span>
+      </div>
+    </td>
+    <td tal:condition="exam.registration">
+      <div tal:omit-tag="" tal:define="r points[ls.student_id]['registration']">
+        <span tal:condition="r==True" tal:omit-tag="">Angemeldet</span>
+        <span tal:condition="r==False" tal:omit-tag="">Abgemeldet</span>
+        <span tal:condition="r==None" tal:omit-tag="">Ausstehend</span>
+      </div>
+    </td>
   </tr>
 
 </tbody>
