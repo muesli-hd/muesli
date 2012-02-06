@@ -104,14 +104,16 @@ class EnterPoints(object):
 		error_msgs = []
 		exam = self.request.context.exam
 		tutorials = self.request.context.tutorials
-		students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))
+		students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))\
+					.options(sqlalchemy.orm.joinedload_all('tutorial.tutor'))
 		students = students.all()
 		pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
 		points = DictOfObjects(lambda: {})
-		#for s in students:
-		#	for e in exam.exercises:
-		#		points[s.student_id][e.id] = None
-		for point in pointsQuery:
+		for s in students:
+			for e in exam.exercises:
+				points[s.student_id][e.id] = None
+		for point in pointsQuery.all():
+			#print point
 			points[point.student_id][point.exercise_id] = point
 		for student in students:
 			if not student.student_id in points:
@@ -138,9 +140,10 @@ class EnterPoints(object):
 								points[student.student_id][e.id].points = value
 							except:
 								error_msgs.append(u'Could not convert "%s" (%s, Exercise %i)'%(value, student.student.name(), e.nr))
-		self.db.commit()
 		for student in points:
 			points[student]['total'] = sum([v.points for v in points[student].values() if v.points])
+		if self.db.new or self.db.dirty or self.db.deleted:
+			self.db.commit()
 		# TODO: Die Statistik scheint recht langsm zu sein. Evt lohnt es sich,
 		#       die selber auszurechnen...
 		if tutorials:

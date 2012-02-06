@@ -289,7 +289,7 @@ class Exam(Base):
 			statistics = AutoVivification()
 		session = Session.object_session(self)
 		if not students:
-			students = self.lecture.lecture_students_for_tutorials(tutorials)
+			students = self.lecture.lecture_students_for_tutorials(tutorials).all()
 		pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students]))\
 							.filter(ExerciseStudent.points!=None)
 		pointsStmt = pointsQuery.subquery()
@@ -374,7 +374,7 @@ class Tutorial(Base):
 	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id))
 	lecture = relationship(Lecture, backref=backref('tutorials',lazy='dynamic'))
 	tutor_id = Column('tutor', Integer, ForeignKey(User.id))
-	tutor = relationship(User, order_by=Lecture.term)
+	tutor = relationship(User)
 	place = Column(Text)
 	max_students = Column(Integer, nullable=False, default=0)
 	comment = Column(Text)
