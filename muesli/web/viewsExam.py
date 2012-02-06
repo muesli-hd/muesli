@@ -180,7 +180,8 @@ class Export(object):
 					exerciseStudent.exercise = e
 					points[student.student_id][e.id] = exerciseStudent
 					self.db.add(exerciseStudent)
-		self.db.commit()
+		if self.db.new or self.db.dirty or self.db.deleted:
+			self.db.commit()
 		for student in points:
 			points[student]['total'] = sum([v.points for v in points[student].values() if v.points])
 		if exam.admission or exam.registration:
