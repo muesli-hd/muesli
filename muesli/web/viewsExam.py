@@ -234,7 +234,8 @@ class ExamStatisticsBar(object):
 		self.color2 = (140,140,255)
 		self.max = float(request.matchdict['max'])
 		self.lecture_points = float(request.matchdict['lecture_points'])
-		self.tutorial_points = float(request.matchdict['tutorial_points']) if request.matchdict['tutorial_points']!=None else None
+		self.tutorial_points = float(request.matchdict['tutorial_points'])\
+			if (request.matchdict['tutorial_points']!=None and request.matchdict['tutorial_points']!='') else None
 		self.values = [[self.lecture_points, self.max]]
 		if self.tutorial_points != None:
 			self.values.insert(0,[self.tutorial_points, self.max])
