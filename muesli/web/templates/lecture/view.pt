@@ -72,7 +72,7 @@
       <th>Verf. Plätze</th>
       <th>Präferenz</th>
     </tr>
-    <tr tal:repeat='count,time enumerate(times,1)'>
+    <tr tal:repeat='(count,time) enumerate(times,1)'>
       <td>${time['time']}</td>
       <td>${time['max_students']}</td>
       <td>
