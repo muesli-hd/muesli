@@ -204,7 +204,7 @@ def statistics(request):
 	tutorial_ids = request.context.tutorial_ids
 	exam = request.context.exam
 	tutorials = request.context.tutorials
-	lecturestudents = exam.lecture.lecture_students
+	lecturestudents = exam.lecture.lecture_students.all()
 	statistics = exam.getStatistics(students=lecturestudents)
 	statistics_by_subject = exam.getStatisticsBySubjects(students=lecturestudents)# exam.getStatisticsBySubject(students=students)
 	if tutorials:
