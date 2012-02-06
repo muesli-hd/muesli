@@ -290,7 +290,8 @@ class Exam(Base):
 		session = Session.object_session(self)
 		if not students:
 			students = self.lecture.lecture_students_for_tutorials(tutorials)
-		pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students]))
+		pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students]))\
+							.filter(ExerciseStudent.points!=None)
 		pointsStmt = pointsQuery.subquery()
 		exerciseStatistics = session.query(\
 				pointsStmt.c.exercise.label('exercise_id'),
