@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:define-macro="tutorial_occupancy">
-  <img tal:attributes="src request.route_path('tutorial_occupancy_bar', count=tutorial.students.count(), max_count=tutorial.max_students, max_count_total=30)" />
-  ${tutorial.students.count()}/${tutorial.max_students}
+  <img tal:attributes="src request.route_path('tutorial_occupancy_bar', count=tutorial.student_count, max_count=tutorial.max_students, max_count_total=30)" />
+  ${tutorial.student_count}/${tutorial.max_students}
 </metal:main>

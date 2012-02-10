@@ -32,7 +32,7 @@ from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTPForbidden
 from pyramid.url import route_url
 
-from sqlalchemy.orm import exc, joinedload
+from sqlalchemy.orm import exc, joinedload, undefer
 import sqlalchemy
 
 from muesli import types
@@ -59,7 +59,7 @@ class View(object):
 		self.db = self.request.db
 		self.lecture_id = request.matchdict['lecture_id']
 	def __call__(self):
-		lecture = self.db.query(models.Lecture).get(self.lecture_id)
+		lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
 		times = lecture.prepareTimePreferences(user=self.request.user)
 		return {'lecture': lecture,
 		        'times': times,
@@ -112,7 +112,7 @@ class Edit(object):
 		self.db = self.request.db
 		self.lecture_id = request.matchdict['lecture_id']
 	def __call__(self):
-		lecture = self.db.query(models.Lecture).get(self.lecture_id)
+		lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
 		form = LectureEdit(self.request, lecture)
 		if self.request.method == 'POST' and form.processPostData(self.request.POST):
 			form.saveValues()

@@ -24,9 +24,10 @@ import math, random, time, hashlib
 import muesli
 
 import sqlalchemy
+import sqlalchemy as sa
 import sqlalchemy.ext.declarative
 from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table, text
-from sqlalchemy.orm import relationship, sessionmaker, backref
+from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
 from muesli.types import *
 from muesli.utils import DictOfObjects, AutoVivification
 
@@ -393,6 +394,7 @@ class Tutorial(Base):
 	time = Column(ColumnWrapper(TutorialTime)(length=7))
 	date = Column(Date)
 	is_special = Column(Boolean, nullable=False, default=False)
+	#student_count defined below, after LectureStudent is defined
 
 class TimePreference(Base):
 	__tablename__ = 'time_preferences'
@@ -430,6 +432,12 @@ class LectureStudent(Base):
 	student = relationship(User, backref=backref('lecture_students', lazy='dynamic'))
 	tutorial_id = Column('tutorial', Integer, ForeignKey(Tutorial.id))
 	tutorial = relationship(Tutorial, backref='lecture_students')
+
+Tutorial.student_count = column_property(
+		sa.select([sa.func.count(LectureStudent.student_id)]).\
+			where(LectureStudent.tutorial_id==Tutorial.id),
+		deferred=True
+		)
 
 class LectureRemovedStudent(Base):
 	__tablename__ = 'lecture_removed_students'
