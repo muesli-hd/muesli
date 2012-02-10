@@ -98,7 +98,18 @@ class EnterGrades(object):
 		else:
 			formula = grading.formula
 		exam_id = self.request.GET.get('students', None)
-		lecture_students = grading.lecture.lecture_students_for_tutorials([]).options(sqlalchemy.orm.joinedload(models.LectureStudent.student)).all()
+		if exam_id:
+			exam = self.request.db.query(models.Exam).get(exam_id)
+		else: exam=None
+		lecture_students = grading.lecture.lecture_students_for_tutorials([])\
+			.options(sqlalchemy.orm.joinedload(models.LectureStudent.student))
+		if exam:
+			lecture_students = lecture_students\
+				.join(models.ExerciseStudent, models.LectureStudent.student_id==models.ExerciseStudent.student_id)\
+				.join(models.Exercise)\
+				.join(models.Exam)\
+				.filter(models.Exam.id==exam_id)
+		lecture_students = lecture_students.all()
 		gradesQuery = grading.student_grades.filter(models.StudentGrade.student_id.in_([ls.student_id for ls in lecture_students]))
 		grades = DictOfObjects(lambda: {})
 		exam_ids = [e.id for e in grading.exams]
