@@ -61,7 +61,9 @@ class View(object):
 	def __call__(self):
 		lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
 		times = lecture.prepareTimePreferences(user=self.request.user)
+		subscribed = self.request.user.id in [s.id for s in lecture.students]
 		return {'lecture': lecture,
+		        'subscribed': subscribed,
 		        'times': times,
 		        'prefs': utils.preferences}
 
