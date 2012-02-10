@@ -51,7 +51,7 @@ class View(object):
 		lecture_students = self.request.context.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))
 		students = [ls.student for ls in lecture_students] #self.db.query(models.User).filter(filterClause)
 		tutorial = tutorials[0]
-		other_tutorials = tutorial.lecture.tutorials.order_by(models.Tutorial.time)
+		other_tutorials = tutorial.lecture.tutorials
 		return {'tutorial': tutorial,
 		        'tutorials': tutorials,
 		        'tutorial_ids': self.tutorial_ids,
