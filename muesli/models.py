@@ -157,6 +157,7 @@ class Lecture(Base):
 	#  'static' - no subscription, no unsubscription
 	mode = Column(Text, nullable=False, default='off')
 	minimum_preferences = Column(Integer, default=None)
+	tutorials = relationship('Tutorial', order_by='Tutorial.time')
 	tutors = relationship(User, secondary=lecture_tutors_table, backref = "lectures_as_tutor")
 	@property
 	def students(self):
@@ -193,7 +194,8 @@ class Lecture(Base):
 				else:
 					time['penalty'] = 100
 			if user:
-				session.commit()
+				if session.new or session.dirty or session.deleted:
+					session.commit()
 		else:
 			times = []
 		return times
@@ -372,9 +374,9 @@ class Tutorial(Base):
 	__tablename__ = 'tutorials'
 	id = Column(Integer, primary_key=True)
 	lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id))
-	lecture = relationship(Lecture, backref=backref('tutorials',lazy='dynamic'))
+	lecture = relationship(Lecture, backref=backref('tutorials_q',lazy='dynamic'))
 	tutor_id = Column('tutor', Integer, ForeignKey(User.id))
-	tutor = relationship(User)
+	tutor = relationship(User, lazy='joined')
 	place = Column(Text)
 	max_students = Column(Integer, nullable=False, default=0)
 	comment = Column(Text)
