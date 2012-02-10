@@ -147,6 +147,13 @@ body {
     padding: 0.5em;
 }
 
+.formerror {
+    background-color: #ee8888;
+    color: #000000;
+    border: 1px #000000 solid;
+    padding: 0.5em;
+}
+
 .invalid {
     background-color: #ee8888;
 }
