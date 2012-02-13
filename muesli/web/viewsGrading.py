@@ -229,7 +229,7 @@ class Export(ExcelView):
 				g = float(grade.grade*100)
 			else:
 				g = ''
-			data = [grade.student.matrikel, grade.student.last_name, '', grade.student.subject, '', '', g, '']
+			data = [grade.student.matrikel, grade.student.last_name, '', grade.student.formatCompleteSubject(), '', '', g, '']
 			for j,d in enumerate(data):
 				worksheet_grades.write(1+i,j,d if d != None else '')
 		worksheet_data = self.w.add_sheet('Daten')
@@ -248,7 +248,7 @@ class Export(ExcelView):
 				None,
 				float(grade.grade) if grade.grade != None else '',
 				'',
-				grade.student.subject]
+				grade.student.formatCompleteSubject()]
 			for j,d in enumerate(data):
 				worksheet_data.write(1+i,j,d if d != None else '')
 			worksheet_data.write(1+i,4, date, date_style)
