@@ -116,6 +116,11 @@ class User(Base):
 		return query.count()>0
 	def confirmed(self):
 		return self.password != None
+	def formatCompleteSubject(self):
+		ret = self.subject
+		if self.second_subject:
+			ret += ', Zweites Hauptfach: %s' % self.second_subject
+		return ret
 	def __unicode__(self):
 		return u'{name} <{email}>'.format(name=self.name(), email=self.email)
 
