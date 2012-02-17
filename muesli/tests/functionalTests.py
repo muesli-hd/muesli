@@ -85,7 +85,7 @@ class BaseTests(unittest.TestCase):
 	def assertResContainsNot(self, res, content):
 		self.assertTrue(content.encode(res.charset) not in res.body)
 
-	def assertForm(self, res, name, newvalue, formindex=None):
+	def assertForm(self, res, name, newvalue, formindex=None, expectedvalue=None):
 		def getForm(res):
 			if formindex != None:
 				return res.forms[formindex]
@@ -96,7 +96,8 @@ class BaseTests(unittest.TestCase):
 		res2 = form.submit()
 		self.assertResContainsNot(res2, u'formerror')
 		form = getForm(res2)
-		self.assertTrue(form[name].value == newvalue)
+		if expectedvalue==None: expectedvalue=newvalue
+		self.assertTrue(form[name].value == expectedvalue)
 		return res2
 
 def setUserPassword(user, password):

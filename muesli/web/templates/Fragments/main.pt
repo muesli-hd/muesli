@@ -45,6 +45,7 @@ function set_navigation(nav) {
 </div>
 <div id="debug">
 loading time: ${'{0:.3f}s'.format(request.now() - request.time)}
+queries: ${request.queries}
 </div>
 </body>
 </html>
