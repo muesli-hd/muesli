@@ -38,11 +38,18 @@ from muesli import utils
 
 import time
 
+from sqlalchemy import event as saevent
+
 @subscriber(NewRequest)
 def add_session_to_request(event):
 	event.request.time = time.time()
 	event.request.now = time.time
 	event.request.db = Session()
+	event.request.queries = 0
+	def before_execute(conn, clauseelement, multiparams, params):
+		event.request.queries += 1
+	saevent.listen(Session.get_bind(event.request.db), "before_execute", before_execute)
+
 	def callback(request):
 		request.db.rollback()
 	event.request.add_finished_callback(callback)
