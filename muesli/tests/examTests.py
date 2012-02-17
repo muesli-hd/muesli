@@ -163,10 +163,8 @@ class TutorLoggedInTests(UserLoggedInTests):
 		self.assertForm(res, 'registration-%s' % (self.user.id), '0')
 		self.assertForm(res, 'registration-%s' % (self.user.id), '')
 
-
 	def test_exam_admission_tuts(self):
 		res = self.testapp.get('/exam/admission/%s/%s,%s' % (self.exam.id, self.tutorial.id, self.tutorial2.id), status=200)
-
 
 	def test_exam_statistics(self):
 		res = self.testapp.get('/exam/statistics/%s/' % self.exam.id, status=200)
