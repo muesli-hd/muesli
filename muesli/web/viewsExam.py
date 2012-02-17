@@ -157,6 +157,52 @@ class EnterPoints(object):
 		        'statistics': statistics,
 		        'error_msg': u'\n'.join(error_msgs)}
 
+@view_config(route_name='exam_admission', renderer='muesli.web:templates/exam/admission.pt', context=ExamContext, permission='enter_points')
+class Admission(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.tutorial_ids = self.request.context.tutorial_ids
+	def valueToBool(self, value):
+		if value=='1':
+			return True
+		if value=='0':
+			return False
+		if value=='':
+			return None
+		raise ValueError('"%r" could not be converted to boolean' % value)
+	def __call__(self):
+		error_msgs = []
+		exam = self.request.context.exam
+		tutorials = self.request.context.tutorials
+		students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))\
+					.options(sqlalchemy.orm.joinedload_all('tutorial.tutor'))
+		students = students.all()
+		db_admissions = exam.exam_admissions.filter(ExamAdmission.student_id.in_([s.student.id for s  in students])).all()
+		admissions={}
+		for admission in db_admissions:
+			admissions[admission.student_id] = admission
+		for student in students:
+			if not student.student_id in admissions:
+				admission = ExamAdmission(exam, student.student)
+				self.db.add(admission)
+				admissions[student.student_id] = admission
+		if self.request.method == 'POST':
+			for ls in students:
+				admission_parameter = 'admission-{0}'.format(ls.student_id)
+				if exam.admission and admission_parameter in self.request.POST:
+					admissions[ls.student_id].admission = self.valueToBool(self.request.POST[admission_parameter])
+				registration_parameter = 'registration-{0}'.format(ls.student_id)
+				if exam.registration and registration_parameter in self.request.POST:
+					admissions[ls.student_id].registration = self.valueToBool(self.request.POST[registration_parameter])
+		if self.db.new or self.db.dirty or self.db.deleted:
+			self.db.commit()
+		return {'exam': exam,
+		        'tutorial_ids': self.request.matchdict['tutorial_ids'],
+		        'students': students,
+		        'admissions': admissions,
+		        }
+
 @view_config(route_name='exam_export', renderer='muesli.web:templates/exam/export.pt', context=ExamContext, permission='enter_points')
 class Export(object):
 	def __init__(self, request):

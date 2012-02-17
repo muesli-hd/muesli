@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+
+<h2>Zulassung zu ${exam.name}</h2>
+
+<form method="POST">
+<table>
+<thead>
+  <tr>
+    <th tal:condition="not tutorial_ids">Tutor</th>
+    <th>Name</th>
+    <th>Zulassung</th>
+    <th>Anmeldung</th>
+  </tr>
+</thead>
+<tbody>
+
+  <tr tal:repeat="ls students">
+    <span tal:omit-tag="" tal:define="student ls.student; tutor ls.tutorial.tutor">
+    <td tal:condition="not tutorial_ids">${tutor.last_name}</td>
+    <td>${student.last_name}, ${student.first_name}</td>
+    <td tal:define="name     'admission-%s' % student.id;
+                    value     admissions[ls.student_id].admission;
+                    readonly  exam.admission!=True">
+        <metal:main metal:use-macro="templates('Fragments/HTML/input_tristate.pt').macros['input_tristate']" />
+    </td>
+    <td tal:define="name     'registration-%s' % student.id;
+                    value     admissions[ls.student_id].registration;
+                    readonly  exam.registration!=True">
+        <metal:main metal:use-macro="templates('Fragments/HTML/input_tristate.pt').macros['input_tristate']" />
+    </td>
+    </span>
+  </tr>
+</tbody>
+</table>
+
+<input type="submit" value="Speichern"/>
+</form>
+
+
+  </metal:main>
+</metal:main>
