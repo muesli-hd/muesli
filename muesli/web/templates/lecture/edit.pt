@@ -10,6 +10,7 @@
 
 <div tal:condition="lecture.mode=='prefs'" tal:omit-tag="">
   <h3>Einteilung vornehmen</h3>
+  <p><a tal:attributes="href request.route_path('lecture_preferences', lecture_id=lecture.id)">Details</a></p>
   <p>Verteilung der angemeldeten Studenten:</p>
   <table>
     <thead>
