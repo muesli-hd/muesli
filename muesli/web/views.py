@@ -70,19 +70,37 @@ def index(request):
 
 @view_config(route_name='email_users', renderer='muesli.web:templates/email_users.pt', context=GeneralContext, permission='admin')
 def emailUsers(request):
+	ttype = request.GET.get('type', 'wrong_subject')
+	print ttype
 	form = EmailWrongSubject()
 	semesterlimit = utils.getSemesterLimit()
 	students = request.db.query(models.User).filter(models.User.lecture_students.any(models.LectureStudent.lecture.has(models.Lecture.term >= semesterlimit))).all()
 	bad_students = []
-	for student in students:
-		if not student.subject:
-			continue
-		lsub = student.subject.lower()
-		if 'mathematik (la)' in lsub:
-			if not ('hauptfach' in lsub or 'beifach' in lsub):
+	headers = []
+	table = []
+	if ttype=='wrong_subject':
+		headers = ['Fach', 'Beifach']
+		for student in students:
+			if not student.subject:
+				continue
+			lsub = student.subject.lower()
+			if 'mathematik (la)' in lsub:
+				if not ('hauptfach' in lsub or 'beifach' in lsub):
+					bad_students.append(student)
+				elif not student.second_subject:
+					bad_students.append(student)
+		for s in bad_students:
+			table.append((s,s.subject, s.second_subject))
+	elif ttype=='wrong_birthday':
+		headers = ["Geburtstag"]
+		validator = DateString()
+		for student in students:
+			try:
+				date = validator.to_python(student.birth_date)
+			except formencode.Invalid:
 				bad_students.append(student)
-			elif not student.second_subject:
-				bad_students.append(student)
+		for s in bad_students:
+			table.append((s,s.birth_date))
 	if request.method == 'POST' and form.processPostData(request.POST):
 		message = Message(subject=form['subject'],
 			sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
@@ -94,6 +112,9 @@ def emailUsers(request):
 		sendMail(message)
 		request.session.flash('A Mail has been send to all students with wrong subject', queue='messages')
 	return {'form': form,
+	        'type': ttype,
+	        'table': table,
+	        'headers': headers,
 	        'students': bad_students}
 
 @view_config(context = Exception, renderer='muesli.web:templates/error.pt')

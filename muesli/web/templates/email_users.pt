@@ -9,6 +9,11 @@ Auf dieser Seite können Sie eine Nachricht an alle Studenten, die ein falsches 
 Geben Sie hierzu in das Formular unten einen Betreff und die Nachricht ein und klicken dann auf "E-Mail senden".
 </p>
 
+<ul>
+  <li><a tal:attributes="href request.route_path('email_users',_query={'type': 'wrong_subject'})">Falsches Fach</a></li>
+  <li><a tal:attributes="href request.route_path('email_users',_query={'type': 'wrong_birthday'})">Falscher Geburtstag</a></li>
+</ul>
+
 <p>
 Hallo!
 <br />
@@ -23,7 +28,7 @@ Mit freundlichen Grüßen,<br />
   Das MÜSLI-Team
 </p>
 
-<form action="/email_wrong_subject" tal:attributes="action request.route_path('email_users',)" method="POST"
+<form action="/email_wrong_subject" tal:attributes="action request.route_path('email_users',_query={'type': type})" method="POST"
   enctype="multipart/form-data">
 <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
@@ -33,14 +38,12 @@ Mit freundlichen Grüßen,<br />
   <thead>
     <tr>
       <td>Name</td>
-      <td>Fach</td>
-      <td>Beifach</td>
+      <td tal:repeat="header headers">${header}</td>
     </tr>
   </thead>
-  <tr tal:repeat="student students">
-    <td><a tal:attributes="href request.route_path('user_edit', user_id=student.id)">${student.name()}</a></td>
-    <td>${student.subject}</td>
-    <td>${student.second_subject}</td>
+  <tr tal:repeat="tstudent table">
+    <td><a tal:attributes="href request.route_path('user_edit', user_id=tstudent[0].id)">${tstudent[0].name()}</a></td>
+    <td tal:repeat="field tstudent[1:]">${field}</td>
   </tr>
 </table>
 
