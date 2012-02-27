@@ -135,14 +135,19 @@ class UserLoggedInTests(UnloggedTests):
 		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=200)
 
 	def test_lecture_set_preferences(self):
+		prefcount = len(self.loggedUser.time_preferences)
 		res = self.testapp.get('/lecture/set_preferences/%s' % self.prefLecture.id, status=302)
 		res = self.testapp.get('/lecture/view/%s' % self.prefLecture.id, status=200)
 		form = res.forms[0]
-		form['time-1'] = str(self.prefTutorial.time)
+		#Works only, if there are no tutorials with same time!
+		for i,tut in enumerate(self.prefLecture.tutorials):
+			form['time-%s' % (i+1)] = str(tut.time)
+			form['pref-%s'% (i+1)] = "1"
 		res = form.submit()
 		self.assertTrue(res.status.startswith('302'))
+		res = res.follow()
 		self.session.expire_all()
-		self.assertTrue(len(self.loggedUser.time_preferences) > 0)
+		self.assertGreater(len(self.loggedUser.time_preferences), prefcount)
 
 	def test_lecture_remove_preferences(self):
 		res = self.testapp.get('/lecture/remove_preferences/%s' % self.prefLecture.id, status=302)
