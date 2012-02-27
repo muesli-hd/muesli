@@ -42,8 +42,8 @@ import traceback
 def start(request):
 	if not request.user:
 		return HTTPFound(location = request.route_url('user_login'))
-	tutorials_as_tutor = request.user.tutorials_as_tutor.options(joinedload(Tutorial.tutor, Tutorial.lecture))
-	tutorials = request.user.tutorials.options(joinedload(Tutorial.tutor, Tutorial.lecture))
+	tutorials_as_tutor = request.user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
+	tutorials = request.user.tutorials.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
 	lectures_as_assistant = request.user.lectures_as_assistant
 	if request.GET.get('show_all', '0')=='0':
 		semesterlimit = utils.getSemesterLimit()
