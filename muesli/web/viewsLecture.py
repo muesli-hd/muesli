@@ -360,6 +360,7 @@ def setPreferences(request):
 	if lecture.minimum_preferences:
 		valid = len(filter(lambda tp: tp.penalty < 100, tps)) >= lecture.minimum_preferences
 	else:
+		#TODO: Works not for just one tutorial!
 		min_number_of_times = len(tps)/100.0+1
 		penalty_count = sum([1.0/tp.penalty for tp in tps])
 		valid = penalty_count > min_number_of_times
