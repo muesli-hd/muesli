@@ -46,7 +46,7 @@ def valueToBool(value):
 
 class DateString(formencode.FancyValidator):
 	prevalidator = formencode.validators.UnicodeString()
-	pattern = re.compile('^(?P<day>\d\d)\.(?P<month>\d\d)\.(?P<year>\d\d\d\d)$')
+	pattern = re.compile('^(?P<day>\d\d?)\.(?P<month>\d\d?)\.(?P<year>\d\d\d\d)$')
 	def _to_python(self, value, state):
 		string = self.prevalidator.to_python(value, state)
 		match = self.pattern.match(string)
@@ -60,7 +60,7 @@ class DateString(formencode.FancyValidator):
 			raise formencode.Invalid(u'Ungültiger Tag!', value, state)
 		if not (month >=1 and month <= 12):
 			raise formencode.Invalid(u'Ungültiger Monat!', value, state)
-		if not (year >=1900 and day <= 2050):
+		if not (year >= 1900):
 			raise formencode.Invalid(u'Ungültiges Jahr!', value, state)
 		return string
 
