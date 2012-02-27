@@ -25,7 +25,9 @@ from muesli.web.context import *
 from muesli.web.forms import *
 from muesli.allocation import Allocation
 from muesli.mail import Message, sendMail
+from muesli.web.viewsExam import MatplotlibView
 
+from collections import defaultdict
 
 from pyramid.view import view_config
 from pyramid.response import Response
@@ -133,6 +135,58 @@ class Edit(object):
 		        'categories': utils.categories,
 		        'exams': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
 		        'form': form}
+
+@view_config(route_name='lecture_preferences', renderer='muesli.web:templates/lecture/preferences.pt', context=LectureContext, permission='edit')
+class Preferences(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.lecture_id = request.matchdict['lecture_id']
+	def __call__(self):
+		lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
+		names = utils.lecture_types[lecture.type]
+		pref_subjects = lecture.pref_subjects()
+		pref_count = sum([pref[0] for pref in pref_subjects])
+		subjects = lecture.subjects()
+		student_count = sum([subj[0] for subj in subjects])
+		times = lecture.prepareTimePreferences(user=None)
+		times = sorted([t for t in times], key=lambda s:s['time'].value)
+		#print times
+		return {'lecture': lecture,
+		        'names': names,
+		        'pref_subjects': pref_subjects,
+		        'pref_count': pref_count,
+		        'subjects': subjects,
+		        'times': times,
+		        'student_count': student_count,
+		        'categories': utils.categories,
+		        'exams': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
+		        }
+
+@view_config(route_name='lecture_prefhistogram', context=LectureContext, permission='edit')
+class PrefHistogram(MatplotlibView):
+	def __init__(self, request):
+		MatplotlibView.__init__(self)
+		self.request=request
+		lecture = self.request.context.lecture
+		time = self.request.matchdict['time']
+		preferences = self.request.db.query(sa.func.count(TimePreference.penalty),TimePreference.penalty).filter(TimePreference.lecture_id==lecture.id)\
+			.filter(TimePreference.time==time).group_by(TimePreference.penalty).order_by(TimePreference.penalty).all()
+		prefdict = {}
+		for count, penalty in preferences:
+			prefdict[penalty]=count
+		self.bars = [prefdict.get(p['penalty'],0) for p in utils.preferences]
+		self.inds = range(len(utils.preferences))
+		self.xticks = [p['name'] for p in utils.preferences]
+		self.label=types.TutorialTime(time).__html__()
+	def __call__(self):
+		ax = self.fig.add_subplot(111)
+		if self.bars:
+			ax.bar(self.inds, self.bars, color='red')
+			ax.set_xticks([i+0.4 for i in self.inds])
+			ax.set_xticklabels(self.xticks)
+		ax.set_title(self.label)
+		return self.createResponse()
 
 @view_config(route_name='lecture_add', renderer='muesli.web:templates/lecture/add.pt', context=GeneralContext, permission='create_lecture')
 class Add(object):
@@ -306,6 +360,7 @@ def setPreferences(request):
 	if lecture.minimum_preferences:
 		valid = len(filter(lambda tp: tp.penalty < 100, tps)) >= lecture.minimum_preferences
 	else:
+		#TODO: Works not for just one tutorial!
 		min_number_of_times = len(tps)/100.0+1
 		penalty_count = sum([1.0/tp.penalty for tp in tps])
 		valid = penalty_count > min_number_of_times

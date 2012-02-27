@@ -107,7 +107,7 @@ class EnterPoints(object):
 		students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))\
 					.options(sqlalchemy.orm.joinedload_all('tutorial.tutor'))
 		students = students.all()
-		pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
+		pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student), sqlalchemy.orm.joinedload(ExerciseStudent.exercise))
 		points = DictOfObjects(lambda: {})
 		#for s in students:
 		#	for e in exam.exercises:
@@ -213,7 +213,7 @@ class Export(object):
 		exam = self.request.context.exam
 		tutorials = self.request.context.tutorials
 		students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student)).all()
-		pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
+		pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student), sqlalchemy.orm.joinedload(ExerciseStudent.exercise))
 		points = DictOfObjects(lambda: {})
 		for point in pointsQuery:
 			points[point.student_id][point.exercise_id] = point
