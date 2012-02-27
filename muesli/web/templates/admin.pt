@@ -11,7 +11,7 @@
     (<a tal:attributes="href request.route_path('lecture_export_yaml', _query={'show_all': 1})">Alle exportieren</a>)
   </li>
   <li><a tal:attributes="href request.route_path('lecture_add')">Neue Vorlesung</a></li>
-  <li><a tal:attributes="href request.route_path('email_wrong_subject')">Studenten ohne Beifach mailen</a></li>
+  <li><a tal:attributes="href request.route_path('email_users')">Studenten mailen</a></li>
 </ul>
 
   </metal:main>
