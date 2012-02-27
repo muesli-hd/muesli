@@ -26,6 +26,7 @@ from formencode import validators
 from muesli import models
 from muesli import utils
 from muesli.types import TutorialTime
+import re
 
 def boolToValue(boolean):
 	if boolean==True:
@@ -42,6 +43,26 @@ def valueToBool(value):
 		return False
 	if value=='None':
 		return None
+
+class DateString(formencode.FancyValidator):
+	prevalidator = formencode.validators.UnicodeString()
+	pattern = re.compile('^(?P<day>\d\d)\.(?P<month>\d\d)\.(?P<year>\d\d\d\d)$')
+	def _to_python(self, value, state):
+		string = self.prevalidator.to_python(value, state)
+		match = self.pattern.match(string)
+		if not match:
+			raise formencode.Invalid('Geben Sie das Datum im Format TT.MM.JJJJ an!', value, state)
+		gd = match.groupdict()
+		day = int(gd['day'])
+		month = int(gd['month'])
+		year = int(gd['year'])
+		if not (day >=1 and day <= 31):
+			raise formencode.Invalid(u'Ungültiger Tag!', value, state)
+		if not (month >=1 and month <= 12):
+			raise formencode.Invalid(u'Ungültiger Monat!', value, state)
+		if not (year >=1900 and day <= 2050):
+			raise formencode.Invalid(u'Ungültiges Jahr!', value, state)
+		return string
 
 class FormField(object):
 	def __init__(self, name, label="", type="text", options=None,
@@ -345,6 +366,7 @@ class UserEdit(ObjectForm):
 			   value=user.second_subject),
 			FormField('birth_date',
 			   label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
+			   validator=DateString(),
 			   value=user.birth_date),
 			FormField('birth_place',
 			   label='Geburtsort', size=20,
@@ -408,6 +430,7 @@ class UserUpdate(ObjectForm):
 			   value=user.second_subject),
 			FormField('birth_date',
 			   label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
+			   validator=DateString(),
 			   value=user.birth_date),
 			FormField('birth_place',
 			   label='Geburtsort', size=20,
@@ -471,6 +494,7 @@ class UserRegister(ObjectForm):
 			FormField('birth_date',
 			   label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
 			   #value=user.birth_date,
+			   validator=DateString(),
 			   required=True
 			   ),
 			FormField('birth_place',
