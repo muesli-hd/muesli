@@ -128,7 +128,6 @@ class Edit(object):
 		student_count = sum([subj[0] for subj in subjects])
 		return {'lecture': lecture,
 		        'names': names,
-		        'pref_subjects': pref_subjects,
 		        'pref_count': pref_count,
 		        'subjects': subjects,
 		        'student_count': student_count,
