@@ -10,23 +10,8 @@
 
 <div tal:condition="lecture.mode=='prefs'" tal:omit-tag="">
   <h3>Einteilung vornehmen</h3>
-  <p><a tal:attributes="href request.route_path('lecture_preferences', lecture_id=lecture.id)">Details</a></p>
-  <p>Verteilung der angemeldeten Studenten:</p>
-  <table>
-    <thead>
-      <tr><th>Studiengang</th><th>Anzahl Teilnehmer</th></tr>
-    </thead>
-    <tbody>
-
-      <tr tal:repeat="subject pref_subjects">
-        <td>${subject[1] if subject[1] else 'Keine Angabe'}</td><td>${subject[0]}</td></tr>
-    <tr>
-      <td>Gesamt</td><td>${pref_count}</td>
-    </tr>
-    </tbody>
-  </table>
   <p>
-  Es haben sich insgesamt ${pref_count} Studenten angemeldet.
+  Es haben sich insgesamt ${pref_count} Studenten angemeldet (<a tal:attributes="href request.route_path('lecture_preferences', lecture_id=lecture.id)">Details</a>).
   Gruppeneinteilung nach Präferenzen vornehmen.
   <strong>Dies überschreibt vorherige Einteilungen!</strong>
   </p>

@@ -37,6 +37,7 @@ from muesli.web.viewsUser import *
 from muesli import utils
 
 import time
+import datetime
 
 from sqlalchemy import event as saevent
 
@@ -99,6 +100,8 @@ def main(global_config=None, **settings):
 		'beaker.session.bind': engine,
 		'beaker.session.table': session_table,
 		'beaker.session.data_dir': tempfile.mkdtemp(),
+		'beaker.session.cookie_expires': datetime.timedelta(hours=2),
+		'beaker.session.timeout': 7200,
 	})
 	session_factory = pyramid_beaker.session_factory_from_settings(settings)
 
@@ -127,7 +130,7 @@ def main(global_config=None, **settings):
 	config.add_route('user_list', '/user/list', factory = GeneralContext)
 	config.add_route('user_edit', '/user/edit/{user_id}', factory = UserContext)
 	config.add_route('user_resend_confirmation_mail', '/user/resend_confirmation_mail/{user_id}', factory = UserContext)
-	config.add_route('user_list_subjects', '/user/list_subjects')
+	config.add_route('user_list_subjects', '/user/list_subjects', factory = GeneralContext)
 	config.add_route('user_register', '/user/register', factory=GeneralContext)
 	config.add_route('user_register_other', '/user/register_other', factory=GeneralContext)
 	config.add_route('user_wait_for_confirmation', '/user/wait_for_confirmation', factory=GeneralContext)

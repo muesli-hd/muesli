@@ -59,7 +59,14 @@ def logout(request):
 @view_config(route_name='user_list', renderer='muesli.web:templates/user/list.pt', context=GeneralContext, permission='admin')
 def list(request):
 	users = request.db.query(models.User).order_by(models.User.last_name, models.User.first_name)
+	if 'subject' in request.GET:
+		users = users.filter(models.User.subject==request.GET['subject'])
 	return {'users': users}
+
+@view_config(route_name='user_list_subjects', renderer='muesli.web:templates/user/list_subjects.pt', context=GeneralContext, permission='admin')
+def listSubjects(request):
+	subjects = request.db.query(models.User.subject, func.count(models.User.id)).group_by(models.User.subject).order_by(models.User.subject)
+	return {'subjects': subjects}
 
 @view_config(route_name='user_edit', renderer='muesli.web:templates/user/edit.pt', context=UserContext, permission='edit')
 def edit(request):
