@@ -37,6 +37,7 @@ from muesli.web.viewsUser import *
 from muesli import utils
 
 import time
+import datetime
 
 from sqlalchemy import event as saevent
 
@@ -99,6 +100,8 @@ def main(global_config=None, **settings):
 		'beaker.session.bind': engine,
 		'beaker.session.table': session_table,
 		'beaker.session.data_dir': tempfile.mkdtemp(),
+		'beaker.session.cookie_expires': datetime.timedelta(hours=2),
+		'beaker.session.timeout': 7200,
 	})
 	session_factory = pyramid_beaker.session_factory_from_settings(settings)
 
