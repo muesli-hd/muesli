@@ -771,8 +771,10 @@ class LectureEmailTutors(Form):
 		Form.__init__(self, formfields, send=u'Senden')
 
 class EmailWrongSubject(Form):
-	def __init__(self):
+	def __init__(self, type):
 		formfields = [
+			HiddenField('type',
+			   value=type),
 			FormField('subject',
 			   label='Betreff', size=64,
 			   required=True,
