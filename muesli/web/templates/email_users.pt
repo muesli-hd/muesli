@@ -28,7 +28,7 @@ Mit freundlichen Grüßen,<br />
   Das MÜSLI-Team
 </p>
 
-<form action="/email_wrong_subject" tal:attributes="action request.route_path('email_users',_query={'type': type})" method="POST"
+<form action="/email_wrong_subject" tal:attributes="action request.route_path('email_users')" method="POST"
   enctype="multipart/form-data">
 <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
