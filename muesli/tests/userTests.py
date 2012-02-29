@@ -133,6 +133,10 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_user_ajax_complete(self):
 		res = self.testapp.get('/user/ajax_complete/%s/%s' % (self.lecture.id,self.tutorial.id), status=403)
 
+class UnicodeTests(functionalTests.UnicodeUserTests):
+	def test_unicodepassword(self):
+		res = self.testapp.get('/start', status=200)
+
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
 		UnloggedTests.setUp(self)

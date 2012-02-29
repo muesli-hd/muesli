@@ -102,7 +102,7 @@ class BaseTests(unittest.TestCase):
 
 def setUserPassword(user, password):
 	user.realpassword = password
-	user.password = sha1(password).hexdigest()
+	user.password = sha1(password.encode('utf-8')).hexdigest()
 
 class PopulatedTests(BaseTests):
 	def populate(self):
@@ -122,6 +122,14 @@ class PopulatedTests(BaseTests):
 		self.user2.subject = utils.subjects[1]
 		setUserPassword(self.user2, 'user2password')
 		self.session.add(self.user2)
+
+		self.unicodeuser = muesli.models.User()
+		self.unicodeuser.first_name = u'Uli'
+		self.unicodeuser.last_name = u'Unicode'
+		self.unicodeuser.email = 'unicodeuser@muesli.org'
+		self.unicodeuser.subject = utils.subjects[1]
+		setUserPassword(self.unicodeuser, u'üüü')
+		self.session.add(self.unicodeuser)
 		#self.session.commit()
 
 		self.tutor = muesli.models.User()
@@ -270,7 +278,12 @@ class PopulatedTests(BaseTests):
 
 	def setUser(self, user):
 		self.loggedUser = user
-		self.testapp.post('/user/login',{'email': user.email, 'password': user.realpassword}, status=302)
+		res = self.testapp.get('/user/login', status=200)
+		res.form['email'] = user.email
+		res.form['password'] = user.realpassword
+		res = res.form.submit()
+		self.assertEqual(res.status_int, 302)
+		#res = self.testapp.post('/user/login',{'email': user.email, 'password': user.realpassword}, status=302)
 
 class UserLoggedInTests(PopulatedTests):
 	def setUp(self):
@@ -292,4 +305,8 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 		AssistantLoggedInTests.setUp(self)
 		self.setUser(self.admin)
 
+class UnicodeUserTests(PopulatedTests):
+	def setUp(self):
+		PopulatedTests.setUp(self)
+		self.setUser(self.unicodeuser)
 

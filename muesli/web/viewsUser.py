@@ -42,12 +42,13 @@ import os
 def login(request):
 	form = FormValidator(UserLogin())
 	if request.method == 'POST' and form.validate(request.POST):
-		user = request.db.query(models.User).filter_by(email=form['email'], password=sha1(form['password']).hexdigest()).first()
+		user = request.db.query(models.User).filter_by(email=form['email'], password=sha1(form['password'].encode('utf-8')).hexdigest()).first()
 		if user is not None:
 			security.remember(request, user.id)
 			request.user = user
 			url = request.route_url('start')
 			return HTTPFound(location=url)
+		request.session.flash(u'Nicht gefunden', queue='errors')
 	return { 'form': form, 'user': security.authenticated_userid(request) }
 
 @view_config(route_name='user_logout')
