@@ -152,7 +152,7 @@ def confirm(request):
 	form = UserConfirm(request, request.context.confirmation)
 	if request.method == 'POST' and form.processPostData(request.POST):
 		user = request.context.confirmation.user
-		user.password = sha1(form['password']).hexdigest()
+		user.password = sha1(form['password'].encode('utf-8')).hexdigest()
 		request.db.delete(request.context.confirmation)
 		request.db.commit()
 		return HTTPFound(location=request.route_url('user_login'))
@@ -233,7 +233,7 @@ def confirmEmail(request):
 def changePassword(request):
 	form = UserChangePassword(request)
 	if request.method == 'POST' and form.processPostData(request.POST):
-		request.user.password = sha1(form['new_password']).hexdigest()
+		request.user.password = sha1(form['new_password'].encode('utf-8')).hexdigest()
 		request.session.flash('Neues Passwort gesetzt', queue='messages')
 		request.db.commit()
 	return {'form': form}
@@ -284,7 +284,7 @@ def resetPassword3(request):
 	form = UserResetPassword3(request, request.context.confirmation)
 	if request.method == 'POST' and form.processPostData(request.POST):
 		user = request.context.confirmation.user
-		user.password = sha1(form['password']).hexdigest()
+		user.password = sha1(form['password'].encode('utf-8')).hexdigest()
 		request.db.delete(request.context.confirmation)
 		request.db.commit()
 		return HTTPFound(location=request.route_url('user_login'))
