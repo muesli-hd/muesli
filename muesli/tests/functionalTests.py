@@ -278,7 +278,12 @@ class PopulatedTests(BaseTests):
 
 	def setUser(self, user):
 		self.loggedUser = user
-		self.testapp.post('/user/login',{'email': user.email, 'password': user.realpassword}, status=302)
+		res = self.testapp.get('/user/login', status=200)
+		res.form['email'] = user.email
+		res.form['password'] = user.realpassword
+		res = res.form.submit()
+		self.assertEqual(res.status_int, 302)
+		#res = self.testapp.post('/user/login',{'email': user.email, 'password': user.realpassword}, status=302)
 
 class UserLoggedInTests(PopulatedTests):
 	def setUp(self):
@@ -300,4 +305,8 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 		AssistantLoggedInTests.setUp(self)
 		self.setUser(self.admin)
 
+class UnicodeUserTests(PopulatedTests):
+	def setUp(self):
+		PopulatedTests.setUp(self)
+		self.setUser(self.unicodeuser)
 
