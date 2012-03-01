@@ -74,6 +74,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_lecture_view_points(self):
 		res = self.testapp.get('/lecture/view_points/%s' % 123456, status=404)
 
+	def test_lecture_add_tutor(self):
+		res = self.testapp.get('/lecture/add_tutor/%s' % 123456, status=404)
+
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_lecture_view(self):
@@ -126,6 +129,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_lecture_view_points(self):
 		res = self.testapp.get('/lecture/view_points/%s' % self.lecture.id, status=403)
 
+	def test_lecture_add_tutor(self):
+		res = self.testapp.get('/lecture/add_tutor/%s' % self.lecture.id, status=403)
+
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
 		UnloggedTests.setUp(self)
@@ -155,6 +161,18 @@ class UserLoggedInTests(UnloggedTests):
 
 	def test_lecture_view_points(self):
 		res = self.testapp.get('/lecture/view_points/%s' % self.lecture.id, status=200)
+
+	def test_lecture_add_tutor(self):
+		alreadyTutor = self.loggedUser in self.lecture.tutors
+		res = self.testapp.post('/lecture/add_tutor/%s' % self.lecture.id, {'password': ''}, status=302)
+		res = res.follow()
+		res.mustcontain('Fehler aufgetreten')
+		res = self.testapp.post('/lecture/add_tutor/%s' % self.lecture.id, {'password': self.lecture.password}, status=302)
+		res = res.follow()
+		if alreadyTutor:
+			res.mustcontain('Sie sind bereits')
+		else:
+			res.mustcontain('Sie wurden als')
 
 class TutorLoggedInTests(UserLoggedInTests):
 	def setUp(self):
