@@ -96,7 +96,7 @@ def addTutor(request):
 		password = request.POST['password']
 		if lecture.password and lecture.password == password:
 			if request.user in lecture.tutors:
-				request.session.flash(u'Sie sind bereit als Übungsleiter für diese Vorlesung eingetragen.', queue='messages')
+				request.session.flash(u'Sie sind bereits als Übungsleiter für diese Vorlesung eingetragen.', queue='messages')
 			else:
 				lecture.tutors.append(request.user)
 				request.db.commit()
