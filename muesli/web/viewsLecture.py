@@ -89,6 +89,24 @@ class AddExam(object):
 		        'form': form
 		       }
 
+@view_config(route_name='lecture_add_tutor', context=LectureContext, permission='add_tutor')
+def addTutor(request):
+	lecture = request.context.lecture
+	if request.method == 'POST':
+		password = request.POST['password']
+		if lecture.password and lecture.password == password:
+			if request.user in lecture.tutors:
+				request.session.flash(u'Sie sind bereit als Übungsleiter für diese Vorlesung eingetragen.', queue='messages')
+			else:
+				lecture.tutors.append(request.user)
+				request.db.commit()
+				request.session.flash(u'Sie wurden als Übungsleiter für diese Vorlesung eingetragen', queue='messages')
+		else:
+			request.session.flash(u'Bei der Anmeldung als Übungsleiter ist ein Fehler aufgetreten. Möglicherweise haben Sie ein falsches Passwort eingegeben oder die Anmeldung als Übungsleiter ist nicht mehr notwendig.', queue='errors')
+	else:
+		raise ValueError('lecture_add_tutor can only be called by POST-requests!')
+	return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))
+
 @view_config(route_name='lecture_add_grading', renderer='muesli.web:templates/lecture/add_grading.pt', context=LectureContext, permission='edit')
 class AddGrading(object):
 	def __init__(self, request):

@@ -49,7 +49,7 @@ class LectureContext(object):
 		if self.lecture is None:
 			raise HTTPNotFound(detail='Lecture not found')
 		self.__acl__ = [
-			(Allow, Authenticated, ('view', 'view_own_points')),
+			(Allow, Authenticated, ('view', 'view_own_points', 'add_tutor')),
 			(Allow, 'user:{0}'.format(self.lecture.assistant_id), ('view', 'edit', 'view_tutorials', 'get_tutorials')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
 			]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials', 'get_tutorials')) for tutor in self.lecture.tutors]
