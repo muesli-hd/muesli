@@ -183,6 +183,7 @@ class PopulatedTests(BaseTests):
 		self.lecture = muesli.models.Lecture()
 		self.lecture.name = "Irgendwas"
 		self.lecture.mode = 'direct'
+		self.lecture.password = 'geheim'
 		self.lecture.assistant = self.assistant
 		self.session.add(self.lecture)
 		self.lecture.tutors.append(self.tutor2)
