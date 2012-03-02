@@ -94,7 +94,7 @@ class AddOrEditExercise(object):
 		return {'form': form,
 		        'exam': exam}
 
-@view_config(route_name='exam_enter_points', renderer='muesli.web:templates/exam/enter_points.pt', context=ExamContext, permission='enter_points')
+@view_config(route_name='exam_enter_points', renderer='muesli.web:templates/exam/enter_points.pt', context=ExamContext, permission='view_points')
 class EnterPoints(object):
 	def __init__(self, request):
 		self.request = request
@@ -157,7 +157,7 @@ class EnterPoints(object):
 		        'statistics': statistics,
 		        'error_msg': u'\n'.join(error_msgs)}
 
-@view_config(route_name='exam_admission', renderer='muesli.web:templates/exam/admission.pt', context=ExamContext, permission='enter_points')
+@view_config(route_name='exam_admission', renderer='muesli.web:templates/exam/admission.pt', context=ExamContext, permission='view_points')
 class Admission(object):
 	def __init__(self, request):
 		self.request = request
@@ -203,7 +203,7 @@ class Admission(object):
 		        'admissions': admissions,
 		        }
 
-@view_config(route_name='exam_export', renderer='muesli.web:templates/exam/export.pt', context=ExamContext, permission='enter_points')
+@view_config(route_name='exam_export', renderer='muesli.web:templates/exam/export.pt', context=ExamContext, permission='view_points')
 class Export(object):
 	def __init__(self, request):
 		self.request = request
@@ -623,7 +623,7 @@ def ajaxSavePoints(request):
 	json_data['msg'] = json_data['msg'] or 'sucessfull'
 	return json_data
 
-@view_config(route_name='exam_ajax_get_points', renderer='json', context=ExamContext, permission='enter_points')
+@view_config(route_name='exam_ajax_get_points', renderer='json', context=ExamContext, permission='view_points')
 def ajaxGetPoints(request):
 	exam = request.context.exam
 	lecture_students = exam.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)

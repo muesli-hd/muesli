@@ -2,6 +2,8 @@ from muesli.models import *
 from pyramid.security import Allow, Deny, Everyone, Authenticated, DENY_ALL, ALL_PERMISSIONS
 from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden
 
+from muesli.utils import editAllTutorials, editOwnTutorials, editNoTutorials
+
 def getTutorials(request):
 	"""returns tutorials and tutorial_ids for this request.
 	Does also a check whether the tutorials belong to the same lecture."""
@@ -131,12 +133,19 @@ class ExamContext(object):
 		self.tutorial_ids_str = request.matchdict.get('tutorial_ids', '')
 		self.tutorials, self.tutorial_ids =  getTutorials(request)
 		self.__acl__ = [
-			(Allow, Authenticated, 'view_points'),
-			(Allow, 'user:{0}'.format(self.exam.lecture.assistant_id), ('view_points', 'edit', 'enter_points', 'statistics')),
+			#(Allow, Authenticated, 'view_own_points'),
+			(Allow, 'user:{0}'.format(self.exam.lecture.assistant_id), ('edit', 'view_points', 'enter_points', 'statistics')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
-			]+[(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'statistics')) for tutor in self.exam.lecture.tutors]
-		if self.tutorials:
-			self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points')) for tutor in getTutorForTutorials(self.tutorials)]
+			]+[(Allow, 'user:{0}'.format(tutor.id), ('statistics')) for tutor in self.exam.lecture.tutors]
+		if self.exam.lecture.tutor_rights == editAllTutorials:
+			self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('enter_points', 'view_points')) for tutor in self.exam.lecture.tutors]
+		else:
+			if self.tutorials:
+				if self.exam.lecture.tutor_rights == editOwnTutorials:
+					self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points')) for tutor in getTutorForTutorials(self.tutorials)]
+				elif self.exam.lecture.tutor_rights == editNoTutorials:
+					self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points')) for tutor in getTutorForTutorials(self.tutorials)]
+				else: raise ValueError('Tutorrights %s not known' % self.exam.lecture.tutor_rights)
 
 class ExerciseContext(object):
 	def __init__(self, request):
