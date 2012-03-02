@@ -125,6 +125,8 @@ class EnterPoints(object):
 					points[student.student_id][e.id] = exerciseStudent
 					self.db.add(exerciseStudent)
 		if self.request.method == 'POST':
+			if not self.request.permissionInfo.has_permission('enter_points'):
+				return HTTPForbidden('Sie haben keine Rechte um Punkte einzutragen!')
 			for student in students:
 				for e in exam.exercises:
 					param = 'points-%u-%u' % (student.student_id, e.id)
@@ -188,6 +190,8 @@ class Admission(object):
 				self.db.add(admission)
 				admissions[student.student_id] = admission
 		if self.request.method == 'POST':
+			if not self.request.permissionInfo.has_permission('enter_points'):
+				return HTTPForbidden('Sie haben keine Rechte um Punkte einzutragen!')
 			for ls in students:
 				admission_parameter = 'admission-{0}'.format(ls.student_id)
 				if exam.admission and admission_parameter in self.request.POST:
