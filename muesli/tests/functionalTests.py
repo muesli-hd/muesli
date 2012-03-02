@@ -212,6 +212,15 @@ class PopulatedTests(BaseTests):
 		self.lecture2.name = "Irgendwas2"
 		self.lecture2.assistant = self.assistant2
 		self.session.add(self.lecture2)
+
+		tutorial = muesli.models.Tutorial()
+		tutorial.lecture = self.lecture2
+		tutorial.tutor = self.tutor
+		tutorial.place = 'In einer weiter entfernten Galaxis'
+		tutorial.max_students = 42
+		tutorial.time = muesli.types.TutorialTime('0 14:00')
+		self.lecture2_tutorial = tutorial
+		self.session.add(self.lecture2_tutorial)
 		#self.session.commit()
 
 		self.tutorial = muesli.models.Tutorial()
@@ -221,6 +230,15 @@ class PopulatedTests(BaseTests):
 		self.tutorial.max_students = 42
 		self.tutorial.time = muesli.types.TutorialTime('0 12:00')
 		self.session.add(self.tutorial)
+
+		tutorial = muesli.models.Tutorial()
+		tutorial.lecture = self.lecture
+		tutorial.tutor = self.tutor2
+		tutorial.place = 'In einer noch weiter entfernten Galaxis'
+		tutorial.max_students = 42
+		tutorial.time = muesli.types.TutorialTime('0 16:00')
+		self.tutorial_tutor2 = tutorial
+		self.session.add(self.tutorial_tutor2)
 
 		self.lecture_student = muesli.models.LectureStudent()
 		self.lecture_student.student = self.user

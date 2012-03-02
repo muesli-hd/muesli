@@ -1,6 +1,6 @@
 from muesli.models import *
 from pyramid.security import Allow, Deny, Everyone, Authenticated, DENY_ALL, ALL_PERMISSIONS
-from pyramid.httpexceptions import HTTPNotFound
+from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden
 
 class UserContext(object):
 	def __init__(self, request):
@@ -73,9 +73,17 @@ class TutorialContext(object):
 				self.lecture = None
 		self.__acl__ = [
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
-			]+[(Allow, 'user:{0}'.format(tutor.id), ('view')) for tutorial in self.tutorials for tutor in tutorial.lecture.tutors]
+			]
+		if self.lecture:
+			self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewOverview')) for tutor in self.lecture.tutors]
 		if len(self.tutorials)>0:
-			self.__acl__.append((Allow, 'user:{0}'.format(self.tutorials[0].lecture.assistant_id), ('view', 'edit')))
+			for tutorial in self.tutorials:
+				if tutorial.lecture_id != self.lecture.id:
+					raise HTTPForbidden('Tutorials belong to different lectures!')
+			self.__acl__.append((Allow, 'user:{0}'.format(self.lecture.assistant_id), ('viewOverview', 'viewAll', 'edit')))
+			tutors = set.intersection(*[set([tutorial.tutor]) for tutorial in self.tutorials])
+			for tutor in tutors:
+				self.__acl__.append((Allow, 'user:{0}'.format(tutor.id), ('viewAll')))
 			if self.tutorials[0].lecture.mode == 'direct':
 				self.__acl__.append((Allow, Authenticated, ('subscribe')))
 			if self.tutorials[0].lecture.mode in ['direct', 'off']:
