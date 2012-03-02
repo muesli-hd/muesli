@@ -118,6 +118,7 @@ def main(global_config=None, **settings):
 
 	config.add_route('start', '/start', factory = GeneralContext)
 	config.add_route('contact', '/contact')
+	config.add_route('changelog', '/changelog')
 	config.add_route('admin', '/admin', factory = GeneralContext)
 	config.add_route('index', '/')
 	config.add_route('email_users', '/email_users', factory = GeneralContext)

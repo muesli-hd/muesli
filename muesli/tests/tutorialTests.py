@@ -102,9 +102,29 @@ class TutorLoggedInTests(UserLoggedInTests):
 	def test_tutorial_view(self):
 		res = self.testapp.get('/tutorial/view/%s' % self.tutorial.id, status=200)
 
+	def test_tutorial_view_different_lectures(self):
+		#Different lectures should be forbidden
+		res = self.testapp.get('/tutorial/view/%s,%s' % (self.tutorial.id, self.lecture2_tutorial.id), status=403)
+
+	def test_tutorial_view_same_lecture_same_tutor(self):
+		#own tutorial of same lecture allowed
+		res = self.testapp.get('/tutorial/view/%s,%s' % (self.tutorial.id, self.tutorial2.id), status=200)
+
+	def test_tutorial_view_same_lecture_different_tutor(self):
+		#other tutorials of same lecture allowed
+		res = self.testapp.get('/tutorial/view/%s,%s' % (self.tutorial.id, self.tutorial_tutor2.id), status=200)
+
 	def test_tutorial_results(self):
 		res = self.testapp.get('/tutorial/results/%s' % self.tutorial.id, status=200)
+	def test_tutorial_results_different_lectures(self):
+		#Different lectures should be forbidden
+		res = self.testapp.get('/tutorial/results/%s,%s' % (self.tutorial.id, self.lecture2_tutorial.id), status=403)
+	def test_tutorial_results_same_lecture_same_tutor(self):
+		#own tutorials of same lecture allowed
 		res = self.testapp.get('/tutorial/results/%s,%s' % (self.tutorial.id, self.tutorial2.id), status=200)
+	def test_tutorial_results_same_lecture_different_tutor(self):
+		#other tutorials of same lecture not allowed
+		res = self.testapp.get('/tutorial/results/%s,%s' % (self.tutorial.id, self.tutorial_tutor2.id), status=403)
 
 	def test_tutorial_email(self):
 		res = self.testapp.get('/tutorial/email/%s' % self.tutorial.id, status=200)
@@ -128,6 +148,10 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
 	def test_tutorial_edit(self):
 		res = self.testapp.get('/tutorial/edit/%s' % self.tutorial.id, status=200)
+
+	def test_tutorial_results_same_lecture_different_tutor(self):
+		#other tutorials of same lecture allowed for assistant
+		res = self.testapp.get('/tutorial/results/%s,%s' % (self.tutorial.id, self.tutorial_tutor2.id), status=200)
 
 class AdminLoggedInTests(AssistantLoggedInTests):
 	def setUp(self):

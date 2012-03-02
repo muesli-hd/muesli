@@ -127,11 +127,11 @@ class TutorLoggedInTests(UserLoggedInTests):
 		UserLoggedInTests.setUp(self)
 		self.setUser(self.tutor)
 
-	def test_exam_enter_points(self):
-		res = self.testapp.get('/exam/enter_points/%s/' % self.exam.id, status=200)
-		self.assertForm(res, 'points-%s-%s' % (self.user.id, self.exercise.id), '1.5', formindex=0)
-		self.assertForm(res, 'points-%s-%s' % (self.user2.id, self.exercise.id), '3.5', formindex=0)
-
+	#def test_exam_enter_points(self):
+		#test later if this can be allowed for tutors.
+		#res = self.testapp.get('/exam/enter_points/%s/' % self.exam.id, status=200)
+		#self.assertForm(res, 'points-%s-%s' % (self.user.id, self.exercise.id), '1.5', formindex=0)
+		#self.assertForm(res, 'points-%s-%s' % (self.user2.id, self.exercise.id), '3.5', formindex=0)
 
 	def test_exam_enter_points_tuts(self):
 		res = self.testapp.get('/exam/enter_points/%s/%s,%s' % (self.exam.id, self.tutorial.id, self.tutorial2.id), status=200)
@@ -142,26 +142,7 @@ class TutorLoggedInTests(UserLoggedInTests):
 		self.assertResContainsNot(res, 'points-%s-%s' % (self.user2.id, self.exercise.id))
 
 	def test_exam_admission(self):
-		self.exam.admission=True
-		self.exam.registration=False
-		self.session.commit()
-		res = self.testapp.get('/exam/admission/%s/' % self.exam.id, status=200)
-		self.assertForm(res, 'admission-%s' % (self.user.id), '1', formindex=0)
-		self.assertForm(res, 'admission-%s' % (self.user.id), '0', formindex=0)
-		self.assertForm(res, 'admission-%s' % (self.user.id), '', formindex=0)
-		self.assertForm(res, 'registration-%s' % (self.user.id), '1', expectedvalue='')
-		self.assertForm(res, 'registration-%s' % (self.user.id), '0', expectedvalue='')
-		self.assertForm(res, 'registration-%s' % (self.user.id), '', expectedvalue='')
-		self.exam.admission=False
-		self.exam.registration=True
-		self.session.commit()
-		res = self.testapp.get('/exam/admission/%s/' % self.exam.id, status=200)
-		self.assertForm(res, 'admission-%s' % (self.user.id), '1', expectedvalue='')
-		self.assertForm(res, 'admission-%s' % (self.user.id), '0', expectedvalue='')
-		self.assertForm(res, 'admission-%s' % (self.user.id), '', expectedvalue='')
-		self.assertForm(res, 'registration-%s' % (self.user.id), '1')
-		self.assertForm(res, 'registration-%s' % (self.user.id), '0')
-		self.assertForm(res, 'registration-%s' % (self.user.id), '')
+		res = self.testapp.get('/exam/admission/%s/' % self.exam.id, status=403)
 
 	def test_exam_admission_tuts(self):
 		res = self.testapp.get('/exam/admission/%s/%s,%s' % (self.exam.id, self.tutorial.id, self.tutorial2.id), status=200)
@@ -178,8 +159,9 @@ class TutorLoggedInTests(UserLoggedInTests):
 		res = self.testapp.get('/exam/histogram_for_exam/%s/' % self.exam.id, status=200)
 		res = self.testapp.get('/exam/histogram_for_exam/%s/%s,%s' % (self.exam.id, self.tutorial.id, self.tutorial2.id), status=200)
 
-	def test_exam_export(self):
-		res = self.testapp.get('/exam/export/%s/' % self.exam.id, status=200)
+	#def test_exam_export(self):
+		#Test later
+		#res = self.testapp.get('/exam/export/%s/' % self.exam.id, status=200)
 
 	def test_exam_export_tuts(self):
 		res = self.testapp.get('/exam/export/%s/%s,%s' % (self.exam.id, self.tutorial.id,self.tutorial2.id), status=200)
@@ -211,6 +193,33 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 		TutorLoggedInTests.setUp(self)
 		self.setUser(self.assistant)
 
+	def test_exam_enter_points(self):
+		res = self.testapp.get('/exam/enter_points/%s/' % self.exam.id, status=200)
+		self.assertForm(res, 'points-%s-%s' % (self.user.id, self.exercise.id), '1.5', formindex=0)
+		self.assertForm(res, 'points-%s-%s' % (self.user2.id, self.exercise.id), '3.5', formindex=0)
+
+	def test_exam_admission(self):
+		self.exam.admission=True
+		self.exam.registration=False
+		self.session.commit()
+		res = self.testapp.get('/exam/admission/%s/' % self.exam.id, status=200)
+		self.assertForm(res, 'admission-%s' % (self.user.id), '1', formindex=0)
+		self.assertForm(res, 'admission-%s' % (self.user.id), '0', formindex=0)
+		self.assertForm(res, 'admission-%s' % (self.user.id), '', formindex=0)
+		self.assertForm(res, 'registration-%s' % (self.user.id), '1', expectedvalue='')
+		self.assertForm(res, 'registration-%s' % (self.user.id), '0', expectedvalue='')
+		self.assertForm(res, 'registration-%s' % (self.user.id), '', expectedvalue='')
+		self.exam.admission=False
+		self.exam.registration=True
+		self.session.commit()
+		res = self.testapp.get('/exam/admission/%s/' % self.exam.id, status=200)
+		self.assertForm(res, 'admission-%s' % (self.user.id), '1', expectedvalue='')
+		self.assertForm(res, 'admission-%s' % (self.user.id), '0', expectedvalue='')
+		self.assertForm(res, 'admission-%s' % (self.user.id), '', expectedvalue='')
+		self.assertForm(res, 'registration-%s' % (self.user.id), '1')
+		self.assertForm(res, 'registration-%s' % (self.user.id), '0')
+		self.assertForm(res, 'registration-%s' % (self.user.id), '')
+
 	def test_exam_edit(self):
 		res = self.testapp.get('/exam/edit/%s' % self.exam.id, status=200)
 		self.assertForm(res, 'name', 'Neuer Name')
@@ -227,6 +236,9 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 	def test_exam_edit_exercise(self):
 		res = self.testapp.get('/exam/add_or_edit_exercise/%s/%s' % (self.exam.id, self.exercise.id), status=200)
 		self.assertForm(res, 'maxpoints', '5')
+
+	def test_exam_export(self):
+		res = self.testapp.get('/exam/export/%s/' % self.exam.id, status=200)
 
 class AdminLoggedInTests(AssistantLoggedInTests):
 	def setUp(self):

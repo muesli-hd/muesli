@@ -94,7 +94,7 @@ class AddOrEditExercise(object):
 		return {'form': form,
 		        'exam': exam}
 
-@view_config(route_name='exam_enter_points', renderer='muesli.web:templates/exam/enter_points.pt', context=ExamContext, permission='enter_points')
+@view_config(route_name='exam_enter_points', renderer='muesli.web:templates/exam/enter_points.pt', context=ExamContext, permission='view_points')
 class EnterPoints(object):
 	def __init__(self, request):
 		self.request = request
@@ -125,6 +125,8 @@ class EnterPoints(object):
 					points[student.student_id][e.id] = exerciseStudent
 					self.db.add(exerciseStudent)
 		if self.request.method == 'POST':
+			if not self.request.permissionInfo.has_permission('enter_points'):
+				return HTTPForbidden('Sie haben keine Rechte um Punkte einzutragen!')
 			for student in students:
 				for e in exam.exercises:
 					param = 'points-%u-%u' % (student.student_id, e.id)
@@ -157,7 +159,7 @@ class EnterPoints(object):
 		        'statistics': statistics,
 		        'error_msg': u'\n'.join(error_msgs)}
 
-@view_config(route_name='exam_admission', renderer='muesli.web:templates/exam/admission.pt', context=ExamContext, permission='enter_points')
+@view_config(route_name='exam_admission', renderer='muesli.web:templates/exam/admission.pt', context=ExamContext, permission='view_points')
 class Admission(object):
 	def __init__(self, request):
 		self.request = request
@@ -188,6 +190,8 @@ class Admission(object):
 				self.db.add(admission)
 				admissions[student.student_id] = admission
 		if self.request.method == 'POST':
+			if not self.request.permissionInfo.has_permission('enter_points'):
+				return HTTPForbidden('Sie haben keine Rechte um Punkte einzutragen!')
 			for ls in students:
 				admission_parameter = 'admission-{0}'.format(ls.student_id)
 				if exam.admission and admission_parameter in self.request.POST:
@@ -203,7 +207,7 @@ class Admission(object):
 		        'admissions': admissions,
 		        }
 
-@view_config(route_name='exam_export', renderer='muesli.web:templates/exam/export.pt', context=ExamContext, permission='enter_points')
+@view_config(route_name='exam_export', renderer='muesli.web:templates/exam/export.pt', context=ExamContext, permission='view_points')
 class Export(object):
 	def __init__(self, request):
 		self.request = request
@@ -247,7 +251,7 @@ class Export(object):
 		        'points': points}
 
 
-@view_config(route_name='exam_statistics', renderer='muesli.web:templates/exam/statistics.pt', context=ExamContext, permission='enter_points')
+@view_config(route_name='exam_statistics', renderer='muesli.web:templates/exam/statistics.pt', context=ExamContext, permission='statistics')
 def statistics(request):
 	db = request.db
 	tutorial_ids = request.context.tutorial_ids
@@ -623,7 +627,7 @@ def ajaxSavePoints(request):
 	json_data['msg'] = json_data['msg'] or 'sucessfull'
 	return json_data
 
-@view_config(route_name='exam_ajax_get_points', renderer='json', context=ExamContext, permission='enter_points')
+@view_config(route_name='exam_ajax_get_points', renderer='json', context=ExamContext, permission='view_points')
 def ajaxGetPoints(request):
 	exam = request.context.exam
 	lecture_students = exam.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)

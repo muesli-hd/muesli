@@ -15,5 +15,6 @@
       <li><a tal:attributes="href request.route_path('user_register')">Registrieren</a></li>
     </div>
     <li><a tal:attributes="href request.route_path('contact')">Kontakt</a></li>
+    <li><a tal:attributes="href request.route_path('changelog')">Neues</a></li>
   </ul>
 </metal:main>

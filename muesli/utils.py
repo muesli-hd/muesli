@@ -91,6 +91,15 @@ subjects = [
 	'Sonstiges'
 	]
 
+#TutorRights:
+editAllTutorials = 'editAllTutorials'
+editOwnTutorials = 'editOwnTutorial'
+editNoTutorials = 'editNoTutorial'
+
+tutorRights = [[editAllTutorials, 'Punkte zu allen Tutorien eintragen'],
+					[editOwnTutorials, 'Punkte zu eigenen Tutorien eintragen'],
+					[editNoTutorials, 'Keine Punkte eintragen']]
+
 def getSubjects(user=None):
 	hisSubjects = list(subjects)
 	if user and not user.subject in hisSubjects:

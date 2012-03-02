@@ -40,7 +40,7 @@ import PIL.Image
 import PIL.ImageDraw
 import StringIO
 
-@view_config(route_name='tutorial_view', renderer='muesli.web:templates/tutorial/view.pt', context=TutorialContext, permission='view')
+@view_config(route_name='tutorial_view', renderer='muesli.web:templates/tutorial/view.pt', context=TutorialContext, permission='viewOverview')
 class View(object):
 	def __init__(self, request):
 		self.request = request
@@ -126,7 +126,7 @@ class Edit(object):
 		        'form': form,
 		        'error_msg': error_msg}
 
-@view_config(route_name='tutorial_results', renderer='muesli.web:templates/tutorial/results.pt', context=TutorialContext, permission='view')
+@view_config(route_name='tutorial_results', renderer='muesli.web:templates/tutorial/results.pt', context=TutorialContext, permission='viewAll')
 def results(request):
 	tutorials = request.context.tutorials
 	lecture = tutorials[0].lecture
@@ -223,7 +223,7 @@ def sendChangesMail(request, tutor, text):
 		body=u'Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
 	muesli.mail.sendMail(message)
 
-@view_config(route_name='tutorial_email', renderer='muesli.web:templates/tutorial/email.pt', context=TutorialContext, permission='view')
+@view_config(route_name='tutorial_email', renderer='muesli.web:templates/tutorial/email.pt', context=TutorialContext, permission='viewAll')
 def email(request):
 	db = request.db
 	tutorials = request.context.tutorials

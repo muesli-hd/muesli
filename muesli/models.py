@@ -29,7 +29,7 @@ import sqlalchemy.ext.declarative
 from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table, text
 from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
 from muesli.types import *
-from muesli.utils import DictOfObjects, AutoVivification
+from muesli.utils import DictOfObjects, AutoVivification, editOwnTutorials
 
 Base = sqlalchemy.ext.declarative.declarative_base()
 
@@ -163,6 +163,7 @@ class Lecture(Base):
 	#  'static' - no subscription, no unsubscription
 	mode = Column(Text, nullable=False, default='off')
 	minimum_preferences = Column(Integer, default=None)
+	tutor_rights = Column(Text, nullable=False, default=editOwnTutorials)
 	tutorials = relationship('Tutorial', order_by='Tutorial.time')
 	tutors = relationship(User, secondary=lecture_tutors_table, backref = "lectures_as_tutor")
 	@property

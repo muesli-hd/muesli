@@ -1,6 +1,34 @@
 from muesli.models import *
 from pyramid.security import Allow, Deny, Everyone, Authenticated, DENY_ALL, ALL_PERMISSIONS
-from pyramid.httpexceptions import HTTPNotFound
+from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden
+
+from muesli.utils import editAllTutorials, editOwnTutorials, editNoTutorials
+
+def getTutorials(request):
+	"""returns tutorials and tutorial_ids for this request.
+	Does also a check whether the tutorials belong to the same lecture."""
+	tutorial_ids = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', '')).split(',')
+	if len(tutorial_ids)==1 and tutorial_ids[0]=='':
+		tutorial_ids = []
+		tutorials = []
+	else:
+		tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(tutorial_ids)).all()
+	checkTutorials(tutorials)
+	return tutorials, tutorial_ids
+
+def checkTutorials(tutorials):
+	if tutorials:
+		lecture_id = tutorials[0].lecture_id
+		for tutorial in tutorials:
+			if tutorial.lecture_id != lecture_id:
+				raise HTTPForbidden('Tutorials belong to different lectures!')
+
+def getTutorForTutorials(tutorials):
+	if tutorials:
+		tutors = set.intersection(*[set([tutorial.tutor]) for tutorial in tutorials])
+		return tutors
+	else:
+		return []
 
 class UserContext(object):
 	def __init__(self, request):
@@ -56,13 +84,8 @@ class LectureContext(object):
 
 class TutorialContext(object):
 	def __init__(self, request):
-		self.tutorial_ids = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', '')).split(',')
 		self.tutorial_ids_str = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', ''))
-		if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
-			self.tutorial_ids = []
-			self.tutorials = []
-		else:
-			self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(self.tutorial_ids)).all()
+		self.tutorials, self.tutorial_ids = getTutorials(request)
 		if self.tutorials:
 			self.lecture = self.tutorials[0].lecture
 		else:
@@ -73,9 +96,13 @@ class TutorialContext(object):
 				self.lecture = None
 		self.__acl__ = [
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
-			]+[(Allow, 'user:{0}'.format(tutor.id), ('view')) for tutorial in self.tutorials for tutor in tutorial.lecture.tutors]
-		if len(self.tutorials)>0:
-			self.__acl__.append((Allow, 'user:{0}'.format(self.tutorials[0].lecture.assistant_id), ('view', 'edit')))
+			]
+		if self.lecture:
+			self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewOverview')) for tutor in self.lecture.tutors]
+		if self.tutorials:
+			self.__acl__.append((Allow, 'user:{0}'.format(self.lecture.assistant_id), ('viewOverview', 'viewAll', 'edit')))
+			for tutor in getTutorForTutorials(self.tutorials):
+				self.__acl__.append((Allow, 'user:{0}'.format(tutor.id), ('viewAll')))
 			if self.tutorials[0].lecture.mode == 'direct':
 				self.__acl__.append((Allow, Authenticated, ('subscribe')))
 			if self.tutorials[0].lecture.mode in ['direct', 'off']:
@@ -104,18 +131,21 @@ class ExamContext(object):
 		if self.exam is None:
 			raise HTTPNotFound(detail='Exam not found')
 		self.tutorial_ids_str = request.matchdict.get('tutorial_ids', '')
-		if 'tutorial_ids' in request.matchdict:
-			self.tutorial_ids = request.matchdict['tutorial_ids'].split(',')
-			if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
-				self.tutorial_ids = []
-				self.tutorials = []
-			else:
-				self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(self.tutorial_ids)).all()
+		self.tutorials, self.tutorial_ids =  getTutorials(request)
 		self.__acl__ = [
-			(Allow, Authenticated, 'view_points'),
-			(Allow, 'user:{0}'.format(self.exam.lecture.assistant_id), ('view_points', 'edit', 'enter_points', 'statistics')),
+			#(Allow, Authenticated, 'view_own_points'),
+			(Allow, 'user:{0}'.format(self.exam.lecture.assistant_id), ('edit', 'view_points', 'enter_points', 'statistics')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
-			]+[(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points', 'statistics')) for tutor in self.exam.lecture.tutors]
+			]+[(Allow, 'user:{0}'.format(tutor.id), ('statistics')) for tutor in self.exam.lecture.tutors]
+		if self.exam.lecture.tutor_rights == editAllTutorials:
+			self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('enter_points', 'view_points')) for tutor in self.exam.lecture.tutors]
+		else:
+			if self.tutorials:
+				if self.exam.lecture.tutor_rights == editOwnTutorials:
+					self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points')) for tutor in getTutorForTutorials(self.tutorials)]
+				elif self.exam.lecture.tutor_rights == editNoTutorials:
+					self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points')) for tutor in getTutorForTutorials(self.tutorials)]
+				else: raise ValueError('Tutorrights %s not known' % self.exam.lecture.tutor_rights)
 
 class ExerciseContext(object):
 	def __init__(self, request):

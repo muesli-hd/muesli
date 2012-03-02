@@ -24,6 +24,7 @@ from muesli import models, utils
 from muesli.web.forms import *
 from muesli.web.context import *
 from muesli.mail import Message, sendMail
+from muesli.changelog import changelog as changelog_str
 
 from pyramid import security
 from pyramid.view import view_config
@@ -128,3 +129,20 @@ def internalServerError(exc, request):
 	email = request.user.email if request.user else '<nobody>'
 	return {'now': now,
 	        'email': email}
+@view_config(route_name='changelog', renderer='muesli.web:templates/changelog.pt')
+def changelog(request):
+	entries = []
+	for part in changelog_str.split('====')[1:]:
+		date = part.split('\n',1)[0]
+		text = []
+		for line in part.split('\n')[1:]:
+			if line.startswith('topic:'):
+				pass
+			elif line.startswith('concerns:'):
+				pass
+			else: text.append(line)
+		text = u'\n'.join(text)
+		entries.append({'date': date, 'description': text})
+	return {'entries': entries}
+
+
