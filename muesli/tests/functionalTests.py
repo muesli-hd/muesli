@@ -61,9 +61,9 @@ class BaseTests(unittest.TestCase):
 		muesli.engine = lambda: self.engine
 		import muesli.web
 		from muesli.web import main
-		app = main({})
+		self.app = main({})
 		from webtest import TestApp
-		self.testapp = TestApp(app)
+		self.testapp = TestApp(self.app)
 		self.session = muesli.models.Session()
 		for table in reversed(muesli.models.Base.metadata.sorted_tables):
 			self.session.execute(table.delete())
