@@ -8,5 +8,10 @@
   <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
 
+<p>Die deaktivierten Felder können Sie nicht selber ändern. Um diese Daten
+  zu korrigieren, <a href="mailto:muesli@mathi.uni-heidelberg.de">schreiben Sie
+  uns bitte eine Mail</a>.
+</p>
+
   </metal:main>
 </metal:main>
