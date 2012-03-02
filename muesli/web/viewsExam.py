@@ -247,7 +247,7 @@ class Export(object):
 		        'points': points}
 
 
-@view_config(route_name='exam_statistics', renderer='muesli.web:templates/exam/statistics.pt', context=ExamContext, permission='enter_points')
+@view_config(route_name='exam_statistics', renderer='muesli.web:templates/exam/statistics.pt', context=ExamContext, permission='statistics')
 def statistics(request):
 	db = request.db
 	tutorial_ids = request.context.tutorial_ids

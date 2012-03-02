@@ -129,26 +129,14 @@ class ExamContext(object):
 		if self.exam is None:
 			raise HTTPNotFound(detail='Exam not found')
 		self.tutorial_ids_str = request.matchdict.get('tutorial_ids', '')
-		if 'tutorial_ids' in request.matchdict:
-			self.tutorial_ids = request.matchdict['tutorial_ids'].split(',')
-			if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':
-				self.tutorial_ids = []
-				self.tutorials = []
-			else:
-				self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(self.tutorial_ids)).all()
-			for tutorial in self.tutorials:
-				if tutorial.lecture_id != self.exam.lecture_id:
-					raise HTTPForbidden('Tutorial does not belong to same lecture as the exam!')
-		else:
-			self.tutorials = []
+		self.tutorials, self.tutorial_ids =  getTutorials(request)
 		self.__acl__ = [
 			(Allow, Authenticated, 'view_points'),
 			(Allow, 'user:{0}'.format(self.exam.lecture.assistant_id), ('view_points', 'edit', 'enter_points', 'statistics')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
 			]+[(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'statistics')) for tutor in self.exam.lecture.tutors]
 		if self.tutorials:
-			tutors = set.intersection(*[set([tutorial.tutor]) for tutorial in self.tutorials])
-			self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points')) for tutor in tutors]
+			self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points')) for tutor in getTutorForTutorials(self.tutorials)]
 
 class ExerciseContext(object):
 	def __init__(self, request):
