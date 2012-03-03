@@ -102,6 +102,14 @@ def register(request):
 		return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
 	return {'form': form}
 
+@view_config(route_name='user_register_other', renderer='muesli.web:templates/user/register_other.pt', context=GeneralContext)
+def registerOther(request):
+	form = UserRegisterOther(request)
+	if request.method == 'POST' and form.processPostData(request.POST):
+		registerCommon(request, form)
+		return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
+	return {'form': form}
+
 def registerCommon(request, form):
 	if request.db.query(models.User).filter(models.User.email==form['email']).first():
 		request.session.flash(u'Ein Benutzer mit dieser E-Mail-Adresse existiert bereits.', queue='messages')

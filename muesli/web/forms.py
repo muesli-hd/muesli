@@ -520,6 +520,31 @@ class UserRegister(ObjectForm):
 		else:
 			ObjectForm.saveField(self, fieldName)
 
+class UserRegisterOther(ObjectForm):
+	def __init__(self, request):
+		formfields = [
+			FormField('email',
+			   label='E-Mail', size=40,
+			   #value=user.email,
+			   required=True,
+			   validator=validators.Email()),
+			FormField('title',
+			   label='Titel', size=20,
+			   #value=user.title
+			   ),
+			FormField('first_name',
+			   label='Vorname', size=40,
+			   #value=user.first_name,
+			   required=True),
+			FormField('last_name',
+			   label='Nachname', size=40,
+			   #value=user.last_name,
+			   required=True),
+			]
+		ObjectForm.__init__(self, None, formfields, send=u'Registrieren')
+	def saveField(self, fieldName):
+		ObjectForm.saveField(self, fieldName)
+
 class UserConfirm(ObjectForm):
 	def __init__(self, request, confirmation):
 		formfields = [

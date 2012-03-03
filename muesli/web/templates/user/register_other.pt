@@ -1,0 +1,22 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Bei MÜSLI registrieren</h2>
+
+<p>
+Um sich anzumelden füllen Sie bitte das Formular unten aus. Bitte beachten Sie, daß die Daten später <strong>nicht mehr verändert werden können</strong>.
+</p>
+
+<p>
+Studenten, die Scheine benötigen., müssen sich <a tal:attributes="href request.route_path('user_register_other')">mit mehr Angaben anmelden</a>.
+Werden Rechte zum Eintragen von Vorlesungen benötigt so <a tal:attributes="href request.route_path('contact')">melden Sie sich bitte bei uns</a> nach der Anmeldung.
+</p>
+
+
+<form action="/user/register_other" tal:attributes="action request.route_path('user_register_other')" method="POST">
+  <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+</form>
+
+  </metal:main>
+</metal:main>
