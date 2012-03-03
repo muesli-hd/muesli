@@ -65,6 +65,21 @@ class BaseTests(functionalTests.BaseTests):
 		res = form.submit()
 		self.assertTrue(res.status.startswith('302'))
 
+	def test_user_register_other(self):
+		res = self.testapp.get('/user/register_other', status=200)
+		form = res.form
+		form['email'] = 'matthias@matthias-k.org'
+		form['first_name'] = 'Matthias'
+		res = form.submit()
+		self.assertTrue(res.status.startswith('200'))
+		self.assertResContains(res, 'formerror')
+		form = res.form
+		form['email'] = 'matthias@matthias-k.org'
+		form['first_name'] = 'Matthias'
+		form['last_name'] = 'Kümmerer'
+		res = form.submit()
+		self.assertTrue(res.status.startswith('302'))
+
 	def test_user_confirm(self):
 		self.test_user_register()
 		self.session.expire_all()
