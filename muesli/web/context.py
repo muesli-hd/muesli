@@ -25,8 +25,12 @@ def checkTutorials(tutorials):
 
 def getTutorForTutorials(tutorials):
 	if tutorials:
-		tutors = set.intersection(*[set([tutorial.tutor]) for tutorial in tutorials])
-		return tutors
+		tutorlist = [set([tutorial.tutor]) for tutorial in tutorials if tutorial.tutor]
+		if tutorlist:
+			tutors = set.intersection(*tutorlist)
+			return tutors
+		else:
+			return []
 	else:
 		return []
 
@@ -100,9 +104,16 @@ class TutorialContext(object):
 		if self.lecture:
 			self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewOverview')) for tutor in self.lecture.tutors]
 		if self.tutorials:
-			self.__acl__.append((Allow, 'user:{0}'.format(self.lecture.assistant_id), ('viewOverview', 'viewAll', 'edit')))
+			self.__acl__.append((Allow, 'user:{0}'.format(self.lecture.assistant_id), ('viewOverview', 'viewAll', 'sendMail', 'edit')))
+			if self.lecture.tutor_rights == editOwnTutorials:
+				self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewAll')) for tutor in getTutorForTutorials(self.tutorials)]
+			elif self.lecture.tutor_rights == editNoTutorials:
+				self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewAll')) for tutor in getTutorForTutorials(self.tutorials)]
+			elif self.lecture.tutor_rights == editAllTutorials:
+				self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewAll')) for tutor in self.lecture.tutors]
+			else: raise ValueError('Tutorrights %s not known' % self.lecture.tutor_rights)
 			for tutor in getTutorForTutorials(self.tutorials):
-				self.__acl__.append((Allow, 'user:{0}'.format(tutor.id), ('viewAll')))
+				self.__acl__.append((Allow, 'user:{0}'.format(tutor.id), ('sendMail')))
 			if self.tutorials[0].lecture.mode == 'direct':
 				self.__acl__.append((Allow, Authenticated, ('subscribe')))
 			if self.tutorials[0].lecture.mode in ['direct', 'off']:
@@ -145,6 +156,8 @@ class ExamContext(object):
 					self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points')) for tutor in getTutorForTutorials(self.tutorials)]
 				elif self.exam.lecture.tutor_rights == editNoTutorials:
 					self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points')) for tutor in getTutorForTutorials(self.tutorials)]
+				elif self.exam.lecture.tutor_rights == editAllTutorials:
+					self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points')) for tutor in self.exam.lecture.tutors]
 				else: raise ValueError('Tutorrights %s not known' % self.exam.lecture.tutor_rights)
 
 class ExerciseContext(object):

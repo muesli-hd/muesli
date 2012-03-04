@@ -185,6 +185,7 @@ class PopulatedTests(BaseTests):
 		self.lecture.mode = 'direct'
 		self.lecture.password = 'geheim'
 		self.lecture.assistant = self.assistant
+		self.lecture.tutor_rights = utils.editOwnTutorials
 		self.session.add(self.lecture)
 		self.lecture.tutors.append(self.tutor2)
 		self.lecture.tutors.append(self.tutor)
@@ -239,6 +240,14 @@ class PopulatedTests(BaseTests):
 		tutorial.time = muesli.types.TutorialTime('0 16:00')
 		self.tutorial_tutor2 = tutorial
 		self.session.add(self.tutorial_tutor2)
+
+		tutorial = muesli.models.Tutorial()
+		tutorial.lecture = self.lecture
+		tutorial.place = 'In einer noch viel weiter entfernten Galaxis'
+		tutorial.max_students = 42
+		tutorial.time = muesli.types.TutorialTime('0 18:00')
+		self.tutorial_no_tutor= tutorial
+		self.session.add(self.tutorial_no_tutor)
 
 		self.lecture_student = muesli.models.LectureStudent()
 		self.lecture_student.student = self.user

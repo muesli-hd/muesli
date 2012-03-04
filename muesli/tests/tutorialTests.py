@@ -24,6 +24,7 @@ from hashlib import sha1
 import unittest
 import muesli.web
 from muesli.tests import functionalTests
+from muesli import utils
 
 class BaseTests(functionalTests.BaseTests):
 	def test_tutorial_view(self):
@@ -102,6 +103,9 @@ class TutorLoggedInTests(UserLoggedInTests):
 	def test_tutorial_view(self):
 		res = self.testapp.get('/tutorial/view/%s' % self.tutorial.id, status=200)
 
+	def test_tutorial_view_no_tutor(self):
+		res = self.testapp.get('/tutorial/view/%s' % self.tutorial_no_tutor.id, status=200)
+
 	def test_tutorial_view_different_lectures(self):
 		#Different lectures should be forbidden
 		res = self.testapp.get('/tutorial/view/%s,%s' % (self.tutorial.id, self.lecture2_tutorial.id), status=403)
@@ -116,6 +120,12 @@ class TutorLoggedInTests(UserLoggedInTests):
 
 	def test_tutorial_results(self):
 		res = self.testapp.get('/tutorial/results/%s' % self.tutorial.id, status=200)
+	def test_tutorial_results_no_tutor_all_tutorials(self):
+		self.lecture.tutor_rights = utils.editAllTutorials
+		self.session.commit()
+		res = self.testapp.get('/tutorial/results/%s' % self.tutorial_no_tutor.id, status=200)
+	def test_tutorial_results_no_tutor_own_tutorial(self):
+		res = self.testapp.get('/tutorial/results/%s' % self.tutorial_no_tutor.id, status=403)
 	def test_tutorial_results_different_lectures(self):
 		#Different lectures should be forbidden
 		res = self.testapp.get('/tutorial/results/%s,%s' % (self.tutorial.id, self.lecture2_tutorial.id), status=403)
@@ -152,6 +162,9 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 	def test_tutorial_results_same_lecture_different_tutor(self):
 		#other tutorials of same lecture allowed for assistant
 		res = self.testapp.get('/tutorial/results/%s,%s' % (self.tutorial.id, self.tutorial_tutor2.id), status=200)
+
+	def test_tutorial_results_no_tutor_own_tutorial(self):
+		res = self.testapp.get('/tutorial/results/%s' % self.tutorial.id, status=200)
 
 class AdminLoggedInTests(AssistantLoggedInTests):
 	def setUp(self):
