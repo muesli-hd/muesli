@@ -49,7 +49,7 @@ class List(object):
 		self.db = self.request.db
 	def __call__(self):
 
-		lectures = self.db.query(models.Lecture).order_by(models.Lecture.term).options(joinedload(models.Lecture.assistant))
+		lectures = self.db.query(models.Lecture).order_by(models.Lecture.term, models.Lecture.name).options(joinedload(models.Lecture.assistant))
 		if self.request.GET.get('show_all', '0')=='0':
 			lectures = lectures.filter(models.Lecture.is_visible == True)
 		return {'lectures': lectures.all()}
