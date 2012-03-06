@@ -301,7 +301,7 @@ def resetPassword3(request):
 	return {'form': form,
 	        'confirmation': request.context.confirmation}
 
-@view_config(route_name='user_ajax_complete', renderer='muesli.web:templates/user/ajax_complete.pt', context=TutorialContext, permission='viewAll')
+@view_config(route_name='user_ajax_complete', renderer='muesli.web:templates/user/ajax_complete.pt', context=TutorialContext, permission='viewOverview')
 def ajaxComplete(request):
 	search_str =  request.POST['name']+'%'
 	lecture_students = request.context.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)
