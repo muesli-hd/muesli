@@ -216,11 +216,21 @@ class TutorLoggedInTests(UserLoggedInTests):
 		UserLoggedInTests.setUp(self)
 		self.setUser(self.tutor)
 
-	def test_user_ajax_complete(self):
+	def test_user_ajax_complete_tut(self):
 		res = self.testapp.post('/user/ajax_complete/%s/%s' % (self.lecture.id,self.tutorial.id),
 		       {'name': 'GarantiertKeinName'}, status=200)
 		self.assertResContainsNot(res, '</li>')
 		res = self.testapp.post('/user/ajax_complete/%s/%s' % (self.lecture.id,self.tutorial.id),
+		       {'name': self.tutorial.students[0].last_name}, status=200)
+		self.assertResContains(res, self.tutorial.students[0].first_name)
+
+	def test_user_ajax_complete(self):
+		#All tutors should be allowed to see students from all
+		#tutorials
+		res = self.testapp.post('/user/ajax_complete/%s/' % (self.lecture.id),
+		       {'name': 'GarantiertKeinName'}, status=200)
+		self.assertResContainsNot(res, '</li>')
+		res = self.testapp.post('/user/ajax_complete/%s/' % (self.lecture.id,),
 		       {'name': self.tutorial.students[0].last_name}, status=200)
 		self.assertResContains(res, self.tutorial.students[0].first_name)
 

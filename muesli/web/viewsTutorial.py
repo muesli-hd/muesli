@@ -223,7 +223,7 @@ def sendChangesMail(request, tutor, text):
 		body=u'Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
 	muesli.mail.sendMail(message)
 
-@view_config(route_name='tutorial_email', renderer='muesli.web:templates/tutorial/email.pt', context=TutorialContext, permission='viewAll')
+@view_config(route_name='tutorial_email', renderer='muesli.web:templates/tutorial/email.pt', context=TutorialContext, permission='sendMail')
 def email(request):
 	db = request.db
 	tutorials = request.context.tutorials

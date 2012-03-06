@@ -162,7 +162,7 @@ def main(global_config=None, **settings):
 	config.add_route('lecture_add_grading', '/lecture/add_grading/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_export_students_html', '/lecture/export_students_html/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_export_totals', '/lecture/export_totals/{lecture_id}', factory = LectureContext)
-	config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory = LectureContext)
+	config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory = GeneralContext)
 	config.add_route('lecture_view_points', '/lecture/view_points/{lecture_id}', factory = LectureContext)
 
 
