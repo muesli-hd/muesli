@@ -216,7 +216,7 @@ class TutorLoggedInTests(UserLoggedInTests):
 		UserLoggedInTests.setUp(self)
 		self.setUser(self.tutor)
 
-	def test_user_ajax_complete(self):
+	def test_user_ajax_complete_tut(self):
 		res = self.testapp.post('/user/ajax_complete/%s/%s' % (self.lecture.id,self.tutorial.id),
 		       {'name': 'GarantiertKeinName'}, status=200)
 		self.assertResContainsNot(res, '</li>')
@@ -224,10 +224,22 @@ class TutorLoggedInTests(UserLoggedInTests):
 		       {'name': self.tutorial.students[0].last_name}, status=200)
 		self.assertResContains(res, self.tutorial.students[0].first_name)
 
+	def test_user_ajax_complete(self):
+		res = self.testapp.post('/user/ajax_complete/%s/' % (self.lecture.id,),
+		       {'name': 'GarantiertKeinName'}, status=403)
+
 class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
 		TutorLoggedInTests.setUp(self)
 		self.setUser(self.assistant)
+
+	def test_user_ajax_complete(self):
+		res = self.testapp.post('/user/ajax_complete/%s/' % (self.lecture.id),
+		       {'name': 'GarantiertKeinName'}, status=200)
+		self.assertResContainsNot(res, '</li>')
+		res = self.testapp.post('/user/ajax_complete/%s/' % (self.lecture.id,),
+		       {'name': self.tutorial.students[0].last_name}, status=200)
+		self.assertResContains(res, self.tutorial.students[0].first_name)
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):
