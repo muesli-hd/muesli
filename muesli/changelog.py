@@ -27,6 +27,13 @@ Es ist jetzt möglich, für jede Vorlesung einzustellen, ob die Tutoren Punkte f
 sie gar keine Punkte eintragen dürfen. Die Option dazu findet sich auf der "Bearbeiten"-Seite
 der Vorlesung.
 
+====2012-02-27
+concerns:assistants
+Es gibt eine neue Seite mit Details zur Anmeldung über Präferenzen. Sie enthält Histogramme,
+die die Beliebtheit jedes möglichen Termines angeben, sowie eine Übersicht der Fächerverteilung
+unter den angemeldeten Studenten. Der Link zu der Seite findet sich auf der "Bearbeiten"-Seite
+der Vorlesung.
+
 ====2012-02-02
 concerns:assistants
 Die Punkte von Testaten können versteckt werden. Dies bewirkt, dass die Studenten ihre
