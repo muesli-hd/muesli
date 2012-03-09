@@ -226,7 +226,7 @@ class Lecture(Base):
 				ExerciseStudent.student_id.label('student_id'),
 				Exam, Exam.id)\
 			.filter(ExerciseStudent.exercise_id.in_([e.id  for e in exercises]))\
-			.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students]))\
+			.filter(ExerciseStudent.student_id.in_([s.student_id for s  in students]))\
 			.join(Exercise).join(Exam)\
 			.group_by(ExerciseStudent.student_id, Exam)
 		return lecture_results
@@ -299,7 +299,7 @@ class Exam(Base):
 		session = Session.object_session(self)
 		if not students:
 			students = self.lecture.lecture_students_for_tutorials(tutorials).all()
-		pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students]))\
+		pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student_id for s  in students]))\
 							.filter(ExerciseStudent.points!=None)
 		pointsStmt = pointsQuery.subquery()
 		exerciseStatistics = session.query(\
@@ -336,7 +336,7 @@ class Exam(Base):
 		if not students:
 			students = self.lecture.lecture_students_for_tutorials(tutorials)
 		exercise_points = session.query(ExerciseStudent, ExerciseStudent.student)
-		pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students]))\
+		pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student_id for s  in students]))\
 			.filter(ExerciseStudent.exercise_id.in_([e.id for e in self.exercises]))\
 			.filter(ExerciseStudent.points!=None).subquery()
 		pointsStmt = session.query(User.subject, pointsQuery).join(pointsQuery, pointsQuery.c.student==User.id).subquery()

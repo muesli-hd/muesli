@@ -38,6 +38,7 @@ from muesli import utils
 
 import time
 import datetime
+import numbers
 
 from sqlalchemy import event as saevent
 
@@ -70,6 +71,7 @@ def add_javascript_to_request(event):
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):
 	event['templates'] = lambda name: get_renderer('templates/{0}'.format(name)).implementation()
+	event['Number'] = numbers.Number
 
 def principals_for_user(user_id, request):
 	user = request.db.query(User).get(user_id)
