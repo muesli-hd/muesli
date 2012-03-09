@@ -273,7 +273,7 @@ class Exam(Base):
 		session = Session.object_session(self)
 		pointsQuery = self.exercise_points
 		if students:
-			pointsQuery = pointsQuery.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students]))
+			pointsQuery = pointsQuery.filter(ExerciseStudent.student_id.in_([s.student_id for s  in students]))
 		pointsStmt = pointsQuery.subquery()
 		examPoints = session.query(\
 				pointsStmt.c.student.label('student_id'),
