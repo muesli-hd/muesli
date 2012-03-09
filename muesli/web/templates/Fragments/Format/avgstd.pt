@@ -2,7 +2,7 @@
 <metal:main metal:define-macro="avgstd">
 
       <span class="popup">
-        <span tal:define="fF lambda f: '%.1f' % f if f!=None else '-'">
+        <span tal:define="fF lambda f: '%.1f' % f if (f!=None and isinstance(f, Number)) else '-'">
           <span tal:condition="'tut_avg'     in statisticsData" class="points" tal:attributes="style 'display:none' if statistics_images else False">${'%s / %s' % (fF(statisticsData['tut_avg']), fF(statisticsData['lec_avg']))}</span>
           <span tal:condition="'tut_avg' not in statisticsData" class="points" tal:attributes="style 'display:none' if statistics_images else False">${'%s' % fF(statisticsData['lec_avg'])}</span>
           <span tal:condition='statistics_images'>
