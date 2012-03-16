@@ -20,6 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2012-03-16
+concerns:assistants
+Das Ausrechnen von Noten hat eine Vereinfachung erfahren: Es gibt die zusätzlichen Funktionen
+cases1, cases2 und cases3 zum Vergeben von ganzen, halben und drittel Noten. Details finden sich
+unter "Hilfe" auf der Seite zum Noteneintragen.
+
 ====2012-03-02
 concerns:assistants
 Es ist jetzt möglich, für jede Vorlesung einzustellen, ob die Tutoren Punkte für alle

@@ -46,7 +46,7 @@
   <a class="nohelp" href="javascript:show_help()">Hilfe</a><a class="help" style="display:none" href="javascript:hide_help()">Hilfe verbergen</a>
 </form>
 <div class="help" style="display:none"><p>
-Die Formel muss ein algebraischer Ausdruck in den Variablen 1, 2, ... sein, wobei i für
+Die Formel muss ein algebraischer Ausdruck in den Variablen $0, $1, ... sein, wobei $i für
 die erreichten Punktzahlen in den gewählten Testaten steht (Siehe Kopfzeile der Tabelle unten).
 Desweiteren können folgende Funktionen benutzt werden:
 </p>
@@ -54,7 +54,15 @@ Desweiteren können folgende Funktionen benutzt werden:
 <li>max(a, b, ...): Liefert das Maximum der Ausdrücke a, b, ...</li>
 <li>min(a, b, ...): Liefert das Minimum der Ausdrücke a, b, ...</li>
 <li>cases(val,r<sub>0</sub>, b<sub>1</sub>, r<sub>1</sub>, ..., b<sub>n</sub>, r<sub>n</sub>):
-Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &ge; b<sub>i</sub>.</li>
+Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &ge; b<sub>i</sub>.
+  <ul>
+    <li>Für ganze Noten: cases1(val, b<sub>1</sub>, ..., b<sub>4</sub>): Liefert Note 5, falls val &lt; b<sub>1</sub>;
+        Note 4, falls val &lt; b<sub>2</sub> etc. </li>
+    <li>Für halbe Noten: cases2(val, b<sub>1</sub>, ..., b<sub>7</sub>): Liefert Note 5, falls val &lt; b<sub>1</sub>;
+        Note 4, falls val &lt; b<sub>2</sub>; Note 3.5, falls val &lt; b<sub>3</sub>, etc. </li>
+    <li>Für drittel Noten: cases3(val, b<sub>1</sub>, ..., b<sub>10</sub>): Liefert Note 5, falls val &lt; b<sub>1</sub>;
+        Note 4, falls val &lt; b<sub>2</sub>; Note 3.7, falls val &lt; b<sub>3</sub>, etc. </li>  </ul>
+</li>
 </ul>
 </div>
 
@@ -66,7 +74,7 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
   <input type="submit" value="Anzeigen"/>
 </form>
 
-<form method="post">
+<form method="post" tal:attributes="action request.route_path('grading_enter_grades', grading_id=grading.id)">
 <input type="hidden" name="submit" value="1" />
 <table class="colored">
   <tr>
@@ -89,7 +97,7 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
      
     <td><input tal:attributes="class 'invalid' if grades[ls.student_id]['invalid'] else 'points';
              name 'grade-%i' % ls.student_id;
-             value grades[ls.student_id]['grade'].grade if grades[ls.student_id]['grade'].grade else ''" size="4" /></td>
+             value grades[ls.student_id]['gradestr']" size="4" /></td>
   </tr>
 </table>
 <input type="submit" value="Speichern"/>

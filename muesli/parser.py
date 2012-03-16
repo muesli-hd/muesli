@@ -28,6 +28,7 @@ import re
 from pyparsing import Word, alphas, ParseException, Literal, CaselessLiteral \
 , Combine, Optional, nums, Or, Forward, ZeroOrMore, StringEnd, alphanums, nestedExpr, delimitedList, CaselessKeyword
 import math
+from decimal import Decimal
 
 # Debugging flag can be set to either "debug_flag=True" or "debug_flag=False"
 debug_flag=True
@@ -91,9 +92,9 @@ class Parser(object):
 		# map operator symbols to corresponding arithmetic operations
 		self.opn = { "+" : self.handleNone( lambda a,b: a + b ),
 				"-" : self.handleNone( lambda a,b: a - b ),
-				"*" : self.handleNone( lambda a,b: a * b ),
-				"/" : self.handleNone( lambda a,b: a / b ),
-				"^" : self.handleNone( lambda a,b: a ** b ) }
+				"*" : self.handleNone( lambda a,b: a * b, none_survives=True ),
+				"/" : self.handleNone( lambda a,b: a / b, none_survives=True ),
+				"^" : self.handleNone( lambda a,b: a ** b, none_survives=True ) }
 		self.functions = { 'max': max,
 			'min': self.min,
 			'cases': self.cases,
@@ -104,12 +105,17 @@ class Parser(object):
 	def min(self, arr):
 		arr = filter(lambda a: a != None, arr)
 		return min(arr)
-	def handleNone(self, func):
+	def handleNone(self, func, none_survives=False):
 		def newFunc(a, b):
 			if a == None:
-				return b
+				if none_survives:
+					return None
+				else:
+					return b
 			if b == None:
-				return a
+				if none_survives:
+					return None
+				else: return a
 			else:
 				return func(a,b)
 		return newFunc
@@ -151,9 +157,9 @@ class Parser(object):
 			ops.reverse()
 			return self.functions[op](ops)
 		elif op == "PI":
-			return math.pi
+			return Decimal(math.pi)
 		elif op == "E":
-			return math.e
+			return Decimal(math.e)
 		elif re.search('^\$[a-zA-Z0-9_]*$',op):
 			if self.variables.has_key(op):
 				return self.variables[op]
@@ -162,7 +168,7 @@ class Parser(object):
 		elif re.search('^[-+]?[0-9]+$',op):
 			return long( op )
 		else:
-			return float( op )
+			return Decimal( op )
 	def cases(self, parameters):
 		val = parameters[0]
 		if val == None:
