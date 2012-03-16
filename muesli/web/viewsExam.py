@@ -353,7 +353,7 @@ class Histogram(MatplotlibView):
 		if self.max==None:
 			self.max = max(self.points)
 		factor = 1
-		while (self.max+2)/factor > 10:
+		while (self.max+2)/factor > 15:
 			factor += 1
 		self.bins = [i*factor-0.5 for i in range(int(math.ceil((self.max+2)/factor)))]
 
