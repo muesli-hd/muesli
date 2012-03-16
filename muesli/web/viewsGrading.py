@@ -117,30 +117,40 @@ class EnterGrades(object):
 		varsForExam = dict([[examvars[var], var] for var in examvars ])
 		for ls in lecture_students:
 			grades[ls.student_id]['grade'] = ''
+			grades[ls.student_id]['gradestr'] = ''
 			grades[ls.student_id]['invalid'] = None
 			grades[ls.student_id]['exams'] = dict([[i, ''] for i in exam_ids])
 			grades[ls.student_id]['calc'] = ''
 		for grade in gradesQuery:
 			grades[grade.student_id]['grade'] = grade
-		for ls in lecture_students:
-			if not grades[ls.student_id]['grade']:
-				studentGrade = models.StudentGrade()
-				studentGrade.student = ls.student
-				studentGrade.grading = grading
-				grades[ls.student_id]['grade'] = studentGrade
-				self.db.add(studentGrade)
+			grades[grade.student_id]['gradestr'] = grade.grade
+		#for ls in lecture_students:
+		#	if not grades[ls.student_id]['grade']:
+		#		studentGrade = models.StudentGrade()
+		#		studentGrade.student = ls.student
+		#		studentGrade.grading = grading
+		#		grades[ls.student_id]['grade'] = studentGrade
+		#		self.db.add(studentGrade)
 		if self.request.method == 'POST':
 			for ls in lecture_students:
 				param = 'grade-%u' % (ls.student_id)
 				if param in self.request.POST:
 					value = self.request.POST[param]
+					if not grades[ls.student_id]['grade']:
+						studentGrade = models.StudentGrade()
+						studentGrade.student = ls.student
+						studentGrade.grading = grading
+						grades[ls.student_id]['grade'] = studentGrade
+						self.db.add(studentGrade)
 					if not value:
 						grades[ls.student_id]['grade'].grade = None
+						grades[ls.student_id]['gradestr'] = ''
 					else:
 						value = value.replace(',','.')
 						try:
 							value = float(value)
 							grades[ls.student_id]['grade'].grade = value
+							grades[ls.student_id]['gradestr'] = value
 						except:
 							error_msgs.append('Could not convert "%s" (%s)'%(value, ls.student.name()))
 		if self.db.new or self.db.dirty or self.db.deleted:
@@ -164,8 +174,12 @@ class EnterGrades(object):
 						d[varsForExam[exam.id]] = result
 					result = parser.calculate(d)
 					grades[ls.student_id]['calc'] = result if result != None else ''
+					if 'fill' in self.request.GET:
+						grades[ls.student_id]['gradestr'] = result if result != None else ''
 			except Exception, err:
 				error_msgs.append(str(err))
+		if 'fill' in self.request.GET:
+			self.request.session.flash('Achtung, die Noten sind noch nicht abgespeichert!', queue='errors')
 		self.request.javascript.add('prototype.js')
 		return {'grading': grading,
 		        'error_msg': '\n'.join(error_msgs),
