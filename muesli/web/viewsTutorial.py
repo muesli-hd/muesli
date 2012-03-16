@@ -146,6 +146,19 @@ def results(request):
 	        'exams_by_cat': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
 	        }
 
+@view_config(route_name='tutorial_take', context=TutorialContext, permission='take_tutorial')
+def take(request):
+	tutorials = request.context.tutorials
+	for tutorial in tutorials:
+		if tutorial.tutor_id:
+			request.session.flash(u'Für das Tutorial ist bereits ein Tutor eingetragen!', queue='errors')
+		else:
+			tutorial.tutor = request.user
+			request.session.flash(u'Sie wurden als Übungsleiter eingetragen!', queue='messages')
+	if request.db.dirty:
+		request.db.commit()
+	return HTTPFound(location=request.route_url('lecture_view', lecture_id = request.context.lecture.id))
+
 @view_config(route_name='tutorial_subscribe', context=TutorialContext, permission='subscribe')
 def subscribe(request):
 	tutorials = request.context.tutorials
