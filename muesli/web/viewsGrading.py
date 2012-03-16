@@ -143,7 +143,8 @@ class EnterGrades(object):
 							grades[ls.student_id]['grade'].grade = value
 						except:
 							error_msgs.append('Could not convert "%s" (%s)'%(value, ls.student.name()))
-		self.db.commit()
+		if self.db.new or self.db.dirty or self.db.deleted:
+			self.db.commit()
 		for exam in grading.exams:
 			results = exam.getResults(students = lecture_students)
 			for result in results:
