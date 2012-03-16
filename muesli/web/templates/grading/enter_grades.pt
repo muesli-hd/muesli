@@ -46,7 +46,7 @@
   <a class="nohelp" href="javascript:show_help()">Hilfe</a><a class="help" style="display:none" href="javascript:hide_help()">Hilfe verbergen</a>
 </form>
 <div class="help" style="display:none"><p>
-Die Formel muss ein algebraischer Ausdruck in den Variablen $0, $1, ... sein, wobei $i für
+Die Formel muss ein algebraischer Ausdruck in den Variablen $0, $1, ... sein, wobei $<span>i</span> für
 die erreichten Punktzahlen in den gewählten Testaten steht (Siehe Kopfzeile der Tabelle unten).
 Desweiteren können folgende Funktionen benutzt werden:
 </p>
