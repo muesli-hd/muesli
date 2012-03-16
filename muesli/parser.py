@@ -28,6 +28,7 @@ import re
 from pyparsing import Word, alphas, ParseException, Literal, CaselessLiteral \
 , Combine, Optional, nums, Or, Forward, ZeroOrMore, StringEnd, alphanums, nestedExpr, delimitedList, CaselessKeyword
 import math
+from decimal import Decimal
 
 # Debugging flag can be set to either "debug_flag=True" or "debug_flag=False"
 debug_flag=True
@@ -151,9 +152,9 @@ class Parser(object):
 			ops.reverse()
 			return self.functions[op](ops)
 		elif op == "PI":
-			return math.pi
+			return Decimal(math.pi)
 		elif op == "E":
-			return math.e
+			return Decimal(math.e)
 		elif re.search('^\$[a-zA-Z0-9_]*$',op):
 			if self.variables.has_key(op):
 				return self.variables[op]
@@ -162,7 +163,7 @@ class Parser(object):
 		elif re.search('^[-+]?[0-9]+$',op):
 			return long( op )
 		else:
-			return float( op )
+			return Decimal( op )
 	def cases(self, parameters):
 		val = parameters[0]
 		if val == None:
