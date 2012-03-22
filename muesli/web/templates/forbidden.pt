@@ -1,0 +1,19 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+<h2>Zugriff verweigert!</h2>
+
+<p>
+Sie haben nicht die nötigen Rechte, um auf diese Seite zuzugreifen.
+</p>
+
+<p tal:condition="request.user">
+  Wenn Sie der Meinung sind, daß Sie auf diese Seite zugreifen können sollten,
+ <a tal:attributes="href request.route_path('contact')">melden Sie sich bitte bei uns</a>.
+</p>
+<p tal:condition="not request.user">
+  Sie sind derzeit nicht angemeldet. Bitte 
+  <a tal:attributes="href request.route_path('user_login')">melden Sie sich an</a> und versuchen Sie es erneut.
+</p>
+  </metal:main>
+</metal:main>

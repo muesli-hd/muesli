@@ -30,6 +30,7 @@ from pyramid import security
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPInternalServerError, HTTPFound
+import pyramid.exceptions
 from pyramid.url import route_url
 from sqlalchemy.orm import exc, joinedload
 from hashlib import sha1
@@ -145,4 +146,8 @@ def changelog(request):
 		entries.append({'date': date, 'description': text})
 	return {'entries': entries}
 
+
+@view_config(context=pyramid.exceptions.HTTPForbidden, renderer='muesli.web:templates/forbidden.pt')
+def forbidden(exc, request):
+	return {}
 
