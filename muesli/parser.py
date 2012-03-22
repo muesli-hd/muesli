@@ -104,7 +104,10 @@ class Parser(object):
 			}
 	def min(self, arr):
 		arr = filter(lambda a: a != None, arr)
-		return min(arr)
+		if arr:
+			return min(arr)
+		else:
+			return None
 	def handleNone(self, func, none_survives=False):
 		def newFunc(a, b):
 			if a == None:
