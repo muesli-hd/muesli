@@ -195,8 +195,8 @@ class Parser(object):
 		return self.cases(casesParameters)
 	def cases3(self, parameters):
 		p = parameters
-		casesParameters = [p[0], 1.0, p[1], 1.3, p[2], 1.7, p[3], 2.0, p[4], 2.3, p[5], 2.7,
-			p[6], 3.0, p[7], 3.3, p[8], 3.7, p[9], 4.0, p[10], 5.0]
+		casesParameters = [p[0], 5.0, p[1], 4.0, p[2], 3.7, p[3], 3.3, p[4], 3.0, p[5], 2.7,
+			p[6], 2.3, p[7], 2.0, p[8], 1.7, p[9], 1.3, p[10], 1.0]
 		return self.cases(casesParameters)
 
 

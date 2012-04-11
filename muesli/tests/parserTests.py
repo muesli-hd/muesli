@@ -55,7 +55,7 @@ class ContextTests(unittest.TestCase):
 		self.assertEqual(self.parser.calculate({'$0': 1.5}), 1)
 		self.assertEqual(self.parser.calculate({'$0': None}), None)
 
-	def test_parser_cases(self):
+	def test_parser_cases1(self):
 		self.parser.parseString('cases1($0, 2, 4, 6, 8)')
 		self.assertEqual(self.parser.calculate({'$0': 0}), 5)
 		self.assertEqual(self.parser.calculate({'$0': 1.5}), 5)
@@ -64,6 +64,11 @@ class ContextTests(unittest.TestCase):
 		self.assertEqual(self.parser.calculate({'$0': 6}), 2)
 		self.assertEqual(self.parser.calculate({'$0': 8}), 1)
 		self.assertEqual(self.parser.calculate({'$0': None}), None)
+
+	def test_parser_cases3(self):
+		self.parser.parseString('cases3($0,30,34,38,42,46,50,54,58,62,66)')
+		self.assertEqual(self.parser.calculate({'$0': 0}), 5)
+		self.assertEqual(self.parser.calculate({'$0': 7}), 5)
 
 	def test_parser_min(self):
 		self.parser.parseString('min($0)')
