@@ -144,7 +144,7 @@ class Lecture(Base):
 	__tablename__ = 'lectures'
 	id = Column(Integer, primary_key=True)
 	assistant_id = Column('assistant', Integer, ForeignKey(User.id, ondelete='SET NULL'))
-	assistant = relationship(User, backref=backref('lectures_as_assistant_old', order_by='Lecture.term', lazy='dynamic'))
+	old_assistant = relationship(User, backref=backref('lectures_as_assistant_old', order_by='Lecture.term', lazy='dynamic'))
 	assistants = relationship(User, secondary=lecture_assistants_table, backref =backref("lectures_as_assistant", order_by='Lecture.term', lazy='dynamic'))
 	name = Column(Text)
 	# lecture type
