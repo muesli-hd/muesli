@@ -155,6 +155,23 @@ class Edit(object):
 		        'assistants': assistants,
 		        'form': form}
 
+@view_config(route_name='lecture_change_assistants', renderer='muesli.web:templates/lecture/change_assistants.pt', context=LectureContext, permission='change_assistants')
+def change_assistants(request):
+	lecture = request.context.lecture
+	if request.method == 'POST':
+		for nr, assistant in enumerate(lecture.assistants):
+			if 'change-%i' % assistant.id in request.POST:
+				new_assistant = request.db.query(models.User).get(request.POST['assistant-%i' % assistant.id])
+				lecture.assistants[nr] = new_assistant
+			if 'remove-%i' % assistant.id in request.POST:
+				del lecture.assistants[nr]
+		if 'add-assistant' in request.POST:
+			new_assistant = request.db.query(models.User).get(request.POST['new-assistant'])
+			lecture.assistants.append(new_assistant)
+	if request.db.new or request.db.dirty or request.db.deleted:
+		request.db.commit()
+	return HTTPFound(location=request.route_url('lecture_edit', lecture_id = lecture.id))
+
 @view_config(route_name='lecture_preferences', renderer='muesli.web:templates/lecture/preferences.pt', context=LectureContext, permission='edit')
 class Preferences(object):
 	def __init__(self, request):
