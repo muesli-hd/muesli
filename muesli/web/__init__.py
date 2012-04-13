@@ -148,6 +148,7 @@ def main(global_config=None, **settings):
 	config.add_route('lecture_add', '/lecture/add', factory = GeneralContext)
 	config.add_route('lecture_list', '/lecture/list')
 	config.add_route('lecture_edit', '/lecture/edit/{lecture_id}', factory = LectureContext)
+	config.add_route('lecture_change_assistants', '/lecture/change_assistants/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_preferences', '/lecture/preferences/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_prefhistogram', '/lecture/prefhistogram/{lecture_id}/{time}', factory = LectureContext)
 	config.add_route('lecture_remove_tutor', '/lecture/remove_tutor/{lecture_id}/{tutor_id}', factory = LectureContext)
