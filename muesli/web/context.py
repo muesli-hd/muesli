@@ -69,9 +69,8 @@ class GradingContext(object):
 		if self.grading is None:
 			raise HTTPNotFound(detail='Grading not found')
 		self.__acl__ = [
-			(Allow, 'user:{0}'.format(self.grading.lecture.assistant_id), ('view', 'edit')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
-			]
+			]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in self.grading.lecture.assistants]
 
 
 class LectureContext(object):
@@ -82,8 +81,8 @@ class LectureContext(object):
 			raise HTTPNotFound(detail='Lecture not found')
 		self.__acl__ = [
 			(Allow, Authenticated, ('view', 'view_own_points', 'add_tutor')),
-			(Allow, 'user:{0}'.format(self.lecture.assistant_id), ('view', 'edit', 'view_tutorials', 'get_tutorials')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
+			]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit', 'view_tutorials', 'get_tutorials')) for assistant in self.lecture.assistants
 			]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials', 'get_tutorials')) for tutor in self.lecture.tutors]
 
 class TutorialContext(object):
@@ -103,7 +102,7 @@ class TutorialContext(object):
 			]
 		if self.lecture:
 			self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewOverview', 'take_tutorial')) for tutor in self.lecture.tutors]
-			self.__acl__.append((Allow, 'user:{0}'.format(self.lecture.assistant_id), ('viewOverview', 'viewAll', 'sendMail', 'edit')))
+			self.__acl__ += [((Allow, 'user:{0}'.format(assistant.id), ('viewOverview', 'viewAll', 'sendMail', 'edit'))) for assistant in self.lecture.assistants]
 		if self.tutorials:
 			if self.lecture.tutor_rights == editOwnTutorials:
 				self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewAll')) for tutor in getTutorForTutorials(self.tutorials)]
@@ -130,8 +129,9 @@ class AssignStudentContext(object):
 		if self.tutorial is None:
 			raise HTTPNotFound(detail='tutorial not found')
 		self.__acl__ = [
-			(Allow, 'user:{0}'.format(self.tutorial.lecture.assistant_id), ('move')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
+			]+[
+				(Allow, 'user:{0}'.format(assistant.id), ('move')) for assistant in self.tutorial.lecture.assistants
 			]
 
 
@@ -145,9 +145,10 @@ class ExamContext(object):
 		self.tutorials, self.tutorial_ids =  getTutorials(request)
 		self.__acl__ = [
 			#(Allow, Authenticated, 'view_own_points'),
-			(Allow, 'user:{0}'.format(self.exam.lecture.assistant_id), ('edit', 'view_points', 'enter_points', 'statistics')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
-			]+[(Allow, 'user:{0}'.format(tutor.id), ('statistics')) for tutor in self.exam.lecture.tutors]
+			]+[(Allow, 'user:{0}'.format(tutor.id), ('statistics')) for tutor in self.exam.lecture.tutors
+			]+[(Allow, 'user:{0}'.format(assistant.id), ('edit', 'view_points', 'enter_points', 'statistics')) for assistant in self.exam.lecture.assistants
+			]
 		if self.exam.lecture.tutor_rights == editAllTutorials:
 			self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('enter_points', 'view_points')) for tutor in self.exam.lecture.tutors]
 		else:
@@ -176,7 +177,8 @@ class ExerciseContext(object):
 				self.tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(self.tutorial_ids)).all()
 		self.__acl__ = [
 			(Allow, Authenticated, 'view_points'),
-			(Allow, 'user:{0}'.format(self.exam.lecture.assistant_id), ('statistics')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
-			]+[(Allow, 'user:{0}'.format(tutor.id), ('statistics')) for tutor in self.exam.lecture.tutors]
+			]+[(Allow, 'user:{0}'.format(tutor.id), ('statistics')) for tutor in self.exam.lecture.tutors
+			]+[(Allow, 'user:{0}'.format(assistant.id), ('statistics')) for assistant in self.exam.lecture.assistants
+			]
 

@@ -184,7 +184,7 @@ class PopulatedTests(BaseTests):
 		self.lecture.name = "Irgendwas"
 		self.lecture.mode = 'direct'
 		self.lecture.password = 'geheim'
-		self.lecture.assistant = self.assistant
+		self.lecture.assistants.append(self.assistant)
 		self.lecture.tutor_rights = utils.editOwnTutorials
 		self.session.add(self.lecture)
 		self.lecture.tutors.append(self.tutor2)
@@ -211,7 +211,7 @@ class PopulatedTests(BaseTests):
 
 		self.lecture2 = muesli.models.Lecture()
 		self.lecture2.name = "Irgendwas2"
-		self.lecture2.assistant = self.assistant2
+		self.lecture2.assistants.append(self.assistant2)
 		self.session.add(self.lecture2)
 
 		tutorial = muesli.models.Tutorial()
@@ -280,7 +280,7 @@ class PopulatedTests(BaseTests):
 		self.prefLecture = muesli.models.Lecture()
 		self.prefLecture.name = "Vorlieben"
 		self.prefLecture.mode = 'prefs'
-		self.prefLecture.assistant = self.assistant
+		self.prefLecture.assistants.append(self.assistant)
 		self.session.add(self.prefLecture)
 
 		self.prefTutorial = muesli.models.Tutorial()

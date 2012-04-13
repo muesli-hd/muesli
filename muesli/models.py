@@ -57,6 +57,11 @@ grading_exam_table = Table('grading_exams', Base.metadata,
 	Column('exam', Integer, ForeignKey('exams.id', ondelete='CASCADE'), nullable=False, primary_key=True)
 )
 
+lecture_assistants_table = Table('lecture_assistants', Base.metadata,
+	Column('lecture', Integer, ForeignKey('lectures.id', ondelete='CASCADE'), nullable=False, primary_key=True),
+	Column('assistant', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True)
+)
+
 #class GradingExam(Base):
 #	__tablename__ = 'grading_exams'
 #	grading_id = Column('grading', Integer, ForeignKey(Grading.id, ondelete='CASCADE'), nullable=False, primary_key=True)
@@ -139,7 +144,8 @@ class Lecture(Base):
 	__tablename__ = 'lectures'
 	id = Column(Integer, primary_key=True)
 	assistant_id = Column('assistant', Integer, ForeignKey(User.id, ondelete='SET NULL'))
-	assistant = relationship(User, backref=backref('lectures_as_assistant', order_by='Lecture.term', lazy='dynamic'))
+	old_assistant = relationship(User, backref=backref('lectures_as_assistant_old', order_by='Lecture.term', lazy='dynamic'))
+	assistants = relationship(User, secondary=lecture_assistants_table, backref =backref("lectures_as_assistant", order_by='Lecture.term', lazy='dynamic'))
 	name = Column(Text)
 	# lecture type
 	#  'lecture'

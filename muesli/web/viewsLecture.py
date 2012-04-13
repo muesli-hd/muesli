@@ -49,7 +49,7 @@ class List(object):
 		self.db = self.request.db
 	def __call__(self):
 
-		lectures = self.db.query(models.Lecture).order_by(models.Lecture.term, models.Lecture.name).options(joinedload(models.Lecture.assistant))
+		lectures = self.db.query(models.Lecture).order_by(models.Lecture.term, models.Lecture.name).options(joinedload(models.Lecture.assistants))
 		if self.request.GET.get('show_all', '0')=='0':
 			lectures = lectures.filter(models.Lecture.is_visible == True)
 		return {'lectures': lectures.all()}
@@ -136,6 +136,7 @@ class Edit(object):
 	def __call__(self):
 		lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
 		form = LectureEdit(self.request, lecture)
+		assistants = self.db.query(models.User).filter(models.User.is_assistant==1).order_by(models.User.last_name).all()
 		if self.request.method == 'POST' and form.processPostData(self.request.POST):
 			form.saveValues()
 			self.request.db.commit()
@@ -151,7 +152,29 @@ class Edit(object):
 		        'student_count': student_count,
 		        'categories': utils.categories,
 		        'exams': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
+		        'assistants': assistants,
 		        'form': form}
+
+@view_config(route_name='lecture_change_assistants', context=LectureContext, permission='change_assistants')
+def change_assistants(request):
+	lecture = request.context.lecture
+	if request.method == 'POST':
+		for nr, assistant in enumerate(lecture.assistants):
+			if 'change-%i' % assistant.id in request.POST:
+				new_assistant = request.db.query(models.User).get(request.POST['assistant-%i' % assistant.id])
+				lecture.assistants[nr] = new_assistant
+			if 'remove-%i' % assistant.id in request.POST:
+				del lecture.assistants[nr]
+		if 'add-assistant' in request.POST:
+			new_assistant = request.db.query(models.User).get(request.POST['new-assistant'])
+			lecture.assistants.append(new_assistant)
+	if request.db.new or request.db.dirty or request.db.deleted:
+		if len(lecture.assistants)>0:
+			lecture.old_assistant = lecture.assistants[0]
+		else:
+			lecture.old_assistant = None
+		request.db.commit()
+	return HTTPFound(location=request.route_url('lecture_edit', lecture_id = lecture.id))
 
 @view_config(route_name='lecture_preferences', renderer='muesli.web:templates/lecture/preferences.pt', context=LectureContext, permission='edit')
 class Preferences(object):

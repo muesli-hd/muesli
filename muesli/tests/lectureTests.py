@@ -77,6 +77,8 @@ class BaseTests(functionalTests.BaseTests):
 	def test_lecture_add_tutor(self):
 		res = self.testapp.get('/lecture/add_tutor/%s' % 123456, status=404)
 
+	def test_lecture_change_assistants(self):
+		res = self.testapp.get('/lecture/change_assistants/%s' % 123456, status=404)
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_lecture_view(self):
@@ -131,6 +133,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 	def test_lecture_add_tutor(self):
 		res = self.testapp.get('/lecture/add_tutor/%s' % self.lecture.id, status=403)
+
+	def test_lecture_change_assistants(self):
+		res = self.testapp.get('/lecture/change_assistants/%s' % self.lecture.id, status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -200,7 +205,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
 	def test_lecture_edit(self):
 		res = self.testapp.get('/lecture/edit/%s' % self.lecture.id, status=200)
-		self.assertForm(res, 'name', 'Irgendwie anders')
+		self.assertForm(res, 'name', 'Irgendwie anders', formindex=0)
 
 	def test_lecture2_edit(self):
 		res = self.testapp.get('/lecture/edit/%s' % self.lecture2.id, status=403)
@@ -251,3 +256,6 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 
 	def test_lecture2_edit(self):
 		pass
+
+	def test_lecture_change_assistants(self):
+		res = self.testapp.get('/lecture/change_assistants/%s' % self.lecture.id, status=302)
