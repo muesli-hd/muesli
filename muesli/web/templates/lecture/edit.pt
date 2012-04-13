@@ -19,8 +19,8 @@
          </option>
          </span>
        </select>
-       <input type="submit" value="Ändern" tal:attributes="name 'change-%i' % assistant.id">
-       <input type="submit" value="Löschen" tal:attributes="name 'remove-%i' % assistant.id">
+       <input type="submit" value="Ändern" tal:attributes="name 'change-%i' % assistant.id" />
+       <input type="submit" value="Löschen" tal:attributes="name 'remove-%i' % assistant.id" />
     </li>
     <li>
        <select name="new-assistant">
@@ -31,7 +31,7 @@
          </option>
          </span>
        </select>
-       <input type="submit" value="Hinzufügen" name="add-assistant">
+       <input type="submit" value="Hinzufügen" name="add-assistant" />
     </li>
   </ul>
   </form>
