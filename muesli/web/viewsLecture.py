@@ -155,7 +155,7 @@ class Edit(object):
 		        'assistants': assistants,
 		        'form': form}
 
-@view_config(route_name='lecture_change_assistants', renderer='muesli.web:templates/lecture/change_assistants.pt', context=LectureContext, permission='change_assistants')
+@view_config(route_name='lecture_change_assistants', context=LectureContext, permission='change_assistants')
 def change_assistants(request):
 	lecture = request.context.lecture
 	if request.method == 'POST':
