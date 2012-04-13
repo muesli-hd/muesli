@@ -11,7 +11,11 @@
         </td>
         <td><a tal:attributes="href request.route_path('lecture_view', lecture_id=lecture.id)">${lecture.name}</a></td>
         <td>${lecture.lecturer}</td>
-        <td><a tal:attributes="href 'mailto:'+lecture.assistant.email">${lecture.assistant.last_name}</a></td>
+        <td>
+          <span tal:repeat="assistant lecture.assistants">
+            <a tal:attributes="href 'mailto:'+assistant.email">${assistant.last_name}</a>
+          </span>
+        </td>
       </tr>
     </table>
     <a tal:condition="request.userInfo.is_assistant" tal:attributes="href request.route_path('lecture_add')">Neue Vorlesung eintragen</a>
