@@ -20,6 +20,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2012-04-13
+concerns:assistants
+Vorlesungen können jetzt mehr als einen Assistenten haben. Weitere Assistenten können momentan
+nur die Administratoren hinzufügen (Erreichbar über "Kontakt").
+
 ====2012-03-16
 concerns:assistants
 Das Ausrechnen von Noten hat eine Vereinfachung erfahren: Es gibt die zusätzlichen Funktionen
