@@ -169,6 +169,10 @@ def change_assistants(request):
 			new_assistant = request.db.query(models.User).get(request.POST['new-assistant'])
 			lecture.assistants.append(new_assistant)
 	if request.db.new or request.db.dirty or request.db.deleted:
+		if len(lecture.assistants)>0:
+			lecture.old_assistant = lecture.assistants[0]
+		else:
+			lecture.old_assistant = None
 		request.db.commit()
 	return HTTPFound(location=request.route_url('lecture_edit', lecture_id = lecture.id))
 
