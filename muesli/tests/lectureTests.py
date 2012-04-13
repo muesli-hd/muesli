@@ -205,7 +205,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
 	def test_lecture_edit(self):
 		res = self.testapp.get('/lecture/edit/%s' % self.lecture.id, status=200)
-		self.assertForm(res, 'name', 'Irgendwie anders')
+		self.assertForm(res, 'name', 'Irgendwie anders', formindex=0)
 
 	def test_lecture2_edit(self):
 		res = self.testapp.get('/lecture/edit/%s' % self.lecture2.id, status=403)
