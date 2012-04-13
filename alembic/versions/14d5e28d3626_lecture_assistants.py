@@ -31,12 +31,26 @@ def upgrade():
 	results = connection.execute(lectures.select())
 	ins = []
 	for res in results:
-		ins.append({'lecture': res.id, 'assistant': res.assistant})
+		if res.assistant!=None:
+			ins.append({'lecture': res.id, 'assistant': res.assistant})
 	lecture_assistants = sa.sql.table('lecture_assistants',
 		sa.Column('lecture', sa.Integer(), nullable=False),
 		sa.Column('assistant', sa.Integer(), nullable=False)
 	)
-	op.bulk_insert(lecture_assistants,ins)
+	if ins:
+		op.bulk_insert(lecture_assistants,ins)
 
 def downgrade():
-    op.drop_table('lecture_assistants')
+	lecture_assistants = sa.sql.table('lecture_assistants',
+		sa.Column('lecture', sa.Integer(), nullable=False),
+		sa.Column('assistant', sa.Integer(), nullable=False)
+	)
+	lectures = sa.sql.table('lectures',
+		sa.Column('id', sa.Integer),
+		sa.Column('assistant', sa.Integer)
+	)
+	connection = op.get_bind()
+	results = connection.execute(lecture_assistants.select())
+	for res in results:
+		connection.execute(lectures.update().where(lectures.c.id==res.lecture).values(assistant=res.assistant))
+	op.drop_table('lecture_assistants')
