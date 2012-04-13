@@ -257,25 +257,25 @@ class LectureEdit(ObjectForm):
 			   options=[[1, 'Ja'], [0, 'Nein']],
 			   value=boolToValue(lecture.is_visible))
 			]
-		if request.permissionInfo.has_permission('change_assistant'):
-			assistants = request.db.query(models.User).filter(models.User.is_assistant==1).order_by(models.User.last_name).all()
-			formfields.append(
-			  FormField('assistant',
-			   label='Assistent',
-			   type='select',
-			   options=[[a.id, unicode(a)] for a in assistants],
-			   value=lecture.assistant.id,
-			   required=True,
-			   ))
+		#if request.permissionInfo.has_permission('change_assistant'):
+			#assistants = request.db.query(models.User).filter(models.User.is_assistant==1).order_by(models.User.last_name).all()
+			#formfields.append(
+			  #FormField('assistant',
+			   #label='Assistent',
+			   #type='select',
+			   #options=[[a.id, unicode(a)] for a in assistants],
+			   #value=lecture.assistant.id,
+			   #required=True,
+			   #))
 		ObjectForm.__init__(self, lecture, formfields, send=u'Ändern')
-	def saveField(self, fieldName):
-		if fieldName == 'is_visible':
-			self.obj.is_visible = valueToBool(self['is_visible'])
-		elif fieldName == 'assistant':
-			assistant = self.request.db.query(models.User).get(self['assistant'])
-			self.obj.assistant = assistant
-		else:
-			ObjectForm.saveField(self, fieldName)
+	#def saveField(self, fieldName):
+		#if fieldName == 'is_visible':
+			#self.obj.is_visible = valueToBool(self['is_visible'])
+		#elif fieldName == 'assistant':
+			#assistant = self.request.db.query(models.User).get(self['assistant'])
+			#self.obj.assistant = assistant
+		#else:
+			#ObjectForm.saveField(self, fieldName)
 
 class LectureAdd(ObjectForm):
 	def __init__(self, request):
@@ -331,7 +331,7 @@ class LectureAdd(ObjectForm):
 	def saveField(self, fieldName):
 		if fieldName == 'assistant':
 			assistant = self.request.db.query(models.User).get(self['assistant'])
-			self.obj.assistant = assistant
+			self.obj.assistants.append(assistant)
 		else:
 			ObjectForm.saveField(self, fieldName)
 
