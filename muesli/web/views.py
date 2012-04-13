@@ -149,5 +149,6 @@ def changelog(request):
 
 @view_config(context=pyramid.exceptions.HTTPForbidden, renderer='muesli.web:templates/forbidden.pt')
 def forbidden(exc, request):
+	request.response.status=403
 	return {}
 
