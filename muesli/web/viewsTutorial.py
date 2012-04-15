@@ -159,6 +159,19 @@ def take(request):
 		request.db.commit()
 	return HTTPFound(location=request.route_url('lecture_view', lecture_id = request.context.lecture.id))
 
+@view_config(route_name='tutorial_resign_as_tutor', context=TutorialContext, permission='viewAll')
+def resignAsTutor(request):
+	tutorials = request.context.tutorials
+	for tutorial in tutorials:
+		if tutorial.tutor != request.user:
+			request.session.flash(u'Sie sind nicht Tutor eines Tutorials', queue='errors')
+		else:
+			tutorial.tutor = None
+			request.session.flash(u'Sie sind als Tutor zurückgetreten', queue='messages')
+	if request.db.dirty or request.db.new or request.db.deleted:
+		request.db.commit()
+	return HTTPFound(location=request.route_url('lecture_view', lecture_id = request.context.lecture.id))
+
 @view_config(route_name='tutorial_subscribe', context=TutorialContext, permission='subscribe')
 def subscribe(request):
 	tutorials = request.context.tutorials
