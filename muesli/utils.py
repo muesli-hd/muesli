@@ -154,8 +154,13 @@ class UserInfo:
 		else: return False
 	def is_tutor(self, lecture):
 		if self.is_loggedin():
-			return self in lecture.tutors
+			return self.user in lecture.tutors
 		else: return False
+	def is_tutor_of_tutorials(self, tutorials):
+		if self.is_loggedin():
+			return all(self.user == tutorial.tutor for tutorial in tutorials)
+		else:
+			return False
 
 class DictOfObjects(object):
 	def __init__(self, createFunction):
