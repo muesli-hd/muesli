@@ -143,6 +143,7 @@ class Confirmation(Base):
 class Lecture(Base):
 	__tablename__ = 'lectures'
 	id = Column(Integer, primary_key=True)
+	##Should be removed some day. Stays here just to make muesli3 work.
 	assistant_id = Column('assistant', Integer, ForeignKey(User.id, ondelete='SET NULL'))
 	old_assistant = relationship(User, backref=backref('lectures_as_assistant_old', order_by='Lecture.term', lazy='dynamic'))
 	assistants = relationship(User, secondary=lecture_assistants_table, backref =backref("lectures_as_assistant", order_by='Lecture.term', lazy='dynamic'))
