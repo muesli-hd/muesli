@@ -56,6 +56,9 @@ class BaseTests(functionalTests.BaseTests):
 		res = self.testapp.post('/tutorial/ajax_get_tutorial/%s' % (1234),
 		       {'student_id': 1234}, status=404)
 
+	def test_tutorial_resign_as_tutor(self):
+		res = self.testapp.get('/tutorial/resign_as_tutor/%s' % 12345, status=403)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_tutorial_view(self):
 		res = self.testapp.get('/tutorial/view/%s' % self.tutorial.id, status=403)
@@ -81,6 +84,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_tutorial_ajax_tutorial(self):
 		res = self.testapp.post('/tutorial/ajax_get_tutorial/%s' % (self.lecture.id),
 		       {'student_id': self.tutorial.students[0].id}, status=403)
+
+	def test_tutorial_resign_as_tutor(self):
+		res = self.testapp.get('/tutorial/resign_as_tutor/%s' % self.tutorial.id, status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -147,6 +153,16 @@ class TutorLoggedInTests(UserLoggedInTests):
 		res = self.testapp.post('/tutorial/ajax_get_tutorial/%s' % (self.lecture.id),
 		       {'student_id': self.tutorial.students[0].id}, status=200)
 		self.assertResContains(res, self.tutorial.time.formatted())
+
+	def test_tutorial_resign_as_tutor(self):
+		old_tutor = self.tutorial.tutor
+		is_tutor = self.loggedUser == old_tutor
+		res = self.testapp.get('/tutorial/resign_as_tutor/%s' % self.tutorial.id, status=302)
+		self.session.expire_all()
+		if is_tutor:
+			self.assertTrue(self.tutorial.tutor==None)
+		else:
+			self.assertEqual(self.tutorial.tutor, old_tutor)
 
 class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
