@@ -286,7 +286,7 @@ def emailTutors(request):
 		tutors = lecture.tutors
 		message = Message(subject=form['subject'],
 			sender=request.user.email,
-			to= [lecture.assistant.email],
+			to= [assistant.email for assistant in lecture.assistants],
 			bcc=[t.email for t in tutors],
 			body=form['body'])
 		if request.POST['attachments'] not in ['', None]:
@@ -306,7 +306,7 @@ def emailStudents(request):
 		students = lecture.students
 		message = Message(subject=form['subject'],
 			sender=request.user.email,
-			to= [lecture.assistant.email],
+			to= [assistant.email for assistant in lecture.assistants],
 			bcc=[s.email for s in students],
 			body=form['body'])
 		if request.POST['attachments'] not in ['', None]:
