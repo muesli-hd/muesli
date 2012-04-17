@@ -237,7 +237,7 @@ class Add(object):
 		form = LectureAdd(self.request)
 		if self.request.method == 'POST' and form.processPostData(self.request.POST):
 			lecture = models.Lecture()
-			lecture.assistant = self.request.user
+			lecture.assistants.append(self.request.user)
 			form.obj = lecture
 			form.saveValues()
 			self.request.db.add(lecture)

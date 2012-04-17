@@ -331,7 +331,7 @@ class LectureAdd(ObjectForm):
 	def saveField(self, fieldName):
 		if fieldName == 'assistant':
 			assistant = self.request.db.query(models.User).get(self['assistant'])
-			self.obj.assistants.append(assistant)
+			self.obj.assistants = [assistant]
 		else:
 			ObjectForm.saveField(self, fieldName)
 
