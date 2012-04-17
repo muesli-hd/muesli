@@ -155,6 +155,30 @@ class Edit(object):
 		        'assistants': assistants,
 		        'form': form}
 
+@view_config(route_name='lecture_delete', context=LectureContext, permission='delete_lecture')
+def delete(request):
+	lecture = request.context.lecture
+	if lecture.tutorials:
+		request.session.flash(u'Vorlesung hat noch Übungsgruppen!', queue='errors')
+	elif lecture.tutors:
+		request.session.flash(u'Vorlesung hat noch Tutoren!', queue='errors')
+	elif lecture.lecture_students.all():
+		request.session.flash(u'Vorlesung hat noch Studenten', queue='errors')
+	elif lecture.lecture_removed_students.all():
+		request.session.flash(u'Vorlesung hat noch gelöschte Studenten', queue='errors')
+	elif lecture.exams.all():
+		request.session.flash(u'Vorlesung hat noch Testate', queue='errors')
+	elif lecture.gradings:
+		request.session.flash(u'Vorlesung hat noch Benotungen', queue='errors')
+	elif lecture.time_preferences.all():
+		request.session.flash(u'Vorlesung hat noch Präferenzen', queue='errors')
+	else:
+		lecture.assistants = []
+		request.db.delete(lecture)
+		request.db.commit()
+		request.session.flash(u'Vorlesung gelöscht', queue='messages')
+	return HTTPFound(location=request.route_url('lecture_list'))
+
 @view_config(route_name='lecture_change_assistants', context=LectureContext, permission='change_assistants')
 def change_assistants(request):
 	lecture = request.context.lecture
