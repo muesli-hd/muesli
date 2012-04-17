@@ -268,14 +268,11 @@ class LectureEdit(ObjectForm):
 			   #required=True,
 			   #))
 		ObjectForm.__init__(self, lecture, formfields, send=u'Ändern')
-	#def saveField(self, fieldName):
-		#if fieldName == 'is_visible':
-			#self.obj.is_visible = valueToBool(self['is_visible'])
-		#elif fieldName == 'assistant':
-			#assistant = self.request.db.query(models.User).get(self['assistant'])
-			#self.obj.assistant = assistant
-		#else:
-			#ObjectForm.saveField(self, fieldName)
+	def saveField(self, fieldName):
+		if fieldName == 'is_visible':
+			self.obj.is_visible = valueToBool(self['is_visible'])
+		else:
+			ObjectForm.saveField(self, fieldName)
 
 class LectureAdd(ObjectForm):
 	def __init__(self, request):
