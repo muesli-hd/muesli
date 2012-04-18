@@ -14,7 +14,9 @@
   <tr tal:repeat="ls removed_students">
     <td><a tal:attributes="href 'mailto:'+ls.student.email">${ls.student.last_name}, ${ls.student.first_name}</a></td>
     <td>${ls.tutorial.time} - ${ls.tutorial.place} (${ls.tutorial.tutor.last_name if ls.tutorial.tutor else ''})</td>
-    <td>TODO: Move</td>
+    <td tal:define="old_tutorial_id ls.tutorial_id; student ls.student; other_tutorials lecture.tutorials">
+      <metal:main metal:use-macro="templates('Fragments/HTML/move_student.pt').macros['movestudentmacro']" />
+    </td>
   </tr>
 
 </table>

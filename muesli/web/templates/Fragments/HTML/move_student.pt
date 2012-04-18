@@ -2,8 +2,11 @@
 <metal:main metal:define-macro="movestudentmacro">
     <form method="POST" tal:attributes="action request.route_path('tutorial_assign_student')">
       <input type="hidden" name="student" tal:attributes="value student.id"/>
+      <span tal:condition="not:exists:old_tutorial_id" tal:omit-tag="">
+        <span tal:define="global old_tutorial_id None" tal:omit-tag=""></span>
+      </span>
       <select name="new_tutorial">
-        <option tal:repeat="tutorial other_tutorials" tal:attributes="value tutorial.id">
+        <option tal:repeat="tutorial other_tutorials" tal:attributes="value tutorial.id; selected 'selected' if old_tutorial_id==tutorial.id else None">
           ${tutorial.time} - ${tutorial.place} ${('(%s)' % tutorial.tutor.last_name) if tutorial.tutor else ''}
         </option>
       </select>
