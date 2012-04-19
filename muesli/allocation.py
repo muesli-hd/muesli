@@ -89,7 +89,7 @@ class Allocation(object):
 		times = self.lecture.prepareTimePreferences()
 		for time in times:
 			time_tutorials = []
-			tuts = self.session.query(models.Tutorial).filter(models.Tutorial.time == time['time']).all()
+			tuts = self.session.query(models.Tutorial).filter(models.Tutorial.lecture_id==self.lecture.id).filter(models.Tutorial.time == time['time']).all()
 			for tut in tuts:
 				time_tutorials.append({
 					'id': tut.id,
