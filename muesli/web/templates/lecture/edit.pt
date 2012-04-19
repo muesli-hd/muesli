@@ -73,7 +73,9 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
     </td>
     <td>${tutorial.comment}</td>
     <td><a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">Details</a></td>
-    <td><a tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">Bearbeiten</a></td>
+    <td><a tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">Bearbeiten</a>
+        <a tal:condition="not tutorial.student_count"
+           tal:attributes="href request.route_path('tutorial_delete', tutorial_ids=tutorial.id)"> Löschen</a></td>
   </tr>
   <tr>
     <td colspan="3">
