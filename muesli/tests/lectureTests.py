@@ -214,6 +214,8 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 		res = self.testapp.get('/lecture/do_allocation/%s' % self.prefLecture.id, status=200)
 		self.session.expire_all()
 		self.assertTrue(self.prefLecture.lecture_students.count()>0)
+		for ls in self.prefLecture.lecture_students.all():
+			self.assertTrue(ls.tutorial.lecture_id == self.prefLecture.id)
 		res = res.forms[0].submit()
 		self.assertTrue(res.status.startswith('302'))
 		self.session.expire_all()
