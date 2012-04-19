@@ -59,7 +59,9 @@ class View(object):
 		        'students': students,
 		        'categories': utils.categories,
 		        'exams': dict([[cat['id'], tutorial.lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
-		        'names': utils.lecture_types[tutorial.lecture.type]}
+		        'names': utils.lecture_types[tutorial.lecture.type],
+		        'old_tutorial_id': None  #see move_student
+		        }
 
 @view_config(route_name='tutorial_occupancy_bar')
 class OccupancyBar(object):
