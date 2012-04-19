@@ -144,6 +144,7 @@ class UserLoggedInTests(UnloggedTests):
 
 	def test_lecture_view(self):
 		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=200)
+		self.assertResContainsNot(res, 'bernehmen')
 
 	def test_lecture_set_preferences(self):
 		prefcount = len(self.loggedUser.time_preferences)
@@ -184,6 +185,10 @@ class TutorLoggedInTests(UserLoggedInTests):
 		UserLoggedInTests.setUp(self)
 		self.setUser(self.tutor)
 
+	def test_lecture_view(self):
+		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=200)
+		self.assertResContains(res, 'bernehmen')
+
 	def test_lecture_view_points(self):
 		res = self.testapp.get('/lecture/view_points/%s' % self.lecture.id, status=403)
 
@@ -192,6 +197,9 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
 		TutorLoggedInTests.setUp(self)
 		self.setUser(self.assistant)
+
+	def test_lecture_view(self):
+		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=200)
 
 	def test_lecture_add(self):
 		res = self.testapp.get('/lecture/add', status=200)
@@ -214,6 +222,8 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 		res = self.testapp.get('/lecture/do_allocation/%s' % self.prefLecture.id, status=200)
 		self.session.expire_all()
 		self.assertTrue(self.prefLecture.lecture_students.count()>0)
+		for ls in self.prefLecture.lecture_students.all():
+			self.assertTrue(ls.tutorial.lecture_id == self.prefLecture.id)
 		res = res.forms[0].submit()
 		self.assertTrue(res.status.startswith('302'))
 		self.session.expire_all()

@@ -171,6 +171,7 @@ def main(global_config=None, **settings):
 
 
 	config.add_route('tutorial_add', '/tutorial/add/{lecture_id}', factory=LectureContext)
+	config.add_route('tutorial_delete', '/tutorial/delete/{tutorial_ids}', factory=TutorialContext)
 	config.add_route('tutorial_view', '/tutorial/view/{tutorial_ids}', factory = TutorialContext)
 	config.add_route('tutorial_results', '/tutorial/results/{tutorial_ids}', factory = TutorialContext)
 	config.add_route('tutorial_email', '/tutorial/email/{tutorial_ids}', factory = TutorialContext)

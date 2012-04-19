@@ -20,6 +20,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2012-04-18
+concerns:assistants
+Ab sofort können komplett leere Übungsgruppen gelöscht werden. In der Liste der ausgetretenen
+Studenten werden Studenten die aus einer später gelöschten Gruppe ausgetreten sind, mit "gelöschte
+Gruppe" angezeigt. Es lässt sich damit nicht mehr feststellen, aus welcher Gruppe sie genau
+ausgetreten sind.
+
 ====2012-04-13
 concerns:assistants
 Vorlesungen können jetzt mehr als einen Assistenten haben. Weitere Assistenten können momentan

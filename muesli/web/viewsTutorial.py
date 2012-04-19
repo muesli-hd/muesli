@@ -109,6 +109,19 @@ class Add(object):
 		        'form': form,
 		        'error_msg': error_msg}
 
+@view_config(route_name='tutorial_delete', context=TutorialContext, permission='edit')
+def delete(request):
+	for tutorial in request.context.tutorials:
+		if tutorial.student_count:
+			request.session.flash(u'Übungsgruppe ist nicht leer!', queue='errors')
+		else:
+			for lrs in tutorial.lecture_removed_students:
+				lrs.tutorial = None
+			request.db.delete(tutorial)
+			request.session.flash(u'Übungsgruppe gelöscht.', queue='messages')
+	request.db.commit()
+	return HTTPFound(location=request.route_url('lecture_edit', lecture_id = request.context.lecture.id))
+
 @view_config(route_name='tutorial_edit', renderer='muesli.web:templates/tutorial/edit.pt', context=TutorialContext, permission='edit')
 class Edit(object):
 	def __init__(self, request):
