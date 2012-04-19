@@ -20,7 +20,7 @@
     Es ist derzeit nicht möglich sich zu Übungsgruppen in dieser Vorlesung anzumelden.
   </p>
 
-  <div tal:omit-tag='' tal:condition="lecture.mode=='direct' or request.userInfo.is_assistant() or request.userInfo.is_admin()">
+  <div tal:omit-tag='' tal:condition="lecture.mode=='direct' or request.userInfo.is_assistant() or request.userInfo.is_admin() or request.permissionInfo.has_permission('take_tutorial')">
     <p>
     Zu dieser Vorlesung werden die folgenden Übungsgruppen angeboten:
     </p>
