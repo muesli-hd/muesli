@@ -301,7 +301,7 @@ class ExportStudentsHtml(object):
 		return {'lecture': lecture,
 		        'lecture_students': students}
 
-@view_config(route_name='lecture_email_tutors', renderer='muesli.web:templates/lecture/email_tutors.pt', context=LectureContext, permission='edit')
+@view_config(route_name='lecture_email_tutors', renderer='muesli.web:templates/lecture/email_tutors.pt', context=LectureContext, permission='mail_tutors')
 def emailTutors(request):
 	db = request.db
 	lecture = request.context.lecture
