@@ -192,6 +192,9 @@ class TutorLoggedInTests(UserLoggedInTests):
 	def test_lecture_view_points(self):
 		res = self.testapp.get('/lecture/view_points/%s' % self.lecture.id, status=403)
 
+	def test_lecture_email_tutors(self):
+		res = self.testapp.get('/lecture/email_tutors/%s' % self.lecture.id, status=200)
+
 
 class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
@@ -245,9 +248,6 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
 	def test_lecture_export_students_html(self):
 		res = self.testapp.get('/lecture/export_students_html/%s' % self.lecture.id, status=200)
-
-	def test_lecture_email_tutors(self):
-		res = self.testapp.get('/lecture/email_tutors/%s' % self.lecture.id, status=200)
 
 	def test_lecture_email_students(self):
 		res = self.testapp.get('/lecture/email_students/%s' % self.lecture.id, status=200)
