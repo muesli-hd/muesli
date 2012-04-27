@@ -24,7 +24,7 @@ from hashlib import sha1
 import unittest
 import muesli.web
 from muesli.tests import functionalTests
-from muesli import utils
+from muesli import utils, models
 
 class BaseTests(functionalTests.BaseTests):
 	def test_tutorial_view(self):
@@ -59,6 +59,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_tutorial_resign_as_tutor(self):
 		res = self.testapp.get('/tutorial/resign_as_tutor/%s' % 12345, status=403)
 
+	def test_tutorial_remove_student(self):
+		res = self.testapp.get('/tutorial/remove_student/%s/%s' % (12345,12345), status=403)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_tutorial_view(self):
 		res = self.testapp.get('/tutorial/view/%s' % self.tutorial.id, status=403)
@@ -87,6 +90,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 	def test_tutorial_resign_as_tutor(self):
 		res = self.testapp.get('/tutorial/resign_as_tutor/%s' % self.tutorial.id, status=403)
+
+	def test_tutorial_remove_student(self):
+		res = self.testapp.get('/tutorial/remove_student/%s/%s' % (self.tutorial.id,self.user.id), status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -141,6 +147,13 @@ class TutorLoggedInTests(UserLoggedInTests):
 	def test_tutorial_results_same_lecture_different_tutor(self):
 		#other tutorials of same lecture not allowed
 		res = self.testapp.get('/tutorial/results/%s,%s' % (self.tutorial.id, self.tutorial_tutor2.id), status=403)
+
+	def test_tutorial_remove_student(self):
+		self.assertIn(self.user, self.tutorial.students.all())
+		res = self.testapp.get('/tutorial/remove_student/%s/%s' % (self.tutorial.id,self.user.id), status=302)
+		self.session.expire_all()
+		self.assertNotIn(self.user, self.tutorial.students.all())
+		self.assertGreater(self.tutorial.lecture.lecture_removed_students.filter(muesli.models.LectureRemovedStudent.student_id==self.user.id).count(),0)
 
 	def test_tutorial_email(self):
 		res = self.testapp.get('/tutorial/email/%s' % self.tutorial.id, status=200)

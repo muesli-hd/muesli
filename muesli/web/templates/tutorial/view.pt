@@ -43,7 +43,7 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
       <metal:main metal:use-macro="templates('Fragments/HTML/move_student.pt').macros['movestudentmacro']" />
     </td>
     <td>
-      <form method="post" tal:attributes="action request.route_path('tutorial_remove_student', tutorial_id=tutorial.id, student_id=student.id)">
+      <form method="post" tal:attributes="action request.route_path('tutorial_remove_student', tutorial_ids=tutorial_ids, student_id=student.id)">
         <input type="submit" value="Entfernen"/>
       </form>
     </td>

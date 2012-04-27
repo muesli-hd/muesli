@@ -102,14 +102,15 @@ class TutorialContext(object):
 			]
 		if self.lecture:
 			self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewOverview', 'take_tutorial')) for tutor in self.lecture.tutors]
-			self.__acl__ += [((Allow, 'user:{0}'.format(assistant.id), ('viewOverview', 'viewAll', 'sendMail', 'edit'))) for assistant in self.lecture.assistants]
+			self.__acl__ += [((Allow, 'user:{0}'.format(assistant.id), ('viewOverview', 'viewAll', 'sendMail', 'edit', 'remove_student'))) for assistant in self.lecture.assistants]
 		if self.tutorials:
 			if self.lecture.tutor_rights == editOwnTutorials:
-				self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewAll')) for tutor in getTutorForTutorials(self.tutorials)]
+				self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewAll', 'remove_student')) for tutor in getTutorForTutorials(self.tutorials)]
 			elif self.lecture.tutor_rights == editNoTutorials:
-				self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewAll')) for tutor in getTutorForTutorials(self.tutorials)]
+				#TODO: This has to be a bug?!
+				self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewAll', 'remove_student')) for tutor in getTutorForTutorials(self.tutorials)]
 			elif self.lecture.tutor_rights == editAllTutorials:
-				self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewAll')) for tutor in self.lecture.tutors]
+				self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewAll', 'remove_student')) for tutor in self.lecture.tutors]
 			else: raise ValueError('Tutorrights %s not known' % self.lecture.tutor_rights)
 			for tutor in getTutorForTutorials(self.tutorials):
 				self.__acl__.append((Allow, 'user:{0}'.format(tutor.id), ('sendMail')))

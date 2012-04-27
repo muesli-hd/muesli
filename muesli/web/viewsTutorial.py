@@ -236,6 +236,26 @@ def unsubscribe(request):
 	request.session.flash(u'Erfolgreich aus Übungsgruppe ausgetragen', queue='messages')
 	return HTTPFound(location=request.route_url('start'))
 
+@view_config(route_name='tutorial_remove_student', context=TutorialContext, permission='remove_student')
+def removeStudent(request):
+	student_id = int(request.matchdict['student_id'])
+	ls = request.db.query(models.LectureStudent).get((request.context.lecture.id, student_id))
+	if not ls:
+		request.session.flash('Student in Vorlesung nicht gefunden!', queue='errors')
+	else:
+		lrs = models.LectureRemovedStudent()
+		lrs.student_id = student_id
+		lrs.lecture_id = ls.lecture_id
+		lrs.tutorial_id = ls.tutorial_id
+		request.db.add(lrs)
+		request.db.delete(ls)
+		request.db.commit()
+		request.session.flash(u'Student aus Übungsgruppe ausgetragen!', queue='messages')
+	if request.referrer:
+		return HTTPFound(location=request.referrer)
+	else:
+		return HTTPFound(location=request.route_url('start'))
+
 def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
 	if not tutorial.tutor:
 		return
