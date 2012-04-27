@@ -92,7 +92,7 @@ class User(Base):
 	@property
 	def tutorials_as_tutor(self):
 		session = Session.object_session(self)
-		return session.query(Tutorial).filter(Tutorial.tutor_id == self.id).join(Tutorial.lecture).order_by(Lecture.term)
+		return session.query(Tutorial).filter(Tutorial.tutor_id == self.id).join(Tutorial.lecture).order_by(Lecture.term,Lecture.name,Tutorial.time)
 	def prepareMultiTutorials(self):
 		mt = {}
 		for tutorial in self.tutorials_as_tutor:
