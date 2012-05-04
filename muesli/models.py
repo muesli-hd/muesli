@@ -265,6 +265,7 @@ class Exam(Base):
 	# exam type
 	#  'exam'
 	#  'assignment'
+	#  'practical assignment'
 	#  'presence_assignment'
 	#  'mock_exam'
 	category = Column(Text, nullable=False)
