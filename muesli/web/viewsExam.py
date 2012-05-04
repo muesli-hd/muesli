@@ -57,7 +57,8 @@ class Edit(object):
 			self.request.db.commit()
 			form.message = u"Änderungen gespeichert."
 		if exam.admission!=None or exam.registration!=None:
-			students = exam.lecture.lecture_students
+			students = exam.lecture.lecture_students.options(sqlalchemy.orm.joinedload(LectureStudent.student))\
+				.options(sqlalchemy.orm.joinedload_all('tutorial.tutor'))
 			if exam.admission != None:
 				students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.admission==True))))
 			if exam.registration != None:

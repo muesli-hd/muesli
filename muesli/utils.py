@@ -68,6 +68,7 @@ modes = [['off', 'Keine Anmeldung'],
 
 categories = [{'id': 'assignment', 'name': u'Übungszettel'},
 	{'id': 'exam', 'name': 'Klausur'},
+	{'id': 'practical_assignment', 'name': u'Praktische Übung'},
 	{'id': 'presence_assignment', 'name': u'Präsenzübung'},
 	{'id': 'mock_exam', 'name': 'Probeklausur'}]
 
