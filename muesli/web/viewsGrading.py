@@ -238,7 +238,7 @@ class Export(ExcelView):
 		header = ['mtknr', 'name', 'stg', 'stg_txt', 'accnr', 'pnr', 'pnote', 'pstatus', 'ppunkte', 'pbonus']
 		for i,h in enumerate(header):
 			worksheet_grades.write(0,i,h,header_style)
-		grades = grading.student_grades.all()
+		grades = grading.student_grades.options(sqlalchemy.orm.joinedload(models.StudentGrade.student)).all()
 		for i,grade in enumerate(grades):
 			if grade.grade != None:
 				g = float(grade.grade*100)
