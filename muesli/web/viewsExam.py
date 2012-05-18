@@ -26,7 +26,7 @@ from muesli.web.forms import *
 
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest
+from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound
 from pyramid.url import route_url
 from sqlalchemy.orm import exc
 from sqlalchemy.sql import func
@@ -69,6 +69,17 @@ class Edit(object):
 		        'students': students
 		       }
 
+@view_config(route_name='exam_delete', context=ExamContext, permission='edit')
+def delete(request):
+	exam = request.context.exam
+	if exam.exercises:
+		request.session.flash(u'Dieses Testat hat noch Aufgaben!', queue='errors')
+	else:
+		request.db.delete(exam)
+		request.db.commit()
+		request.session.flash(u'Testat gelöscht!', queue='messages')
+	return HTTPFound(location=request.route_url('lecture_edit', lecture_id = exam.lecture.id))
+
 @view_config(route_name='exam_add_or_edit_exercise', renderer='muesli.web:templates/exam/add_or_edit_exercise.pt', context=ExamContext, permission='edit')
 class AddOrEditExercise(object):
 	def __init__(self, request):
@@ -94,6 +105,27 @@ class AddOrEditExercise(object):
 			form.message = u"Änderungen gespeichert."
 		return {'form': form,
 		        'exam': exam}
+
+@view_config(route_name='exam_delete_exercise', context=ExamContext, permission='edit')
+class DeleteExercise(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.exercise_id = request.matchdict['exercise_id']
+	def __call__(self):
+		exam = self.request.context.exam
+		exercise = self.db.query(models.Exercise).get(self.exercise_id)
+		points = exercise.exercise_points.all()
+		none_points = [p.points == None for p in points]
+		if not all(none_points):
+			self.request.session.flash(u'Für diese Aufgabe sind bereits Punkte eingetragen!', queue='errors')
+		else:
+			for point in points:
+				self.request.db.delete(point)
+			self.request.db.delete(exercise)
+			self.request.db.commit()
+			self.request.session.flash(u'Aufgabe gelöscht', queue='messages')
+		return HTTPFound(location=self.request.route_url('exam_edit', exam_id = exam.id))
 
 @view_config(route_name='exam_enter_points', renderer='muesli.web:templates/exam/enter_points.pt', context=ExamContext, permission='view_points')
 class EnterPoints(object):

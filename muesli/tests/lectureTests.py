@@ -236,6 +236,10 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
 	def test_lecture_add_exam(self):
 		res = self.testapp.get('/lecture/add_exam/%s' % self.lecture.id, status=200)
+		form =  res.form
+		form['name'] = 'Testblatt'
+		res = form.submit()
+		self.assertEqual(res.status_int, 302)
 
 	def test_lecture_add_grading(self):
 		res = self.testapp.get('/lecture/add_grading/%s' % self.lecture.id, status=200)

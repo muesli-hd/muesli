@@ -30,6 +30,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_exam_edit(self):
 		res = self.testapp.get('/exam/edit/%s' % 12345, status=404)
 
+	def test_exam_delete_exercise(self):
+		res = self.testapp.get('/exam/delete_exercise/%s/%s' % (12345,12345), status=404)
+
 	def test_exam_add_exercise(self):
 		res = self.testapp.get('/exam/add_or_edit_exercise/%s/' % 12345, status=404)
 
@@ -79,6 +82,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 	def test_exam_edit_exercise(self):
 		res = self.testapp.get('/exam/add_or_edit_exercise/%s/%s' % (self.exam.id, self.exercise.id), status=403)
+
+	def test_exam_delete_exercise(self):
+		res = self.testapp.get('/exam/delete_exercise/%s/%s' % (self.exam.id,self.exercise.id), status=403)
 
 	def test_exam_enter_points(self):
 		res = self.testapp.get('/exam/enter_points/%s/' % self.exam.id, status=403)
@@ -236,6 +242,9 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 	def test_exam_edit_exercise(self):
 		res = self.testapp.get('/exam/add_or_edit_exercise/%s/%s' % (self.exam.id, self.exercise.id), status=200)
 		self.assertForm(res, 'maxpoints', '5')
+
+	def test_exam_delete_exercise(self):
+		res = self.testapp.get('/exam/delete_exercise/%s/%s' % (self.exam.id,self.exercise.id), status=302)
 
 	def test_exam_export(self):
 		res = self.testapp.get('/exam/export/%s/' % self.exam.id, status=200)
