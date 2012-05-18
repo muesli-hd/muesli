@@ -191,6 +191,7 @@ def main(global_config=None, **settings):
 	config.add_route('exam_add_or_edit_exercise', '/exam/add_or_edit_exercise/{exam_id}/{exercise_id:[^/]*}', factory=ExamContext)
 	config.add_route('exam_delete_exercise', '/exam/delete_exercise/{exam_id}/{exercise_id}', factory=ExamContext)
 	config.add_route('exam_edit', '/exam/edit/{exam_id}', factory=ExamContext)
+	config.add_route('exam_delete', '/exam/delete/{exam_id}', factory=ExamContext)
 	config.add_route('exam_admission', '/exam/admission/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
 	config.add_route('exam_statistics', '/exam/statistics/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
 	config.add_route('exam_statistics_bar', '/exam/statistics_bar/{max}/{lecture_points}/{tutorial_points:[^/]*}')
