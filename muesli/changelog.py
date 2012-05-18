@@ -20,6 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2012-05-18
+concerns:assistants
+Ab jetzt können Übungsaufgaben und Testate gelöscht werden. Aufgaben können gelöscht werden,
+wenn kein Punkte eingetragen sind (auch nicht bei bereits ausgetragenen Studenten!). Ein
+Testat kann gelöscht werden, wenn es keine Aufgaben mehr hat.
+
 ====2012-04-18
 concerns:assistants
 Ab sofort können komplett leere Übungsgruppen gelöscht werden. In der Liste der ausgetretenen
