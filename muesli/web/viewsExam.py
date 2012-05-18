@@ -69,6 +69,17 @@ class Edit(object):
 		        'students': students
 		       }
 
+@view_config(route_name='exam_delete', context=ExamContext, permission='edit')
+def delete(request):
+	exam = request.context.exam
+	if exam.exercises:
+		request.session.flash(u'Dieses Testat hat noch Aufgaben!', queue='errors')
+	else:
+		request.db.delete(exam)
+		request.db.commit()
+		request.session.flash(u'Testat gelöscht!', queue='messages')
+	return HTTPFound(location=request.route_url('lecture_edit', lecture_id = exam.lecture.id))
+
 @view_config(route_name='exam_add_or_edit_exercise', renderer='muesli.web:templates/exam/add_or_edit_exercise.pt', context=ExamContext, permission='edit')
 class AddOrEditExercise(object):
 	def __init__(self, request):
