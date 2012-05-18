@@ -85,6 +85,7 @@ class AddExam(object):
 			form.saveValues()
 			self.request.db.commit()
 			form.message = "Neues Testat angelegt."
+			return HTTPFound(location=self.request.route_url('exam_edit', exam_id = exam.id))
 		return {'lecture': lecture,
 		        'form': form
 		       }
