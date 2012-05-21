@@ -42,5 +42,6 @@
   </tr>
 </tbody>
 </table>
+  <br tal:repeat="i range(15)" />
   </metal:main>
 </metal:main>
