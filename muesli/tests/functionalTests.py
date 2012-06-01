@@ -195,6 +195,8 @@ class PopulatedTests(BaseTests):
 		self.exam.name = u"Aufgabenblatt 1"
 		self.exam.lecture = self.lecture
 		self.exam.category = utils.categories[0]['id']
+		self.admission = True
+		self.registration = True
 		self.session.add(self.exam)
 		self.exercise = muesli.models.Exercise()
 		self.exercise.nr = 1

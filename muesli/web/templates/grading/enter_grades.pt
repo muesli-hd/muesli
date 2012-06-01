@@ -90,7 +90,9 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
         <span tal:condition="ls.tutorial.tutor" tal:content="ls.tutorial.tutor.last_name" tal:omit-tag="" />
       </td>
       <td tal:repeat="exam grading.exams">
-        ${grades[ls.student_id]['exams'][exam.id]}
+        <span tal:define="exam_points grades[ls.student_id]['exams'][exam.id]">
+          <metal:main metal:use-macro="templates('Fragments/Format/exam_points.pt').macros['exam_points']" />
+        </span>
       </td>
     <td>${ls.student.name()}</td>
     <td>${grades[ls.student_id]['calc']}</td>

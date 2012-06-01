@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:define-macro="exam_points">
+  ${exam_points['points']}
+  <span tal:define="fA (lambda f: ('Z' if f==True else ('N' if f==False else '?'))); fR (lambda f: ('A' if f==True else ('N' if f==False else '?')));">
+    <span tal:condition="exam.admission!=None or exam.registration!=None">
+      <span class="popup">
+        (<span tal:condition="exam.admission!=None">${'%s' % fA(exam_points['admission'])}</span><span tal:condition="exam.registration!=None">${fR(exam_points['registration'])}</span>)
+          <span class="balloon">
+            <table>
+              <tr tal:condition="exam.admission!=None">
+                <th>Zulassung</th>
+                <td tal:condition="exam_points['admission']==True">Zugelassen</td>
+                <td tal:condition="exam_points['admission']==False">Nicht zugelassen</td>
+                <td tal:condition="exam_points['admission']==None">Ausstehend</td>
+              </tr>
+              <tr tal:condition="exam.registration!=None">
+                <th>Anmeldung</th>
+                <td tal:condition="exam_points['registration']==True">Angemeldet</td>
+                <td tal:condition="exam_points['registration']==False">Abgemeldet</td>
+                <td tal:condition="exam_points['registration']==None">Ausstehend</td>
+              </tr>
+            </table>
+          </span>
+      </span>
+    </span>
+  </span>
+</metal:main>
+

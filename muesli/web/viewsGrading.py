@@ -119,7 +119,7 @@ class EnterGrades(object):
 			grades[ls.student_id]['grade'] = ''
 			grades[ls.student_id]['gradestr'] = ''
 			grades[ls.student_id]['invalid'] = None
-			grades[ls.student_id]['exams'] = dict([[i, ''] for i in exam_ids])
+			grades[ls.student_id]['exams'] = dict([[i, {'points': '', 'admission': None, 'registration': None}] for i in exam_ids])
 			grades[ls.student_id]['calc'] = ''
 		for grade in gradesQuery:
 			grades[grade.student_id]['grade'] = grade
@@ -158,7 +158,16 @@ class EnterGrades(object):
 		for exam in grading.exams:
 			results = exam.getResults(students = lecture_students)
 			for result in results:
-				grades[result.student_id]['exams'][exam.id] = result.points
+				grades[result.student_id]['exams'][exam.id]['points'] = result.points
+			if exam.admission!=None or exam.registration!=None:
+				student_ids = [ls.student_id for ls in lecture_students]
+				admissions = exam.exam_admissions
+				for a in admissions:
+					if a.student_id in student_ids:
+						if exam.admission!=None:
+							grades[a.student_id]['exams'][exam.id]['admission'] = a.admission
+						if exam.registration!=None:
+							grades[a.student_id]['exams'][exam.id]['registration'] = a.registration
 		error_msgs = []
 		if formula:
 			parser = Parser()
@@ -168,7 +177,7 @@ class EnterGrades(object):
 				#print student
 					d = {}
 					for exam in grading.exams:
-						result = grades[ls.student_id]['exams'][exam.id]
+						result = grades[ls.student_id]['exams'][exam.id]['points']
 						if result == '':
 							result = None
 						d[varsForExam[exam.id]] = result
