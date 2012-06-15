@@ -78,6 +78,32 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
   </tr>
 </table>
 
+<div tal:condition="exam.registration or exam.admission" tal:omit-tag="">
+  <h3>Zulassung und Anmeldung</h3>
+  <table>
+    <tr>
+      <th></th>
+      <th tal:condition="tutorial_ids">Übungsgruppe</th>
+      <th>Vorlesung</th>
+    </tr>
+    <tr tal:condition="exam.admission">
+      <td>Zugelassen</td>
+      <td tal:condition="tutorial_ids">${admissions['admission_count_tut']}</td>
+      <td>${admissions['admission_count']}</td>
+    </tr>
+    <tr tal:condition="exam.registration">
+      <td>Angemeldet</td>
+      <td tal:condition="tutorial_ids">${admissions['registration_count_tut']}</td>
+      <td>${admissions['registration_count']}</td>
+    </tr>
+    <tr tal:condition="exam.registration and exam.admission">
+      <td>Zugelassen und angemeldet</td>
+      <td tal:condition="tutorial_ids">${admissions['admission_and_registration_count_tut']}</td>
+      <td>${admissions['admission_and_registration_count']}</td>
+    </tr>
+  </table>
+</div>
+
 <h3>Histogramme</h3>
 
 <h4>Gesamt</h4>

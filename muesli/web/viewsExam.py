@@ -301,6 +301,26 @@ def statistics(request):
 		old_statistics_by_subject = statistics_by_subject
 		statistics_by_subject = exam.getStatisticsBySubjects(students=tutorialstudents, prefix='tut')
 		statistics_by_subject.update_available(old_statistics_by_subject)
+	admissions = {}
+	if exam.admission or exam.registration:
+		admission_data = exam.exam_admissions.all()
+		all_student_ids = [ls.student_id for ls in lecturestudents]
+		if exam.admission:
+			admissions['admission_count'] = len([e for e in admission_data if e.admission and e.student_id in all_student_ids])
+		if exam.registration:
+			admissions['registration_count'] = len([e for e in admission_data if e.registration and e.student_id in all_student_ids])
+		if exam.admission and exam.registration:
+			admissions['admission_and_registration_count'] = len([e for e in admission_data if e.admission and e.registration and e.student_id in all_student_ids])
+		if tutorials:
+			student_ids = [s.student_id for s in tutorialstudents]
+			if exam.admission:
+				admissions['admission_count_tut'] = len([e for e in admission_data if e.admission and e.student_id in student_ids])
+			if exam.registration:
+				admissions['registration_count_tut'] = len([e for e in admission_data if e.registration and e.student_id in student_ids])
+			if exam.admission and exam.registration:
+				admissions['admission_and_registration_count_tut'] = len([e for e in admission_data if e.registration and e.admission and e.student_id in student_ids])
+
+
 	request.javascript.add('prototype.js')
 	#pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
 	#points = DictOfObjects(lambda: {})
@@ -320,6 +340,7 @@ def statistics(request):
 	return {'exam': exam,
 			'tutorial_ids': request.matchdict['tutorial_ids'],
 			#'students': students,
+			'admissions': admissions,
 			'statistics': statistics,
 			'statistics_by_subject': statistics_by_subject}
 
