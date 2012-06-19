@@ -140,7 +140,7 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
     <th>Vorlesung</th>
   </tr>
   <tr tal:repeat="q quantils">
-    <td>${q['lecture']['min_points']} (${int(q['lecture']['min_points']/float(exam.getMaxpoints())*100)}%)</td>
+    <td>${q['lecture']['min_points']} (${int(q['lecture']['min_percent']*100)}%)</td>
     <td tal:condition="tutorial_ids">${int(q['tutorial']['quantile']*100)}% (${q['tutorial']['count']})</td>
     <td>${int(q['lecture']['quantile']*100)}% (${q['lecture']['count']})</td>
   </tr>

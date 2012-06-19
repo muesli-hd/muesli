@@ -392,8 +392,9 @@ class Exam(Base):
 			count = len([res for res in results if res.points >= i])
 			quantils.append({
 				'min_points': i,
+				'min_percent': i/float(self.getMaxpoints()) if self.getMaxpoints() else 0,
 				'count': count,
-				'quantile': float(count)/allcount})
+				'quantile': float(count)/allcount if allcount!=0 else 0})
 		return quantils
 
 class Tutorial(Base):
