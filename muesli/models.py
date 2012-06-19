@@ -384,6 +384,17 @@ class Exam(Base):
 		return statistics
 	def getMaxpoints(self):
 		return sum([e.maxpoints for e in self.exercises])
+	def getQuantils(self, students=None):
+		results = self.getResults(students=students).all()
+		allcount = len(results)
+		quantils = []
+		for i in range(self.getMaxpoints()+1):
+			count = len([res for res in results if res.points >= i])
+			quantils.append({
+				'min_points': i,
+				'count': count,
+				'quantile': float(count)/allcount})
+		return quantils
 
 class Tutorial(Base):
 	__tablename__ = 'tutorials'

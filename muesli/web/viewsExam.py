@@ -319,8 +319,13 @@ def statistics(request):
 				admissions['registration_count_tut'] = len([e for e in admission_data if e.registration and e.student_id in student_ids])
 			if exam.admission and exam.registration:
 				admissions['admission_and_registration_count_tut'] = len([e for e in admission_data if e.registration and e.admission and e.student_id in student_ids])
-
-
+	quantils = []
+	for q in exam.getQuantils():
+		quantils.append({'lecture': q})
+	if tutorials:
+		for i,q in enumerate(exam.getQuantils(students=tutorialstudents)):
+			quantils[i]['tutorial'] = q
+		#quantils['tutorials'] = exam.getQuantils(students=tutorialstudents)
 	request.javascript.add('prototype.js')
 	#pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
 	#points = DictOfObjects(lambda: {})
@@ -340,6 +345,7 @@ def statistics(request):
 	return {'exam': exam,
 			'tutorial_ids': request.matchdict['tutorial_ids'],
 			#'students': students,
+			'quantils': quantils,
 			'admissions': admissions,
 			'statistics': statistics,
 			'statistics_by_subject': statistics_by_subject}

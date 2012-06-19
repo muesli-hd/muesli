@@ -26,6 +26,29 @@
       Element.hide(fields[i]);
     }
   }
+  function hide_quantils ()
+  {
+    var fields = $$(".quantile");
+    for (i=0; i<fields.length; i++) {
+      Element.hide(fields[i]);
+    }
+    var fields = $$(".noquantile");
+    for (i=0; i<fields.length; i++) {
+      Element.show(fields[i]);
+    }
+  }
+
+  function show_quantils ()
+  {
+    var fields = $$(".quantile");
+    for (i=0; i<fields.length; i++) {
+      Element.show(fields[i]);
+    }
+    var fields = $$(".noquantile");
+    for (i=0; i<fields.length; i++) {
+      Element.hide(fields[i]);
+    }
+  }
 /* ]]> */
 </script>
 
@@ -102,6 +125,26 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
       <td>${admissions['admission_and_registration_count']}</td>
     </tr>
   </table>
+</div>
+
+<h3>Quantile</h3>
+<a class="noquantile" href="javascript:show_quantils()">Anzeigen</a>
+<div class="quantile" style="display:none">
+<a href="javascript:hide_quantils()">Verbergen</a>
+
+
+<table>
+  <tr>
+    <th>Mindestpunktzahl</th>
+    <th tal:condition="tutorial_ids">Übungsgruppe</th>
+    <th>Vorlesung</th>
+  </tr>
+  <tr tal:repeat="q quantils">
+    <td>${q['lecture']['min_points']} (${int(q['lecture']['min_points']/float(exam.getMaxpoints())*100)}%)</td>
+    <td tal:condition="tutorial_ids">${int(q['tutorial']['quantile']*100)}% (${q['tutorial']['count']})</td>
+    <td>${int(q['lecture']['quantile']*100)}% (${q['lecture']['count']})</td>
+  </tr>
+</table>
 </div>
 
 <h3>Histogramme</h3>
