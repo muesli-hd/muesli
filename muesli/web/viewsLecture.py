@@ -306,7 +306,7 @@ class ExportStudentsHtml(object):
 def emailTutors(request):
 	db = request.db
 	lecture = request.context.lecture
-	form = LectureEmailTutors()
+	form = LectureEmailTutors(request)
 	if request.method == 'POST' and form.processPostData(request.POST):
 		tutors = lecture.tutors
 		message = Message(subject=form['subject'],
@@ -326,7 +326,7 @@ def emailTutors(request):
 def emailStudents(request):
 	db = request.db
 	lecture = request.context.lecture
-	form = LectureEmailTutors()
+	form = LectureEmailTutors(request)
 	if request.method == 'POST' and form.processPostData(request.POST):
 		students = lecture.students
 		message = Message(subject=form['subject'],

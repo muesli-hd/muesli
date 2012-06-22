@@ -180,15 +180,21 @@ class FormValidator(object):
 		for f in fields:
 			setattr(obj, f, self[f])
 
-class ObjectForm(Form):
-	def __init__(self, obj, formfields, send="Ändern", chained_validators=[]):
-		Form.__init__(self, formfields, send=send, chained_validators=chained_validators)
+class CSRFSecureForm(Form):
+	def __init__(self, formfields, request, send="Ändern", chained_validators=[]):
+		token_field = HiddenField('csrf_token', value=request.session.get_csrf_token(), validator=validators.OneOf([request.session.get_csrf_token()],hideList=True))
+		Form.__init__(self, formfields+[token_field], send=send, chained_validators=chained_validators)
+
+class ObjectForm(CSRFSecureForm):
+	def __init__(self, obj, formfields, request, send="Ändern", chained_validators=[]):
+		CSRFSecureForm.__init__(self, formfields, send=send, chained_validators=chained_validators, request=request)
 		self.obj = obj
 	def saveField(self, fieldName):
 		setattr(self.obj, fieldName, self[fieldName])
 	def saveValues(self):
 		for name in self.named_fields:
-			self.saveField(name)
+			if name != 'csrf_token':
+				self.saveField(name)
 
 
 class UserLogin(formencode.Schema):
@@ -197,7 +203,7 @@ class UserLogin(formencode.Schema):
 
 class LectureEdit(ObjectForm):
 	def __init__(self, request, lecture):
-		self.request =  request
+		self.request = request
 		formfields = [
 			FormField('type',
 			   label='Typ',
@@ -267,7 +273,7 @@ class LectureEdit(ObjectForm):
 			   #value=lecture.assistant.id,
 			   #required=True,
 			   #))
-		ObjectForm.__init__(self, lecture, formfields, send=u'Ändern')
+		ObjectForm.__init__(self, lecture, formfields, request, send=u'Ändern')
 	def saveField(self, fieldName):
 		if fieldName == 'is_visible':
 			self.obj.is_visible = valueToBool(self['is_visible'])
@@ -324,7 +330,7 @@ class LectureAdd(ObjectForm):
 			   #value=lecture.assistant.id,
 			   required=True,
 			   ))
-		ObjectForm.__init__(self, None, formfields, send=u'Anlegen')
+		ObjectForm.__init__(self, None, formfields, request, send=u'Anlegen')
 	def saveField(self, fieldName):
 		if fieldName == 'assistant':
 			assistant = self.request.db.query(models.User).get(self['assistant'])
@@ -384,7 +390,7 @@ class UserEdit(ObjectForm):
 			   options=[[1, 'Ja'], [0, 'Nein']],
 			   value=1 if user.is_admin else 0)
 			]
-		ObjectForm.__init__(self, user, formfields, send=u'Änderungen übernehmen')
+		ObjectForm.__init__(self, user, formfields, request, send=u'Änderungen übernehmen')
 	def saveField(self, fieldName):
 		if fieldName == 'subject':
 			if self['subject']=='Sonstiges':
@@ -438,7 +444,7 @@ class UserUpdate(ObjectForm):
 			   label='Geburtsort', size=20,
 			   value=user.birth_place),
 			]
-		ObjectForm.__init__(self, user, formfields, send=u'Änderungen übernehmen')
+		ObjectForm.__init__(self, user, formfields, request, send=u'Änderungen übernehmen')
 		self.editok = ['title', 'subject', 'subject_alt', 'second_subject']
 		for field in ['matrikel', 'birth_date', 'birth_place']:
 			if not getattr(user, field):
@@ -505,7 +511,7 @@ class UserRegister(ObjectForm):
 			   required=True
 			   )
 			]
-		ObjectForm.__init__(self, None, formfields, send=u'Registrieren')
+		ObjectForm.__init__(self, None, formfields, request, send=u'Registrieren')
 	def saveField(self, fieldName):
 		if fieldName == 'subject':
 			if self['subject']=='Sonstiges':
@@ -538,7 +544,7 @@ class UserRegisterOther(ObjectForm):
 			   #value=user.last_name,
 			   required=True),
 			]
-		ObjectForm.__init__(self, None, formfields, send=u'Registrieren')
+		ObjectForm.__init__(self, None, formfields, request, send=u'Registrieren')
 	def saveField(self, fieldName):
 		ObjectForm.saveField(self, fieldName)
 
@@ -560,7 +566,7 @@ class UserConfirm(ObjectForm):
 			HiddenField('hash',
 			   value=confirmation.hash),
 			]
-		ObjectForm.__init__(self, None, formfields, send=u'Registrierung abschließen',
+		ObjectForm.__init__(self, None, formfields, request, send=u'Registrierung abschließen',
 			chained_validators=[validators.FieldsMatch('password', 'password_repeat')])
 
 class UserChangeEmail(ObjectForm):
@@ -572,7 +578,7 @@ class UserChangeEmail(ObjectForm):
 			   required=True,
 			   validator=validators.Email()),
 			]
-		ObjectForm.__init__(self, user, formfields, send=u'E-Mail-Adresse ändern')
+		ObjectForm.__init__(self, user, formfields, request, send=u'E-Mail-Adresse ändern')
 	def saveField(self, fieldName):
 		pass
 
@@ -589,7 +595,7 @@ class LectureAddExam(ObjectForm):
 			FormField('url',
 			   label='URL', size=100)
 			]
-		ObjectForm.__init__(self, None, formfields, send=u'Anlegen')
+		ObjectForm.__init__(self, None, formfields, request, send=u'Anlegen')
 
 class UserChangePassword(ObjectForm):
 	def __init__(self, request):
@@ -607,7 +613,7 @@ class UserChangePassword(ObjectForm):
 			   required=True
 			   ),
 			]
-		ObjectForm.__init__(self, None, formfields, send=u'Neues Passwort setzen',
+		ObjectForm.__init__(self, None, formfields, request, send=u'Neues Passwort setzen',
 			chained_validators=[validators.FieldsMatch('new_password', 'new_password_repeat')])
 
 class UserResetPassword(ObjectForm):
@@ -618,7 +624,7 @@ class UserResetPassword(ObjectForm):
 			   required=True,
 			   validator=validators.Email()),
 			]
-		ObjectForm.__init__(self, None, formfields, send=u'Passwort zurücksetzen')
+		ObjectForm.__init__(self, None, formfields, request,  send=u'Passwort zurücksetzen')
 
 class UserResetPassword3(ObjectForm):
 	def __init__(self, request, confirmation):
@@ -636,7 +642,7 @@ class UserResetPassword3(ObjectForm):
 			   required=True
 			   ),
 			]
-		ObjectForm.__init__(self, None, formfields, send=u'Neues Passwort setzen',
+		ObjectForm.__init__(self, None, formfields, request, send=u'Neues Passwort setzen',
 			chained_validators=[validators.FieldsMatch('password', 'password_repeat')])
 
 class LectureEditExam(ObjectForm):
@@ -670,7 +676,7 @@ class LectureEditExam(ObjectForm):
 			   value=boolToValue(exam.registration),
 			   options=[[1, 'Editieren erlaubt'], [0, 'Editieren gesperrt'], ['None', 'Nicht notwendig']]),
 			]
-		ObjectForm.__init__(self, exam, formfields, send=u'Änderungen speichern')
+		ObjectForm.__init__(self, exam, formfields, request, send=u'Änderungen speichern')
 	def saveField(self, fieldName):
 		if fieldName in ['admission', 'registration', 'results_hidden']:
 			setattr(self.obj, fieldName, valueToBool(self[fieldName]))
@@ -713,7 +719,7 @@ class TutorialEdit(ObjectForm):
 			   options=[[1, 'Ja'], [0, 'Nein']],
 			   value=boolToValue(tutorial.is_special) if tutorial else 0)
 			]
-		ObjectForm.__init__(self, tutorial, formfields, send=u'Ändern')
+		ObjectForm.__init__(self, tutorial, formfields, request, send=u'Ändern')
 	def saveField(self, fieldName):
 		if fieldName == 'is_special':
 			setattr(self.obj, fieldName, valueToBool(self[fieldName]))
@@ -731,8 +737,8 @@ class TutorialEdit(ObjectForm):
 		else:
 			ObjectForm.saveField(self, fieldName)
 
-class TutorialEmail(Form):
-	def __init__(self):
+class TutorialEmail(CSRFSecureForm):
+	def __init__(self, request):
 		formfields = [
 			FormField('subject',
 			   label='Betreff', size=64,
@@ -752,7 +758,7 @@ class TutorialEmail(Form):
 			   value=0
 			   ),
 			]
-		Form.__init__(self, formfields, send=u'Senden')
+		CSRFSecureForm.__init__(self, formfields, request, send=u'Senden')
 
 class ExamAddOrEditExercise(ObjectForm):
 	def __init__(self, request, exercise):
@@ -769,7 +775,7 @@ class ExamAddOrEditExercise(ObjectForm):
 			   validator=validators.Number(min=0),
 			   required = True),
 			]
-		ObjectForm.__init__(self, exercise, formfields, send=u'Anlegen/Ändern')
+		ObjectForm.__init__(self, exercise, formfields, request, send=u'Anlegen/Ändern')
 
 class LectureAddGrading(ObjectForm):
 	def __init__(self, request):
@@ -778,10 +784,10 @@ class LectureAddGrading(ObjectForm):
 			   label='Name', size=100,
 			   required=True),
 			]
-		ObjectForm.__init__(self, None, formfields, send=u'Anlegen')
+		ObjectForm.__init__(self, None, formfields, request, send=u'Anlegen')
 
-class LectureEmailTutors(Form):
-	def __init__(self):
+class LectureEmailTutors(CSRFSecureForm):
+	def __init__(self, request):
 		formfields = [
 			FormField('subject',
 			   label='Betreff', size=64,
@@ -795,10 +801,10 @@ class LectureEmailTutors(Form):
 			   growable=False
 			   ),
 			]
-		Form.__init__(self, formfields, send=u'Senden')
+		CSRFSecureForm.__init__(self, formfields, request, send=u'Senden')
 
-class EmailWrongSubject(Form):
-	def __init__(self, type):
+class EmailWrongSubject(CSRFSecureForm):
+	def __init__(self, type, request):
 		formfields = [
 			HiddenField('type',
 			   value=type),
@@ -815,7 +821,7 @@ class EmailWrongSubject(Form):
 			   growable=False
 			   ),
 			]
-		Form.__init__(self, formfields, send=u'Senden')
+		CSRFSecureForm.__init__(self, formfields, request, send=u'Senden')
 
 class GradingEdit(ObjectForm):
 	def __init__(self, request, grading):
@@ -837,4 +843,4 @@ class GradingEdit(ObjectForm):
 			   label=u'Prüfer-Id', size=10,
 			   value=grading.examiner_id),
 			]
-		ObjectForm.__init__(self, grading, formfields, send=u'Ändern')
+		ObjectForm.__init__(self, grading, formfields, request, send=u'Ändern')
