@@ -73,7 +73,7 @@ def index(request):
 @view_config(route_name='email_users', renderer='muesli.web:templates/email_users.pt', context=GeneralContext, permission='admin')
 def emailUsers(request):
 	ttype = request.params.get('type', 'wrong_subject')
-	form = EmailWrongSubject(ttype)
+	form = EmailWrongSubject(ttype, request)
 	semesterlimit = utils.getSemesterLimit()
 	students = request.db.query(models.User).filter(models.User.lecture_students.any(models.LectureStudent.lecture.has(models.Lecture.term >= semesterlimit))).all()
 	bad_students = []

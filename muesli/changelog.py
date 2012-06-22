@@ -20,6 +20,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2012-06-19
+concerns:assistans,tutors
+Auf der Statistikseite zu Testaten kann jetzt eine Tabelle angezeigt werden, die angibt,
+wieviele Studenten welche Mindestpunktzahl haben.
+
 ====2012-05-18
 concerns:assistants
 Ab jetzt können Übungsaufgaben und Testate gelöscht werden. Aufgaben können gelöscht werden,

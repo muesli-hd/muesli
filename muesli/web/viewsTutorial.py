@@ -289,7 +289,7 @@ def email(request):
 	db = request.db
 	tutorials = request.context.tutorials
 	lecture = tutorials[0].lecture
-	form = TutorialEmail()
+	form = TutorialEmail(request)
 	if request.method == 'POST' and form.processPostData(request.POST):
 		lecture_students = lecture.lecture_students_for_tutorials(tutorials=tutorials)
 		message = muesli.mail.Message(subject=form['subject'],
