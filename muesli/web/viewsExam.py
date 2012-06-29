@@ -233,6 +233,9 @@ class Admission(object):
 				registration_parameter = 'registration-{0}'.format(ls.student_id)
 				if exam.registration and registration_parameter in self.request.POST:
 					admissions[ls.student_id].registration = self.valueToBool(self.request.POST[registration_parameter])
+				certificate_parameter = 'medical_certificate-{0}'.format(ls.student_id)
+				if exam.medical_certificate and certificate_parameter in self.request.POST:
+					admissions[ls.student_id].medical_certificate = self.valueToBool(self.request.POST[certificate_parameter])
 		if self.db.new or self.db.dirty or self.db.deleted:
 			self.db.commit()
 		return {'exam': exam,
