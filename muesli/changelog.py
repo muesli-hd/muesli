@@ -20,8 +20,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2012-06-29
+concerns:assistants
+Neben Zulassung und Anmeldung können zu Klausuren jetzt auch Atteste verwaltet werden. Das
+Konzept ist das gleiche wie bei Zulassung und Anmeldung: Man muss die Funktionalität bei
+den Einstellungen des Testats freischalten. Danach findet sich beim Punkte-Eintragen der Link
+zum Eintragen der Attest-Informationen. Außerdem wird auf der Seite zum Noteneintragen bei
+verlinkten Testaten mit Attest der Atteststatus angezeigt.
+
 ====2012-06-19
-concerns:assistans,tutors
+concerns:assistants,tutors
 Auf der Statistikseite zu Testaten kann jetzt eine Tabelle angezeigt werden, die angibt,
 wieviele Studenten welche Mindestpunktzahl haben.
 

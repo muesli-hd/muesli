@@ -13,6 +13,7 @@
     <th>Name</th>
     <th>Zulassung</th>
     <th>Anmeldung</th>
+    <th>Attest</th>
   </tr>
 </thead>
 <tbody>
@@ -29,6 +30,11 @@
     <td tal:define="name     'registration-%s' % student.id;
                     value     admissions[ls.student_id].registration;
                     readonly  exam.registration!=True">
+        <metal:main metal:use-macro="templates('Fragments/HTML/input_tristate.pt').macros['input_tristate']" />
+    </td>
+    <td tal:define="name     'medical_certificate-%s' % student.id;
+                    value     admissions[ls.student_id].medical_certificate;
+                    readonly  exam.medical_certificate!=True">
         <metal:main metal:use-macro="templates('Fragments/HTML/input_tristate.pt').macros['input_tristate']" />
     </td>
     </span>

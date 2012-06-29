@@ -233,6 +233,9 @@ class Admission(object):
 				registration_parameter = 'registration-{0}'.format(ls.student_id)
 				if exam.registration and registration_parameter in self.request.POST:
 					admissions[ls.student_id].registration = self.valueToBool(self.request.POST[registration_parameter])
+				certificate_parameter = 'medical_certificate-{0}'.format(ls.student_id)
+				if exam.medical_certificate and certificate_parameter in self.request.POST:
+					admissions[ls.student_id].medical_certificate = self.valueToBool(self.request.POST[certificate_parameter])
 		if self.db.new or self.db.dirty or self.db.deleted:
 			self.db.commit()
 		return {'exam': exam,
@@ -267,18 +270,22 @@ class Export(object):
 			self.db.commit()
 		for student in points:
 			points[student]['total'] = sum([v.points for v in points[student].values() if v.points])
-		if exam.admission or exam.registration:
+		if exam.admission!=None or exam.registration!=None or exam.medical_certificate!=None:
 			admissions = exam.exam_admissions
 			for a in admissions:
-				if exam.admission:
+				if exam.admission!=None:
 					points[a.student_id]['admission'] = a.admission
-				if exam.registration:
+				if exam.registration!=None:
 					points[a.student_id]['registration'] = a.registration
+				if exam.medical_certificate!=None:
+					points[a.student_id]['medical_certificate'] = a.medical_certificate
 			for student in points:
-				if exam.admission and not 'admission' in points[student]:
+				if exam.admission!=None and not 'admission' in points[student]:
 					points[student]['admission'] = None
-				if exam.registration and not 'registration' in points[student]:
+				if exam.registration!=None and not 'registration' in points[student]:
 					points[student]['registration'] = None
+				if exam.medical_certificate!=None and not 'medical_certificate' in points[student]:
+					points[student]['medical_certificate'] = None
 		return {'exam': exam,
 		        'tutorial_ids': self.request.matchdict['tutorial_ids'],
 		        'students': students,

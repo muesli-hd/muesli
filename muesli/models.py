@@ -29,7 +29,7 @@ import sqlalchemy.ext.declarative
 from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table, text
 from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
 from muesli.types import *
-from muesli.utils import DictOfObjects, AutoVivification, editOwnTutorials
+from muesli.utils import DictOfObjects, AutoVivification, editOwnTutorials, listStrings
 
 Base = sqlalchemy.ext.declarative.declarative_base()
 
@@ -271,6 +271,7 @@ class Exam(Base):
 	category = Column(Text, nullable=False)
 	admission = Column(Boolean)
 	registration = Column(Boolean)
+	medical_certificate = Column(Boolean)
 	url = Column(Text)
 	results_hidden = Column(Boolean, default=False)
 	@property
@@ -396,6 +397,16 @@ class Exam(Base):
 				'count': count,
 				'quantile': float(count)/allcount if allcount!=0 else 0})
 		return quantils
+	@property
+	def admissions_string(self):
+		l = []
+		if self.admission:
+			l.append('Zulassung')
+		if self.registration:
+			l.append('Anmeldung')
+		if self.medical_certificate:
+			l.append('Attest')
+		return listStrings(l)
 
 class Tutorial(Base):
 	__tablename__ = 'tutorials'
@@ -505,6 +516,7 @@ class ExamAdmission(Base):
 	student = relationship(User, backref='exam_admissions')
 	admission = Column(Boolean)
 	registration = Column(Boolean)
+	medical_certificate = Column(Boolean)
 	def __init__(self, exam=None, student=None):
 		self.exam = exam
 		self.student = student

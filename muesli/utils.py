@@ -21,6 +21,7 @@
 
 import datetime
 import pyramid.security
+from collections import defaultdict
 
 from muesli.types import Term
 
@@ -163,6 +164,16 @@ class UserInfo:
 		else:
 			return False
 
+def listStrings(strings):
+	if len(strings)==0:
+		return ''
+	elif len(strings) == 1:
+		return strings[1]
+	else:
+		part1 = strings[:-1]
+		part2 = strings[-1]
+		return ', '.join(part1)+' und '+part2
+
 class DictOfObjects(object):
 	def __init__(self, createFunction):
 		self.d = {}
@@ -201,4 +212,9 @@ class AutoVivification(dict):
 					else:
 						self[key].update(other[key])
 			else: self[key] = other[key]
+
+#From http://blogs.fluidinfo.com/terry/2012/05/26/autovivification-in-python-nested-defaultdicts-with-a-specific-final-type/
+def autovivify(levels=1, final=dict):
+    return (defaultdict(final) if levels < 2 else
+            defaultdict(lambda: autovivify(levels - 1, final)))
 

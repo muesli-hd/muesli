@@ -119,7 +119,7 @@ class EnterGrades(object):
 			grades[ls.student_id]['grade'] = ''
 			grades[ls.student_id]['gradestr'] = ''
 			grades[ls.student_id]['invalid'] = None
-			grades[ls.student_id]['exams'] = dict([[i, {'points': '', 'admission': None, 'registration': None}] for i in exam_ids])
+			grades[ls.student_id]['exams'] = dict([[i, {'points': '', 'admission': None, 'registration': None, 'medical_certificate': None}] for i in exam_ids])
 			grades[ls.student_id]['calc'] = ''
 		for grade in gradesQuery:
 			grades[grade.student_id]['grade'] = grade
@@ -159,7 +159,7 @@ class EnterGrades(object):
 			results = exam.getResults(students = lecture_students)
 			for result in results:
 				grades[result.student_id]['exams'][exam.id]['points'] = result.points
-			if exam.admission!=None or exam.registration!=None:
+			if exam.admission!=None or exam.registration!=None or exam.medical_certificate!=None:
 				student_ids = [ls.student_id for ls in lecture_students]
 				admissions = exam.exam_admissions
 				for a in admissions:
@@ -168,6 +168,8 @@ class EnterGrades(object):
 							grades[a.student_id]['exams'][exam.id]['admission'] = a.admission
 						if exam.registration!=None:
 							grades[a.student_id]['exams'][exam.id]['registration'] = a.registration
+						if exam.medical_certificate!=None:
+							grades[a.student_id]['exams'][exam.id]['medical_certificate'] = a.medical_certificate
 		error_msgs = []
 		if formula:
 			parser = Parser()
