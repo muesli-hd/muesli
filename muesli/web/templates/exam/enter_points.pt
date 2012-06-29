@@ -14,14 +14,8 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
 
 <h3>${exam.name} der Vorlesung ${exam.lecture.name}</h3>
 
-  <p tal:condition="exam.admission!=None and exam.registration!=None">
-  Zu dieser Prüfung ist eine <a tal:attributes="href request.route_path('exam_admission', exam_id=exam.id, tutorial_ids=tutorial_ids)">Anmeldung und Zulassung</a> erforderlich.
-  </p>
-  <p tal:condition="exam.admission!=None and exam.registration==None">
-  Zu dieser Prüfung ist eine <a tal:attributes="href request.route_path('exam_admission', exam_id=exam.id, tutorial_ids=tutorial_ids)">Zulassung</a> erforderlich.
-  </p>
-  <p tal:condition="exam.admission==None and exam.registration!=None">
-  Zu dieser Prüfung ist eine <a tal:attributes="href request.route_path('exam_admission', exam_id=exam.id, tutorial_ids=tutorial_ids)">Anmeldung</a> erforderlich.
+  <p tal:condition="exam.admissions_string" tal:omit-tag="">
+    Zu dieser Prüfung ist eine <a tal:attributes="href request.route_path('exam_admission', exam_id=exam.id, tutorial_ids=tutorial_ids)">${exam.admissions_string}</a> erforderlich.
   </p>
 
   <p class="error" tal:condition="error_msg">${error_msg}</p>
