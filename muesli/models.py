@@ -271,6 +271,7 @@ class Exam(Base):
 	category = Column(Text, nullable=False)
 	admission = Column(Boolean)
 	registration = Column(Boolean)
+	medical_certificate = Column(Boolean)
 	url = Column(Text)
 	results_hidden = Column(Boolean, default=False)
 	@property
@@ -505,6 +506,7 @@ class ExamAdmission(Base):
 	student = relationship(User, backref='exam_admissions')
 	admission = Column(Boolean)
 	registration = Column(Boolean)
+	medical_certificate = Column(Boolean)
 	def __init__(self, exam=None, student=None):
 		self.exam = exam
 		self.student = student

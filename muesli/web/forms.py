@@ -187,7 +187,7 @@ class CSRFSecureForm(Form):
 
 class ObjectForm(CSRFSecureForm):
 	def __init__(self, obj, formfields, request, send="Ändern", chained_validators=[]):
-		CSRFSecureForm.__init__(self, formfields, send=send, chained_validators=chained_validators, request=request)
+		CSRFSecureForm.__init__(self, formfields, request, send=send, chained_validators=chained_validators)
 		self.obj = obj
 	def saveField(self, fieldName):
 		setattr(self.obj, fieldName, self[fieldName])
@@ -675,10 +675,15 @@ class LectureEditExam(ObjectForm):
 			   type='radio',
 			   value=boolToValue(exam.registration),
 			   options=[[1, 'Editieren erlaubt'], [0, 'Editieren gesperrt'], ['None', 'Nicht notwendig']]),
+			FormField('medical_certificate',
+			   label='Attest',
+			   type='radio',
+			   value=boolToValue(exam.medical_certificate),
+			   options=[[1, 'Editieren erlaubt'], [0, 'Editieren gesperrt'], ['None', 'Nicht notwendig']]),
 			]
 		ObjectForm.__init__(self, exam, formfields, request, send=u'Änderungen speichern')
 	def saveField(self, fieldName):
-		if fieldName in ['admission', 'registration', 'results_hidden']:
+		if fieldName in ['admission', 'registration', 'medical_certificate', 'results_hidden']:
 			setattr(self.obj, fieldName, valueToBool(self[fieldName]))
 		else:
 			ObjectForm.saveField(self, fieldName)
