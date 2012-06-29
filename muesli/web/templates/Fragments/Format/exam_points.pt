@@ -1,10 +1,12 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:define-macro="exam_points">
   ${exam_points['points']}
-  <span tal:define="fA (lambda f: ('Z' if f==True else ('N' if f==False else '?'))); fR (lambda f: ('A' if f==True else ('N' if f==False else '?')));">
+  <span tal:define="fA (lambda f: ('Z' if f==True else ('N' if f==False else '?')));
+                    fR (lambda f: ('A' if f==True else ('N' if f==False else '?')));
+                    fAttest (lambda f: ('-At' if f==True else ('-NAt' if f==False else '')));">
     <span tal:condition="exam.admission!=None or exam.registration!=None">
       <span class="popup">
-        (<span tal:condition="exam.admission!=None">${'%s' % fA(exam_points['admission'])}</span><span tal:condition="exam.registration!=None">${fR(exam_points['registration'])}</span>)
+        (<span tal:condition="exam.admission!=None">${'%s' % fA(exam_points['admission'])}</span><span tal:condition="exam.registration!=None">${fR(exam_points['registration'])}</span><span tal:condition="exam.medical_certificate!=None">${fAttest(exam_points['medical_certificate'])}</span>)
           <span class="balloon">
             <table>
               <tr tal:condition="exam.admission!=None">
@@ -18,6 +20,12 @@
                 <td tal:condition="exam_points['registration']==True">Angemeldet</td>
                 <td tal:condition="exam_points['registration']==False">Abgemeldet</td>
                 <td tal:condition="exam_points['registration']==None">Ausstehend</td>
+              </tr>
+              <tr tal:condition="exam.medical_certificate!=None">
+                <th>Attest</th>
+                <td tal:condition="exam_points['medical_certificate']==True">Erhalten</td>
+                <td tal:condition="exam_points['medical_certificate']==False">Kein Attest</td>
+                <td tal:condition="exam_points['medical_certificate']==None">Keine Information</td>
               </tr>
             </table>
           </span>
