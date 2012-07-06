@@ -145,7 +145,7 @@ class Edit(object):
 def results(request):
 	tutorials = request.context.tutorials
 	lecture = tutorials[0].lecture
-	lecture_students = lecture.lecture_students_for_tutorials(tutorials=tutorials)
+	lecture_students = lecture.lecture_students_for_tutorials(tutorials=tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student)).all()
 	lecture_results = lecture.getLectureResults(students=lecture_students)
 	results = lecture.getPreparedLectureResults(lecture_results)
 	cat_maxpoints = dict([cat['id'], 0] for cat in utils.categories)
@@ -158,7 +158,7 @@ def results(request):
 	        'names': utils.lecture_types[lecture.type],
 	        'categories': utils.categories,
 	        'cat_maxpoints': cat_maxpoints,
-	        'exams_by_cat': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
+	        'exams_by_cat': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id']).all()] for cat in utils.categories]),
 	        }
 
 @view_config(route_name='tutorial_take', context=TutorialContext, permission='take_tutorial')

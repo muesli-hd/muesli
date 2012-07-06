@@ -20,7 +20,7 @@
 
   <tr tal:repeat="ls students">
     <span tal:omit-tag="" tal:define="student ls.student; tutor ls.tutorial.tutor">
-    <td tal:condition="not tutorial_ids">${tutor.last_name}</td>
+    <td tal:condition="not tutorial_ids">${tutor.last_name if tutor!=None else '-'}</td>
     <td>${student.last_name}, ${student.first_name}</td>
     <td tal:define="name     'admission-%s' % student.id;
                     value     admissions[ls.student_id].admission;
