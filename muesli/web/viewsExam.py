@@ -309,23 +309,27 @@ def statistics(request):
 		statistics_by_subject = exam.getStatisticsBySubjects(students=tutorialstudents, prefix='tut')
 		statistics_by_subject.update_available(old_statistics_by_subject)
 	admissions = {}
-	if exam.admission or exam.registration:
+	if exam.admission!=None or exam.registration!=None or exam.medical_certificate!=None:
 		admission_data = exam.exam_admissions.all()
 		all_student_ids = [ls.student_id for ls in lecturestudents]
-		if exam.admission:
+		if exam.admission!=None:
 			admissions['admission_count'] = len([e for e in admission_data if e.admission and e.student_id in all_student_ids])
-		if exam.registration:
+		if exam.registration!=None:
 			admissions['registration_count'] = len([e for e in admission_data if e.registration and e.student_id in all_student_ids])
-		if exam.admission and exam.registration:
+		if exam.admission!=None and exam.registration!=None:
 			admissions['admission_and_registration_count'] = len([e for e in admission_data if e.admission and e.registration and e.student_id in all_student_ids])
+		if exam.medical_certificate!=None:
+			admissions['medical_certificate_count'] = len([e for e in admission_data if e.medical_certificate and e.student_id in all_student_ids])
 		if tutorials:
 			student_ids = [s.student_id for s in tutorialstudents]
-			if exam.admission:
+			if exam.admission!=None:
 				admissions['admission_count_tut'] = len([e for e in admission_data if e.admission and e.student_id in student_ids])
-			if exam.registration:
+			if exam.registration!=None:
 				admissions['registration_count_tut'] = len([e for e in admission_data if e.registration and e.student_id in student_ids])
-			if exam.admission and exam.registration:
+			if exam.admission!=None and exam.registration!=None:
 				admissions['admission_and_registration_count_tut'] = len([e for e in admission_data if e.registration and e.admission and e.student_id in student_ids])
+			if exam.medical_certificate!=None:
+				admissions['medical_certificate_count_tut'] = len([e for e in admission_data if e.medical_certificate and e.student_id in student_ids])
 	quantils = []
 	for q in exam.getQuantils():
 		quantils.append({'lecture': q})
