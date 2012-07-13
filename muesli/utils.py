@@ -168,7 +168,7 @@ def listStrings(strings):
 	if len(strings)==0:
 		return ''
 	elif len(strings) == 1:
-		return strings[1]
+		return strings[0]
 	else:
 		part1 = strings[:-1]
 		part2 = strings[-1]
