@@ -137,6 +137,7 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   <li><a tal:attributes="href request.route_path('lecture_email_tutors', lecture_id=lecture.id)">E-Mail an alle Übungsleiter schreiben</a></li>
   <li><a tal:attributes="href request.route_path('lecture_email_students', lecture_id=lecture.id)">E-Mail an alle Studenten schreiben</a></li>
   <li><a tal:attributes="href request.route_path('lecture_export_students_html', lecture_id=lecture.id)">Liste aller Teilnehmer</a></li>
+  <li><a tal:attributes="href request.route_path('tutorial_results', lecture_id=lecture.id, tutorial_ids='')">Liste der Ergebnisse</a></li>
   <li><a tal:attributes="href request.route_path('lecture_view_removed_students', lecture_id=lecture.id)">Liste der abgemeldeten/entfernten Teilnehmer</a></li>
   <li><a tal:attributes="href request.route_path('lecture_export_totals', lecture_id=lecture.id)">Punktzahlen exportieren</a> (kann mit Copy&amp;Paste in OpenOffice.org eingefügt werden)</li>
   <li tal:condition="request.permissionInfo.has_permission('delete_lecture')">

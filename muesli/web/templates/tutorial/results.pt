@@ -8,6 +8,7 @@
 
 <thead>
   <tr>
+    <th tal:condition="not tutorial_ids">Tutor</th>
     <th>Name</th>
     <th tal:repeat="cat categories">${cat['name']}</th>
   </tr>
@@ -15,6 +16,7 @@
 
 <tbody>
   <tr tal:repeat="ls lecture_students">
+    <td tal:condition="not tutorial_ids">${ls.tutorial.tutor_name}</td>
     <td>${ls.student.name()}</td>
     <td tal:repeat="cat categories">
       <span class="popup">

@@ -422,6 +422,12 @@ class Tutorial(Base):
 	def students(self):
 		session = Session.object_session(self)
 		return session.query(User).filter(User.lecture_students.any(LectureStudent.tutorial==self))
+	@property
+	def tutor_name(self):
+		if self.tutor:
+			return self.tutor.last_name
+		else:
+			return '-'
 	# weekday and time of tutorial
 	# format: "D HH:MM"
 	# where
