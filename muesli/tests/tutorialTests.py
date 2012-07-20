@@ -41,7 +41,7 @@ class BaseTests(functionalTests.BaseTests):
 		res = self.testapp.get('/tutorial/edit/%s' % 12456, status=403)
 
 	def test_tutorial_results(self):
-		res = self.testapp.get('/tutorial/results/%s' % 12456, status=403)
+		res = self.testapp.get('/tutorial/results/%s/%s' % (12456,1245), status=403)
 
 	def test_tutorial_subscribe(self):
 		res = self.testapp.get('/tutorial/subscribe/%s' % 12456, status=403)
@@ -73,7 +73,7 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 		res = self.testapp.get('/tutorial/edit/%s' % self.tutorial.id, status=403)
 
 	def test_tutorial_results(self):
-		res = self.testapp.get('/tutorial/results/%s' % self.tutorial.id, status=403)
+		res = self.testapp.get('/tutorial/results/%s/%s' % (self.lecture.id, self.tutorial.id), status=403)
 
 	def test_tutorial_subscribe(self):
 		res = self.testapp.get('/tutorial/subscribe/%s' % self.tutorial.id, status=403)
@@ -131,22 +131,24 @@ class TutorLoggedInTests(UserLoggedInTests):
 		res = self.testapp.get('/tutorial/view/%s,%s' % (self.tutorial.id, self.tutorial_tutor2.id), status=200)
 
 	def test_tutorial_results(self):
-		res = self.testapp.get('/tutorial/results/%s' % self.tutorial.id, status=200)
+		res = self.testapp.get('/tutorial/results/%s/%s' % (self.lecture.id, self.tutorial.id), status=200)
 	def test_tutorial_results_no_tutor_all_tutorials(self):
 		self.lecture.tutor_rights = utils.editAllTutorials
 		self.session.commit()
-		res = self.testapp.get('/tutorial/results/%s' % self.tutorial_no_tutor.id, status=200)
+		res = self.testapp.get('/tutorial/results/%s/%s' % (self.lecture.id, self.tutorial_no_tutor.id), status=200)
 	def test_tutorial_results_no_tutor_own_tutorial(self):
-		res = self.testapp.get('/tutorial/results/%s' % self.tutorial_no_tutor.id, status=403)
+		res = self.testapp.get('/tutorial/results/%s/%s' % (self.lecture.id, self.tutorial_no_tutor.id), status=403)
 	def test_tutorial_results_different_lectures(self):
 		#Different lectures should be forbidden
-		res = self.testapp.get('/tutorial/results/%s,%s' % (self.tutorial.id, self.lecture2_tutorial.id), status=403)
+		res = self.testapp.get('/tutorial/results/%s/%s,%s' % (self.lecture.id, self.tutorial.id, self.lecture2_tutorial.id), status=403)
 	def test_tutorial_results_same_lecture_same_tutor(self):
 		#own tutorials of same lecture allowed
-		res = self.testapp.get('/tutorial/results/%s,%s' % (self.tutorial.id, self.tutorial2.id), status=200)
+		res = self.testapp.get('/tutorial/results/%s/%s,%s' % (self.lecture.id, self.tutorial.id, self.tutorial2.id), status=200)
 	def test_tutorial_results_same_lecture_different_tutor(self):
 		#other tutorials of same lecture not allowed
-		res = self.testapp.get('/tutorial/results/%s,%s' % (self.tutorial.id, self.tutorial_tutor2.id), status=403)
+		res = self.testapp.get('/tutorial/results/%s/%s,%s' % (self.lecture.id, self.tutorial.id, self.tutorial_tutor2.id), status=403)
+	def test_tutorial_results_no_tutorials(self):
+		res = self.testapp.get('/tutorial/results/%s/' % (self.lecture.id), status=403)
 
 	def test_tutorial_remove_student(self):
 		self.assertIn(self.user, self.tutorial.students.all())
@@ -190,10 +192,13 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
 	def test_tutorial_results_same_lecture_different_tutor(self):
 		#other tutorials of same lecture allowed for assistant
-		res = self.testapp.get('/tutorial/results/%s,%s' % (self.tutorial.id, self.tutorial_tutor2.id), status=200)
+		res = self.testapp.get('/tutorial/results/%s/%s,%s' % (self.lecture.id, self.tutorial.id, self.tutorial_tutor2.id), status=200)
 
 	def test_tutorial_results_no_tutor_own_tutorial(self):
-		res = self.testapp.get('/tutorial/results/%s' % self.tutorial.id, status=200)
+		res = self.testapp.get('/tutorial/results/%s/%s' % (self.lecture.id, self.tutorial.id), status=200)
+	
+	def test_tutorial_results_no_tutorials(self):
+		res = self.testapp.get('/tutorial/results/%s/' % (self.lecture.id), status=200)
 
 class AdminLoggedInTests(AssistantLoggedInTests):
 	def setUp(self):

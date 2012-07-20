@@ -4,17 +4,27 @@
 
 <h2>Punkteübersicht</h2>
 
-<table class="colored">
+<script type="text/javascript">
+$(document).ready(function() 
+    { 
+        $("#resultstable").tablesorter(); 
+    } 
+);
+</script>
+
+<table id="resultstable" class="colored">
 
 <thead>
   <tr>
-    <th>Name</th>
-    <th tal:repeat="cat categories">${cat['name']}</th>
+    <th tal:condition="not tutorial_ids">Tutor ↕</th>
+    <th>Name ↕</th>
+    <th tal:repeat="cat categories">${cat['name']} ↕</th>
   </tr>
 </thead>
 
 <tbody>
   <tr tal:repeat="ls lecture_students">
+    <td tal:condition="not tutorial_ids">${ls.tutorial.tutor_name}</td>
     <td>${ls.student.name()}</td>
     <td tal:repeat="cat categories">
       <span class="popup">

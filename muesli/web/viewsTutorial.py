@@ -144,13 +144,16 @@ class Edit(object):
 @view_config(route_name='tutorial_results', renderer='muesli.web:templates/tutorial/results.pt', context=TutorialContext, permission='viewAll')
 def results(request):
 	tutorials = request.context.tutorials
-	lecture = tutorials[0].lecture
-	lecture_students = lecture.lecture_students_for_tutorials(tutorials=tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student)).all()
+	lecture = request.context.lecture
+	lecture_students = lecture.lecture_students_for_tutorials(tutorials=tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))\
+		.options(sqlalchemy.orm.joinedload(LectureStudent.tutorial)).all()
 	lecture_results = lecture.getLectureResults(students=lecture_students)
 	results = lecture.getPreparedLectureResults(lecture_results)
 	cat_maxpoints = dict([cat['id'], 0] for cat in utils.categories)
 	for exam in lecture.exams:
 		cat_maxpoints[exam.category] += exam.getMaxpoints()
+	request.javascript.add('jquery/jquery.min.js')
+	request.javascript.add('jquery/jquery.tablesorter.min.js')
 	return {'tutorials': tutorials,
 	        'tutorial_ids': request.context.tutorial_ids,
 	        'lecture_students': lecture_students,
