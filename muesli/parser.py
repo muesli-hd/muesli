@@ -76,9 +76,10 @@ class Parser(object):
 		cases1Func = defineFunction('cases1', parameterCount = 5)
 		cases2Func = defineFunction('cases2', parameterCount = 8)
 		cases3Func = defineFunction('cases3', parameterCount = 11)
+		round3downFunc = defineFunction('round3down', parameterCount = 1)
 		
 		#func = (funcident.setParseAction(self.pushEnd)+lpar +Optional(expr+ZeroOrMore(Literal(',')+expr))+rpar).setParseAction(self.pushFirst)
-		atom = ( maxFunc | minFunc | casesFunc | cases1Func | cases2Func | cases3Func | ( e | floatnumber | integer | ident ).setParseAction(self.pushFirst) | 
+		atom = ( maxFunc | minFunc | casesFunc | cases1Func | cases2Func | cases3Func | round3downFunc | ( e | floatnumber | integer | ident ).setParseAction(self.pushFirst) | 
 				( lpar + expr.suppress() + rpar ) 
 			)
 				
@@ -100,7 +101,8 @@ class Parser(object):
 			'cases': self.cases,
 			'cases1': self.cases1,
 			'cases2': self.cases2,
-			'cases3': self.cases3
+			'cases3': self.cases3,
+			'round3down': self.round3down
 			}
 	def min(self, arr):
 		arr = filter(lambda a: a != None, arr)
@@ -198,7 +200,23 @@ class Parser(object):
 		casesParameters = [p[0], 5.0, p[1], 4.0, p[2], 3.7, p[3], 3.3, p[4], 3.0, p[5], 2.7,
 			p[6], 2.3, p[7], 2.0, p[8], 1.7, p[9], 1.3, p[10], 1.0]
 		return self.cases(casesParameters)
-
+	def rounddown(self, value, steps):
+		oldstep = steps[0]
+		for step in steps[1:]:
+			#Etwas Ungenauigkeit, um Rundungsfehler auszugleichen...
+			if value < step-0.0001:
+				return oldstep
+			oldstep = step
+	def round3down(self, parameters):
+		value = parameters[0]
+		if value == None:
+			return None
+		if value > 4.0:
+			return 5.0
+		elif value == 4.0:
+			return 4.0
+		else:
+			return self.rounddown(value, [1.0, 1.3, 1.7, 2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0])
 
 if __name__ == '__main__':
 	p = Parser()
