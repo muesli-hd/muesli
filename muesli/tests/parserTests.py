@@ -85,15 +85,25 @@ class ContextTests(unittest.TestCase):
 		self.assertEqual(self.parser.calculate({'$0': 5}), 5)
 		self.assertEqual(self.parser.calculate({'$0': 4.1}), 5)
 		self.assertEqual(self.parser.calculate({'$0': 4.0}), 4.0)
-		self.assertEqual(self.parser.calculate({'$0': 1.3}), 1.3)
+		self.assertEqual(self.parser.calculate({'$0': 1.32}), 1.0)
+		self.assertEqual(self.parser.calculate({'$0': 1.33}), 1.0)
+		self.assertEqual(self.parser.calculate({'$0': 1.34}), 1.3)
 		self.assertEqual(self.parser.calculate({'$0': None}), None)
 		#0.3 to next step
-		for step in [1.0, 1.7, 2.0, 2.7, 3.0, 3.7]:
+		for step in [1.0, 2.0, 3.0]:
 			self.assertEqual(self.parser.calculate({'$0': step}), step)
+			self.assertEqual(self.parser.calculate({'$0': step+0.1}), step)
+			self.assertEqual(self.parser.calculate({'$0': step+0.32}), step)
+		#0.3 to next step
+		for step in [1.3, 2.3, 3.3]:
+			self.assertAlmostEqual(self.parser.calculate({'$0': step}), step-0.3)
+			self.assertAlmostEqual(self.parser.calculate({'$0': step+0.033}), step-0.3)
+			self.assertEqual(self.parser.calculate({'$0': step+0.034}), step)
+			self.assertEqual(self.parser.calculate({'$0': step+0.365}), step)
+		#0.4 to next step
+		for step in [1.7, 2.7, 3.7]:
+			self.assertEqual(self.parser.calculate({'$0': step}), step)
+			self.assertEqual(self.parser.calculate({'$0': step-0.03}), step)
+			self.assertAlmostEqual(self.parser.calculate({'$0': step-0.04}), step-0.4)
 			self.assertEqual(self.parser.calculate({'$0': step+0.1}), step)
 			self.assertEqual(self.parser.calculate({'$0': step+0.29}), step)
-		#0.4 to next step
-		for step in [1.3, 2.3, 3.3]:
-			self.assertEqual(self.parser.calculate({'$0': step}), step)
-			self.assertEqual(self.parser.calculate({'$0': step+0.1}), step)
-			self.assertEqual(self.parser.calculate({'$0': step+0.39}), step)

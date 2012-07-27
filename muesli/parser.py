@@ -201,12 +201,10 @@ class Parser(object):
 			p[6], 2.3, p[7], 2.0, p[8], 1.7, p[9], 1.3, p[10], 1.0]
 		return self.cases(casesParameters)
 	def rounddown(self, value, steps):
-		oldstep = steps[0]
-		for step in steps[1:]:
+		for grade, limit in steps:
 			#Etwas Ungenauigkeit, um Rundungsfehler auszugleichen...
-			if value < step-0.0001:
-				return oldstep
-			oldstep = step
+			if value < limit-0.0001:
+				return grade
 	def round3down(self, parameters):
 		value = parameters[0]
 		if value == None:
@@ -216,7 +214,16 @@ class Parser(object):
 		elif value == 4.0:
 			return 4.0
 		else:
-			return self.rounddown(value, [1.0, 1.3, 1.7, 2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0])
+			return self.rounddown(value, [(1.0, 1.333333),
+				(1.3, 1.666666),
+				(1.7, 2.0),
+				(2.0, 2.333333),
+				(2.3, 2.666666),
+				(2.7, 3.0),
+				(3.0, 3.33333),
+				(3.3, 3.6666666),
+				(3.7, 4.0),
+				(4.0, 4.0)])
 
 if __name__ == '__main__':
 	p = Parser()
