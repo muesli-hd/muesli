@@ -20,6 +20,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2012-07-27
+concerns:assistants
+Um mit den neuen Regelungen für Multiple Choice-Aufgaben umgehen zu können, kennt die
+Notenberechnung jetzt die Funktion "round3down", die auf Drittelnoten abrundet. Genaueres
+findet sich in der Hilfe auf der Seite "Noten eintragen".
+
+====2012-07-20
+concerns:assistants,tutors
+Die Seite mit der Punkteübersicht kann jetzt auch von Assistenten für die ganze Vorlesung
+angezeigt werden. Der Link findet sich unten auf der Vorlesungsseite. Außerdem kann die
+Tabelle durch Klick auf die Spaltenüberschriften nach den unterschiedlichen Werten sortiert
+werden.
+
 ====2012-06-29
 concerns:assistants
 Neben Zulassung und Anmeldung können zu Klausuren jetzt auch Atteste verwaltet werden. Das

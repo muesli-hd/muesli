@@ -203,11 +203,14 @@ class Parser(object):
 	def rounddown(self, value, steps):
 		oldstep = steps[0]
 		for step in steps[1:]:
-			if value < step:
+			#Etwas Ungenauigkeit, um Rundungsfehler auszugleichen...
+			if value < step-0.0001:
 				return oldstep
 			oldstep = step
 	def round3down(self, parameters):
 		value = parameters[0]
+		if value == None:
+			return None
 		if value > 4.0:
 			return 5.0
 		elif value == 4.0:
