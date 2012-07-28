@@ -76,11 +76,13 @@ class Parser(object):
 		cases1Func = defineFunction('cases1', parameterCount = 5)
 		cases2Func = defineFunction('cases2', parameterCount = 8)
 		cases3Func = defineFunction('cases3', parameterCount = 11)
+		cases333Func = defineFunction('cases333', parameterCount = 11)
 		round3downFunc = defineFunction('round3down', parameterCount = 1)
 		
 		#func = (funcident.setParseAction(self.pushEnd)+lpar +Optional(expr+ZeroOrMore(Literal(',')+expr))+rpar).setParseAction(self.pushFirst)
-		atom = ( maxFunc | minFunc | casesFunc | cases1Func | cases2Func | cases3Func | round3downFunc | ( e | floatnumber | integer | ident ).setParseAction(self.pushFirst) | 
-				( lpar + expr.suppress() + rpar ) 
+		atom = ( maxFunc | minFunc | casesFunc | cases1Func | cases2Func | cases3Func | cases333Func| round3downFunc |
+				( e | floatnumber | integer | ident ).setParseAction(self.pushFirst) |
+				( lpar + expr.suppress() + rpar )
 			)
 				
 		factor = Forward()
@@ -102,6 +104,7 @@ class Parser(object):
 			'cases1': self.cases1,
 			'cases2': self.cases2,
 			'cases3': self.cases3,
+			'cases333': self.cases333,
 			'round3down': self.round3down
 			}
 	def min(self, arr):
@@ -182,10 +185,10 @@ class Parser(object):
 		results = parameters[1::2]
 		if len(bs)+1 != len(results):
 			raise Exception('Not enough results or boundaries')
-		if val < bs[0]:
+		if val < bs[0]-0.000001:
 			return results[0]
 		for b,r in reversed(zip(bs,results[1:])):
-			if val >= b: return r
+			if val >= b-0.00001: return r
 		raise Exception('could not evaluate cases')
 	def cases1(self, parameters):
 		p = parameters
@@ -199,6 +202,11 @@ class Parser(object):
 		p = parameters
 		casesParameters = [p[0], 5.0, p[1], 4.0, p[2], 3.7, p[3], 3.3, p[4], 3.0, p[5], 2.7,
 			p[6], 2.3, p[7], 2.0, p[8], 1.7, p[9], 1.3, p[10], 1.0]
+		return self.cases(casesParameters)
+	def cases333(self, parameters):
+		p = parameters
+		casesParameters = [p[0], 5.0, p[1], 4.0, p[2], 3.0+2.0/3, p[3], 3.0+1.0/3, p[4], 3.0, p[5], 2.0+2.0/3,
+			p[6], 2.0+1.0/3, p[7], 2.0, p[8], 1.0+2.0/3, p[9], 1.0+1.0/3, p[10], 1.0]
 		return self.cases(casesParameters)
 	def rounddown(self, value, steps):
 		for grade, limit in steps:
@@ -214,14 +222,14 @@ class Parser(object):
 		elif value == 4.0:
 			return 4.0
 		else:
-			return self.rounddown(value, [(1.0, 1.333333),
-				(1.3, 1.666666),
+			return self.rounddown(value, [(1.0, 4.0/3),
+				(1.3, 5.0/3),
 				(1.7, 2.0),
-				(2.0, 2.333333),
-				(2.3, 2.666666),
+				(2.0, 7.0/3),
+				(2.3, 8.0/3),
 				(2.7, 3.0),
-				(3.0, 3.33333),
-				(3.3, 3.6666666),
+				(3.0, 10.0/3),
+				(3.3, 11.0/3),
 				(3.7, 4.0),
 				(4.0, 4.0)])
 

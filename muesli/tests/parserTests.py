@@ -69,6 +69,11 @@ class ContextTests(unittest.TestCase):
 		self.parser.parseString('cases3($0,30,34,38,42,46,50,54,58,62,66)')
 		self.assertEqual(self.parser.calculate({'$0': 0}), 5)
 		self.assertEqual(self.parser.calculate({'$0': 7}), 5)
+	def test_parser_cases333(self):
+		self.parser.parseString('cases333($0,30,34,38,42,46,50,54,58,62,66)')
+		self.assertEqual(self.parser.calculate({'$0': 0}), 5)
+		self.assertEqual(self.parser.calculate({'$0': 7}), 5)
+		self.assertAlmostEqual(self.parser.calculate({'$0': 34}), 11.0/3)
 
 	def test_parser_min(self):
 		self.parser.parseString('min($0)')
@@ -107,3 +112,35 @@ class ContextTests(unittest.TestCase):
 			self.assertAlmostEqual(self.parser.calculate({'$0': step-0.04}), step-0.4)
 			self.assertEqual(self.parser.calculate({'$0': step+0.1}), step)
 			self.assertEqual(self.parser.calculate({'$0': step+0.29}), step)
+	def test_parser_schmidtsche_weltformel(self):
+		for weltformel in ['cases3(-1*$0-2*$1,-36,-35,-32,-29,-26,-23,-20,-17,-14,-11)',
+				'round3down(($0+2*$1)/9)']:
+			self.parser.parseString(weltformel)
+			#Trivialitäten sind auch wichtig
+			self.assertEqual(self.parser.calculate({'$0': 15, '$1': 15}), 5)
+			self.assertEqual(self.parser.calculate({'$0': 12, '$1': 12}), 4)
+			self.assertEqual(self.parser.calculate({'$0': 11, '$1': 11}), 3.7)
+			self.assertEqual(self.parser.calculate({'$0': 10, '$1': 10}), 3.3)
+			self.assertEqual(self.parser.calculate({'$0': 9, '$1': 9}), 3.0)
+			self.assertEqual(self.parser.calculate({'$0': 8, '$1': 8}), 2.7)
+			self.assertEqual(self.parser.calculate({'$0': 7, '$1': 7}), 2.3)
+			self.assertEqual(self.parser.calculate({'$0': 6, '$1': 6}), 2.0)
+			self.assertEqual(self.parser.calculate({'$0': 5, '$1': 5}), 1.7)
+			self.assertEqual(self.parser.calculate({'$0': 4, '$1': 4}), 1.3)
+			self.assertEqual(self.parser.calculate({'$0': 3, '$1': 3}), 1.0)
+			#MC 5 AT 4: gewichtetes Mittel: 1/3 * (5 + 2*4)= 4 1/3: nicht bestanden 5
+			self.assertEqual(self.parser.calculate({'$0': 5*3, '$1': 4*3}), 5)
+			#MC 2,0 AT 5: gewichtetes Mittel 4 bestanden mit Note 4
+			self.assertEqual(self.parser.calculate({'$0': 2*3, '$1': 5*3}), 4)
+			#MC 1, AT 3 gewichtetes Mittel  2 1/3 = bestanden mit Note 2,3
+			self.assertEqual(self.parser.calculate({'$0': 1*3, '$1': 3*3}), 2.3)
+			#MC 2, AT 3 gewichtetes Mittel  2 2/3 = bestanden mit Note 2,7
+			self.assertEqual(self.parser.calculate({'$0': 2*3, '$1': 3*3}), 2.7)
+			#MC 3 1/3, AT 3: gewichtetes Mittel 3,1... gerundet auf Gesamtnote 3.0
+			self.assertEqual(self.parser.calculate({'$0': 10, '$1': 3*3}), 3)
+			#MC 3, AT 3 1/3: gewichtetes Mittel 3,2... gerundet auf Gesamtnote 3.0
+			self.assertEqual(self.parser.calculate({'$0': 3*3, '$1': 10}), 3)
+			#MC 2, AT 2 2/3: gewichtetes Mittel 2,4... gerundet auf Gesamtnote 2,3
+			self.assertEqual(self.parser.calculate({'$0': 2*3, '$1': 8}), 2.3)
+			#MC 1 1/3, AT 1: gewichtetes Mittel 1,1... gerundet auf Gesamtnote 1,0
+			self.assertEqual(self.parser.calculate({'$0': 4, '$1': 1*3}), 1)
