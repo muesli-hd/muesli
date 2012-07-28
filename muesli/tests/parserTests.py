@@ -54,6 +54,8 @@ class ContextTests(unittest.TestCase):
 		self.assertEqual(self.parser.calculate({'$0': 1}), 1)
 		self.assertEqual(self.parser.calculate({'$0': 1.5}), 1)
 		self.assertEqual(self.parser.calculate({'$0': None}), None)
+		self.parser.parseString('cases($0,5,14,4,19,3,24.5,2,29,1)')
+		self.assertEqual(self.parser.calculate({'$0': 21}), 3)
 
 	def test_parser_cases1(self):
 		self.parser.parseString('cases1($0, 2, 4, 6, 8)')
