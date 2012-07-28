@@ -33,6 +33,9 @@ from decimal import Decimal
 # Debugging flag can be set to either "debug_flag=True" or "debug_flag=False"
 debug_flag=True
 
+def dec(f):
+	return Decimal(str(f))
+
 class Parser(object):
 	def __init__(self):
 		# define grammar
@@ -192,27 +195,28 @@ class Parser(object):
 		raise Exception('could not evaluate cases')
 	def cases1(self, parameters):
 		p = parameters
-		casesParameters = [p[0], 5.0, p[1], 4.0, p[2], 3.0, p[3], 2.0, p[4], 1.0]
+		casesParameters = [p[0], dec(5.0), p[1], dec(4.0), p[2], dec(3.0), p[3], dec(2.0), p[4], dec(1.0)]
 		return self.cases(casesParameters)
 	def cases2(self, parameters):
 		p = parameters
-		casesParameters = [p[0], 5.0, p[1], 4.0, p[2], 3.5, p[3], 3.0, p[4], 2.5, p[5], 2.0, p[6], 1.5, p[7], 1.0]
+		casesParameters = [p[0], dec(5.0), p[1], dec(4.0), p[2], dec(3.5), p[3], dec(3.0), p[4], dec(2.5), p[5], dec(2.0), p[6], dec(1.5), p[7], dec(1.0)]
 		return self.cases(casesParameters)
 	def cases3(self, parameters):
 		p = parameters
-		casesParameters = [p[0], 5.0, p[1], 4.0, p[2], 3.7, p[3], 3.3, p[4], 3.0, p[5], 2.7,
-			p[6], 2.3, p[7], 2.0, p[8], 1.7, p[9], 1.3, p[10], 1.0]
+		casesParameters = [p[0], dec(5.0), p[1], dec(4.0), p[2], dec(3.7), p[3], dec(3.3), p[4], dec(3.0), p[5], dec(2.7),
+			p[6], dec(2.3), p[7], dec(2.0), p[8], dec(1.7), p[9], dec(1.3), p[10], dec(1.0)]
 		return self.cases(casesParameters)
 	def cases333(self, parameters):
 		p = parameters
-		casesParameters = [p[0], 5.0, p[1], 4.0, p[2], 3.0+2.0/3, p[3], 3.0+1.0/3, p[4], 3.0, p[5], 2.0+2.0/3,
-			p[6], 2.0+1.0/3, p[7], 2.0, p[8], 1.0+2.0/3, p[9], 1.0+1.0/3, p[10], 1.0]
+		casesParameters = [p[0], dec(5.0), p[1], dec(4.0), p[2], dec(3.0+2.0/3), p[3], dec(3.0+1.0/3), p[4], dec(3.0), p[5], dec(2.0+2.0/3),
+			p[6], dec(2.0+1.0/3), p[7], dec(2.0), p[8], dec(1.0+2.0/3), p[9], dec(1.0+1.0/3), p[10], dec(1.0)]
 		return self.cases(casesParameters)
 	def rounddown(self, value, steps):
 		for grade, limit in steps:
 			#Etwas Ungenauigkeit, um Rundungsfehler auszugleichen...
-			if value < limit-0.0001:
-				return grade
+			llimit = dec(limit)
+			if value < llimit-dec(0.0001):
+				return dec(grade)
 	def round3down(self, parameters):
 		value = parameters[0]
 		if value == None:
