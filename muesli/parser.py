@@ -221,10 +221,10 @@ class Parser(object):
 		value = parameters[0]
 		if value == None:
 			return None
-		if value > 4.0:
+		if value > dec(4.0):
 			return 5.0
-		elif value == 4.0:
-			return 4.0
+		elif value == dec(4.0):
+			return dec(4.0)
 		else:
 			return self.rounddown(value, [(1.0, 4.0/3),
 				(1.3, 5.0/3),
