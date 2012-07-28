@@ -61,7 +61,7 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
     <li>Für halbe Noten: cases2(val, b<sub>1</sub>, ..., b<sub>7</sub>): Liefert Note 5, falls val &lt; b<sub>1</sub>;
         Note 4, falls val &lt; b<sub>2</sub>; Note 3.5, falls val &lt; b<sub>3</sub>, etc. </li>
     <li>Für drittel Noten: cases3(val, b<sub>1</sub>, ..., b<sub>10</sub>): Liefert Note 5, falls val &lt; b<sub>1</sub>;
-        Note 4, falls val &lt; b<sub>2</sub>; Note 3.7, falls val &lt; b<sub>3</sub>, etc. </li>  </ul>
+        Note 4, falls val &lt; b<sub>2</sub>; Note 3.7, falls val &lt; b<sub>3</sub>, etc. </li>
     <li>Für echte drittel Noten: cases333(val, b<sub>1</sub>, ..., b<sub>10</sub>): Liefert Note 5, falls val &lt; b<sub>1</sub>;
         Note 4, falls val &lt; b<sub>2</sub>; Note 3 2/3, falls val &lt; b<sub>3</sub>, etc. Diese Funktion ist
         vor allem für Fälle gedacht, in denen Durchschnitte von Noten berechnet werden müssen.</li>  </ul>
