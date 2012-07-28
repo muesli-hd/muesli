@@ -185,10 +185,10 @@ class Parser(object):
 		results = parameters[1::2]
 		if len(bs)+1 != len(results):
 			raise Exception('Not enough results or boundaries')
-		if val < bs[0]-Decimal(0.000001):
+		if val < bs[0]-Decimal('0.000001'):
 			return results[0]
 		for b,r in reversed(zip(bs,results[1:])):
-			if val >= b-Decimal(0.00001): return r
+			if val >= b-Decimal('0.00001'): return r
 		raise Exception('could not evaluate cases')
 	def cases1(self, parameters):
 		p = parameters
