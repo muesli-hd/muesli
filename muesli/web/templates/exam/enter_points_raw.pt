@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<script>/* <![CDATA[ */
+  function update_total(row)
+  {
+    var total = 0;
+    var current = 0;
+    $("#row-" + row + " input.rawpoints").each(
+      function(index) {
+        current = parseFloat($(this).val().replace(/,/, "."));
+        if (!isNaN(current)) {
+          total += current;
+        }
+      }
+    );
+
+    $("#total-" + row).val(Number(total).toFixed(2));
+  }
+
+    $(document).ready(function() {
+      $(".rawform").each(
+        function(index) {
+          $(this).submit(function() {
+            $("#savestatus").text("Speichere...");
+            var url = $(this).attr('action');
+            $.post(url, $(this).serialize(), function() {
+              $("#savestatus").text("Gespeichert");
+            });
+            return false;
+          });
+      });
+    });
+/* ]]> */
+</script>
+<form id="rawform" class="rawform" method="post" tal:attributes="action request.route_path('exam_enter_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)">
+<input type="hidden" name="student_ids" tal:attributes="value ','.join([str(ls.student_id) for ls in students])" />
+<table class="colored">
+  <tr>
+    <th tal:condition="not tutorial_ids">Tutor</th>
+    <th>Name</th>
+    <th tal:repeat="e exam.exercises">${e.nr}</th>
+    <th>Σ</th>
+  </tr>
+
+  <tr tal:repeat="ls students" tal:attributes="id 'row-'+str(ls.student_id)" tal:define="total 0">
+      <input type="hidden" tal:attributes="value ls.student_id" name="student_id" />
+      <td tal:condition="not tutorial_ids">
+        <span tal:condition="ls.tutorial.tutor" tal:content="ls.tutorial.tutor.last_name" />
+      </td>
+      <td>${ls.student.name()}</td>
+      <td tal:repeat="e exam.exercises">
+        <input class="rawpoints" tal:attributes="name 'points-'+str(ls.student.id)+'-'+str(e.id); onchange 'update_total('+str(ls.student.id)+')'; value points[ls.student_id][e.id].points" size="3" type="text" />
+      </td>
+      <td><input tal:attributes="id 'total-'+str(ls.student.id); value points[ls.student.id]['total']" readonly="readonly" size="4" /></td>
+      <td></td>
+  </tr>
+</table>
+<input type="submit" value="Speichern"/> <span id="savestatus"></span>
+</form>
+
+
