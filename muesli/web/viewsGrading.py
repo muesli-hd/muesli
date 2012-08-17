@@ -84,11 +84,11 @@ class DeleteExamAssociation(object):
 			self.db.commit()
 		return HTTPFound(location=self.request.route_url('grading_edit', grading_id=grading.id))
 
-@view_config(route_name='grading_enter_grades', renderer='muesli.web:templates/grading/enter_grades.pt', context=GradingContext, permission='edit')
-class EnterGrades(object):
+class EnterGradesBasic(object):
 	def __init__(self, request):
 		self.request = request
 		self.db = self.request.db
+		self.return_json = False
 	def __call__(self):
 		grading = self.request.context.grading
 		formula = self.request.GET.get('formula', None)
@@ -101,8 +101,11 @@ class EnterGrades(object):
 		if exam_id:
 			exam = self.request.db.query(models.Exam).get(exam_id)
 		else: exam=None
+		student_id = self.request.GET.get('student', None)
 		lecture_students = grading.lecture.lecture_students_for_tutorials([])\
 			.options(sqlalchemy.orm.joinedload(models.LectureStudent.student))
+		if student_id:
+			lecture_students = lecture_students.filter(models.LectureStudent.student_id == student_id)
 		if exam:
 			lecture_students = lecture_students\
 				.join(models.ExerciseStudent, models.LectureStudent.student_id==models.ExerciseStudent.student_id)\
@@ -111,7 +114,7 @@ class EnterGrades(object):
 				.filter(models.Exam.id==exam_id)
 		lecture_students = lecture_students.all()
 		gradesQuery = grading.student_grades.filter(models.StudentGrade.student_id.in_([ls.student_id for ls in lecture_students]))
-		grades = DictOfObjects(lambda: {})
+		grades = utils.autovivify()
 		exam_ids = [e.id for e in grading.exams]
 		examvars = dict([['$%i' % i, e.id] for i,e in enumerate(grading.exams)])
 		varsForExam = dict([[examvars[var], var] for var in examvars ])
@@ -191,7 +194,11 @@ class EnterGrades(object):
 				error_msgs.append(str(err))
 		if 'fill' in self.request.GET:
 			self.request.session.flash('Achtung, die Noten sind noch nicht abgespeichert!', queue='errors')
-		self.request.javascript.add('prototype.js')
+		#self.request.javascript.add('prototype.js')
+		self.request.javascript.add('jquery/jquery.min.js')
+		self.request.javascript.add('jquery/jquery.fancybox.min.js')
+		#grades = {key: value for key,value in grades.items()}
+
 		return {'grading': grading,
 		        'error_msg': '\n'.join(error_msgs),
 		        'formula': formula,
@@ -201,6 +208,28 @@ class EnterGrades(object):
 		        'examvars': examvars,
 		        'varsForExam': varsForExam,
 		        'lecture_students': lecture_students}
+
+@view_config(route_name='grading_enter_grades', renderer='muesli.web:templates/grading/enter_grades.pt', context=GradingContext, permission='edit')
+class EnterGrades(EnterGradesBasic):
+	pass
+
+@view_config(route_name='grading_get_row', renderer='json', context=GradingContext, permission='edit')
+class GetRow(EnterGradesBasic):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+	def __call__(self):
+		result = super(GetRow, self).__call__()
+		grades = result['grades']
+		for key, value in result['grades'].items():
+			del value['grade']
+			value['gradestr'] = str(value['gradestr'])
+			for exam_id  in value['exams']:
+				value['exams'][exam_id]['points'] = str(value['exams'][exam_id]['points'])
+			if value['calc'] != None:
+				value['calc'] = str(value['calc'])
+		return {'grades': grades,
+		        'error_msg': result['error_msg']}
 
 class ExcelView(object):
 	def __init__(self, request):

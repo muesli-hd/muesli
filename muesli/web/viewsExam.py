@@ -127,12 +127,12 @@ class DeleteExercise(object):
 			self.request.session.flash(u'Aufgabe gelöscht', queue='messages')
 		return HTTPFound(location=self.request.route_url('exam_edit', exam_id = exam.id))
 
-@view_config(route_name='exam_enter_points', renderer='muesli.web:templates/exam/enter_points.pt', context=ExamContext, permission='view_points')
-class EnterPoints(object):
-	def __init__(self, request):
+class EnterPointsBasic(object):
+	def __init__(self, request, raw=False):
 		self.request = request
 		self.db = self.request.db
 		self.tutorial_ids = self.request.context.tutorial_ids
+		self.raw = raw
 	def __call__(self):
 		error_msgs = []
 		exam = self.request.context.exam
@@ -140,6 +140,10 @@ class EnterPoints(object):
 		students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))\
 					.options(sqlalchemy.orm.joinedload_all('tutorial.tutor'))
 		students = students.all()
+		if 'students' in self.request.GET:
+			student_ids = self.request.GET['students'].split(',')
+			student_ids = [int(sid.strip()) for sid in student_ids]
+			students = [s for s in students if s.student.id in student_ids]
 		pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student), sqlalchemy.orm.joinedload(ExerciseStudent.exercise))
 		points = DictOfObjects(lambda: {})
 		#for s in students:
@@ -185,13 +189,24 @@ class EnterPoints(object):
 			statistics.update(exam.getStatistics(students=students, prefix='tut'))
 		else:
 			statistics = exam.getStatistics(students=students)
-		self.request.javascript.add('prototype.js')
+		if not self.raw:
+			self.request.javascript.add('prototype.js')
 		return {'exam': exam,
 		        'tutorial_ids': self.request.matchdict['tutorial_ids'],
 		        'students': students,
 		        'points': points,
 		        'statistics': statistics,
 		        'error_msg': u'\n'.join(error_msgs)}
+
+@view_config(route_name='exam_enter_points', renderer='muesli.web:templates/exam/enter_points.pt', context=ExamContext, permission='view_points')
+class EnterPoints(EnterPointsBasic):
+	def __init__(self, request):
+		super(EnterPoints, self).__init__(request, raw=False)
+
+@view_config(route_name='exam_enter_points_raw', renderer='muesli.web:templates/exam/enter_points_raw.pt', context=ExamContext, permission='view_points')
+class EnterPointsRaw(EnterPointsBasic):
+	def __init__(self, request):
+		super(EnterPointsRaw, self).__init__(request, raw=True)
 
 @view_config(route_name='exam_admission', renderer='muesli.web:templates/exam/admission.pt', context=ExamContext, permission='view_points')
 class Admission(object):

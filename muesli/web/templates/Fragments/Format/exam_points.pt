@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:define-macro="exam_points">
-  ${exam_points['points']}
+  <a class="fancybox" tal:attributes="href request.route_path('exam_enter_points_raw', exam_id=exam.id, tutorial_ids='', _query={'students': ls.student_id})"><span id="exampoints-${ls.student_id}-${exam.id}">${exam_points['points']}</span></a>
   <span tal:define="fA (lambda f: ('Z' if f==True else ('N' if f==False else '?')));
                     fR (lambda f: ('A' if f==True else ('N' if f==False else '?')));
                     fAttest (lambda f: ('-At' if f==True else ('-NAt' if f==False else '')));">
