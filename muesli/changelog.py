@@ -20,6 +20,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2012-08-17
+concerns:assistants
+Von der Seite zum Noteneintragen aus kann man jetzt auch direkt die Punkte der
+verlinkten Klausuren korrigieren. Dies ist gedacht, um nach der Klausureinsicht
+Arbeitsschritte einzusparen. Die neue Note wird berechnet, aber nicht übertragen.
+Dies muss man also noch selber machen. Demnächst wird es noch einen Button geben,
+der dies übernehmen kann.
+
 ====2012-07-27
 concerns:assistants
 Um mit den neuen Regelungen für Multiple Choice-Aufgaben umgehen zu können, kennt die
