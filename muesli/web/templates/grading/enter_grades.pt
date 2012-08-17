@@ -6,27 +6,58 @@
 <script>/* <![CDATA[ */
   function hide_help ()
   {
-    var fields = $$(".help");
-    for (i=0; i<fields.length; i++) {
-      Element.hide(fields[i]);
-    }
-    var fields = $$(".nohelp");
-    for (i=0; i<fields.length; i++) {
-      Element.show(fields[i]);
-    }
+    $(".help").hide();
+    $(".nohelp").show();
   }
 
   function show_help ()
   {
-    var fields = $$(".help");
-    for (i=0; i<fields.length; i++) {
-      Element.show(fields[i]);
-    }
-    var fields = $$(".nohelp");
-    for (i=0; i<fields.length; i++) {
-      Element.hide(fields[i]);
-    }
+    $(".help").show();
+    $(".nohelp").hide();
   }
+    /*
+     * fancybox
+     */
+    function closeFancyBox() {
+      var student = $(this).attr('href').split('students=')[1]
+      var url = $('#gradingsform').attr('action').replace(/enter_grades/, 'get_row');
+      $.ajax({
+        url: url,
+        data: {'student': student},
+        success: function(data, textStatus, jqXHR) {
+            //console.log(student)
+            var real_data = data["grades"][student];
+            //for (var i = 0; i < real_data["exams"].length; i++) {
+            //}
+            for (var exam_id in real_data["exams"]) {
+              $("#exampoints-"+student+"-"+exam_id).text(real_data["exams"][exam_id]["points"]);
+            }
+            $("#calc-"+student).text(real_data["calc"]);
+            $("#grade-"+student).value(real_data["gradestr"]);
+            console.log(real_data);
+          }
+      });
+    }
+
+    function createFancyBoxes(){
+        $("a.fancybox").each(function(index) {
+          console.log($(this));
+          $(this).fancybox({
+            'transitionIn'  :   'elastic',
+            'transitionOut' :   'elastic',
+            'speedIn'       :   600,
+            'speedOut'      :   200,
+            'overlayShow'   :   true,
+            'scrolling'     :   'no',
+            'showNavArrows' :   false,
+            'onClosed'      :   closeFancyBox
+          });
+       });
+    }
+
+    $(document).ready(function() {
+        createFancyBoxes();
+    });
 /* ]]> */
 </script>
 
@@ -80,7 +111,7 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
   <input type="submit" value="Anzeigen"/>
 </form>
 
-<form method="post" tal:attributes="action request.route_path('grading_enter_grades', grading_id=grading.id)">
+<form id="gradingsform" method="post" tal:attributes="action request.route_path('grading_enter_grades', grading_id=grading.id)">
 <input type="hidden" name="submit" value="1" />
 <table class="colored">
   <tr>
@@ -101,11 +132,12 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
         </span>
       </td>
     <td>${ls.student.name()}</td>
-    <td>${grades[ls.student_id]['calc']}</td>
+    <td><span id="calc-${ls.student_id}">${grades[ls.student_id]['calc']}</span></td>
      
     <td><input tal:attributes="class 'invalid' if grades[ls.student_id]['invalid'] else 'points';
              name 'grade-%i' % ls.student_id;
-             value grades[ls.student_id]['gradestr']" size="4" /></td>
+             value grades[ls.student_id]['gradestr'];
+             id 'grade-%i' % ls.student_id;" size="4"/></td>
   </tr>
 </table>
 <input type="submit" value="Speichern"/>
