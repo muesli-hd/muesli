@@ -118,18 +118,6 @@ def emailUsers(request):
 	        'headers': headers,
 	        'students': bad_students}
 
-@view_config(context = Exception, renderer='muesli.web:templates/error.pt')
-def internalServerError(exc, request):
-	if not muesli.productive:
-		print "TRYING TO RECONSTRUCT EXCEPTION"
-		traceback.print_exc()
-		print "RAISING ANYHOW"
-		raise exc
-	now = datetime.datetime.now()
-	traceback.print_exc()
-	email = request.user.email if request.user else '<nobody>'
-	return {'now': now,
-	        'email': email}
 @view_config(route_name='changelog', renderer='muesli.web:templates/changelog.pt')
 def changelog(request):
 	entries = []
@@ -152,3 +140,18 @@ def forbidden(exc, request):
 	request.response.status=403
 	return {}
 
+###################################
+###################################
+###################################
+#@view_config(context = Exception, renderer='muesli.web:templates/error.pt')
+#def internalServerError(exc, request):
+#	if not muesli.productive:
+#		print "TRYING TO RECONSTRUCT EXCEPTION"
+#		traceback.print_exc()
+#		print "RAISING ANYHOW"
+#		raise exc
+#	now = datetime.datetime.now()
+#	traceback.print_exc()
+#	email = request.user.email if request.user else '<nobody>'
+#	return {'now': now,
+#	        'email': email}
