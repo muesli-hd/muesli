@@ -326,13 +326,16 @@ def emailTutors(request):
 def emailStudents(request):
 	db = request.db
 	lecture = request.context.lecture
-	form = LectureEmailTutors(request)
+	form = LectureEmailStudents(request)
 	if request.method == 'POST' and form.processPostData(request.POST):
 		students = lecture.students
+		bcc = [s.email for s in students]
+		if form['copytotutors']==0:
+			bcc.extend([t.email for t in lecture.tutors])
 		message = Message(subject=form['subject'],
 			sender=request.user.email,
 			to= [assistant.email for assistant in lecture.assistants],
-			bcc=[s.email for s in students],
+			bcc=bcc,
 			body=form['body'])
 		if request.POST['attachments'] not in ['', None]:
 			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
