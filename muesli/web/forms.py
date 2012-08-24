@@ -808,6 +808,29 @@ class LectureEmailTutors(CSRFSecureForm):
 			]
 		CSRFSecureForm.__init__(self, formfields, request, send=u'Senden')
 
+class LectureEmailStudents(CSRFSecureForm):
+	def __init__(self, request):
+		formfields = [
+			FormField('subject',
+			   label='Betreff', size=64,
+			   required=True),
+			FormField('body',
+			   label='Nachricht', cols=64, rows=24,
+			   type='textarea',
+			   required=True),
+			FileField('attachments',
+			   label=u'Anhänge', size=64,
+			   growable=False
+			   ),
+			FormField('copytotutors',
+			   label=u'Kopie an Tutoren senden',
+			   type='radio',
+			   options=list(enumerate([u'Senden', u'Nicht senden'])),
+			   value=0
+			   ),
+			]
+		CSRFSecureForm.__init__(self, formfields, request, send=u'Senden')
+
 class EmailWrongSubject(CSRFSecureForm):
 	def __init__(self, type, request):
 		formfields = [
