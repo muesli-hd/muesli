@@ -35,6 +35,7 @@ from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTP
 from pyramid.url import route_url
 
 from sqlalchemy.orm import exc, joinedload, undefer
+from sqlalchemy.sql.expression import desc
 import sqlalchemy
 
 from muesli import types
@@ -49,7 +50,7 @@ class List(object):
 		self.db = self.request.db
 	def __call__(self):
 
-		lectures = self.db.query(models.Lecture).order_by(models.Lecture.term, models.Lecture.name).options(joinedload(models.Lecture.assistants))
+		lectures = self.db.query(models.Lecture).order_by(desc(models.Lecture.term), models.Lecture.name).options(joinedload(models.Lecture.assistants))
 		if self.request.GET.get('show_all', '0')=='0':
 			lectures = lectures.filter(models.Lecture.is_visible == True)
 		return {'lectures': lectures.all()}
