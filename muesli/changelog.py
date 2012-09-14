@@ -20,6 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2012-09-14
+concerns:assistants
+Auf der Seite zum Noteneintragen gibt es nun den versprochenen Button, um einzelne
+Zeilen abzuspeichern. Damit besteht nichtmehr die Gefahr, beim Eintragen der
+Punkteänderung eines Studenten ausversehen alles zu überschreiben.
+
 ====2012-08-17
 concerns:assistants
 Von der Seite zum Noteneintragen aus kann man jetzt auch direkt die Punkte der
