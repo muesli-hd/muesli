@@ -41,7 +41,6 @@
 
     function createFancyBoxes(){
         $("a.fancybox").each(function(index) {
-          console.log($(this));
           $(this).fancybox({
             'transitionIn'  :   'elastic',
             'transitionOut' :   'elastic',
@@ -53,6 +52,27 @@
             'onClosed'      :   closeFancyBox
           });
        });
+    }
+
+    function saveRow(event,id){
+      var url = $('#gradingsform').attr('action').replace(/enter_grades/, 'get_row');
+      var value= $('#grade-'+id).val()
+      var key='grade-'+id
+      var data = {'student': id};
+      data[key] = value;
+      $('#msg-'+id).text('Speichern...');
+      $.ajax({
+        url: url,
+        type: "POST",
+        data: data,
+        error: function(jqXHR, textStatus, errorThrown){
+          alert(textStatus);
+        },
+        success: function(data, textStatus, jqXHR) {
+            console.log(data)
+            $('#msg-'+id).text('Gespeichert');
+          }
+      });
     }
 
     $(document).ready(function() {
@@ -138,6 +158,7 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
              name 'grade-%i' % ls.student_id;
              value grades[ls.student_id]['gradestr'];
              id 'grade-%i' % ls.student_id;" size="4"/></td>
+    <td><input type="button" onclick="saveRow(event,${ls.student_id})" value="Speichern"/><span id="msg-${ls.student_id}"></span></td>
   </tr>
 </table>
 <input type="submit" value="Speichern"/>
