@@ -48,12 +48,24 @@ class List(object):
 	def __init__(self, request):
 		self.request = request
 		self.db = self.request.db
+	def is_ana_or_la(self, lecture):
+		name = lecture.name.lower()
+		if any([name.startswith(start) for start in ['la','ana','lineare algebra', 'analysis']]):
+			return True
+		else:
+			return False
 	def __call__(self):
-
 		lectures = self.db.query(models.Lecture).order_by(desc(models.Lecture.term), models.Lecture.name).options(joinedload(models.Lecture.assistants))
 		if self.request.GET.get('show_all', '0')=='0':
 			lectures = lectures.filter(models.Lecture.is_visible == True)
-		return {'lectures': lectures.all()}
+		lectures = lectures.all()
+		sticky_lectures = []
+		if lectures:
+			newest_term = lectures[0].term
+			sticky_lectures = [l for l in lectures if l.term == newest_term and self.is_ana_or_la(l)]
+			lectures = [l for l in lectures if not l in sticky_lectures]
+		return {'lectures': lectures,
+			'sticky_lectures': sticky_lectures}
 
 @view_config(route_name='lecture_view', renderer='muesli.web:templates/lecture/view.pt', context=LectureContext, permission='view')
 class View(object):
