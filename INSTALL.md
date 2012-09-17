@@ -28,18 +28,40 @@ hopefully in some configuration file).
 Setup:
 ======
 
-Testing:
---------
-
 Müsli comes with a script to test it without the need to configure some
-web server like Apache. If you want to test Müsli using Postgresql (the default),
+web server like Apache. If you want to use Müsli using Postgresql (the default),
 just create a database called 'muesli' for it, e.g.:
 
     createuser -S -D -R username
     createdb -O username -E UTF8 muesli
 
 This commands usually have to be started as user 'postgres'
-Then you should be able to start the test installation from the Müsli directory by
+
+Setting Up
+----------
+
+The database still has to be created. For this execute the script
+
+    python setupDatabase.py
+
+After you have registered yourself in Müsli with some mail adress, you
+can give yourself administration rights by
+
+    python setupDatabase.py mailadress
+
+If you want to change something in the database by hand, you can
+run the script "loadDatabase.py", e.g. from within ipython via
+
+    %run loadDatabase.py
+
+to get a sqlalchemy session in the database.
+
+Testing
+-------
+
+Müsli comes with a script to test it without the need to configure some
+web server like Apache.
+You should be able to start the test installation from the Müsli directory by
 
     ./muesli-test
 
