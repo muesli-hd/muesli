@@ -3,10 +3,14 @@ import muesli.models as models
 import sqlalchemy as sa
 
 import sys
+from alembic.config import Config
+from alembic import command
 
 engine = muesli.engine()
 if len(sys.argv)==1:
 	models.Base.metadata.create_all(engine)
+	alembic_cfg = Config("alembic.ini")
+	command.stamp(alembic_cfg, "head")
 else:
 	admin_user_mail = sys.argv[1]
 	import muesli.models as models
