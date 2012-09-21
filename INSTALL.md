@@ -102,3 +102,14 @@ In the Apache config, you can enable Müsli with the following snippet:
     WSGIProcessGroup muesli
     WSGIScriptAlias /muesli /opt/muesli4/muesli.wsgi
 
+Database upgrades
+=================
+
+Müsli uses alembic to manage its database revisions. To upgrade to the latest database revision, run the command
+
+    alembic upgrade head
+
+in the Müsli directory. At the moment, Müsli uses a single database setup for alembic. Thus, in order to update
+the 'mueslitest' database as well, you have to adapt 'alembic.ini' and run 'alembic upgrade head' again. This
+will be changed in the future.
+
