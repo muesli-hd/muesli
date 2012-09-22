@@ -79,6 +79,9 @@ class BaseTests(functionalTests.BaseTests):
 
 	def test_lecture_change_assistants(self):
 		res = self.testapp.get('/lecture/change_assistants/%s' % 123456, status=404)
+	
+	def test_lecture_add_student(self):
+		res = self.testapp.get('/lecture/add_student/%s' % 123456, status=404)
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_lecture_view(self):
@@ -136,6 +139,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 	def test_lecture_change_assistants(self):
 		res = self.testapp.get('/lecture/change_assistants/%s' % self.lecture.id, status=403)
+
+	def test_lecture_add_student(self):
+		res = self.testapp.get('/lecture/add_student/%s' % self.lecture.id, status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -261,6 +267,18 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
 	def test_lecture_export_totals(self):
 		res = self.testapp.get('/lecture/export_totals/%s' % self.lecture.id, status=200)
+
+	def test_lecture_add_student(self):
+		self.assertNotIn(self.user_without_lecture, self.lecture.students)
+		res = self.testapp.get('/lecture/add_student/%s' % self.lecture.id, status=200)
+		form = res.form
+		form['student_email'] = self.user_without_lecture.email
+		form['new_tutorial']  = self.lecture.tutorials[0].id
+		res = form.submit()
+		self.assertTrue(res.status.startswith('200'))
+		self.session.expire_all()
+		self.assertIn(self.user_without_lecture, self.lecture.students)
+		self.assertIn(self.user_without_lecture, self.lecture.tutorials[0].students)
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):
