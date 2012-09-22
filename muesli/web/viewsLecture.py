@@ -141,6 +141,47 @@ class AddGrading(object):
 		        'form': form
 		       }
 
+@view_config(route_name='lecture_add_student', renderer='muesli.web:templates/lecture/add_student.pt', context=LectureContext, permission='edit')
+class AddStudent(object):
+	def __init__(self, request):
+		self.request = request
+		self.db = self.request.db
+		self.lecture_id = request.matchdict['lecture_id']
+	def __call__(self):
+		lecture = self.db.query(models.Lecture).get(self.lecture_id)
+		tutorials = lecture.tutorials
+		if self.request.method == 'POST':
+			student_email = self.request.POST['student_email']
+			new_tutorial  = int(self.request.POST['new_tutorial'])
+			try:
+				student = self.db.query(models.User).filter(models.User.email==student_email).one()
+			except exc.NoResultFound:
+				self.request.session.flash(u'Emailadresse nicht gefunden!', queue='errors')
+			tutorial = [t for t in tutorials if t.id == new_tutorial]
+			if len(tutorial)!=1:
+				raise HTTPForbidden('Tutorial gehoert nicht zu dieser Vorlesung!')
+			tutorial = tutorial[0]
+			if student in lecture.students.all():
+				self.request.session.flash(u'Der Student ist in diese Vorlesung bereits eingetragen!', queue='errors')
+			lrs = self.request.db.query(models.LectureRemovedStudent).get((lecture.id, student.id))
+			if lrs: self.request.db.delete(lrs)
+			#ls = request.db.query(models.LectureStudent).get((lecture.id, request.user.id))
+			#if ls:
+			#	oldtutorial = ls.tutorial
+			#else:
+			ls = models.LectureStudent()
+			ls.lecture = lecture
+			ls.student = student
+			oldtutorial = None
+			ls.tutorial = tutorial
+			if not ls in self.request.db: self.request.db.add(ls)
+			self.request.db.commit()
+			self.request.session.flash(u'Der Student %s wurde in das Tutorial %s (%s) eingetragen' % (student, tutorial.time.__html__(), tutorial.tutor_name), queue='messages')
+		return {'lecture': lecture,
+			'tutorials': tutorials
+			}
+
+
 @view_config(route_name='lecture_edit', renderer='muesli.web:templates/lecture/edit.pt', context=LectureContext, permission='edit')
 class Edit(object):
 	def __init__(self, request):

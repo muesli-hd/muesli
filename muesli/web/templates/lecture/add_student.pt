@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Studenten in diese Vorlesung eintragen</h2>
+
+<p>
+Vorlesung: <a tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">${lecture.name}</a>
+</p>
+
+<form method="POST" action="/lecture/add_student" tal:attributes="action request.route_path('lecture_add_student', lecture_id=lecture.id)" method="POST">
+  <table>
+    <tr>
+      <td><label for="student_email">Email</label></td>
+      <td>   
+        <input name="student_email" />
+      </td>
+    </tr>
+    <tr>
+      <td><label for="new_tutorial">Tutorial</label></td>
+      <td>
+      <select name="new_tutorial">
+        <option tal:repeat="tutorial tutorials" tal:attributes="value tutorial.id">
+          ${tutorial.time} - ${tutorial.place} ${('(%s)' % tutorial.tutor_name)}
+        </option>
+      </select>
+      </td>
+    </tr>
+    <tr>
+      <td><input type="submit" value="Eintragen"/></td>
+    </tr>
+  </table>
+</form>
+
+
+  </metal:main>
+</metal:main>
