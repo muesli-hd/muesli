@@ -122,7 +122,15 @@ class PopulatedTests(BaseTests):
 		self.user2.subject = utils.subjects[1]
 		setUserPassword(self.user2, 'user2password')
 		self.session.add(self.user2)
-
+		
+		self.user_without_lecture = muesli.models.User()
+		self.user_without_lecture.first_name = u'Sebastian'
+		self.user_without_lecture.last_name = u'Student'
+		self.user_without_lecture.email = 'user_without_lecture@muesli.org'
+		self.user_without_lecture.subject = utils.subjects[1]
+		setUserPassword(self.user_without_lecture, 'user_without_lecturepassword')
+		self.session.add(self.user_without_lecture)
+		
 		self.unicodeuser = muesli.models.User()
 		self.unicodeuser.first_name = u'Uli'
 		self.unicodeuser.last_name = u'Unicode'
