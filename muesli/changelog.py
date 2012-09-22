@@ -20,6 +20,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2012-09-22
+concerns:assistants
+Man kann jetzt Studenten per Hand in eine Vorlesung eintragen. Dazu gibt es auf
+der Seite "Vorlesung bearbeiten" unten einen Link "Student als Teilnehmer eintragen".
+Dort kann man durch Angabe der Emailadresse des Studenten diesen in eine Übungsgruppe
+eintragen. Dieses Feature ist vor allem gedacht, um Studenten, die die Zulassung
+zu einer Klausur in einem früheren Semester erworben haben, in die Vorlesesung
+eintragen zu können. Sonst kann man ihnen keine Klausurpunkte eintragen.
+
 ====2012-09-14
 concerns:assistants
 Auf der Seite zum Noteneintragen gibt es nun den versprochenen Button, um einzelne
