@@ -157,6 +157,9 @@ class AddStudent(object):
 				student = self.db.query(models.User).filter(models.User.email==student_email).one()
 			except exc.NoResultFound:
 				self.request.session.flash(u'Emailadresse nicht gefunden!', queue='errors')
+				return {'lecture': lecture,
+					'tutorials': tutorials
+					}
 			tutorial = [t for t in tutorials if t.id == new_tutorial]
 			if len(tutorial)!=1:
 				raise HTTPForbidden('Tutorial gehoert nicht zu dieser Vorlesung!')
