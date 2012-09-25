@@ -9,7 +9,7 @@ Um sich anzumelden füllen Sie bitte das Formular unten aus. Bitte beachten Sie,
 </p>
 
 <p>
-Studenten, die Scheine benötigen., müssen sich <a tal:attributes="href request.route_path('user_register_other')">mit mehr Angaben anmelden</a>.
+Studenten, die Scheine benötigen, müssen sich <a tal:attributes="href request.route_path('user_register_other')">mit mehr Angaben anmelden</a>.
 Werden Rechte zum Eintragen von Vorlesungen benötigt so <a tal:attributes="href request.route_path('contact')">melden Sie sich bitte bei uns</a> nach der Anmeldung.
 </p>
 
