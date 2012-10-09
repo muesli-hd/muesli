@@ -13,13 +13,11 @@
             <table>
             <tr tal:condition="'tut_avg' in statisticsData">
               <td>Übungsgruppe</td>
-              <td>${u'%s±%s (%u Personen)' % (fF(statisticsData['tut_avg']), fF(statisticsData['tut_std']), statisticsData['tut_count'])}</td>
-<!--              <td><% sprintf("%.1f±%.1f", tut_avg, tut_std) %></td>-->
+              <td>${u'%s (%u Personen)' % (fF(statisticsData['tut_avg']), statisticsData['tut_count'])}</td>
             </tr>
             <tr>
                <td>${'Vorlesung' if tutorial_ids else ''}</td>
-               <td>${u'%s±%s (%u Personen)' % (fF(statisticsData.get('lec_avg', None)), fF(statisticsData.get('lec_std',None)), statisticsData.get('lec_count',0))}</td>
-<!--               <td> <% sprintf("%.1f±%.1f", lec_avg, lec_std) %></td>-->
+               <td>${u'%s (%u Personen)' % (fF(statisticsData.get('lec_avg', None)), statisticsData.get('lec_count',0))}</td>
             </tr>
           </table>
         </span>
