@@ -20,7 +20,7 @@
 
 from sqlalchemy import create_engine
 
-databaseName = 'postgresql:///muesli'
+databaseName = 'sqlite:///muesli.sqlite'
 productive=True
 #databaseName = 'postgresql:///mueslitest'
 

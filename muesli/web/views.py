@@ -104,7 +104,7 @@ def emailUsers(request):
 			table.append((s,s.birth_date))
 	if request.method == 'POST' and form.processPostData(request.POST):
 		message = Message(subject=form['subject'],
-			sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
+			sender=u'MÜSLI-Team <muesli@mathematik.uni-stuttgart.de>',
 			to= [],
 			bcc=[s.email for s in bad_students],
 			body=form['body'])

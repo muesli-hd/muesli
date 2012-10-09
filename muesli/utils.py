@@ -83,13 +83,9 @@ subjects = [
 	'Physik (MSc)',
 	'Physik (Dipl.)',
 	'Physik (LA)',
-	'Angewandte Informatik (BSc)',
-	'Anwendungsorientierte Informatik (MSc)',
-	'Computerlinguistik (BA)',
-	'Computerlinguistik (Magister)',
-	'Medizinische Informatik (BSc)',
-	'Medizinische Informatik (MSc)',
-	'Medizinische Informatik (Dipl.)',
+	'Luft- und Raumfahrttechnik (BSc)',
+	'Materialwissenschaften (BSc)',
+	'Simulation Technology (BSc)',
 	'Sonstiges'
 	]
 
@@ -119,7 +115,7 @@ def getSemesterLimit():
 	return semesterlimit
 
 def getTerms():
-	first_term = 20082
+	first_term = 20122
 	terms_per_year = 2
 
 	now = datetime.datetime.now()

@@ -89,7 +89,7 @@ class Message(object):
 		self.outer.attach(createAttachment(filename, data))
 
 def sendMail(message):
-	s = smtplib.SMTP('localhost')
+	s = smtplib.SMTP('smtp.mathematik.uni-stuttgart.de')
 	if not testing:
 		s.sendmail(message.sender, message.send_to, message.as_string())
 	s.quit()

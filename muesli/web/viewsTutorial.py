@@ -36,8 +36,8 @@ import sqlalchemy
 import re
 import os
 
-import PIL.Image
-import PIL.ImageDraw
+import Image
+import ImageDraw
 import StringIO
 
 @view_config(route_name='tutorial_view', renderer='muesli.web:templates/tutorial/view.pt', context=TutorialContext, permission='viewOverview')
@@ -75,8 +75,8 @@ class OccupancyBar(object):
 		self.color1 = (0,0,255)
 		self.color2 = (140,140,255)
 	def __call__(self):
-		image = PIL.Image.new('RGB', (self.width,self.height),(255,255,255))
-		draw = PIL.ImageDraw.Draw(image)
+		image = Image.new('RGB', (self.width,self.height),(255,255,255))
+		draw = ImageDraw.Draw(image)
 		draw.rectangle([(0,0),(float(self.width)*self.max_count/self.max_count_total,10)], fill=self.color2)
 		draw.rectangle([(0,0),(float(self.width)*self.count/self.max_count_total,10)], fill=self.color1)
 		output = StringIO.StringIO()
@@ -282,7 +282,7 @@ def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
 
 def sendChangesMail(request, tutor, text):
 	message = Message(subject=u'MÜSLI: Änderungen in Ihrer Übungsgruppe',
-		sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
+		sender=u'MÜSLI-Team <muesli@mathematik.uni-stuttgart.de>',
 		to = [tutor.email],
 		body=u'Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
 	muesli.mail.sendMail(message)
