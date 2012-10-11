@@ -128,6 +128,8 @@ class User(Base):
 		return ret
 	def __unicode__(self):
 		return u'{name} <{email}>'.format(name=self.name(), email=self.email)
+	def __repr__(self):
+		return 'u<User %r <%r>>' % (self.name(), self.email)
 
 class Confirmation(Base):
 	__tablename__ = 'confirmations'
