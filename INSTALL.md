@@ -6,6 +6,7 @@ The following packages are needed in order to run Müsli:
     python-pyramid
     python-excelerator
     python-sqlalchemy (>=0.7, i.e. from backports, ...)
+    python-yaml
     libjs-jquery-tablesorter
     libjs-jquery-fancybox
 

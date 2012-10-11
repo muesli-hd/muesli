@@ -22,6 +22,7 @@
 import datetime
 import pyramid.security
 from collections import defaultdict
+import yaml
 
 from muesli.types import Term
 
@@ -92,6 +93,13 @@ subjects = [
 	'Medizinische Informatik (Dipl.)',
 	'Sonstiges'
 	]
+
+class Configuration(object):
+	def __init__(self, filename):
+		with open(filename, 'r') as config_file:
+			self.data = yaml.safe_load(config_file.read())
+	def __getitem__(self, key):
+		return self.data[key]
 
 #TutorRights:
 editAllTutorials = 'editAllTutorials'
