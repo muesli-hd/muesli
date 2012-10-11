@@ -303,7 +303,7 @@ def email(request):
 		if request.POST['attachments'] not in ['', None]:
 			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
 		muesli.mail.sendMail(message)
-		request.session.flash('A Mail has been send to all students of these tutorial', queue='messages')
+		request.session.flash('A mail has been sent to all students of these tutorials', queue='messages')
 		return HTTPFound(location=request.route_url('tutorial_view', tutorial_ids=request.context.tutorial_ids_str))
 	return {'tutorials': tutorials,
 	        'tutorial_ids': request.context.tutorial_ids_str,
