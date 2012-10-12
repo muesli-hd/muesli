@@ -31,6 +31,9 @@ from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
 from muesli.types import *
 from muesli.utils import DictOfObjects, AutoVivification, editOwnTutorials, listStrings
 
+from sqlalchemy.dialects.sqlite.base import SQLiteDialect
+from sqlalchemy.interfaces import PoolListener
+
 Base = sqlalchemy.ext.declarative.declarative_base()
 
 Session = sessionmaker()
@@ -44,6 +47,14 @@ def getOrCreate(type, session, primary_key):
 
 def initializeSession(engine):
 	Session.configure(bind=engine)
+	if isinstance(engine.dialect, SQLiteDialect):
+		class SQLiteConnectionListener(PoolListener):
+			def connect(self, con, rec):
+				con.enable_load_extension(True)
+				con.load_extension('./libsqlitefunctions.so')
+				con.enable_load_extension(False)
+
+		engine.pool.add_listener(SQLiteConnectionListener())
 
 #Session = sessionmaker(bind=engine)
 
