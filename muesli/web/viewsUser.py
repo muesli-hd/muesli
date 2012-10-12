@@ -182,7 +182,7 @@ Mit freudlichen Grüßen,
   Das MÜSLI-Team
 	""" %(confirmation.created_on, user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
 	message = Message(subject=u'MÜSLI: Ihre Registrierung bei MÜSLI',
-		sender=u'MÜSLI-Team <muesli@mathematik.uni-stuttgart.de>',
+		sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
 		to=[user.email],
 		body=body)
 	sendMail(message)
