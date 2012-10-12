@@ -315,7 +315,7 @@ class Exam(Base):
 				pointsStmt.c.exercise.label('exercise_id'),
 				func.count(pointsStmt.c.student).label('count'),
 				func.avg(pointsStmt.c.points).label('avg'),
-				# func.variance(pointsStmt.c.points).label('variance')
+				func.variance(pointsStmt.c.points).label('variance')
 			).group_by(pointsStmt.c.exercise)
 		examPoints = session.query(\
 				pointsStmt.c.student.label('student_id'),
@@ -324,20 +324,19 @@ class Exam(Base):
 		examStatistics = session.query(\
 				func.count(examPoints.c.student_id).label('count'),
 				func.avg(examPoints.c.points).label('avg'),
-				# func.variance(examPoints.c.points).label('variance'),
+				func.variance(examPoints.c.points).label('variance'),
 			).one()
 		statistics['exam'] =  {
 			prefix+'_avg': examStatistics.avg,
-			# prefix+'_std': math.sqrt(examStatistics.variance) if examStatistics.variance else None,
+			prefix+'_std': math.sqrt(examStatistics.variance) if examStatistics.variance else None,
 			prefix+'_count': examStatistics.count,
 			'max': self.getMaxpoints()}
 		for e in self.exercises:
-			# statistics[e.id] = {prefix+'_avg': None, prefix+'_std': None, prefix+'_count': 0, 'max': e.maxpoints}
-			statistics[e.id] = {prefix+'_avg': None, prefix+'_count': 0, 'max': e.maxpoints}
+			statistics[e.id] = {prefix+'_avg': None, prefix+'_std': None, prefix+'_count': 0, 'max': e.maxpoints}
 		for e in exerciseStatistics.all():
 			statistics[e.exercise_id] = {
 				prefix+'_avg': e.avg,
-				# prefix+'_std': math.sqrt(e.variance) if e.variance else None,
+				prefix+'_std': math.sqrt(e.variance) if e.variance else None,
 				prefix+'_count': e.count
 				}
 		return statistics
@@ -355,7 +354,7 @@ class Exam(Base):
 				pointsStmt.c.subject.label('subject'),
 				func.count(pointsStmt.c.student).label('count'),
 				func.avg(pointsStmt.c.points).label('avg'),
-				# func.variance(pointsStmt.c.points).label('variance')
+				func.variance(pointsStmt.c.points).label('variance')
 			).group_by(pointsStmt.c.exercise, pointsStmt.c.subject).all()
 		examPoints = session.query(\
 				pointsStmt.c.student.label('student_id'),
@@ -366,20 +365,20 @@ class Exam(Base):
 				examPoints.c.subject.label('subject'),
 				func.count(examPoints.c.student_id).label('count'),
 				func.avg(examPoints.c.points).label('avg'),
-				# func.variance(examPoints.c.points).label('variance'),
+				func.variance(examPoints.c.points).label('variance'),
 			).group_by(examPoints.c.subject).all()
 		if statistics == None:
 			statistics = AutoVivification()
 		maxpoints = self.getMaxpoints()
 		for res in examStatistics:
 			statistics[res.subject]['exam'] = {prefix+'_avg': res.avg,
-				# prefix+'_std': math.sqrt(res.variance) if res.variance else None,
+				prefix+'_std': math.sqrt(res.variance) if res.variance else None,
 				prefix+'_count': res.count,
 				'max': maxpoints}
 		for e in exerciseStatistics:
 			statistics[e.subject][e.exercise_id] = {
 				prefix+'_avg': e.avg,
-				# prefix+'_std': math.sqrt(e.variance) if e.variance else None,
+				prefix+'_std': math.sqrt(e.variance) if e.variance else None,
 				prefix+'_count': e.count,
 				'max': session.query(Exercise).get(e.exercise_id).maxpoints
 				}
