@@ -26,6 +26,8 @@ import yaml
 
 from muesli.types import Term
 
+import muesli
+
 preferences = [\
 	{'penalty': 1, 'name': 'Gut'},
 	{'penalty': 3, 'name': 'Mittel'},
@@ -74,26 +76,6 @@ categories = [{'id': 'assignment', 'name': u'Übungszettel'},
 	{'id': 'presence_assignment', 'name': u'Präsenzübung'},
 	{'id': 'mock_exam', 'name': 'Probeklausur'}]
 
-subjects = [
-	'Mathematik (BSc)',
-	'Mathematik (MSc)',
-	'Mathematik (Dipl.)',
-	'Mathematik (LA) (Hauptfach)',
-	'Mathematik (LA) (Beifach)',
-	'Physik (BSc)',
-	'Physik (MSc)',
-	'Physik (Dipl.)',
-	'Physik (LA)',
-	'Angewandte Informatik (BSc)',
-	'Anwendungsorientierte Informatik (MSc)',
-	'Computerlinguistik (BA)',
-	'Computerlinguistik (Magister)',
-	'Medizinische Informatik (BSc)',
-	'Medizinische Informatik (MSc)',
-	'Medizinische Informatik (Dipl.)',
-	'Sonstiges'
-	]
-
 class Configuration(object):
 	def __init__(self, filename):
 		with open(filename, 'r') as config_file:
@@ -111,7 +93,7 @@ tutorRights = [[editAllTutorials, 'Punkte zu allen Tutorien eintragen'],
 					[editNoTutorials, 'Keine Punkte eintragen']]
 
 def getSubjects(user=None):
-	hisSubjects = list(subjects)
+	hisSubjects = list(muesli.config['subjects'])
 	if user and not user.subject in hisSubjects:
 		hisSubjects.append(user.subject)
 	hisSubjects = zip(hisSubjects,hisSubjects)
