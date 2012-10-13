@@ -41,29 +41,6 @@ ghostcapacity = 10000
 lpsolve = '/usr/bin/lp_solve'
 students_unhappiness = 50
 
-lecture_types={
-	'lecture':
-		 {'name':  'Vorlesung',
-			'tutorial': u'Übungsgruppe',
-			'tutorials': u'Übungsgruppen',
-			'tutor':     u'Übungsleiter',
-			'tutors':    u'Übungsleiter',
-			'comment':   'Kommentar'},
-	'seminar':
-		 {'name':  'Seminar',
-			'tutorial': u'Vortrag',
-			'tutorials': u'Vorträge',
-			'tutor':     u'Vortragender',
-			'tutors':    u'Vortragende',
-			'comment':   'Thema'},
-	'modul':
-		{'name':     'Modul',
-			'tutorial': 'Veranstaltung',
-			'tutorials': 'Veranstaltungen',
-			'tutor':     'Dozent',
-			'tutors':    'Dozenten',
-			'comment':   'Titel'}
-	}
 
 modes = [['off', 'Keine Anmeldung'],
 	['direct', 'Direkte Anmeldung'],

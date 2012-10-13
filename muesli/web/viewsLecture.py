@@ -198,7 +198,7 @@ class Edit(object):
 		if self.request.method == 'POST' and form.processPostData(self.request.POST):
 			form.saveValues()
 			self.request.db.commit()
-		names = utils.lecture_types[lecture.type]
+		names = self.request.config['lecture_types'][lecture.type]
 		pref_subjects = lecture.pref_subjects()
 		pref_count = sum([pref[0] for pref in pref_subjects])
 		subjects = lecture.subjects()
@@ -266,7 +266,7 @@ class Preferences(object):
 		self.lecture_id = request.matchdict['lecture_id']
 	def __call__(self):
 		lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
-		names = utils.lecture_types[lecture.type]
+		names = self.request.config['lecture_types'][lecture.type]
 		pref_subjects = lecture.pref_subjects()
 		pref_count = sum([pref[0] for pref in pref_subjects])
 		subjects = lecture.subjects()

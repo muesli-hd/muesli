@@ -59,7 +59,7 @@ class View(object):
 		        'students': students,
 		        'categories': utils.categories,
 		        'exams': dict([[cat['id'], tutorial.lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
-		        'names': utils.lecture_types[tutorial.lecture.type],
+		        'names': self.request.config['lecture_types'][tutorial.lecture.type],
 		        'old_tutorial_id': None  #see move_student
 		        }
 
@@ -105,7 +105,7 @@ class Add(object):
 			self.request.db.commit()
 			form.message = u"Neue Übungsgruppe angelegt."
 		return {'lecture': lecture,
-		        'names': utils.lecture_types[lecture.type],
+		        'names': self.request.config['lecture_types'][lecture.type],
 		        'form': form,
 		        'error_msg': error_msg}
 
@@ -137,7 +137,7 @@ class Edit(object):
 			self.request.db.commit()
 			form.message = u"Änderungen gespeichert"
 		return {'tutorial': tutorial,
-		        'names': utils.lecture_types[tutorial.lecture.type],
+		        'names': self.request.config['lecture_types'][tutorial.lecture.type],
 		        'form': form,
 		        'error_msg': error_msg}
 
@@ -158,7 +158,7 @@ def results(request):
 	        'tutorial_ids': request.context.tutorial_ids,
 	        'lecture_students': lecture_students,
 	        'results': results,
-	        'names': utils.lecture_types[lecture.type],
+	        'names': self.request.config['lecture_types'][lecture.type],
 	        'categories': utils.categories,
 	        'cat_maxpoints': cat_maxpoints,
 	        'exams_by_cat': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id']).all()] for cat in utils.categories]),
