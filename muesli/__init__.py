@@ -24,6 +24,9 @@ from utils import Configuration
 
 config = Configuration('muesli.yml')
 
+import muesli.mail
+muesli.mail.server = config['contact']['server']
+
 databaseName = config['database']['connection']
 productive=False
 
