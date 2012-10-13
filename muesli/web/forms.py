@@ -287,7 +287,7 @@ class LectureAdd(ObjectForm):
 			FormField('type',
 			   label='Typ',
 			   type='select',
-			   options=[[type, data['name']] for type, data in request.config['lecture_types']].items(),
+			   options=[[type, data['name']] for type, data in request.config['lecture_types'].items()],
 			   #value=lecture.type,
 			   required=True),
 			FormField('name',

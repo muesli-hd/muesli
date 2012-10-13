@@ -158,7 +158,7 @@ def results(request):
 	        'tutorial_ids': request.context.tutorial_ids,
 	        'lecture_students': lecture_students,
 	        'results': results,
-	        'names': self.request.config['lecture_types'][lecture.type],
+	        'names': request.config['lecture_types'][lecture.type],
 	        'categories': utils.categories,
 	        'cat_maxpoints': cat_maxpoints,
 	        'exams_by_cat': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id']).all()] for cat in utils.categories]),
