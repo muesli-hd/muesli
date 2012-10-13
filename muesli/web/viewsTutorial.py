@@ -282,7 +282,7 @@ def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
 
 def sendChangesMail(request, tutor, text):
 	message = Message(subject=u'MÜSLI: Änderungen in Ihrer Übungsgruppe',
-		sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
+		sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
 		to = [tutor.email],
 		body=u'Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
 	muesli.mail.sendMail(message)

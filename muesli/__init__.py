@@ -20,9 +20,12 @@
 
 from sqlalchemy import create_engine
 
-databaseName = 'postgresql:///muesli'
+from utils import Configuration
+
+config = Configuration('muesli.yml')
+
+databaseName = config['database']['connection']
 productive=False
-#databaseName = 'postgresql:///mueslitest'
 
 def engine():
 	return create_engine(databaseName)
