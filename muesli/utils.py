@@ -26,6 +26,8 @@ import yaml
 
 from muesli.types import Term
 
+import muesli
+
 preferences = [\
 	{'penalty': 1, 'name': 'Gut'},
 	{'penalty': 3, 'name': 'Mittel'},
@@ -39,29 +41,6 @@ ghostcapacity = 10000
 lpsolve = '/usr/bin/lp_solve'
 students_unhappiness = 50
 
-lecture_types={
-	'lecture':
-		 {'name':  'Vorlesung',
-			'tutorial': u'Übungsgruppe',
-			'tutorials': u'Übungsgruppen',
-			'tutor':     u'Übungsleiter',
-			'tutors':    u'Übungsleiter',
-			'comment':   'Kommentar'},
-	'seminar':
-		 {'name':  'Seminar',
-			'tutorial': u'Vortrag',
-			'tutorials': u'Vorträge',
-			'tutor':     u'Vortragender',
-			'tutors':    u'Vortragende',
-			'comment':   'Thema'},
-	'modul':
-		{'name':     'Modul',
-			'tutorial': 'Veranstaltung',
-			'tutorials': 'Veranstaltungen',
-			'tutor':     'Dozent',
-			'tutors':    'Dozenten',
-			'comment':   'Titel'}
-	}
 
 modes = [['off', 'Keine Anmeldung'],
 	['direct', 'Direkte Anmeldung'],
@@ -73,26 +52,6 @@ categories = [{'id': 'assignment', 'name': u'Übungszettel'},
 	{'id': 'practical_assignment', 'name': u'Praktische Übung'},
 	{'id': 'presence_assignment', 'name': u'Präsenzübung'},
 	{'id': 'mock_exam', 'name': 'Probeklausur'}]
-
-subjects = [
-	'Mathematik (BSc)',
-	'Mathematik (MSc)',
-	'Mathematik (Dipl.)',
-	'Mathematik (LA) (Hauptfach)',
-	'Mathematik (LA) (Beifach)',
-	'Physik (BSc)',
-	'Physik (MSc)',
-	'Physik (Dipl.)',
-	'Physik (LA)',
-	'Angewandte Informatik (BSc)',
-	'Anwendungsorientierte Informatik (MSc)',
-	'Computerlinguistik (BA)',
-	'Computerlinguistik (Magister)',
-	'Medizinische Informatik (BSc)',
-	'Medizinische Informatik (MSc)',
-	'Medizinische Informatik (Dipl.)',
-	'Sonstiges'
-	]
 
 class Configuration(object):
 	def __init__(self, filename):
@@ -111,7 +70,7 @@ tutorRights = [[editAllTutorials, 'Punkte zu allen Tutorien eintragen'],
 					[editNoTutorials, 'Keine Punkte eintragen']]
 
 def getSubjects(user=None):
-	hisSubjects = list(subjects)
+	hisSubjects = list(muesli.config['subjects'])
 	if user and not user.subject in hisSubjects:
 		hisSubjects.append(user.subject)
 	hisSubjects = zip(hisSubjects,hisSubjects)

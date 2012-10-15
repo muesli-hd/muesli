@@ -36,6 +36,9 @@ import smtplib
 
 testing = False
 
+# To be overwritten by value from config file
+server = 'localhost'
+
 """Code adapted from http://docs.python.org/library/email-examples.html"""
 def createAttachment(filename, data):
 	# Guess the content type based on the file's extension.  Encoding
@@ -89,7 +92,7 @@ class Message(object):
 		self.outer.attach(createAttachment(filename, data))
 
 def sendMail(message):
-	s = smtplib.SMTP('localhost')
+	s = smtplib.SMTP(server)
 	if not testing:
 		s.sendmail(message.sender, message.send_to, message.as_string())
 	s.quit()

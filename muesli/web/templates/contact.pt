@@ -10,7 +10,7 @@
 
 <p>
 Bei Problemen mit Übungsgruppen wenden Sie sich bitte an den die Vorlesung betreuenden Assistenten.
-Bei Problemen mit MÜSLI selbst <a href="mailto:muesli@mathi.uni-heidelberg.de">schreiben Sie uns bitte eine Mail</a>.
+Bei Problemen mit MÜSLI selbst <a tal:attributes="href 'mailto:'+request.config['contact']['email']">schreiben Sie uns bitte eine Mail</a>.
 </p>
 
 <p>

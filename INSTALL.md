@@ -29,6 +29,10 @@ hopefully in some configuration file).
 Setup:
 ======
 
+Müsli needs a configuration file called 'muesli.yml' in its main directory. It
+is in the YAML format. You can find an example file called 'muesli.yml.example'
+included.
+
 Müsli comes with a script to test it without the need to configure some
 web server like Apache. If you want to use Müsli using Postgresql (the default),
 just create a database called 'muesli' for it, e.g.:

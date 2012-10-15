@@ -18,7 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from pyramid import security
 from pyramid.config import Configurator
 from pyramid.events import subscriber, BeforeRender, NewRequest
@@ -35,6 +34,7 @@ from muesli.web.views import *
 from muesli.web.viewsLecture import *
 from muesli.web.viewsUser import *
 from muesli import utils
+import muesli
 
 import time
 import datetime
@@ -67,6 +67,10 @@ def add_session_to_request(event):
 @subscriber(NewRequest)
 def add_javascript_to_request(event):
 	event.request.javascript = set()
+
+@subscriber(NewRequest)
+def add_config_to_request(event):
+	event.request.config = muesli.config
 
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):

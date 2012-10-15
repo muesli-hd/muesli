@@ -1,0 +1,94 @@
+---
+database:
+    connection: postgresql:///muesli
+
+contact:
+    email: muesli@mathi.uni-heidelberg.de
+    name: MÜSLI-Team
+    server: localhost
+
+subjects:
+    - Mathematik (BSc)
+    - Mathematik (MSc)
+    - Mathematik (Dipl.)
+    - Mathematik (LA) (Hauptfach)
+    - Mathematik (LA) (Beifach)
+    - Physik (BSc)
+    - Physik (MSc)
+    - Physik (Dipl.)
+    - Physik (LA)
+    - Angewandte Informatik (BSc)
+    - Anwendungsorientierte Informatik (MSc)
+    - Computerlinguistik (BA)
+    - Computerlinguistik (Magister)
+    - Medizinische Informatik (BSc)
+    - Medizinische Informatik (MSc)
+    - Medizinische Informatik (Dipl.)
+    - Sonstiges
+
+
+lecture_types:
+  lecture:
+        name:     Vorlesung
+        tutorial: Übungsgruppe
+        tutorials: Übungsgruppen
+        tutor:     Übungsleiter
+        tutors:    Übungsleiter
+        comment:   Kommentar
+  seminar:
+        name:      Seminar
+        tutorial:  Vortrag
+        tutorials: Vorträge
+        tutor:     Vortragender
+        tutors:    Vortragende
+        comment:   Thema
+  modul:
+        name:     Modul
+        tutorial: Veranstaltung
+        tutorials: Veranstaltungen
+        tutor:     Dozent
+        tutors:    Dozenten
+        comment:   Titel
+#  default_type: lecture
+
+
+### The following entries are unused so far.
+Controller::Lecture:
+  first_term: 20082
+  terms_per_year: 2
+exams:
+  categories:
+    - id:   assignment
+      name: Übungszettel
+    - id:   exam
+      name: Klausur
+    - id:   presence_assignment
+      name: Präsenzübung
+    - id:   mock_exam
+      name: Probeklausur
+
+preferences:
+  - penalty: 1
+    name:    Gut
+  - penalty: 3
+    name:    Mittel
+  - penalty: 10
+    name:    Schlecht
+  - penalty: 100
+    name:    Gar nicht
+
+ghostpenalty: 20000
+ghostcapacity: 10000
+lpsolve: /usr/bin/lp_solve
+students_unhappiness: 50
+
+languages:
+  - id: de
+    name: Deutsch
+  - id: en
+    name: English
+default_language: de
+
+View::Email:
+  envelope_from: "no-reply@mathi.uni-heidelberg.de"
+

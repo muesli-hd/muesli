@@ -52,6 +52,7 @@ class BaseTests(unittest.TestCase):
 		import muesli
 		import sqlalchemy
 		self.engine = sqlalchemy.create_engine('postgresql:///mueslitest')
+		self.config = muesli.config
 
 		import muesli.models
 		muesli.models.Base.metadata.create_all(self.engine)
@@ -110,7 +111,7 @@ class PopulatedTests(BaseTests):
 		self.user.first_name = u'Stefan'
 		self.user.last_name = u'Student'
 		self.user.email = 'user@muesli.org'
-		self.user.subject = utils.subjects[0]
+		self.user.subject = self.config['subjects'][0]
 		setUserPassword(self.user, 'userpassword')
 		self.session.add(self.user)
 		#self.session.commit()
@@ -119,7 +120,7 @@ class PopulatedTests(BaseTests):
 		self.user2.first_name = u'Sigmund'
 		self.user2.last_name = u'Student'
 		self.user2.email = 'user2@muesli.org'
-		self.user2.subject = utils.subjects[1]
+		self.user2.subject = self.config['subjects'][1]
 		setUserPassword(self.user2, 'user2password')
 		self.session.add(self.user2)
 		
@@ -127,7 +128,7 @@ class PopulatedTests(BaseTests):
 		self.user_without_lecture.first_name = u'Sebastian'
 		self.user_without_lecture.last_name = u'Student'
 		self.user_without_lecture.email = 'user_without_lecture@muesli.org'
-		self.user_without_lecture.subject = utils.subjects[1]
+		self.user_without_lecture.subject = self.config['subjects'][1]
 		setUserPassword(self.user_without_lecture, 'user_without_lecturepassword')
 		self.session.add(self.user_without_lecture)
 		
@@ -135,7 +136,7 @@ class PopulatedTests(BaseTests):
 		self.unicodeuser.first_name = u'Uli'
 		self.unicodeuser.last_name = u'Unicode'
 		self.unicodeuser.email = 'unicodeuser@muesli.org'
-		self.unicodeuser.subject = utils.subjects[1]
+		self.unicodeuser.subject = self.config['subjects'][1]
 		setUserPassword(self.unicodeuser, u'üüü')
 		self.session.add(self.unicodeuser)
 		#self.session.commit()
@@ -144,7 +145,7 @@ class PopulatedTests(BaseTests):
 		self.tutor.first_name = u'Thorsten'
 		self.tutor.last_name = u'Tutor'
 		self.tutor.email = 'tutor@muesli.org'
-		self.tutor.subject = utils.subjects[2]
+		self.tutor.subject = self.config['subjects'][2]
 		setUserPassword(self.tutor, 'tutorpassword')
 		self.session.add(self.tutor)
 		#self.session.commit()
@@ -153,7 +154,7 @@ class PopulatedTests(BaseTests):
 		self.tutor2.first_name = u'Thor2sten'
 		self.tutor2.last_name = u'Tu2tor'
 		self.tutor2.email = 'tutor2@muesli.org'
-		self.tutor2.subject = utils.subjects[0]
+		self.tutor2.subject = self.config['subjects'][0]
 		setUserPassword(self.tutor2, 'tutor2password')
 		self.session.add(self.tutor2)
 		#self.session.commit()
@@ -162,7 +163,7 @@ class PopulatedTests(BaseTests):
 		self.assistant.first_name = u'Armin'
 		self.assistant.last_name = u'Assistent'
 		self.assistant.email = 'assistant@muesli.org'
-		self.assistant.subject = utils.subjects[0]
+		self.assistant.subject = self.config['subjects'][0]
 		setUserPassword(self.assistant, 'assistantpassword')
 		self.assistant.is_assistant=1
 		self.session.add(self.assistant)
@@ -172,7 +173,7 @@ class PopulatedTests(BaseTests):
 		self.assistant2.first_name = u'Armin'
 		self.assistant2.last_name = u'Assistent2'
 		self.assistant2.email = 'assistant2@muesli.org'
-		self.assistant2.subject = utils.subjects[0]
+		self.assistant2.subject = self.config['subjects'][0]
 		setUserPassword(self.assistant2, 'assistant2password')
 		self.assistant2.is_assistant=1
 		self.session.add(self.assistant2)
@@ -182,7 +183,7 @@ class PopulatedTests(BaseTests):
 		self.admin.first_name = u'Anton'
 		self.admin.last_name = u'Admin'
 		self.admin.email = 'admin@muesli.org'
-		self.admin.subject = utils.subjects[0]
+		self.admin.subject = self.config['subjects'][0]
 		self.admin.is_admin = 1
 		setUserPassword(self.admin, 'adminpassword')
 		self.session.add(self.admin)

@@ -149,7 +149,7 @@ Mit freudlichen Grüßen,
   Das MÜSLI-Team
 	""" %(user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
 	message = Message(subject=u'MÜSLI: Ihre Registrierung bei MÜSLI',
-		sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
+		sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
 		to=[user.email],
 		body=body)
 	sendMail(message)
@@ -182,7 +182,7 @@ Mit freudlichen Grüßen,
   Das MÜSLI-Team
 	""" %(confirmation.created_on, user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
 	message = Message(subject=u'MÜSLI: Ihre Registrierung bei MÜSLI',
-		sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
+		sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
 		to=[user.email],
 		body=body)
 	sendMail(message)
@@ -232,7 +232,7 @@ Mit freundlichen Grüßen,
   Das MÜSLI-Team
 			""" %(email, request.route_url('user_confirm_email', confirmation=confirmation.hash))
 			message = Message(subject=u'MÜSLI: E-Mail-Adresse ändern',
-				sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
+				sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
 				to=[email],
 				body=body)
 			# As we are not using transactions,
@@ -305,7 +305,7 @@ Mit freundlichen Grüßen,
 
 			""" %(request.route_url('user_reset_password3', confirmation=confirmation.hash))
 			message = Message(subject=u'MÜSLI: Passwort zurücksetzen',
-				sender=u'MÜSLI-Team <muesli@mathi.uni-heidelberg.de>',
+				sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
 				to=[user.email],
 				body=body)
 			# As we are not using transactions,
