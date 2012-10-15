@@ -2,6 +2,10 @@
 database:
     connection: postgresql:///muesli
 
+listen: 
+  host: localhost
+  port: 8080
+
 contact:
     email: muesli@mathi.uni-heidelberg.de
     name: MÜSLI-Team

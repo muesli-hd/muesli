@@ -26,6 +26,8 @@ import muesli.web
 from paste.httpserver import serve
 import subprocess
 
+import yaml
+
 if '--reload' in sys.argv:
 	files = subprocess.Popen(['find', '.', '-iname', '*.pt'], stdout=subprocess.PIPE).communicate()[0].split('\n')[:-1]
 	import paste.reloader
@@ -34,4 +36,4 @@ if '--reload' in sys.argv:
 	paste.reloader.install()
 
 app = muesli.web.main()
-serve(app, host='0.0.0.0')
+serve(app, host=muesli.config['listen']['host'] ,port=muesli.config['listen']['port'])
