@@ -86,8 +86,8 @@ def getSemesterLimit():
 	return semesterlimit
 
 def getTerms():
-	first_term = 20122
-	terms_per_year = 2
+	first_term = muesli.config['terms']['first_term']
+	terms_per_year = muesli.config['terms']['terms_per_year']
 
 	now = datetime.datetime.now()
 	year = now.year

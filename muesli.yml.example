@@ -51,6 +51,10 @@ lecture_types:
         comment:   Titel
 #  default_type: lecture
 
+terms:
+  first_term: 20122
+  terms_per_year: 2
+
 
 ### The following entries are unused so far.
 Controller::Lecture:
