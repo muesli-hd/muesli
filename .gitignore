@@ -1,4 +1,5 @@
 *.pyc
+*.so
 *.swp
 muesli.sqlite
 TODO

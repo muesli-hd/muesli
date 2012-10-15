@@ -114,3 +114,14 @@ in the Müsli directory. At the moment, Müsli uses a single database setup for 
 the 'mueslitest' database as well, you have to adapt 'alembic.ini' and run 'alembic upgrade head' again. This
 will be changed in the future.
 
+
+SQLite support
+==============
+In case you are using sqlite as your database, you will need to compile the c file
+extension-functions.c to support the variance aggregate function. For that run
+	gcc -fPIC -lm -shared extension-functions.c -o libsqlitefunctions.so
+and place the resulting shared-object file in MUESLI's root directory. Make sure
+you're compiling on the running machine or use an appropriate cross-compiler.
+You also have to make sure, that pysqlite2 was compiled with load_extension support.
+(See setup.cfg in the pysqlte2 src package und comment the line
+SQLITE_OMIT_LOAD_EXTENSION.)
