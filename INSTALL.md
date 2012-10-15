@@ -6,6 +6,7 @@ The following packages are needed in order to run Müsli:
     python-pyramid
     python-excelerator
     python-sqlalchemy (>=0.7, i.e. from backports, ...)
+    python-yaml
     libjs-jquery-tablesorter
     libjs-jquery-fancybox
 
@@ -27,6 +28,10 @@ hopefully in some configuration file).
 
 Setup:
 ======
+
+Müsli needs a configuration file called 'muesli.yml' in its main directory. It
+is in the YAML format. You can find an example file called 'muesli.yml.example'
+included.
 
 Müsli comes with a script to test it without the need to configure some
 web server like Apache. If you want to use Müsli using Postgresql (the default),

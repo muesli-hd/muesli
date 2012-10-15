@@ -59,7 +59,7 @@ class View(object):
 		        'students': students,
 		        'categories': utils.categories,
 		        'exams': dict([[cat['id'], tutorial.lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
-		        'names': utils.lecture_types[tutorial.lecture.type],
+		        'names': self.request.config['lecture_types'][tutorial.lecture.type],
 		        'old_tutorial_id': None  #see move_student
 		        }
 
@@ -105,7 +105,7 @@ class Add(object):
 			self.request.db.commit()
 			form.message = u"Neue Übungsgruppe angelegt."
 		return {'lecture': lecture,
-		        'names': utils.lecture_types[lecture.type],
+		        'names': self.request.config['lecture_types'][lecture.type],
 		        'form': form,
 		        'error_msg': error_msg}
 
@@ -137,7 +137,7 @@ class Edit(object):
 			self.request.db.commit()
 			form.message = u"Änderungen gespeichert"
 		return {'tutorial': tutorial,
-		        'names': utils.lecture_types[tutorial.lecture.type],
+		        'names': self.request.config['lecture_types'][tutorial.lecture.type],
 		        'form': form,
 		        'error_msg': error_msg}
 
@@ -158,7 +158,7 @@ def results(request):
 	        'tutorial_ids': request.context.tutorial_ids,
 	        'lecture_students': lecture_students,
 	        'results': results,
-	        'names': utils.lecture_types[lecture.type],
+	        'names': request.config['lecture_types'][lecture.type],
 	        'categories': utils.categories,
 	        'cat_maxpoints': cat_maxpoints,
 	        'exams_by_cat': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id']).all()] for cat in utils.categories]),
@@ -282,7 +282,7 @@ def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
 
 def sendChangesMail(request, tutor, text):
 	message = Message(subject=u'MÜSLI: Änderungen in Ihrer Übungsgruppe',
-		sender=u'MÜSLI-Team <muesli@mathematik.uni-stuttgart.de>',
+		sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
 		to = [tutor.email],
 		body=u'Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
 	muesli.mail.sendMail(message)
@@ -303,7 +303,7 @@ def email(request):
 		if request.POST['attachments'] not in ['', None]:
 			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
 		muesli.mail.sendMail(message)
-		request.session.flash('A Mail has been send to all students of these tutorial', queue='messages')
+		request.session.flash('A mail has been sent to all students of these tutorials', queue='messages')
 		return HTTPFound(location=request.route_url('tutorial_view', tutorial_ids=request.context.tutorial_ids_str))
 	return {'tutorials': tutorials,
 	        'tutorial_ids': request.context.tutorial_ids_str,

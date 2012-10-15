@@ -157,6 +157,9 @@ class AddStudent(object):
 				student = self.db.query(models.User).filter(models.User.email==student_email).one()
 			except exc.NoResultFound:
 				self.request.session.flash(u'Emailadresse nicht gefunden!', queue='errors')
+				return {'lecture': lecture,
+					'tutorials': tutorials
+					}
 			tutorial = [t for t in tutorials if t.id == new_tutorial]
 			if len(tutorial)!=1:
 				raise HTTPForbidden('Tutorial gehoert nicht zu dieser Vorlesung!')
@@ -195,7 +198,7 @@ class Edit(object):
 		if self.request.method == 'POST' and form.processPostData(self.request.POST):
 			form.saveValues()
 			self.request.db.commit()
-		names = utils.lecture_types[lecture.type]
+		names = self.request.config['lecture_types'][lecture.type]
 		pref_subjects = lecture.pref_subjects()
 		pref_count = sum([pref[0] for pref in pref_subjects])
 		subjects = lecture.subjects()
@@ -263,7 +266,7 @@ class Preferences(object):
 		self.lecture_id = request.matchdict['lecture_id']
 	def __call__(self):
 		lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
-		names = utils.lecture_types[lecture.type]
+		names = self.request.config['lecture_types'][lecture.type]
 		pref_subjects = lecture.pref_subjects()
 		pref_count = sum([pref[0] for pref in pref_subjects])
 		subjects = lecture.subjects()
@@ -371,7 +374,7 @@ def emailTutors(request):
 		if request.POST['attachments'] not in ['', None]:
 			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
 		sendMail(message)
-		request.session.flash('A Mail has been send to all tutors of this lecture', queue='messages')
+		request.session.flash('A mail has been sent to all tutors of this lecture', queue='messages')
 		return HTTPFound(location=request.route_url('lecture_edit', lecture_id=lecture.id))
 	return {'lecture': lecture,
 	        'form': form}
@@ -394,7 +397,7 @@ def emailStudents(request):
 		if request.POST['attachments'] not in ['', None]:
 			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
 		sendMail(message)
-		request.session.flash('A Mail has been send to all students of this lecture', queue='messages')
+		request.session.flash('A mail has been sent to all students of this lecture', queue='messages')
 		return HTTPFound(location=request.route_url('lecture_edit', lecture_id=lecture.id))
 	return {'lecture': lecture,
 	        'form': form}

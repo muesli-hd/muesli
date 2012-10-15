@@ -98,22 +98,24 @@ def update(request):
 def register(request):
 	form = UserRegister(request)
 	if request.method == 'POST' and form.processPostData(request.POST):
-		registerCommon(request, form)
-		return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
+		if registerCommon(request, form):
+			return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
 	return {'form': form}
 
 @view_config(route_name='user_register_other', renderer='muesli.web:templates/user/register_other.pt', context=GeneralContext)
 def registerOther(request):
 	form = UserRegisterOther(request)
 	if request.method == 'POST' and form.processPostData(request.POST):
-		registerCommon(request, form)
-		return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
+		if registerCommon(request, form):
+			return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
 	return {'form': form}
 
 def registerCommon(request, form):
-	if request.db.query(models.User).filter(models.User.email==form['email']).first():
+	mails = request.db.query(models.User.email).all()
+	mails = [m.email.lower() for m in mails]
+	if form['email'].lower() in mails:
 		request.session.flash(u'Ein Benutzer mit dieser E-Mail-Adresse existiert bereits.', queue='messages')
-		return
+		return False
 	else:
 		user = models.User()
 		form.obj = user
@@ -125,6 +127,7 @@ def registerCommon(request, form):
 		request.db.add(confirmation)
 		request.db.commit()
 		send_confirmation_mail(request, user, confirmation)
+		return True
 
 def send_confirmation_mail(request, user, confirmation):
 	body =u"""
@@ -146,13 +149,43 @@ Mit freudlichen Grüßen,
   Das MÜSLI-Team
 	""" %(user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
 	message = Message(subject=u'MÜSLI: Ihre Registrierung bei MÜSLI',
-		sender=u'MÜSLI-Team <muesli@mathematik.uni-stuttgart.de>',
+		sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
 		to=[user.email],
 		body=body)
 	sendMail(message)
 
 @view_config(route_name='user_wait_for_confirmation', renderer='muesli.web:templates/user/wait_for_confirmation.pt', context=GeneralContext)
 def waitForConfirmation(request):
+	return {}
+
+@view_config(route_name='user_resend_confirmation_mail', renderer='muesli.web:templates/user/wait_for_confirmation.pt', context=UserContext)
+def resendConfirmationMail(request):
+	user_id = request.matchdict['user_id']
+	confirmation = request.db.query(Confirmation).filter(Confirmation.user_id == user_id).first()
+	user = confirmation.user
+	body =u"""
+Hallo!
+
+Sie haben sich am %s bei MÜSLI mit den folgenden Daten angemeldet:
+
+Name:   %s
+E-Mail: %s
+
+Um die Anmeldung abzuschließen, gehen Sie bitte auf die Seite
+
+%s
+
+Haben Sie sich nicht selbst angemeldet, ignorieren Sie diese Mail bitte
+einfach.
+
+Mit freudlichen Grüßen,
+  Das MÜSLI-Team
+	""" %(confirmation.created_on, user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
+	message = Message(subject=u'MÜSLI: Ihre Registrierung bei MÜSLI',
+		sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+		to=[user.email],
+		body=body)
+	sendMail(message)
 	return {}
 
 @view_config(route_name='user_confirm', renderer='muesli.web:templates/user/confirm.pt', context=ConfirmationContext)
@@ -199,7 +232,7 @@ Mit freundlichen Grüßen,
   Das MÜSLI-Team
 			""" %(email, request.route_url('user_confirm_email', confirmation=confirmation.hash))
 			message = Message(subject=u'MÜSLI: E-Mail-Adresse ändern',
-				sender=u'MÜSLI-Team <muesli@mathematik.uni-stuttgart.de>',
+				sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
 				to=[email],
 				body=body)
 			# As we are not using transactions,
@@ -272,7 +305,7 @@ Mit freundlichen Grüßen,
 
 			""" %(request.route_url('user_reset_password3', confirmation=confirmation.hash))
 			message = Message(subject=u'MÜSLI: Passwort zurücksetzen',
-				sender=u'MÜSLI-Team <muesli@mathematik.uni-stuttgart.de.de>',
+				sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
 				to=[user.email],
 				body=body)
 			# As we are not using transactions,

@@ -148,6 +148,33 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_user_ajax_complete(self):
 		res = self.testapp.get('/user/ajax_complete/%s/%s' % (self.lecture.id,self.tutorial.id), status=403)
 
+	def test_user_register_same_email(self):
+		res = self.testapp.get('/user/register', status=200)
+		form = res.form
+		# Same email
+		form['email'] = self.user.email
+		form['first_name'] = 'Matthias'
+		form['last_name'] = 'Kümmerer'
+		form['subject'] = 'Mathematik (Dipl.)'
+		form['matrikel'] = '1234567'
+		form['birth_date'] = '01.12.1999'
+		form['birth_place'] = 'Hintertupfingen'
+		res = form.submit()
+		self.assertTrue(res.status.startswith('200'))
+		self.assertResContains(res, 'existiert bereits')
+		form = res.form
+		# Same email different cases
+		form['email'] = self.user.email.upper()
+		form['first_name'] = 'Matthias'
+		form['last_name'] = 'Kümmerer'
+		form['subject'] = 'Mathematik (Dipl.)'
+		form['matrikel'] = '1234567'
+		form['birth_date'] = '01.12.1999'
+		form['birth_place'] = 'Hintertupfingen'
+		res = form.submit()
+		self.assertTrue(res.status.startswith('200'))
+		self.assertResContains(res, u'existiert bereits')
+
 class UnicodeTests(functionalTests.UnicodeUserTests):
 	def test_unicodepassword(self):
 		res = self.testapp.get('/start', status=200)
