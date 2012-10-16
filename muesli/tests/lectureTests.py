@@ -28,6 +28,7 @@ from muesli.tests import functionalTests
 class BaseTests(functionalTests.BaseTests):
 	def test_lecture_list(self):
 		res = self.testapp.get('/lecture/list', status=200)
+		self.assertResContainsNot(res, '/lecture/add')
 
 	def test_lecture_view(self):
 		res = self.testapp.get('/lecture/view/%s' % 12456, status=404)
@@ -206,6 +207,10 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
 		TutorLoggedInTests.setUp(self)
 		self.setUser(self.assistant)
+
+	def test_lecture_list(self):
+		res = self.testapp.get('/lecture/list', status=200)
+		self.assertResContains(res, '/lecture/add')
 
 	def test_lecture_view(self):
 		res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=200)
