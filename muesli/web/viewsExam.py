@@ -32,8 +32,8 @@ from sqlalchemy.orm import exc
 from sqlalchemy.sql import func
 import sqlalchemy
 
-import Image
-import ImageDraw
+import PIL.Image
+import PIL.ImageDraw
 import StringIO
 
 import matplotlib
@@ -392,8 +392,8 @@ class ExamStatisticsBar(object):
 		if self.tutorial_points != None:
 			self.values.insert(0,[self.tutorial_points, self.max])
 	def __call__(self):
-		image = Image.new('RGB', (self.width,self.height),(255,255,255))
-		draw = ImageDraw.Draw(image)
+		image = PIL.Image.new('RGB', (self.width,self.height),(255,255,255))
+		draw = PIL.ImageDraw.Draw(image)
 		barheight = float(self.height)/len(self.values)
 		for i,bar in enumerate(self.values):
 			draw.rectangle([(0,i*barheight),(float(self.width)*bar[1]/self.max,(i+1)*barheight)], fill=self.color2)

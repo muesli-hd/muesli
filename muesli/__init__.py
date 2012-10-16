@@ -28,7 +28,7 @@ import muesli.mail
 muesli.mail.server = config['contact']['server']
 
 databaseName = config['database']['connection']
-productive=True
+productive=False
 
 def engine():
 	return create_engine(databaseName)

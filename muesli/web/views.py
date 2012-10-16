@@ -143,15 +143,15 @@ def forbidden(exc, request):
 ###################################
 ###################################
 ###################################
-@view_config(context = Exception, renderer='muesli.web:templates/error.pt')
-def internalServerError(exc, request):
-	if not muesli.productive:
-		print "TRYING TO RECONSTRUCT EXCEPTION"
-		traceback.print_exc()
-		print "RAISING ANYHOW"
-		raise exc
-	now = datetime.datetime.now()
-	traceback.print_exc()
-	email = request.user.email if request.user else '<nobody>'
-	return {'now': now,
-	        'email': email}
+#@view_config(context = Exception, renderer='muesli.web:templates/error.pt')
+#def internalServerError(exc, request):
+#	if not muesli.productive:
+#		print "TRYING TO RECONSTRUCT EXCEPTION"
+#		traceback.print_exc()
+#		print "RAISING ANYHOW"
+#		raise exc
+#	now = datetime.datetime.now()
+#	traceback.print_exc()
+#	email = request.user.email if request.user else '<nobody>'
+#	return {'now': now,
+#	        'email': email}

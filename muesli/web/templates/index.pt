@@ -4,8 +4,7 @@
 <h2>Willkommen bei MÜSLI!</h2>
 
 <p>
-MÜSLI verwaltet einige Übungsgruppen und Vorlesungen an der Fakultät für Mathematik
-und Physik der Universität Stuttgart.
+MÜSLI verwaltet viele Übungsgruppen und Vorlesungen an der Fakultät für Mathematik und Informatik der Universität Heidelberg.
 </p>
 
 <p>
@@ -15,7 +14,7 @@ Danach wählen Sie Ihre Vorlesung aus der <a tal:attributes="href request.route_
 </p>
 
 <p>
-Diese Version von MÜSLI wurde in den Semesterferien zum Wintersemester 2012/13 neu aufgesetzt.
+Diese Version von MÜSLI wurde in den Semesterferien zum Wintersemester 2011/12 neu aufgesetzt.
 </p>
 
 <p>
