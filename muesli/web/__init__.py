@@ -40,6 +40,13 @@ import time
 import datetime
 import numbers
 
+#import objgraph
+#import inspect
+#import random
+#mport gc
+
+import weakref
+
 from sqlalchemy import event as saevent
 
 @subscriber(NewRequest)
@@ -48,8 +55,17 @@ def add_session_to_request(event):
 	event.request.now = time.time
 	event.request.db = Session()
 	event.request.queries = 0
+	# The listener is not yet deleted after the request completes,
+	# as this is not implemented in sqlalchemy. Therefore, the
+	# closure would contain a reference to the event as long
+	# as the connection to the database is active, which
+	# creates a memory leak. As long as the listener cannot be
+	# removed, we have to use a weak reference.
+	weak_event = weakref.ref(event)
 	def before_execute(conn, clauseelement, multiparams, params):
-		event.request.queries += 1
+		wevent = weak_event()
+		if wevent:
+			wevent.request.queries += 1
 	saevent.listen(Session.get_bind(event.request.db), "before_execute", before_execute)
 
 	def callback(request):
@@ -63,7 +79,10 @@ def add_session_to_request(event):
 		event.request.user = None
 	event.request.userInfo = utils.UserInfo(event.request.user)
 	event.request.permissionInfo = utils.PermissionInfo(event.request)
-
+	#event.request.objgraph = objgraph
+	#event.request.inspect = inspect
+	#event.request.random = random
+	#event.request.gc = gc
 @subscriber(NewRequest)
 def add_javascript_to_request(event):
 	event.request.javascript = set()
