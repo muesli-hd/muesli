@@ -55,6 +55,12 @@ def add_session_to_request(event):
 	event.request.now = time.time
 	event.request.db = Session()
 	event.request.queries = 0
+	# The listener is not yet deleted after the request completes,
+	# as this is not implemented in sqlalchemy. Therefore, the
+	# closure would contain a reference to the event as long
+	# as the connection to the database is active, which
+	# creates a memory leak. As long as the listener cannot be
+	# removed, we have to use a weak reference.
 	weak_event = weakref.ref(event)
 	def before_execute(conn, clauseelement, multiparams, params):
 		wevent = weak_event()
