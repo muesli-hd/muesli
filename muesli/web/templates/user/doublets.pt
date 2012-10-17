@@ -1,0 +1,23 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Doppelte Anmeldungen</h2>
+
+<table class="colored">
+  <thead>
+    <tr>
+      <td>Email</td>
+      <td>User</td>
+    </tr>
+  </thead>
+  <tr tal:repeat="(email, students) doublets.items()">
+    <td>${email}</td>
+    <td>
+      <span tal:repeat="student students"><a tal:attributes="href request.route_path('user_edit', user_id=student.id)">${student.name()}</a></span>
+    </td>
+  </tr>
+</table>
+
+  </metal:main>
+</metal:main>
