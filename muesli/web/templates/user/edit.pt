@@ -15,6 +15,8 @@
 <form method="post" tal:attributes="action request.route_path('user_resend_confirmation_mail', user_id=user.id)">
   <input type="submit" value="Bestätigungsmail erneut verschicken" />
 </form>
+
+<a tal:attributes="href request.route_path('user_delete', user_id=user.id)">Benutzer löschen</a>
 </div>
 
 <div tal:condition="user.tutorials.count() !=0">

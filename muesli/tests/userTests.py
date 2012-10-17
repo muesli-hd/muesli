@@ -113,6 +113,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_user_ajax_complete(self):
 		res = self.testapp.get('/user/ajax_complete/%s/%s' % (123,234), status=403)
 
+	def test_user_delete(self):
+		res = self.testapp.get('/user/delete/%s' % (1234), status=404)
+
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_user_edit(self):
@@ -174,6 +177,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 		res = form.submit()
 		self.assertTrue(res.status.startswith('200'))
 		self.assertResContains(res, u'existiert bereits')
+
+	def test_user_delete(self):
+		res = self.testapp.get('/user/delete/%s' % (self.user2.id), status=403)
 
 class UnicodeTests(functionalTests.UnicodeUserTests):
 	def test_unicodepassword(self):
@@ -284,3 +290,15 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 
 	def test_user_list(self):
 		res = self.testapp.get('/user/list', status=200)
+	
+	def test_user_delete(self):
+		res = self.testapp.get('/user/delete/%s' % (self.user2.id), status=302)
+		self.assertIn('/user/edit/%s' % self.user2.id, res.headers['location'])
+		res = res.follow()
+		self.assertResContains(res, 'korrekt angemeldet')
+		
+		res = self.testapp.get('/user/delete/%s' % (self.user_unconfirmed.id), status=302)
+		self.assertIn('/admin', res.headers['location'])
+		res = res.follow()
+		self.assertResContains(res, u'wurde gelöscht')
+		
