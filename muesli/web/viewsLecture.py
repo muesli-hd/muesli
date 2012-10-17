@@ -572,6 +572,7 @@ def exportYaml(request):
 		lecture_dict['name'] = lecture.name
 		lecture_dict['lecturer'] = lecture.lecturer
 		lecture_dict['student_count'] = lecture.lecture_students.count()
+		lecture_dict['term'] = lecture.term.__html__()
 		out.append(lecture_dict)
 	response = Response(content_type='application/x-yaml')
 	response.body = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)

@@ -306,11 +306,14 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 		self.assertResContains(res, u'wurde gelöscht')
 
 	def test_user_delete_unconfirmed(self):
+		student_count = self.session.query(muesli.models.User).count()
 		res = self.testapp.get('/user/delete_unconfirmed', status=200)
 		res = res.form.submit()
 		self.assertEqual(res.status_int, 200)
 		# Do not delete students with too new confirmations
 		self.assertResContains(res, u'0 Studenten gelöscht')
+		self.session.expire_all()
+		self.assertEqual(self.session.query(muesli.models.User).count(), student_count)
 		# But do delete students with old confirmations
 		self.user_unconfirmed.confirmations[0].created_on -= datetime.timedelta(60)
 		self.session.commit()
@@ -318,3 +321,5 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 		res = res.form.submit()
 		self.assertEqual(res.status_int, 200)
 		self.assertResContains(res, u'1 Studenten gelöscht')
+		self.session.expire_all()
+		self.assertEqual(self.session.query(muesli.models.User).count(), student_count-1)
