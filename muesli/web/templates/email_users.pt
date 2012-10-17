@@ -2,7 +2,7 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<h2>E-Mail an alle Studenten mit falschen Fach schreiben</h2>
+<h2>E-Mail an alle Studenten mit Datenproblemen schreiben</h2>
 
 <p>
 Auf dieser Seite können Sie eine Nachricht an alle Studenten, die ein falsches Fach eingetragen haben, schicken.
@@ -12,6 +12,7 @@ Geben Sie hierzu in das Formular unten einen Betreff und die Nachricht ein und k
 <ul>
   <li><a tal:attributes="href request.route_path('email_users',_query={'type': 'wrong_subject'})">Falsches Fach</a></li>
   <li><a tal:attributes="href request.route_path('email_users',_query={'type': 'wrong_birthday'})">Falscher Geburtstag</a></li>
+  <li><a tal:attributes="href request.route_path('email_users',_query={'type': 'unconfirmed'})">Karteilleichen</a></li>
 </ul>
 
 <p>

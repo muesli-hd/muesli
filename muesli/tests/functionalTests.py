@@ -131,6 +131,16 @@ class PopulatedTests(BaseTests):
 		self.user_without_lecture.subject = self.config['subjects'][1]
 		setUserPassword(self.user_without_lecture, 'user_without_lecturepassword')
 		self.session.add(self.user_without_lecture)
+
+		self.user_unconfirmed = muesli.models.User()
+		self.user_unconfirmed.first_name = u'Ulrich'
+		self.user_unconfirmed.last_name = u'Student'
+		self.user_unconfirmed.email = 'user_unconfirmed@muesli.org'
+		confirmation = muesli.models.Confirmation()
+		confirmation.user = self.user_unconfirmed
+		confirmation.source = u'user/register'
+		self.session.add(self.user_unconfirmed)
+		self.session.add(confirmation)
 		
 		self.unicodeuser = muesli.models.User()
 		self.unicodeuser.first_name = u'Uli'

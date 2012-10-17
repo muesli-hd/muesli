@@ -85,6 +85,21 @@ def edit(request):
 	        'tutorials_as_tutor': user.tutorials_as_tutor.all(),
 	        'penalty_names': utils.penalty_names}
 
+@view_config(route_name='user_delete', context=UserContext, permission='delete')
+def delete(request):
+	user = request.context.user
+	if not user.password == None:
+		request.session.flash(u'Benutzer %s ist korrekt angemeldet und kann daher nicht gelöscht werden' % user, queue='errors')
+		return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
+	else:
+		for c in user.confirmations:
+			request.db.delete(c)
+		#old_name = str(user)
+		request.db.delete(user)
+		request.db.commit()
+		request.session.flash(u'Benutzer %s wurde gelöscht!' % user, queue='messages')
+		return HTTPFound(location = request.route_url('admin'))
+
 @view_config(route_name='user_update', renderer='muesli.web:templates/user/update.pt', context=GeneralContext, permission='update')
 def update(request):
 	form = UserUpdate(request, request.user)

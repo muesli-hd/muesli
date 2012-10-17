@@ -33,7 +33,7 @@
         </td>
       </tr>
     </table>
-    <a tal:condition="request.userInfo.is_assistant" tal:attributes="href request.route_path('lecture_add')">Neue Vorlesung eintragen</a>
+    <a tal:condition="request.permissionInfo.has_permission('create_lecture')" tal:attributes="href request.route_path('lecture_add')">Neue Vorlesung eintragen</a>
 
   </metal:main>
 </metal:main>

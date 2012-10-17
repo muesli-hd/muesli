@@ -154,6 +154,7 @@ def main(global_config=None, **settings):
 	config.add_route('user_login', '/user/login')
 	config.add_route('user_list', '/user/list', factory = GeneralContext)
 	config.add_route('user_edit', '/user/edit/{user_id}', factory = UserContext)
+	config.add_route('user_delete', '/user/delete/{user_id}', factory = UserContext)
 	config.add_route('user_resend_confirmation_mail', '/user/resend_confirmation_mail/{user_id}', factory = UserContext)
 	config.add_route('user_list_subjects', '/user/list_subjects', factory = GeneralContext)
 	config.add_route('user_register', '/user/register', factory=GeneralContext)
@@ -169,7 +170,7 @@ def main(global_config=None, **settings):
 
 	config.add_route('overview', '/')
 	config.add_route('lecture_add', '/lecture/add', factory = GeneralContext)
-	config.add_route('lecture_list', '/lecture/list')
+	config.add_route('lecture_list', '/lecture/list', factory = GeneralContext)
 	config.add_route('lecture_edit', '/lecture/edit/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_delete', '/lecture/delete/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_change_assistants', '/lecture/change_assistants/{lecture_id}', factory = LectureContext)
