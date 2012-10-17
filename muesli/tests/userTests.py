@@ -20,6 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from hashlib import sha1
+import datetime
 
 import unittest
 import muesli.web
@@ -116,6 +117,8 @@ class BaseTests(functionalTests.BaseTests):
 	def test_user_delete(self):
 		res = self.testapp.get('/user/delete/%s' % (1234), status=404)
 
+	def test_user_delete_unconfirmed(self):
+		res = self.testapp.get('/user/delete_unconfirmed', status=403)
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_user_edit(self):
@@ -301,4 +304,17 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 		self.assertIn('/admin', res.headers['location'])
 		res = res.follow()
 		self.assertResContains(res, u'wurde gelöscht')
-		
+
+	def test_user_delete_unconfirmed(self):
+		res = self.testapp.get('/user/delete_unconfirmed', status=200)
+		res = res.form.submit()
+		self.assertEqual(res.status_int, 200)
+		# Do not delete students with too new confirmations
+		self.assertResContains(res, u'0 Studenten gelöscht')
+		# But do delete students with old confirmations
+		self.user_unconfirmed.confirmations[0].created_on -= datetime.timedelta(60)
+		self.session.commit()
+		res = self.testapp.get('/user/delete_unconfirmed', status=200)
+		res = res.form.submit()
+		self.assertEqual(res.status_int, 200)
+		self.assertResContains(res, u'1 Studenten gelöscht')

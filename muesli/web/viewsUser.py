@@ -37,6 +37,7 @@ from muesli.mail import Message, sendMail
 
 import re
 import os
+import datetime
 
 @view_config(route_name='user_login', renderer='muesli.web:templates/user/login.pt')
 def login(request):
@@ -99,6 +100,26 @@ def delete(request):
 		request.db.commit()
 		request.session.flash(u'Benutzer %s wurde gelöscht!' % user, queue='messages')
 		return HTTPFound(location = request.route_url('admin'))
+
+@view_config(route_name='user_delete_unconfirmed', renderer = 'muesli.web:templates/user/delete_unconfirmed.pt', context=GeneralContext, permission='admin')
+def deleteUnconfirmed(request):
+	potentially_bad_students = request.db.query(models.User).filter(models.User.password == None).all()
+	bad_students = []
+	# We delete everything older than 30 days
+	limit = datetime.datetime.now() - datetime.timedelta(30)
+	for student in potentially_bad_students:
+		if student.confirmations[0].created_on < limit:
+			bad_students.append((student,student.confirmations[0].created_on))
+	bad_students.sort(key=lambda e: e[1])
+	if request.method == 'POST' and 'delete' in request.POST:
+		for student, date in bad_students:
+			for c in student.confirmations:
+				request.db.delete(c)
+			request.db.delete(student)
+		request.db.commit()
+		request.session.flash(u'%i Studenten gelöscht' % len(bad_students), queue='messages')
+		bad_students = []
+	return {'unconfirmed_students': bad_students}
 
 @view_config(route_name='user_update', renderer='muesli.web:templates/user/update.pt', context=GeneralContext, permission='update')
 def update(request):

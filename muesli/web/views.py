@@ -104,8 +104,8 @@ def emailUsers(request):
 			table.append((s,s.birth_date))
 	elif ttype == 'unconfirmed':
 		headers = ['Anmeldedatum']
-		students = request.db.query(models.User).filter(models.User.password == None).all()
-		for student in students:
+		bad_students = request.db.query(models.User).filter(models.User.password == None).all()
+		for student in bad_students:
 			table.append((student, student.confirmations[0].created_on))
 	if request.method == 'POST' and form.processPostData(request.POST):
 		message = Message(subject=form['subject'],
