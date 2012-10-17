@@ -136,7 +136,7 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_user_reset_password3(self):
 		self.test_user_reset_password()
 		self.session.expire_all()
-		confirmation = self.session.query(Confirmation).one()
+		confirmation = self.session.query(Confirmation).filter(Confirmation.user_id == self.user.id).one()
 		user = confirmation.user
 		res = self.testapp.get('/user/reset_password3/%s' % confirmation.hash, status=200)
 		res.form['password'] = 'testpasswort'
