@@ -83,6 +83,7 @@ class OccupancyBar(object):
 		image.save(output, format='PNG')
 		response = Response()
 		response.content_type = 'image/png'
+		response.cache_control = 'max-age=86400'
 		response.body = output.getvalue()
 		output.close()
 		return response
