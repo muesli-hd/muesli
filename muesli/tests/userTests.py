@@ -209,7 +209,8 @@ class UserLoggedInTests(UnloggedTests):
 	def test_user_confirm_email(self):
 		self.test_user_change_email()
 		self.session.expire_all()
-		confirmation = self.session.query(Confirmation).one()
+		self.assertEqual(len(self.loggedUser.confirmations), 1)
+		confirmation = self.loggedUser.confirmations[0]
 		newmail = confirmation.what
 		user = confirmation.user
 		res = self.testapp.get('/user/confirm_email/%s' % confirmation.hash, status=200)
@@ -220,7 +221,8 @@ class UserLoggedInTests(UnloggedTests):
 
 		self.test_user_change_email()
 		self.session.expire_all()
-		confirmation = self.session.query(Confirmation).one()
+		self.assertEqual(len(self.loggedUser.confirmations), 1)
+		confirmation = self.loggedUser.confirmations[0]
 		user = confirmation.user
 		res = self.testapp.get('/user/confirm_email/%s' % confirmation.hash, status=200)
 		res = res.form.submit('confirm')
@@ -295,12 +297,61 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 		res = self.testapp.get('/user/list', status=200)
 	
 	def test_user_delete(self):
+		#Do not delete students from tutorials
 		res = self.testapp.get('/user/delete/%s' % (self.user2.id), status=302)
 		self.assertIn('/user/edit/%s' % self.user2.id, res.headers['location'])
 		res = res.follow()
-		self.assertResContains(res, 'korrekt angemeldet')
+		self.assertResContains(res, 'Tutorien angemeldet')
+		self.assertResContainsNot(res, u'wurde gelöscht')
+
+		#Do not delete tutors
+		res = self.testapp.get('/user/delete/%s' % (self.tutor.id), status=302)
+		self.assertIn('/user/edit/%s' % self.tutor.id, res.headers['location'])
+		res = res.follow()
+		self.assertResContains(res, 'Tutor von Tutorien')
+		self.assertResContainsNot(res, u'wurde gelöscht')
+
+		# Do not delete assistants
+		res = self.testapp.get('/user/delete/%s' % (self.assistant.id), status=302)
+		self.assertIn('/user/edit/%s' % self.assistant.id, res.headers['location'])
+		res = res.follow()
+		self.assertResContains(res, 'verwaltet Vorlesungen')
+		self.assertResContainsNot(res, u'wurde gelöscht')
 		
+		# Do not delete students who have points in Müsli
+		e = ExerciseStudent()
+		e.student = self.user_without_lecture
+		e.exercise = self.exercise
+		self.session.add(e)
+		self.session.commit()
+		res = self.testapp.get('/user/delete/%s' % (self.user_without_lecture.id), status=302)
+		self.assertIn('/user/edit/%s' % self.user_without_lecture.id, res.headers['location'])
+		res = res.follow()
+		self.assertResContains(res, 'eingetragene Punkte')
+		self.assertResContainsNot(res, u'wurde gelöscht')
+		self.session.delete(e)
+		self.session.commit()
+
+		# Do not delete Students who have grades in Müsli
+		e = StudentGrade()
+		e.student = self.user_without_lecture
+		e.grading = self.grading
+		self.session.add(e)
+		self.session.commit()
+		res = self.testapp.get('/user/delete/%s' % (self.user_without_lecture.id), status=302)
+		self.assertIn('/user/edit/%s' % self.user_without_lecture.id, res.headers['location'])
+		res = res.follow()
+		self.assertResContains(res, 'eingetragene Noten')
+		self.assertResContainsNot(res, u'wurde gelöscht')
+		self.session.delete(e)
+		self.session.commit()
+
 		res = self.testapp.get('/user/delete/%s' % (self.user_unconfirmed.id), status=302)
+		self.assertIn('/admin', res.headers['location'])
+		res = res.follow()
+		self.assertResContains(res, u'wurde gelöscht')
+
+		res = self.testapp.get('/user/delete/%s' % (self.user_without_lecture.id), status=302)
 		self.assertIn('/admin', res.headers['location'])
 		res = res.follow()
 		self.assertResContains(res, u'wurde gelöscht')

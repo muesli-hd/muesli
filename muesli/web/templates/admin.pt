@@ -13,6 +13,7 @@
   <li><a tal:attributes="href request.route_path('lecture_add')">Neue Vorlesung</a></li>
   <li><a tal:attributes="href request.route_path('email_users')">Studenten mailen</a></li>
   <li><a tal:attributes="href request.route_path('user_delete_unconfirmed')">Karteileichen sichten und löschen</a></li>
+  <li><a tal:attributes="href request.route_path('user_doublets')">Mehrfache Anmeldungen</a></li>
 </ul>
 
   </metal:main>

@@ -38,6 +38,7 @@ from muesli.mail import Message, sendMail
 import re
 import os
 import datetime
+import collections
 
 @view_config(route_name='user_login', renderer='muesli.web:templates/user/login.pt')
 def login(request):
@@ -89,8 +90,23 @@ def edit(request):
 @view_config(route_name='user_delete', context=UserContext, permission='delete')
 def delete(request):
 	user = request.context.user
-	if not user.password == None:
-		request.session.flash(u'Benutzer %s ist korrekt angemeldet und kann daher nicht gelöscht werden' % user, queue='errors')
+	if (user.tutorials.all()):
+		request.session.flash(u'Benutzer %s ist zu Tutorien angemeldet und kann daher nicht gelöscht werden' % user, queue='errors')
+		return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
+	elif user.tutorials_as_tutor.all():
+		request.session.flash(u'Benutzer %s ist Tutor von Tutorien und kann daher nicht gelöscht werden' % user, queue='errors')
+		return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
+	elif user.lectures_as_tutor:
+		request.session.flash(u'Benutzer %s ist als Tutor eingetragen und kann daher nicht gelöscht werden' % user, queue='errors')
+		return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
+	elif user.lectures_as_assistant.all():
+		request.session.flash(u'Benutzer %s verwaltet Vorlesungen und kann daher nicht gelöscht werden' % user, queue='errors')
+		return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
+	elif len(user.exercise_points)>0:
+		request.session.flash(u'Benutzer %s hat eingetragene Punkte und kann daher nicht gelöscht werden' % user, queue='errors')
+		return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
+	elif len(user.student_grades.all())>0:
+		request.session.flash(u'Benutzer %s hat eingetragene Noten und kann daher nicht gelöscht werden' % user, queue='errors')
 		return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
 	else:
 		for c in user.confirmations:
@@ -120,6 +136,17 @@ def deleteUnconfirmed(request):
 		request.session.flash(u'%i Studenten gelöscht' % len(bad_students), queue='messages')
 		bad_students = []
 	return {'unconfirmed_students': bad_students}
+
+@view_config(route_name='user_doublets', renderer = 'muesli.web:templates/user/doublets.pt', context=GeneralContext, permission='admin')
+def doublets(request):
+	emails = [e.email for e in request.db.query(models.User.email)]
+	doublets = collections.defaultdict(lambda: [])
+	for user in request.db.query(models.User).all():
+		doublets[user.email.lower()].append(user)
+	for key, value in doublets.items():
+		if len(value)<=1:
+			del doublets[key]
+	return {'doublets': dict(doublets)}
 
 @view_config(route_name='user_update', renderer='muesli.web:templates/user/update.pt', context=GeneralContext, permission='update')
 def update(request):
