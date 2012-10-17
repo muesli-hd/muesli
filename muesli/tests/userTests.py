@@ -120,6 +120,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_user_delete_unconfirmed(self):
 		res = self.testapp.get('/user/delete_unconfirmed', status=403)
 
+	def test_user_doublets(self):
+		res = self.testapp.get('/user/doublets', status=403)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_user_edit(self):
 		res = self.testapp.get('/user/edit/%s' % self.user.id, status=403)
@@ -374,3 +377,7 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 		self.assertResContains(res, u'1 Studenten gelöscht')
 		self.session.expire_all()
 		self.assertEqual(self.session.query(muesli.models.User).count(), student_count-1)
+
+	def test_user_doublets(self):
+		res = self.testapp.get('/user/doublets', status=200)
+
