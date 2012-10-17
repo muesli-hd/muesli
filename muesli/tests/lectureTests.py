@@ -83,6 +83,9 @@ class BaseTests(functionalTests.BaseTests):
 	
 	def test_lecture_add_student(self):
 		res = self.testapp.get('/lecture/add_student/%s' % 123456, status=404)
+	
+	def test_lecture_export_yaml(self):
+		res = self.testapp.get('/lecture/export_yaml', status=403)
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_lecture_view(self):
@@ -296,3 +299,7 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 
 	def test_lecture_change_assistants(self):
 		res = self.testapp.get('/lecture/change_assistants/%s' % self.lecture.id, status=302)
+
+	def test_lecture_export_yaml(self):
+		res = self.testapp.get('/lecture/export_yaml', status=200)
+		self.assertEqual(res.content_type, 'application/x-yaml')

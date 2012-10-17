@@ -43,6 +43,8 @@ from muesli import types
 import re
 import os
 
+import yaml
+
 @view_config(route_name='lecture_list', renderer='muesli.web:templates/lecture/list.pt')
 class List(object):
 	def __init__(self, request):
@@ -556,3 +558,22 @@ def viewPoints(request):
 		'grades': grades,
 		}
 	return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))
+
+@view_config(route_name='lecture_export_yaml', context=GeneralContext, permission='export_yaml')
+def exportYaml(request):
+	lectures = request.db.query(models.Lecture)
+	if not "show_all" in request.GET:
+		lectures = lectures.filter(models.Lecture.is_visible==True)
+	out = []
+	for lecture in lectures.all():
+		lecture_dict = {}
+		tutors = set([tutorial.tutor for tutorial in lecture.tutorials])
+		lecture_dict['tutors'] = [tutor.name() for tutor in tutors if tutor!= None]
+		lecture_dict['name'] = lecture.name
+		lecture_dict['lecturer'] = lecture.lecturer
+		lecture_dict['student_count'] = lecture.lecture_students.count()
+		out.append(lecture_dict)
+	response = Response(content_type='application/x-yaml')
+	response.body = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
+	return response
+
