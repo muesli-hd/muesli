@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Karteileichen löschen</h2>
+
+
+<p>Anzahl: ${len(unconfirmed_students)}</p>
+<table class="colored">
+  <thead>
+    <tr>
+      <td>Name</td>
+      <td>Angemeldet</td>
+    </tr>
+  </thead>
+  <tr tal:repeat="(student,date) unconfirmed_students">
+    <td><a tal:attributes="href request.route_path('user_edit', user_id=student.id)">${student.name()}</a></td>
+    <td>${date}</td>
+  </tr>
+</table>
+
+<form method="POST">
+  <input type="hidden" value="delete" name="delete" />
+  <input type="submit" value="Löschen" name="submit" />
+</form>
+
+  </metal:main>
+</metal:main>
