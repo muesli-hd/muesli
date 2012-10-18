@@ -11,11 +11,11 @@
       <td>User</td>
     </tr>
   </thead>
-  <tr tal:repeat="(email, students) doublets.items()">
+  <tr tal:repeat="(email, students) doublets">
     <td>${email}</td>
     <td>
       <span tal:repeat="student students"><a tal:attributes="href request.route_path('user_edit', user_id=student.id)">${student}
-        <span tal:condition="student.is_deletable()"> (löschbar)</span></a></span>
+        <span tal:condition="student.is_deletable()"> (löschbar)</span></a><br /></span>
     </td>
   </tr>
 </table>
