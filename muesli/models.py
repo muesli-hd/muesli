@@ -137,6 +137,20 @@ class User(Base):
 		if self.second_subject:
 			ret += ', Zweites Hauptfach: %s' % self.second_subject
 		return ret
+	def is_deletable(self):
+		if (self.tutorials.all()):
+			return False
+		elif self.tutorials_as_tutor.all():
+			return False
+		elif self.lectures_as_tutor:
+			return False
+		elif self.lectures_as_assistant.all():
+			return False
+		elif len(self.exercise_points)>0:
+			return False
+		elif len(self.student_grades.all())>0:
+			return False
+		return True
 	def __unicode__(self):
 		return u'{name} <{email}>'.format(name=self.name(), email=self.email)
 	def __repr__(self):

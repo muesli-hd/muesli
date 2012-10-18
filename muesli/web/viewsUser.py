@@ -111,6 +111,7 @@ def delete(request):
 	else:
 		for c in user.confirmations:
 			request.db.delete(c)
+		# TODO: lecture_removed_students
 		#old_name = str(user)
 		request.db.delete(user)
 		request.db.commit()
@@ -143,6 +144,7 @@ def doublets(request):
 	doublets = collections.defaultdict(lambda: [])
 	for user in request.db.query(models.User).all():
 		doublets[user.email.lower()].append(user)
+		#doublets[user.name().lower()].append(user)
 	for key, value in doublets.items():
 		if len(value)<=1:
 			del doublets[key]
