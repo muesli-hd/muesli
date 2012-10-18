@@ -148,7 +148,9 @@ def doublets(request):
 	for key, value in doublets.items():
 		if len(value)<=1:
 			del doublets[key]
-	return {'doublets': dict(doublets)}
+	doublets_list = doublets.items()
+	doublets_list.sort(key=lambda e: e[1][0].last_name)
+	return {'doublets': doublets_list}
 
 @view_config(route_name='user_update', renderer='muesli.web:templates/user/update.pt', context=GeneralContext, permission='update')
 def update(request):
