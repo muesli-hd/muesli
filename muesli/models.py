@@ -26,7 +26,7 @@ import muesli
 import sqlalchemy
 import sqlalchemy as sa
 import sqlalchemy.ext.declarative
-from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table, text
+from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, String, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table, text
 from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
 from muesli.types import *
 from muesli.utils import DictOfObjects, AutoVivification, editOwnTutorials, listStrings
@@ -83,7 +83,7 @@ lecture_assistants_table = Table('lecture_assistants', Base.metadata,
 class User(Base):
 	__tablename__ = 'users'
 	id = Column(Integer, primary_key=True)
-	email = Column(Text, unique=True, nullable=False)
+	email = Column(String(100), unique=True, nullable=False)
 	first_name = Column(Text, nullable=False)
 	last_name = Column(Text, nullable=False)
 	password = Column(Text)
