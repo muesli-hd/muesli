@@ -514,7 +514,7 @@ class Correlation(MatplotlibView):
 	def getLectureData(self, id):
 		lecture = self.request.db.query(models.Lecture).get(id)
 		points = lecture.getLectureResultsByCategory()
-		max_points = sum([exam.getMaxpoints() for exam in lecture.exams])
+		max_points = sum([exam.getMaxpoints() for exam in lecture.exams if exam.category == 'assignment'])
 		return dict([(e.student_id, e.points) for e in points if e.points != None and e.category == 'assignment']), max_points, lecture.name
 	def getData(self, source):
 		source_type, source_id = source.split('_',1)
