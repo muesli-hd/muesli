@@ -3,4 +3,5 @@
 *.swp
 muesli.sqlite
 muesli.yml
+alembic.ini
 TODO
