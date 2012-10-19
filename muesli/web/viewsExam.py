@@ -469,7 +469,7 @@ class HistogramForExam(Histogram):
 		self.points = [round(float(p.points)-0.01) for p in exercise_points if p.points!=None]
 		self.max = self.exam.getMaxpoints()
 
-@view_config(route_name='exam_correlation')
+@view_config(route_name='exam_correlation', context=CorrelationContext, permission='correlation')
 class Correlation(MatplotlibView):
 	class CorrelationGrid(object):
 		def __init__(self, data, max1, max2):
@@ -490,7 +490,7 @@ class Correlation(MatplotlibView):
 			for i1,i2 in zip(array1, array2):
 				if i1>0 and i2>0 and i1<=len1 and i2<=len2:
 					self.grid[i2-1,i1-1] += 1
-		def getBins(self, max_value, max_bins = 15):
+		def getBins(self, max_value, max_bins = 10):
 			if max_value/max_bins < 1:
 				stepsize = 0.5
 			else:
@@ -506,10 +506,17 @@ class Correlation(MatplotlibView):
 		exam = self.request.db.query(models.Exam).get(id)
 		points = exam.getResults()
 		return {e.student_id: e.points for e in points if e.points != None}, exam.getMaxpoints(), exam.name
+	def getLectureData(self, id):
+		lecture = self.request.db.query(models.Lecture).get(id)
+		points = lecture.getLectureResultsByCategory()
+		max_points = sum([exam.getMaxpoints() for exam in lecture.exams])
+		return {e.student_id: e.points for e in points if e.points != None and e.category == 'assignment'}, max_points, lecture.name
 	def getData(self, source):
 		source_type, source_id = source.split('_',1)
 		if source_type == 'exam':
 			return self.getExamData(source_id)
+		elif source_type == 'lecture':
+			return self.getLectureData(source_id)
 	def __call__(self):
 		source1 = self.request.GET['source1']
 		source2 = self.request.GET['source2']
@@ -517,17 +524,21 @@ class Correlation(MatplotlibView):
 		data2, max2, name2 = self.getData(source2)
 		student_ids =  set(data1.keys()).intersection(data2.keys())
 		data = {s_id: (data1[s_id], data2[s_id]) for s_id in student_ids}
-		print data
+		#print data
 		grid = self.CorrelationGrid(data, max1, max2)
 		ax = self.fig.add_subplot(111)
-		im = ax.imshow(grid.grid, interpolation='nearest', origin='lower', cmap = pyplot.cm.gray_r)
+		im = ax.imshow(grid.grid,
+			interpolation='nearest',
+			origin='lower',
+			cmap = pyplot.cm.gray_r,
+			aspect='auto')
 		ax.set_xlabel(name1)
 		ax.set_ylabel(name2)
 		self.fig.colorbar(im)
-		ax.set_xticks(np.arange(len(grid.bins2))-0.5)
-		ax.set_yticks(np.arange(len(grid.bins1))-0.5)
-		ax.set_xticklabels(grid.bins2)
-		ax.set_yticklabels(grid.bins1)
+		ax.set_xticks(np.arange(len(grid.bins1))-0.5)
+		ax.set_yticks(np.arange(len(grid.bins2))-0.5)
+		ax.set_xticklabels(grid.bins1)
+		ax.set_yticklabels(grid.bins2)
 		ax.set_title("Korrelation = %.2f" % grid.corrcoef)
 		return self.createResponse()
 
