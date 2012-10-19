@@ -510,12 +510,12 @@ class Correlation(MatplotlibView):
 	def getExamData(self, id):
 		exam = self.request.db.query(models.Exam).get(id)
 		points = exam.getResults()
-		return {e.student_id: e.points for e in points if e.points != None}, exam.getMaxpoints(), exam.name
+		return dict([(e.student_id, e.points) for e in points if e.points != None]), exam.getMaxpoints(), exam.name
 	def getLectureData(self, id):
 		lecture = self.request.db.query(models.Lecture).get(id)
 		points = lecture.getLectureResultsByCategory()
 		max_points = sum([exam.getMaxpoints() for exam in lecture.exams])
-		return {e.student_id: e.points for e in points if e.points != None and e.category == 'assignment'}, max_points, lecture.name
+		return dict([(e.student_id, e.points) for e in points if e.points != None and e.category == 'assignment']), max_points, lecture.name
 	def getData(self, source):
 		source_type, source_id = source.split('_',1)
 		if source_type == 'exam':
@@ -528,7 +528,7 @@ class Correlation(MatplotlibView):
 		data1, max1, name1 = self.getData(source1)
 		data2, max2, name2 = self.getData(source2)
 		student_ids =  set(data1.keys()).intersection(data2.keys())
-		data = {s_id: (data1[s_id], data2[s_id]) for s_id in student_ids}
+		data = dict([(s_id, (data1[s_id], data2[s_id])) for s_id in student_ids])
 		#print data
 		grid = self.CorrelationGrid(data, max1, max2)
 		ax = self.fig.add_subplot(111)
