@@ -108,6 +108,27 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   </ul>
 </div>
 
+
+<form method="get" tal:attributes="action request.route_path('exam_correlation')">
+  <select name="source1">
+    <option tal:repeat="exam lecture.exams" tal:attributes="value 'exam_%s' % exam.id">
+      ${exam.name}
+    </option>
+    <option tal:attributes="value 'lecture_%s' % lecture.id">
+      Summe Übungszettel
+    </option>
+  </select>
+  <select name="source2">
+    <option tal:repeat="exam lecture.exams" tal:attributes="value 'exam_%s' % exam.id">
+      ${exam.name}
+    </option>
+    <option tal:attributes="value 'lecture_%s' % lecture.id">
+      Summe Übungszettel
+    </option>
+  </select>
+  <input type="submit" value="Korrelation"/>
+</form>
+
 <h3>Benotungen</h3>
 
 <p><a tal:attributes="href request.route_path('lecture_add_grading', lecture_id=lecture.id)">Benotung hinzufügen</a></p>

@@ -63,16 +63,20 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
 </div>
 
 <form method="get" tal:attributes="action request.route_path('exam_correlation')">
-  <input type="hidden" name="type1" value="exam"/>
-  <input type="hidden" name="type2" value="exam"/>
-  <select name="id1">
-    <option tal:repeat="exam tutorial.lecture.exams" tal:attributes="value exam.id">
+  <select name="source1">
+    <option tal:repeat="exam tutorial.lecture.exams" tal:attributes="value 'exam_%s' % exam.id">
       ${exam.name}
     </option>
+    <option tal:attributes="value 'lecture_%s' % tutorial.lecture.id">
+      Summe Übungszettel
+    </option>
   </select>
-  <select name="id2">
-    <option tal:repeat="exam tutorial.lecture.exams" tal:attributes="value exam.id">
+  <select name="source2">
+    <option tal:repeat="exam tutorial.lecture.exams" tal:attributes="value 'exam_%s' % exam.id">
       ${exam.name}
+    </option>
+    <option tal:attributes="value 'lecture_%s' % tutorial.lecture.id">
+      Summe Übungszettel
     </option>
   </select>
   <input type="submit" value="Korrelation"/>

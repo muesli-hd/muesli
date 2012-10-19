@@ -20,6 +20,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2012-10-19
+concerns:assistants,tutors
+Es gibt wieder Korrelationsdiagramme, zumindest für einzelne Testate und die Summe
+der Übungszettel. Der Vergleich einzelner Aufgaben wird irgendwann noch implementiert.
+Die Links zu den Korrelationsdiagrammen finden sich auf den Vorlesungs- und Übungsgruppenseiten
+unter den Testaten.
+
 ====2012-09-22
 concerns:assistants
 Man kann jetzt Studenten per Hand in eine Vorlesung eintragen. Dazu gibt es auf

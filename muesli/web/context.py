@@ -183,3 +183,29 @@ class ExerciseContext(object):
 			]+[(Allow, 'user:{0}'.format(assistant.id), ('statistics')) for assistant in self.exam.lecture.assistants
 			]
 
+class CorrelationContext(object):
+	def __init__(self, request):
+		source1 = request.GET['source1']
+		source2 = request.GET['source2']
+		ids1 = self.get_allowed_ids(source1, request)
+		ids2 = self.get_allowed_ids(source2, request)
+		ids = set(ids1).intersection(set(ids2))
+		self.__acl__ = [
+			(Allow, 'group:administrators', ALL_PERMISSIONS)
+			] + [(Allow, 'user:{0}'.format(id), ('correlation')) for id in ids]
+	def get_allowed_ids(self, source, request):
+		source_type, source_id = source.split('_',1)
+		if source_type == 'exam':
+			exam = request.db.query(Exam).get(source_id)
+			if exam:
+				return [assistant.id for assistant in exam.lecture.assistants]+[tutor.id for tutor in exam.lecture.tutors]
+			else:
+				raise HTTPNotFound('Exam not found')
+		elif source_type == 'lecture':
+			lecture = request.db.query(Lecture).get(source_id)
+			if lecture:
+				return [assistant.id for assistant in lecture.assistants]+[tutor.id for tutor in lecture.tutors]
+			else:
+				raise HTTPNotFound('Lecture not found')
+		else:
+			raise ValueError('Sourcetype not known: %s' % source_type)
