@@ -496,12 +496,12 @@ class Correlation(MatplotlibView):
 				if i1>0 and i2>0 and i1<=len1 and i2<=len2:
 					self.grid[i2-1,i1-1] += 1
 		def getBins(self, max_value, max_bins = 10):
-			if max_value/max_bins < 1:
+			if float(max_value)/max_bins < 1:
 				stepsize = 0.5
 			else:
 				stepsize = int(max_value/max_bins)
 			bins = [0]
-			while bins[-1] < max_value:
+			while bins[-1] < float(max_value):
 				bins.append(bins[-1]+stepsize)
 			return bins
 	def __init__(self, request):
