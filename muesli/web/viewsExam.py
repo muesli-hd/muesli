@@ -40,6 +40,8 @@ import matplotlib
 matplotlib.use( 'Agg' )
 from matplotlib import pyplot
 
+import numpy as np
+
 import re
 import os
 import math
@@ -466,6 +468,68 @@ class HistogramForExam(Histogram):
 		exercise_points = self.exam.getResults(students=students)
 		self.points = [round(float(p.points)-0.01) for p in exercise_points if p.points!=None]
 		self.max = self.exam.getMaxpoints()
+
+@view_config(route_name='exam_correlation')
+class Correlation(MatplotlibView):
+	class CorrelationGrid(object):
+		def __init__(self, data, max1, max2):
+			self.data = data
+			self.max1 = max1
+			self.max2 = max2
+			self.bins1 = self.getBins(max1)
+			self.bins2 = self.getBins(max2)
+			len1 = len(self.bins1)-1
+			len2 = len(self.bins2)-1
+			self.grid = np.zeros((len2, len1))
+			array_data = [[p1, p2] for p1, p2 in data.values()]
+			array1 = [p1 for p1, p2 in array_data]
+			array2 = [p2 for p1, p2 in array_data]
+			self.corrcoef = np.corrcoef(array1, array2)[0,1]
+			array1 = np.digitize(array1, self.bins1)
+			array2 = np.digitize(array2, self.bins2)
+			for i1,i2 in zip(array1, array2):
+				if i1>0 and i2>0 and i1<=len1 and i2<=len2:
+					self.grid[i2-1,i1-1] += 1
+		def getBins(self, max_value, max_bins = 15):
+			if max_value/max_bins < 1:
+				stepsize = 0.5
+			else:
+				stepsize = int(max_value/max_bins)
+			bins = [0]
+			while bins[-1] < max_value:
+				bins.append(bins[-1]+stepsize)
+			return bins
+	def __init__(self, request):
+		super(Correlation, self).__init__()
+		self.request = request
+	def getExamData(self, id):
+		exam = self.request.db.query(models.Exam).get(id)
+		points = exam.getResults()
+		return {e.student_id: e.points for e in points if e.points != None}, exam.getMaxpoints(), exam.name
+	def getData(self, source):
+		source_type, source_id = source.split('_',1)
+		if source_type == 'exam':
+			return self.getExamData(source_id)
+	def __call__(self):
+		source1 = self.request.GET['source1']
+		source2 = self.request.GET['source2']
+		data1, max1, name1 = self.getData(source1)
+		data2, max2, name2 = self.getData(source2)
+		student_ids =  set(data1.keys()).intersection(data2.keys())
+		data = {s_id: (data1[s_id], data2[s_id]) for s_id in student_ids}
+		print data
+		grid = self.CorrelationGrid(data, max1, max2)
+		ax = self.fig.add_subplot(111)
+		im = ax.imshow(grid.grid, interpolation='nearest', origin='lower', cmap = pyplot.cm.gray_r)
+		ax.set_xlabel(name1)
+		ax.set_ylabel(name2)
+		self.fig.colorbar(im)
+		ax.set_xticks(np.arange(len(grid.bins2))-0.5)
+		ax.set_yticks(np.arange(len(grid.bins1))-0.5)
+		ax.set_xticklabels(grid.bins2)
+		ax.set_yticklabels(grid.bins1)
+		ax.set_title("Korrelation = %.2f" % grid.corrcoef)
+		return self.createResponse()
 
 @view_config(route_name='exam_enter_points_single', renderer='muesli.web:templates/exam/enter_points_single.pt', context=ExamContext, permission='enter_points')
 def enterPointsSingle(request):
