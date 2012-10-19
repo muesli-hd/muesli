@@ -197,9 +197,15 @@ class CorrelationContext(object):
 		source_type, source_id = source.split('_',1)
 		if source_type == 'exam':
 			exam = request.db.query(Exam).get(source_id)
-			return [assistant.id for assistant in exam.lecture.assistants]+[tutor.id for tutor in exam.lecture.tutors]
+			if exam:
+				return [assistant.id for assistant in exam.lecture.assistants]+[tutor.id for tutor in exam.lecture.tutors]
+			else:
+				raise HTTPNotFound('Exam not found')
 		elif source_type == 'lecture':
 			lecture = request.db.query(Lecture).get(source_id)
-			return [assistant.id for assistant in lecture.assistants]+[tutor.id for tutor in lecture.tutors]
+			if lecture:
+				return [assistant.id for assistant in lecture.assistants]+[tutor.id for tutor in lecture.tutors]
+			else:
+				raise HTTPNotFound('Lecture not found')
 		else:
 			raise ValueError('Sourcetype not known: %s' % source_type)

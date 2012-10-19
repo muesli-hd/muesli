@@ -484,9 +484,14 @@ class Correlation(MatplotlibView):
 			array_data = [[p1, p2] for p1, p2 in data.values()]
 			array1 = [p1 for p1, p2 in array_data]
 			array2 = [p2 for p1, p2 in array_data]
-			self.corrcoef = np.corrcoef(array1, array2)[0,1]
-			array1 = np.digitize(array1, self.bins1)
-			array2 = np.digitize(array2, self.bins2)
+			if array1 and array2:
+				self.corrcoef = np.corrcoef(array1, array2)[0,1]
+				array1 = np.digitize(array1, self.bins1)
+				array2 = np.digitize(array2, self.bins2)
+			else:
+				self.corrcoef = 0
+				array1 = []
+				array2 = []
 			for i1,i2 in zip(array1, array2):
 				if i1>0 and i2>0 and i1<=len1 and i2<=len2:
 					self.grid[i2-1,i1-1] += 1

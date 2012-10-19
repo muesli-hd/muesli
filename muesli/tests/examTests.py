@@ -75,6 +75,12 @@ class BaseTests(functionalTests.BaseTests):
 	def test_exam_ajax_get_points(self):
 		res = self.testapp.get('/exam/ajax_get_points/%s/%s,%s' % (12345, 12,23), status=404)
 
+	def test_exam_correlation(self):
+		res = self.testapp.get('/exam/correlation?source1=exam_%s&source2=exam_%s' % (12345, 1223), status=404)
+		res = self.testapp.get('/exam/correlation?source1=lecture_%s&source2=exam_%s' % (12345, 1223), status=404)
+		res = self.testapp.get('/exam/correlation?source1=exam_%s&source2=lecture_%s' % (12345, 1223), status=404)
+		res = self.testapp.get('/exam/correlation?source1=lecture_%s&source2=lecture_%s' % (12345, 1223), status=404)
+
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	def test_exam_edit(self):
@@ -130,6 +136,12 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 	def test_exam_ajax_get_points(self):
 		res = self.testapp.get('/exam/ajax_get_points/%s/%s,%s' % (self.exam.id, self.tutorial.id,self.tutorial2.id), status=403)
+
+	def test_exam_correlation(self):
+		res = self.testapp.get('/exam/correlation?source1=exam_%s&source2=exam_%s' % (self.exam.id, self.exam.id), status=403)
+		res = self.testapp.get('/exam/correlation?source1=lecture_%s&source2=exam_%s' % (self.lecture.id, self.exam.id), status=403)
+		res = self.testapp.get('/exam/correlation?source1=exam_%s&source2=lecture_%s' % (self.exam.id, self.lecture.id), status=403)
+		res = self.testapp.get('/exam/correlation?source1=lecture_%s&source2=lecture_%s' % (self.lecture.id, self.lecture.id), status=403)
 
 class UserLoggedInTests(UnloggedTests):
 	def setUp(self):
@@ -205,6 +217,20 @@ class TutorLoggedInTests(UserLoggedInTests):
 		data = json.loads(res.body)
 		self.assertTrue(len(data['points'])==1)
 		self.assertTrue(data['points']['%s' % self.exercise.id]==3)
+
+	def test_exam_correlation(self):
+		res = self.testapp.get('/exam/correlation?source1=exam_%s&source2=exam_%s' % (self.exam.id, self.exam.id), status=200)
+		res = self.testapp.get('/exam/correlation?source1=lecture_%s&source2=exam_%s' % (self.lecture.id, self.exam.id), status=200)
+		res = self.testapp.get('/exam/correlation?source1=exam_%s&source2=lecture_%s' % (self.exam.id, self.lecture.id), status=200)
+		res = self.testapp.get('/exam/correlation?source1=lecture_%s&source2=lecture_%s' % (self.lecture.id, self.lecture.id), status=200)
+
+		#res = self.testapp.get('/exam/correlation?source1=exam_%s&source2=exam_%s' % (self.exam.id, self.exam.id), status=403)
+		res = self.testapp.get('/exam/correlation?source1=lecture_%s&source2=exam_%s' % (self.lecture2.id, self.exam.id), status=403)
+		res = self.testapp.get('/exam/correlation?source1=exam_%s&source2=lecture_%s' % (self.exam.id, self.lecture2.id), status=403)
+		res = self.testapp.get('/exam/correlation?source1=lecture_%s&source2=lecture_%s' % (self.lecture.id, self.lecture2.id), status=403)
+		res = self.testapp.get('/exam/correlation?source1=lecture_%s&source2=lecture_%s' % (self.lecture2.id, self.lecture.id), status=403)
+
+
 
 class AssistantLoggedInTests(TutorLoggedInTests):
 	def setUp(self):
@@ -301,3 +327,10 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 	def setUp(self):
 		AssistantLoggedInTests.setUp(self)
 		self.setUser(self.admin)
+
+	def test_exam_correlation(self):
+		res = self.testapp.get('/exam/correlation?source1=exam_%s&source2=exam_%s' % (self.exam.id, self.exam.id), status=200)
+		res = self.testapp.get('/exam/correlation?source1=lecture_%s&source2=exam_%s' % (self.lecture.id, self.exam.id), status=200)
+		res = self.testapp.get('/exam/correlation?source1=exam_%s&source2=lecture_%s' % (self.exam.id, self.lecture.id), status=200)
+		res = self.testapp.get('/exam/correlation?source1=lecture_%s&source2=lecture_%s' % (self.lecture.id, self.lecture.id), status=200)
+
