@@ -37,6 +37,7 @@ import PIL.ImageDraw
 import StringIO
 
 import matplotlib
+
 matplotlib.use( 'Agg' )
 from matplotlib import pyplot
 
@@ -471,39 +472,6 @@ class HistogramForExam(Histogram):
 
 @view_config(route_name='exam_correlation', context=CorrelationContext, permission='correlation')
 class Correlation(MatplotlibView):
-	class CorrelationGrid(object):
-		def __init__(self, data, max1, max2):
-			self.data = data
-			self.max1 = max1
-			self.max2 = max2
-			self.bins1 = self.getBins(max1)
-			self.bins2 = self.getBins(max2)
-			len1 = len(self.bins1)-1
-			len2 = len(self.bins2)-1
-			self.grid = np.zeros((len2, len1))
-			array_data = [[p1, p2] for p1, p2 in data.values()]
-			array1 = [p1 for p1, p2 in array_data]
-			array2 = [p2 for p1, p2 in array_data]
-			if array1 and array2:
-				self.corrcoef = np.corrcoef(array1, array2)[0,1]
-				array1 = np.digitize(array1, self.bins1)
-				array2 = np.digitize(array2, self.bins2)
-			else:
-				self.corrcoef = 0
-				array1 = []
-				array2 = []
-			for i1,i2 in zip(array1, array2):
-				if i1>0 and i2>0 and i1<=len1 and i2<=len2:
-					self.grid[i2-1,i1-1] += 1
-		def getBins(self, max_value, max_bins = 10):
-			if float(max_value)/max_bins < 1:
-				stepsize = 0.5
-			else:
-				stepsize = int(max_value/max_bins)
-			bins = [0]
-			while bins[-1] < float(max_value):
-				bins.append(bins[-1]+stepsize)
-			return bins
 	def __init__(self, request):
 		super(Correlation, self).__init__()
 		self.request = request
@@ -522,29 +490,49 @@ class Correlation(MatplotlibView):
 			return self.getExamData(source_id)
 		elif source_type == 'lecture':
 			return self.getLectureData(source_id)
+	def getBins(self, max_value, max_bins = 10):
+		if float(max_value)/max_bins < 1:
+			stepsize = 0.5
+		else:
+			stepsize = int(max_value/max_bins)
+		bins = [0]
+		while bins[-1] < float(max_value):
+			bins.append(bins[-1]+stepsize)
+		return bins
 	def __call__(self):
 		source1 = self.request.GET['source1']
 		source2 = self.request.GET['source2']
 		data1, max1, name1 = self.getData(source1)
 		data2, max2, name2 = self.getData(source2)
 		student_ids =  set(data1.keys()).intersection(data2.keys())
-		data = dict([(s_id, (data1[s_id], data2[s_id])) for s_id in student_ids])
-		#print data
-		grid = self.CorrelationGrid(data, max1, max2)
+		data = np.array([(float(data1[s_id]), float(data2[s_id])) for s_id in student_ids])
+		if len(data):
+			x = data[:,0]
+			y = data[:,1]
+		else: x,y = [], []
+		bins1 = self.getBins(max1)
+		bins2 = self.getBins(max2)
+
+		hist,xedges,yedges = np.histogram2d(x,y,bins=[bins1, bins2])
+
+		color_stepsize = int(math.ceil(hist.max()/10.0)) or 1
+		color_ticks = range(0, int(hist.max()) or 1, color_stepsize)
+		color_bins = [-color_stepsize/2.0]
+		color_bins.extend([t+color_stepsize/2.0 for t in color_ticks])
+
+		norm = matplotlib.colors.BoundaryNorm(color_bins, len(color_ticks))
+
+		extent = [xedges[0], xedges[-1], yedges[0], yedges[-1] ]
 		ax = self.fig.add_subplot(111)
-		im = ax.imshow(grid.grid,
-			interpolation='nearest',
+		im = ax.imshow(hist.T,extent=extent,interpolation='nearest',
 			origin='lower',
 			cmap = pyplot.cm.gray_r,
 			aspect='auto')
 		ax.set_xlabel(name1)
 		ax.set_ylabel(name2)
-		self.fig.colorbar(im)
-		ax.set_xticks(np.arange(len(grid.bins1))-0.5)
-		ax.set_yticks(np.arange(len(grid.bins2))-0.5)
-		ax.set_xticklabels(grid.bins1)
-		ax.set_yticklabels(grid.bins2)
-		ax.set_title("Korrelation = %.2f" % grid.corrcoef)
+		self.fig.colorbar(im, norm=norm, boundaries=color_bins, ticks=color_ticks)
+		corrcoef = np.corrcoef(x, y)[0,1] if len(x)>0 else 0
+		ax.set_title("Korrelation = %.2f" % corrcoef)
 		return self.createResponse()
 
 @view_config(route_name='exam_enter_points_single', renderer='muesli.web:templates/exam/enter_points_single.pt', context=ExamContext, permission='enter_points')
