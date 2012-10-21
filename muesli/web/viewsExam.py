@@ -513,7 +513,13 @@ class Correlation(MatplotlibView):
 		bins1 = self.getBins(max1)
 		bins2 = self.getBins(max2)
 
-		hist,xedges,yedges = np.histogram2d(x,y,bins=[bins1, bins2])
+		try:
+			hist,xedges,yedges = np.histogram2d(x,y,bins=[bins1, bins2])
+		except ValueError:
+			# x,y = [] raises ValueErrors in old numpy
+			hist = np.array([[0]])
+			xedges = [0,1]
+			yedges = xedges
 
 		color_stepsize = int(math.ceil(hist.max()/10.0)) or 1
 		color_ticks = range(0, int(hist.max()) or 1, color_stepsize)
