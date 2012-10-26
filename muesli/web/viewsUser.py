@@ -75,8 +75,15 @@ def listSubjects(request):
 def edit(request):
 	user_id = request.matchdict['user_id']
 	user = request.db.query(models.User).get(user_id)
+	lectures=user.lectures_as_assistant.all()
 	form = UserEdit(request, user)
 	if request.method == 'POST' and form.processPostData(request.POST):
+		if (form['is_assistant'] != user.is_assistant) and (form['is_assistant'] == 0):
+			lectures=user.lectures_as_assistant.all()
+			for l in lectures:
+				for nr, ass in enumerate(l.assistants):
+					if ass.id == user.id:
+						del l.assistants[nr]
 		form.saveValues()
 		request.db.commit()
 		request.session.flash(u'Daten geändert', queue='messages')
