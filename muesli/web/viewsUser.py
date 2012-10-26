@@ -77,6 +77,11 @@ def edit(request):
 	user = request.db.query(models.User).get(user_id)
 	form = UserEdit(request, user)
 	if request.method == 'POST' and form.processPostData(request.POST):
+		if (form['is_assistant'] != user.is_assistant) and (form['is_assistant'] == 0):
+			lectures=user.lectures_as_assistant.all()
+			for l in lectures:
+				for nr, ass in enumerate(l.assistants):
+					del l.assistants[nr]
 		form.saveValues()
 		request.db.commit()
 		request.session.flash(u'Daten geändert', queue='messages')
