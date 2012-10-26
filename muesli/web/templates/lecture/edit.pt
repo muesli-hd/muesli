@@ -38,7 +38,7 @@
 </div>
 <div tal:condition="not request.permissionInfo.has_permission('change_assistant')">
   Assistenten:
-    <span tal:repeat="assistant lecture.assistants"><a tal:attributes="href assistant.email">${assistant.last_name}</a> </span>
+    <span tal:repeat="assistant lecture.assistants"><a tal:attributes="href 'mailto:'+assistant.email">${assistant.last_name}</a> </span>
   (Änderbar von den <a tal:attributes="href request.route_path('contact')">Administratoren</a>).
 </div>
 
