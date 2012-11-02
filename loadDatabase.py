@@ -23,9 +23,9 @@ def autoCorrectSubjects():
 	def autoListDipl(subject):
 		return autoList(subject, '(Dipl.)', ['Diplom', 'dipl', 'Dipl', 'Dipl.', '(Dipl)'])
 	def autoListLAHaupt(subject):
-		return autoList(subject, '(LA) (Hauptfach)', ['(LA) Hauptfach', 'LA, Hauptfach'])
+		return autoList(subject, '(LA) (Hauptfach)', ['(LA) Hauptfach', 'LA, Hauptfach', '(LA Hauptfach)'])
 	def autoListLABei(subject):
-		return autoList(subject, '(LA) (Beifach)', ['(LA) Beifach', 'LA, Beifach'])
+		return autoList(subject, '(LA) (Beifach)', ['(LA) Beifach', 'LA, Beifach', '(LA Beifach)'])
 	def autoListLA(subject):
 		return autoList(subject, '(LA)', ['Lehramt', '(Lehramt)', 'LA'])
 	def autoListPromotion(subject):
