@@ -58,6 +58,7 @@ def autoCorrectSubjects():
 		corrections['%s (Dipl.)' % subject] = autoListDipl(subject)
 		corrections['%s (Promotion)' % subject] = autoListPromotion(subject)
 		corrections['%s (LA) (Hauptfach)' % subject] = autoListLAHaupt(subject)
+		corrections['%s (LA) (Beifach)' % subject] = autoListLABei(subject)
 		corrections['%s (LA)' % subject] = autoListLA(subject)
 	for right, wrongs in corrections.items():
 		for wrong in wrongs:
