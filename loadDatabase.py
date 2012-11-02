@@ -15,9 +15,9 @@ def autoCorrectSubjects():
 		format_list += ['%s %s' % (prefix, subject) for prefix in variants_pre]
 		return format_list
 	def autoListBSc(subject):
-		return autoList(subject, '(BSc)', ['Bachelor', 'bsc', 'Bsc', 'B.Sc.', '(Bsc)', '(BSC.)', '(B.Sc.)'])
+		return autoList(subject, '(BSc)', ['Bachelor', 'bsc', 'Bsc', 'BSc', 'B.Sc.', '(Bsc)', '(BSC.)', '(B.Sc.)'])
 	def autoListMSc(subject):
-		return autoList(subject, '(MSc)', ['Master', 'msc', 'Msc', 'M.Sc.', '(Msc)', '(BSC.)'])
+		return autoList(subject, '(MSc)', ['Master', 'msc', 'Msc', 'MSc', 'M.Sc.', '(Msc)', '(BSC.)'])
 	def autoListPhD(subject):
 		return autoList(subject, '(PhD)', ['phd', 'Phd', 'PhD', 'phd.', 'Phd.', 'PhD.', 'Ph.D.', '(phd)', '(Phd.)'])
 	def autoListDipl(subject):
