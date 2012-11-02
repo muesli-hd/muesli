@@ -15,7 +15,7 @@ def autoCorrectSubjects():
 		format_list += ['%s %s' % (prefix, subject) for prefix in variants_pre]
 		return format_list
 	def autoListBSc(subject):
-		return autoList(subject, '(BSc)', ['Bachelor', 'bsc', 'Bsc', 'B.Sc.', '(Bsc)', '(BSC.)'])
+		return autoList(subject, '(BSc)', ['Bachelor', 'bsc', 'Bsc', 'B.Sc.', '(Bsc)', '(BSC.)', '(B.Sc.)'])
 	def autoListMSc(subject):
 		return autoList(subject, '(MSc)', ['Master', 'msc', 'Msc', 'M.Sc.', '(Msc)', '(BSC.)'])
 	def autoListPhD(subject):
@@ -24,14 +24,32 @@ def autoCorrectSubjects():
 		return autoList(subject, '(Dipl.)', ['Diplom', 'dipl', 'Dipl', 'Dipl.', '(Dipl)'])
 	def autoListLAHaupt(subject):
 		return autoList(subject, '(LA) (Hauptfach)', ['(LA) Hauptfach', 'LA, Hauptfach'])
+	def autoListLABei(subject):
+		return autoList(subject, '(LA) (Beifach)', ['(LA) Beifach', 'LA, Beifach'])
+	def autoListLA(subject):
+		return autoList(subject, '(LA)', ['Lehramt', '(Lehramt)', 'LA'])
 	def autoListPromotion(subject):
 		return autoList(subject, '(Promotion)', ['Promotion', 'dipl', 'Dipl', 'Dipl.', '(Dipl)'])
 
 
-	subjects = ['Angewandte Informatik', 'Anwendungsorientierte Informatik', 'Biologie', 'Biowissenschaften',
-		'Economics', 'Geowissenschaften','Psychologie', 'Chemie', 'Computerlinguistik',
-		'Geographie', 'Molekulare Biotechnologie', 'Molekulare Zellbiologie',
-		'Mathematik', 'Physik', 'Philosophie', 'Alte Geschichte', ]
+	subjects = ['Angewandte Informatik',
+		'Anwendungsorientierte Informatik',
+		'Biologie',
+		'Biowissenschaften',
+		'Economics',
+		'Geowissenschaften',
+		'Psychologie',
+		'Chemie',
+		'Computerlinguistik',
+		'Geographie',
+		'Informatik',
+		'Molekulare Biotechnologie',
+		'Molekulare Zellbiologie',
+		'Mathematik',
+		'Physik',
+		'Philosophie',
+		'Alte Geschichte',
+		'Wissenschaftliches Rechnen',]
 	corrections = {}
 	for subject in subjects:
 		corrections['%s (BSc)' % subject] = autoListBSc(subject)
@@ -40,6 +58,7 @@ def autoCorrectSubjects():
 		corrections['%s (Dipl.)' % subject] = autoListDipl(subject)
 		corrections['%s (Promotion)' % subject] = autoListPromotion(subject)
 		corrections['%s (LA) (Hauptfach)' % subject] = autoListLAHaupt(subject)
+		corrections['%s (LA)' % subject] = autoListLA(subject)
 	for right, wrongs in corrections.items():
 		for wrong in wrongs:
 			print "%s -> %s" % (wrong, right)
