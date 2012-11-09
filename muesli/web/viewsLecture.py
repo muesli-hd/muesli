@@ -168,20 +168,22 @@ class AddStudent(object):
 			tutorial = tutorial[0]
 			if student in lecture.students.all():
 				self.request.session.flash(u'Der Student ist in diese Vorlesung bereits eingetragen!', queue='errors')
-			lrs = self.request.db.query(models.LectureRemovedStudent).get((lecture.id, student.id))
-			if lrs: self.request.db.delete(lrs)
-			#ls = request.db.query(models.LectureStudent).get((lecture.id, request.user.id))
-			#if ls:
-			#	oldtutorial = ls.tutorial
-			#else:
-			ls = models.LectureStudent()
-			ls.lecture = lecture
-			ls.student = student
-			oldtutorial = None
-			ls.tutorial = tutorial
-			if not ls in self.request.db: self.request.db.add(ls)
-			self.request.db.commit()
-			self.request.session.flash(u'Der Student %s wurde in das Tutorial %s (%s) eingetragen' % (student, tutorial.time.__html__(), tutorial.tutor_name), queue='messages')
+			else:
+				lrs = self.request.db.query(models.LectureRemovedStudent).get((lecture.id, student.id))
+				if lrs:
+					self.request.db.delete(lrs)
+				#ls = request.db.query(models.LectureStudent).get((lecture.id, request.user.id))
+				#if ls:
+				#	oldtutorial = ls.tutorial
+				#else:
+				ls = models.LectureStudent()
+				ls.lecture = lecture
+				ls.student = student
+				oldtutorial = None
+				ls.tutorial = tutorial
+				if not ls in self.request.db: self.request.db.add(ls)
+				self.request.db.commit()
+				self.request.session.flash(u'Der Student %s wurde in das Tutorial %s (%s) eingetragen' % (student, tutorial.time.__html__(), tutorial.tutor_name), queue='messages')
 		return {'lecture': lecture,
 			'tutorials': tutorials
 			}
