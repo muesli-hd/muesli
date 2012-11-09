@@ -3,11 +3,11 @@
   <metal:main metal:fill-slot="content">
 
 <script>
-<![CDATA[
+/*<![CDATA[*/
   function confirm_unsubscribe() {
     return confirm("Wollen Sie wirklich diese Übungsgruppe verlassen?");
   }
-]]>
+/*]]>*/
 </script>
 
 <h2>Übersicht Ihrer Veranstaltungen in diesem Semester</h2>

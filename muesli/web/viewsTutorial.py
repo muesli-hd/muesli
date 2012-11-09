@@ -264,9 +264,9 @@ def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
 	if not tutorial.tutor:
 		return
 	text = u'In Ihre Übungsgruppe zur Vorlesung %s am %s hat sich der Student %s eingetragen'\
-		% (tutorial.lecture.name, tutorial.time, student.name())
+		% (tutorial.lecture.name, tutorial.time.__html__(), student.name())
 	if fromTutorial:
-		text += ' (Wechsel aus der Gruppe am %s von %s).' % (fromTutorial.time, fromTutorial.tutor.name() if fromTutorial.tutor else 'NN')
+		text += ' (Wechsel aus der Gruppe am %s von %s).' % (fromTutorial.time.__html__(), fromTutorial.tutor.name() if fromTutorial.tutor else 'NN')
 	else:
 		text += '.'
 	sendChangesMail(request, tutorial.tutor, text)
@@ -274,9 +274,9 @@ def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
 	if not tutorial.tutor:
 		return
 	text = u'Aus Ihrer Übungsgruppe zur Vorlesung %s am %s hat sich der Student %s ausgetragen'\
-			% (tutorial.lecture.name, tutorial.time, student.name())
+			% (tutorial.lecture.name, tutorial.time.__html__(), student.name())
 	if toTutorial:
-		text += ' (Wechsel in die Gruppe am %s von %s).' % (toTutorial.time, toTutorial.tutor.name() if toTutorial.tutor else 'NN')
+		text += ' (Wechsel in die Gruppe am %s von %s).' % (toTutorial.time.__html__(), toTutorial.tutor.name() if toTutorial.tutor else 'NN')
 	else:
 		text += '.'
 	sendChangesMail(request, tutorial.tutor, text)
