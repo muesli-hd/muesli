@@ -287,6 +287,19 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 		self.session.expire_all()
 		self.assertIn(self.user_without_lecture, self.lecture.students)
 		self.assertIn(self.user_without_lecture, self.lecture.tutorials[0].students)
+	
+	def test_lecture_add_student_removed(self):
+		res = self.testapp.get('/tutorial/remove_student/%s/%s' % (self.tutorial.id, self.user.id), status=302)
+		res = self.testapp.get('/lecture/add_student/%s' % self.lecture.id, status=200)
+		form = res.form
+		form['student_email'] = self.user.email
+		form['new_tutorial']  = self.lecture.tutorials[0].id
+		res = form.submit()
+		self.assertTrue(res.status.startswith('200'))
+		self.session.expire_all()
+		self.assertIn(self.user, self.lecture.students)
+		self.assertIn(self.user, self.lecture.tutorials[0].students)
+
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):
