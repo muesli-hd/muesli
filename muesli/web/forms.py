@@ -750,8 +750,7 @@ class TutorialEmail(CSRFSecureForm):
 			   required=True),
 			FormField('body',
 			   label='Nachricht', cols=64, rows=24,
-			   type='textarea',
-			   required=True),
+			   type='textarea'),
 			FileField('attachments',
 			   label=u'Anhänge', size=64,
 			   growable=False
@@ -799,8 +798,7 @@ class LectureEmailTutors(CSRFSecureForm):
 			   required=True),
 			FormField('body',
 			   label='Nachricht', cols=64, rows=24,
-			   type='textarea',
-			   required=True),
+			   type='textarea'),
 			FileField('attachments',
 			   label=u'Anhänge', size=64,
 			   growable=False
@@ -816,8 +814,7 @@ class LectureEmailStudents(CSRFSecureForm):
 			   required=True),
 			FormField('body',
 			   label='Nachricht', cols=64, rows=24,
-			   type='textarea',
-			   required=True),
+			   type='textarea'),
 			FileField('attachments',
 			   label=u'Anhänge', size=64,
 			   growable=False
