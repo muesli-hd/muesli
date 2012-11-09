@@ -300,6 +300,14 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 		self.assertIn(self.user, self.lecture.students)
 		self.assertIn(self.user, self.lecture.tutorials[0].students)
 
+	def test_lecture_add_student_exists(self):
+		res = self.testapp.get('/lecture/add_student/%s' % self.lecture.id, status=200)
+		form = res.form
+		form['student_email'] = self.user.email
+		form['new_tutorial']  = self.lecture.tutorials[0].id
+		res = form.submit()
+		self.assertResContains(res, 'bereits eingetragen')
+
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):
