@@ -297,13 +297,13 @@ class Export(object):
 					points[a.student_id]['registration'] = a.registration
 				if exam.medical_certificate!=None:
 					points[a.student_id]['medical_certificate'] = a.medical_certificate
-			for student in points:
+			for student in students:
 				if exam.admission!=None and not 'admission' in points[student]:
-					points[student]['admission'] = None
+					points[student.student_id]['admission'] = None
 				if exam.registration!=None and not 'registration' in points[student]:
-					points[student]['registration'] = None
+					points[student.student_id]['registration'] = None
 				if exam.medical_certificate!=None and not 'medical_certificate' in points[student]:
-					points[student]['medical_certificate'] = None
+					points[student.student_id]['medical_certificate'] = None
 		return {'exam': exam,
 		        'tutorial_ids': self.request.matchdict['tutorial_ids'],
 		        'students': students,
