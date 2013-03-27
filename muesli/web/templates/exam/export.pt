@@ -29,7 +29,7 @@
     <td>${ls.student.subject}</td>
     <td>${ls.student.birth_date}, ${ls.student.birth_place}</td>
     <td tal:repeat="ex exam.exercises">${points[ls.student_id][ex.id].points if points[ls.student_id][ex.id].points!= None else ''}</td>
-    <td>${points[ls.student_id]['total']}</td>
+    <td>${points[ls.student_id].get('total', '')}</td>
     <td tal:condition="exam.admission!=None">
       <div tal:omit-tag="" tal:define="a points[ls.student_id]['admission']">
         <span tal:condition="a==True" tal:omit-tag="">Zugelassen</span>
