@@ -70,6 +70,35 @@ def contact(request):
 def index(request):
 	return {}
 
+@view_config(route_name='email_all_users', renderer='muesli.web:templates/email_all_users.pt', context=GeneralContext, permission='admin')
+def emailAllUsers(request):
+	ttype = request.params.get('type', 'inform_message')
+	form = EmailWrongSubject(ttype, request)
+	semesterlimit = utils.getSemesterLimit()
+	students = request.db.query(models.User).filter(models.User.lecture_students.any(models.LectureStudent.lecture.has(models.Lecture.term >= semesterlimit))).all()
+	headers = ['MUESLI-Information']
+	table = []
+	for s in students:
+		table.append(s)
+	if request.method == 'POST' and form.processPostData(request.POST):
+		message = Message(subject=form['subject'],
+			sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+			to= [],
+			bcc=[s.email for s in students],
+			body=form['body'])
+		if request.POST['attachments'] not in ['', None]:
+			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
+		sendMail(message)
+		request.session.flash('A Mail has been send to all students', queue='messages')
+	return {'form': form,
+		'type': ttype,
+		'table': table,
+		'headers': headers,
+		'students': students}
+
+
+
+
 @view_config(route_name='email_users', renderer='muesli.web:templates/email_users.pt', context=GeneralContext, permission='admin')
 def emailUsers(request):
 	ttype = request.params.get('type', 'wrong_subject')

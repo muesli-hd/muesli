@@ -147,6 +147,7 @@ def main(global_config=None, **settings):
 	config.add_route('admin', '/admin', factory = GeneralContext)
 	config.add_route('index', '/')
 	config.add_route('email_users', '/email_users', factory = GeneralContext)
+	config.add_route('email_all_users','/email_all_users',factory = GeneralContext)
 	config.add_route('user_update', '/user/update', factory = GeneralContext)
 	config.add_route('user_change_email', '/user/change_email', factory = GeneralContext)
 	config.add_route('user_change_password', '/user/change_password', factory = GeneralContext)
@@ -194,6 +195,9 @@ def main(global_config=None, **settings):
 	config.add_route('lecture_export_students_html', '/lecture/export_students_html/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_export_totals', '/lecture/export_totals/{lecture_id}', factory = LectureContext)
 	config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory = GeneralContext)
+	config.add_route('lecture_export_yaml_details','/lecture/export_yaml_details',factory = GeneralContext) #Canh added
+	config.add_route('lecture_export_excel','/lecture/export_excel/downloadDetailTutorials.xls',factory = GeneralContext) #Canh added
+
 	config.add_route('lecture_view_points', '/lecture/view_points/{lecture_id}', factory = LectureContext)
 
 

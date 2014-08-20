@@ -37,7 +37,10 @@ from pyramid.url import route_url
 from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
 import sqlalchemy
-
+#
+import pyExcelerator
+import StringIO
+#
 from muesli import types
 
 import re
@@ -241,7 +244,7 @@ def delete(request):
 		request.session.flash(u'Vorlesung gelöscht', queue='messages')
 	return HTTPFound(location=request.route_url('lecture_list'))
 
-@view_config(route_name='lecture_change_assistants', context=LectureContext, permission='change_assistants')
+@view_config(route_name='lecture_change_assistants', context=LectureContext, permission='change_assistant')
 def change_assistants(request):
 	lecture = request.context.lecture
 	if request.method == 'POST':
@@ -253,7 +256,8 @@ def change_assistants(request):
 				del lecture.assistants[nr]
 		if 'add-assistant' in request.POST:
 			new_assistant = request.db.query(models.User).get(request.POST['new-assistant'])
-			lecture.assistants.append(new_assistant)
+			if new_assistant and new_assistant not in lecture.assistants:
+				lecture.assistants.append(new_assistant)
 	if request.db.new or request.db.dirty or request.db.deleted:
 		if len(lecture.assistants)>0:
 			lecture.old_assistant = lecture.assistants[0]
@@ -579,4 +583,98 @@ def exportYaml(request):
 	response = Response(content_type='application/x-yaml')
 	response.body = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
 	return response
+
+@view_config(route_name='lecture_export_yaml_details',context = GeneralContext, permission = 'export_yaml')
+def exportYaml_details(request):
+	lectures = request.db.query(models.Lecture)
+	if not "show_all" in request.GET:
+		lectures = lectures.filter(models.Lecture.is_visible == True)
+	out = []
+	for lecture in lectures.all():
+		lecture_dict = {}
+		lecture_dict['tutorials'] = []
+		for tutorial in lecture.tutorials:
+			vtutor = 'tutor: ' + tutorial.tutor.name() if tutorial.tutor!=None else 'tutor: '
+			vemail = 'email: ' + tutorial.tutor.email  if tutorial.tutor!=None else 'email: '
+			vplace = 'place: ' + tutorial.place
+			vtime = 'time: '+ tutorial.time.__html__()
+			vcomment = 'comment: ' + tutorial.comment
+			tutorialItem = (vtutor.replace("'",""),vemail, vplace.replace("'",""), vtime.replace("'",""),vcomment.replace("'",""))
+			lecture_dict['tutorials'].append(tutorialItem)
+		lecture_dict['name'] = lecture.name
+		lecture_dict['lecturer'] = lecture.lecturer
+		lecture_dict['student_count'] = lecture.lecture_students.count()
+		lecture_dict['term'] = lecture.term.__html__()
+		out.append(lecture_dict)
+		response = Response(content_type='application/x-yaml')
+	response.body = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
+	return response
+
+#Canh added
+class ExcelExport(object):
+	def __init__(self,request):
+		self.request = request
+		self.w = pyExcelerator.Workbook()
+
+	def createResponse(self):
+		output = StringIO.StringIO()
+		self.w.save(output)
+		response = Response(content_type='application/vnd.ms-exel')
+		response.body = output.getvalue()
+		output.close()
+		return response
+
+	
+@view_config(route_name='lecture_export_excel', context = GeneralContext, permission='view')
+class DoExport(ExcelExport):
+	def __call__(self):
+		lectures = self.request.db.query(models.Lecture)
+		lectures = lectures.filter(models.Lecture.is_visible==True)
+		header = ['Tutor FirstName','Tutor LastName','Tutor Email','Tutorial Information','Student Count','Tutorial Room','Time','Comments']
+		w = self.w
+		worksheet_tutorials = w.add_sheet('Tutorials')
+		worksheet_tutorials.set_col_default_width(20)
+		header_style = pyExcelerator.XFStyle()
+		header_style.font.bold = True
+		for i, h in enumerate(header):
+			worksheet_tutorials.write(0,i,h,header_style)
+		rowIndex = 1
+		for lecture in lectures.all():
+			tutorialList = []
+			lectureName = lecture.name
+			for tutorial in lecture.tutorials:
+				vtutor = tutorial.tutor.name() if tutorial.tutor!=None else 'None'
+				vtutor_firstName = tutorial.tutor.first_name if tutorial.tutor!=None else 'None'
+				vtutor_lastName = tutorial.tutor.last_name if tutorial.tutor!=None else 'None'
+				vemail = tutorial.tutor.email if tutorial.tutor!=None else 'None'
+				vplace = tutorial.place
+				vtime = tutorial.time.__html__()
+				vcomment = tutorial.comment
+				vstudent = len(tutorial.students.all())
+				tutorialItem = (vtutor_firstName,vtutor_lastName,vemail,lectureName,vstudent,vplace,vtime,vcomment)
+				tutorialList.append(tutorialItem)
+			#sort by tutor fistName
+			tutorialList = sorted(tutorialList)
+			newList = []
+			tutorialIndex = 1
+			for item in tutorialList:
+				newItem = (item[0],item[1],item[2],item[3]+' Uebungsgruppe: '+str(tutorialIndex),item[4],item[5],item[6],item[7])
+				newList.append(newItem)
+				tutorialIndex = tutorialIndex + 1
+			#add sumary lecture
+			lectureItem = ('',lecture.lecturer,'',lectureName,lecture.lecture_students.count(),'',lecture.term.__html__(),'')
+			newList.append(lectureItem)
+			#add to sheet
+			for item in newList:
+				for col, d in enumerate(item):
+					worksheet_tutorials.write(rowIndex,col,d)
+				rowIndex = rowIndex + 1
+		return self.createResponse()
+
+
+
+
+
+				
+
 

@@ -82,7 +82,7 @@ class LectureContext(object):
 		self.__acl__ = [
 			(Allow, Authenticated, ('view', 'view_own_points', 'add_tutor')),
 			(Allow, 'group:administrators', ALL_PERMISSIONS),
-			]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for assistant in self.lecture.assistants
+			]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit','change_assistant', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for assistant in self.lecture.assistants
 			]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for tutor in self.lecture.tutors]
 
 class TutorialContext(object):

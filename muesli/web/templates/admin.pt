@@ -10,8 +10,13 @@
   <li><a tal:attributes="href request.route_path('lecture_export_yaml')">Aktuelle Vorlesungen als YAML exportieren</a>
     (<a tal:attributes="href request.route_path('lecture_export_yaml', _query={'show_all': 1})">Alle exportieren</a>)
   </li>
+ <li><a tal:attributes="href request.route_path('lecture_export_yaml_details')">Aktuelle Vorlesungen und Tutorials als YAML exportieren</a>
+    (<a tal:attributes="href request.route_path('lecture_export_yaml_details', _query={'show_all': 1})">Alle exportieren</a>)
+  </li>
+  <li> <a tal:attributes="href request.route_path('lecture_export_excel')">Aktuelle Vorlesungen und Tutorials als Excel Exportieren</a> </li>
   <li><a tal:attributes="href request.route_path('lecture_add')">Neue Vorlesung</a></li>
-  <li><a tal:attributes="href request.route_path('email_users')">Studenten mailen</a></li>
+  <li><a tal:attributes="href request.route_path('email_users')">Studenten mit Problems mailen</a></li>
+  <li><a tal:attributes="href request.route_path('email_all_users')">Alles Studenten mailen</a></li>
   <li><a tal:attributes="href request.route_path('user_delete_unconfirmed')">Karteileichen sichten und löschen</a></li>
   <li><a tal:attributes="href request.route_path('user_doublets')">Mehrfache Anmeldungen</a></li>
 </ul>
