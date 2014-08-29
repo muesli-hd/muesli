@@ -198,7 +198,7 @@ class Lecture(Base):
 	mode = Column(Text, nullable=False, default='off')
 	minimum_preferences = Column(Integer, default=None)
 	tutor_rights = Column(Text, nullable=False, default=editOwnTutorials)
-	tutorials = relationship('Tutorial', order_by='Tutorial.time')
+	tutorials = relationship('Tutorial', order_by='Tutorial.time,Tutorial.comment')
 	tutors = relationship(User, secondary=lecture_tutors_table, backref = "lectures_as_tutor")
 	@property
 	def students(self):

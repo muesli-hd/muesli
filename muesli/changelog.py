@@ -20,6 +20,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2014-08-30
+concerns:assistants,tutors
+Um Seminare sinnvoller Sortieren zu können werden Übungsgruppen ab sofort nach
+Wochentag, Uhrzeit und Kommentarfeld (in dieser Reihenfolge) sortiert. Dadurch
+wird ermöglicht, dass Seminare über das Kommentarfeld durchnummeriert werden
+können.
+
 ====2012-10-19
 concerns:assistants,tutors
 Es gibt wieder Korrelationsdiagramme, zumindest für einzelne Testate und die Summe
