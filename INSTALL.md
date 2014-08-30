@@ -10,6 +10,7 @@ The following packages are needed in order to run Müsli:
     python-numpy
     libjs-jquery-tablesorter
     libjs-jquery-fancybox
+    libjs-scriptaculous
 
 For database-upgrade, the following packages is needed in addition:
 
