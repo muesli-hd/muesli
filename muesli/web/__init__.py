@@ -243,6 +243,7 @@ def main(global_config=None, **settings):
 	config.add_route('grading_enter_grades', '/grading/enter_grades/{grading_id}', factory=GradingContext)
 	config.add_route('grading_get_row', '/grading/get_row/{grading_id}', factory=GradingContext)
 
+	config.include('pyramid_chameleon');
 
 	config.scan()
 

@@ -3,14 +3,24 @@ Needed Packages:
 
 The following packages are needed in order to run Müsli:
 
-    python-pyramid
+    postgresql-server-dev-all
+    python-chameleon
     python-excelerator
-    python-sqlalchemy (>=0.7, i.e. from backports, ...)
+    python-formencode
+    python-matplotlib
+    python-paste
+    python-pi
+    python-pyramid
+    python-pyramid-beaker
+    python-psycopg2
+    python-sqlalchemy (==0.7.x, i.e. from backports, ...)
     python-yaml
     python-numpy
     libjs-jquery-tablesorter
     libjs-jquery-fancybox
     libjs-scriptaculous
+
+    pip install pyramid-chameleon
 
 For database-upgrade, the following packages is needed in addition:
 
@@ -125,7 +135,7 @@ SQLite support
 ==============
 In case you are using sqlite as your database, you will need to compile the c file
 extension-functions.c to support the variance aggregate function. For that run
-	gcc -fPIC -lm -shared extension-functions.c -o libsqlitefunctions.so
+    gcc -fPIC -lm -shared extension-functions.c -o libsqlitefunctions.so
 and place the resulting shared-object file in MUESLI's root directory. Make sure
 you're compiling on the running machine or use an appropriate cross-compiler.
 You also have to make sure, that pysqlite2 was compiled with load_extension support.
