@@ -359,6 +359,7 @@ class UserEdit(ObjectForm):
 			   required=True),
 			FormField('matrikel',
 			   label='Matrikelnummer', size=10,
+			   validator=validators.Number,
 			   value=user.matrikel),
 			FormField('subject',
 			   label='Studiengang',
@@ -423,6 +424,7 @@ class UserUpdate(ObjectForm):
 			   required=True),
 			FormField('matrikel',
 			   label='Matrikelnummer', size=10,
+			   validator=validators.Number,
 			   value=user.matrikel),
 			FormField('subject',
 			   label='Studiengang',
@@ -487,6 +489,7 @@ class UserRegister(ObjectForm):
 			   required=True),
 			FormField('matrikel',
 			   label='Matrikelnummer', size=10,
+			   validator=validators.Number,
 			   #value=user.matrikel,
 			   required=True
 			   ),
