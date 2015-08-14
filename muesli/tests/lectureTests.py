@@ -235,6 +235,9 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 	def test_lecture2_edit(self):
 		res = self.testapp.get('/lecture/edit/%s' % self.lecture2.id, status=403)
 
+	def test_lecture_change_assistants(self):
+		res = self.testapp.get('/lecture/change_assistants/%s' % self.lecture.id, status=302)
+
 	def test_lecture_do_allocation(self):
 		res = self.testapp.get('/lecture/do_allocation/%s' % self.prefLecture.id, status=200)
 		self.session.expire_all()
@@ -317,9 +320,6 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 
 	def test_lecture2_edit(self):
 		pass
-
-	def test_lecture_change_assistants(self):
-		res = self.testapp.get('/lecture/change_assistants/%s' % self.lecture.id, status=302)
 
 	def test_lecture_export_yaml(self):
 		res = self.testapp.get('/lecture/export_yaml', status=200)

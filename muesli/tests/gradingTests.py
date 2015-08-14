@@ -95,9 +95,9 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 		self.assertForm(res, 'grade-%i' % self.user.id, '2.0', formindex=2)
 
 	def test_grading_export(self):
-		res = self.testapp.get('/grading/export/%s' % self.grading.id, status=200)
+		res = self.testapp.get('/grading/export/%s.xls' % self.grading.id, status=200)
 		self.test_grading_enter_grades()
-		res = self.testapp.get('/grading/export/%s' % self.grading.id, status=200)
+		res = self.testapp.get('/grading/export/%s.xls' % self.grading.id, status=200)
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):
