@@ -31,7 +31,7 @@ class BaseTests(functionalTests.BaseTests):
 		res = self.testapp.get('/tutorial/view/%s' % 12456, status=403)
 
 	def test_tutorial_occupancy_bar(self):
-		res = self.testapp.get('/tutorial/occupancy_bar/10/20/30', status=200)
+		res = self.testapp.get('/tutorial/occupancy_bar/10/20', status=200)
 		self.assertTrue(res.content_type=='image/png')
 
 	def test_tutorial_add(self):

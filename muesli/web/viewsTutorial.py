@@ -69,7 +69,6 @@ class OccupancyBar(object):
 		self.request = request
 		self.count = int(request.matchdict['count'])
 		self.max_count = int(request.matchdict['max_count'])
-		self.max_count_total = int(request.matchdict['max_count_total'])
 		self.width = 60
 		self.height = 10
 		self.color1 = (0,0,255)
@@ -77,8 +76,8 @@ class OccupancyBar(object):
 	def __call__(self):
 		image = PIL.Image.new('RGB', (self.width,self.height),(255,255,255))
 		draw = PIL.ImageDraw.Draw(image)
-		draw.rectangle([(0,0),(float(self.width)*self.max_count/self.max_count_total,10)], fill=self.color2)
-		draw.rectangle([(0,0),(float(self.width)*self.count/self.max_count_total,10)], fill=self.color1)
+		draw.rectangle([(0,0),(float(self.width)*self.max_count/self.max_count,10)], fill=self.color2)
+		draw.rectangle([(0,0),(float(self.width)*self.count/self.max_count,10)], fill=self.color1)
 		output = StringIO.StringIO()
 		image.save(output, format='PNG')
 		response = Response()
