@@ -60,6 +60,17 @@ class BaseTests(functionalTests.BaseTests):
 		form['first_name'] = 'Matthias'
 		form['last_name'] = 'Kümmerer'
 		form['subject'] = 'Mathematik (Dipl.)'
+		form['matrikel'] = 'ui123'
+		form['birth_date'] = '01.12.1999'
+		form['birth_place'] = 'Hintertupfingen'
+		res = form.submit()
+		self.assertTrue(res.status.startswith('200'))
+		self.assertResContains(res, 'formerror')
+		form = res.form
+		form['email'] = 'matthias@matthias-k.org'
+		form['first_name'] = 'Matthias'
+		form['last_name'] = 'Kümmerer'
+		form['subject'] = 'Mathematik (Dipl.)'
 		form['matrikel'] = '1234567'
 		form['birth_date'] = '01.12.1999'
 		form['birth_place'] = 'Hintertupfingen'
