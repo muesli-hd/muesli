@@ -14,7 +14,7 @@ Bei Problemen mit MÜSLI selbst <a tal:attributes="href 'mailto:'+request.config
 </p>
 
 <p>
-Es gibt auch eine <a href="http://www.mathi.uni-heidelberg.de/~ansgar/muesli">Webseite zu MÜSLI</a> selbst.
+Der Quelltext von Müsli kann auf <a href="https://github.com/muesli-hd/muesli">Github</a> eingesehen werden. Auch Verbesserungsvorschläge können dort abgegeben werden.
 </p>
 
 
