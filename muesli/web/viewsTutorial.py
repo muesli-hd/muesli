@@ -76,8 +76,12 @@ class OccupancyBar(object):
 	def __call__(self):
 		image = PIL.Image.new('RGB', (self.width,self.height),(255,255,255))
 		draw = PIL.ImageDraw.Draw(image)
-		draw.rectangle([(0,0),(float(self.width)*self.max_count/self.max_count,10)], fill=self.color2)
-		draw.rectangle([(0,0),(float(self.width)*self.count/self.max_count,10)], fill=self.color1)
+		# prevent 0-division error
+		if self.max_count > 0:
+			draw.rectangle([(0,0),(float(self.width)*self.max_count/self.max_count,10)], fill=self.color2)
+			draw.rectangle([(0,0),(float(self.width)*self.count/self.max_count,10)], fill=self.color1)
+		else:
+			draw.rectangle([(0,0),(float(self.width),10)], fill=self.color1)
 		output = StringIO.StringIO()
 		image.save(output, format='PNG')
 		response = Response()
