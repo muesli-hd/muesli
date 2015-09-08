@@ -32,6 +32,9 @@ class BaseTests(functionalTests.BaseTests):
 
 	def test_tutorial_occupancy_bar(self):
 		res = self.testapp.get('/tutorial/occupancy_bar/10/20', status=200)
+		res = self.testapp.get('/tutorial/occupancy_bar/50/30', status=200)
+		res = self.testapp.get('/tutorial/occupancy_bar/0/0', status=200)
+		res = self.testapp.get('/tutorial/occupancy_bar/30/0', status=200)
 		self.assertTrue(res.content_type=='image/png')
 
 	def test_tutorial_add(self):
