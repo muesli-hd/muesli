@@ -55,7 +55,7 @@ class List(object):
 		self.db = self.request.db
 	def is_ana_or_la(self, lecture):
 		name = lecture.name.lower()
-		if any([name.startswith(start) for start in ['la','ana','lineare algebra', 'analysis']]):
+		if any([name.startswith(start) for start in ['lineare algebra i', 'analysis i','lineare algebra 1', 'analysis 1']]):
 			return True
 		else:
 			return False
