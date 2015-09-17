@@ -22,7 +22,10 @@ from sqlalchemy import create_engine
 
 from utils import Configuration
 
-config = Configuration('/opt/muesli4/muesli.yml')
+import os
+
+
+config = Configuration(os.getenv('MUESLI_PATH','/opt/muesli4') + '/muesli.yml')
 
 import muesli.mail
 muesli.mail.server = config['contact']['server']
