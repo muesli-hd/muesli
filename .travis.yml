@@ -17,6 +17,7 @@ before_script:
   - psql -c 'create database muesli;' -U postgres
   - psql -c 'create database mueslitest;' -U postgres
   - cp muesli.yml.example muesli.yml
+  - smtp-sink -c localhost:25 10000
 
 # command to run tests
 script: MUESLI_PATH=$(pwd) python test.py
