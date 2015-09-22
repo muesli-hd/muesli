@@ -20,6 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2015-09-22
+concerns:users
+Ab sofort können sich Benutzer ohne Matrikelnummer anmelden, indem sie die
+Matrikelnummer 00000 eingeben. Diese muss baldmöglichst nachgetragen werden um
+Problemen beim eintragen der Prüfungsergebnisse aus dem Weg zu gehen.
+
 ====2014-08-30
 concerns:assistants,tutors
 Um Seminare sinnvoller Sortieren zu können werden Übungsgruppen ab sofort nach
