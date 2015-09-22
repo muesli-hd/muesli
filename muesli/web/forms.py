@@ -488,7 +488,7 @@ class UserRegister(ObjectForm):
 			   #value=user.last_name,
 			   required=True),
 			FormField('matrikel',
-			   label='Matrikelnummer', size=10,
+			   label='Matrikelnummer', size=10, comment=u'Falls noch keine Matrikelnummer bekannt ist bitte 00000 eintragen. Die Matrikelnummer muss dann baldmöglichst unter „Angaben ergänzen“ richtig gestellt werden!',
 			   validator=validators.Number,
 			   #value=user.matrikel,
 			   required=True
@@ -523,6 +523,11 @@ class UserRegister(ObjectForm):
 				self.obj.subject = self['subject']
 		elif fieldName == 'alt_subject':
 			pass
+		elif fieldName == 'matrikel':
+			if self['matrikel']==00000:
+				self.obj.matrikel = None
+			else:
+				self.obj.matrikel = self['matrikel']
 		else:
 			ObjectForm.saveField(self, fieldName)
 
