@@ -59,7 +59,7 @@
 
 <p>Anzeigemodus: <span class="points" style="display:none"><a href="javascript:hide_points()">Nur Diagramme</a> | Punkte und Diagramme</span><span class="nopoints">Nur Diagramme | <a href="javascript:show_points()">Punkte und Diagramme</a></span></p>
 
-<p tal:condition="tutorial_ids">In den Diagrammen entspricht der erste Balken dem Wert in der Übungsgruppe, der zwei Wert dem in der
+<p tal:condition="tutorial_ids">In den Diagrammen entspricht der erste Balken dem Wert in der Übungsgruppe, der zweite Wert dem in der
 gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der Form <i>Übungsgruppe/Vorlesung</i> ausgegeben</span></p>
 
 <table>
