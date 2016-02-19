@@ -1,6 +1,10 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
+<h3>Aktuelles</h3>
+
+<p>In den nächsten Wochen zieht die Fakultät für Mathematik und Informatik gemeinsam mit dem IWR in das neu gebaute Mathematikon (INF 205). Aus diesem Grund wird das MÜSLI um den 10. März teilweise nicht zur Verfügung stehen.</p>
+
 <h2>Willkommen bei MÜSLI!</h2>
 
 <p>

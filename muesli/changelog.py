@@ -20,6 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2016-02-19
+concerns:users,assistants,tutors
+In den nächsten Wochen zieht die Fakultät für Mathematik und Informatik
+gemeinsam mit dem IWR in das neu gebaute Mathematikon (INF 205). Aus diesem
+Grund wird das MÜSLI um den 10. März teilweise nicht zur Verfügung stehen.
+
 ====2015-09-22
 concerns:users
 Ab sofort können sich Benutzer ohne Matrikelnummer anmelden, indem sie die
