@@ -79,7 +79,7 @@ def getSubjects(user=None):
 def getSemesterLimit():
 	now = datetime.datetime.now()
 	semesterlimit = now.year
-	if now.month < 3:
+	if now.month < 4:
 		semesterlimit -= 1
 	term = '1' if now.month>=4 and now.month <=9 else '2'
 	semesterlimit = '%4i%s' % (semesterlimit, term)
