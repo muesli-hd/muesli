@@ -4,24 +4,15 @@ python:
 
 addons:
   postgresql: "9.4"
-  apt:
-    packages:
-      - postfix
 
 cache: pip
-
-#sudo: required
 
 # command to install dependencies
 install: "pip install -r requirements.txt"
 
 before_script:
   - psql -c 'create database mueslitest;' -U postgres
-  - psql -c 'create database muesli;' -U postgres
   - cp muesli.yml.example muesli.yml
-#  - sudo smtp-sink -c localhost:25 10000
-  - pip list
-  - pwd
 
 # command to run tests
 script: MUESLI_PATH=$(pwd) py.test muesli/tests
