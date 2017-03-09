@@ -10,6 +10,8 @@ addons:
 
 cache: pip
 
+sudo: required
+
 # command to install dependencies
 install: "pip install -r requirements.txt"
 
@@ -17,7 +19,7 @@ before_script:
   - psql -c 'create database mueslitest;' -U postgres
   - psql -c 'create database muesli;' -U postgres
   - cp muesli.yml.example muesli.yml
-  - smtp-sink -c localhost:25 10000
+  - sudo smtp-sink -c localhost:25 10000
   - pip list
 
 # command to run tests
