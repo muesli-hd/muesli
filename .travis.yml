@@ -14,7 +14,6 @@ cache: pip
 install: "pip install -r requirements.txt"
 
 before_script:
-  - psql -c 'create database muesli;' -U postgres
   - psql -c 'create database mueslitest;' -U postgres
   - psql -c 'create database muesli;' -U postgres
   - cp muesli.yml.example muesli.yml
