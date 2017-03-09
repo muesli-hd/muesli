@@ -1,3 +1,6 @@
+[travis master](https://travis-ci.org/muesli-hd/muesli.svg?branch=master)
+[travis production](https://travis-ci.org/muesli-hd/muesli.svg?branch=production)
+
 Needed Packages:
 ================
 
