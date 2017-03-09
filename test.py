@@ -17,6 +17,7 @@ names = ['muesli.tests.functionalTests',
 	     'muesli.tests.utilsTests',
 		 ]
 
+print(names)
 suites = [loader.loadTestsFromNames(names),
 	]
 
