@@ -16,7 +16,7 @@ pyparsing==2.0.3
 pyramid==1.5.7
 pyramid-beaker==0.8
 pyramid-chameleon==0.3
-pytest==2.7.3
+pytest==3.0.6
 python-dateutil==2.4.1
 pytz==2015.2
 PyYAML==3.11

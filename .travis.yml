@@ -24,4 +24,4 @@ before_script:
   - pwd
 
 # command to run tests
-script: MUESLI_PATH=$(pwd) python test.py
+script: MUESLI_PATH=$(pwd) py.test muesli/tests
