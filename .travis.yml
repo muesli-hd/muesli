@@ -5,8 +5,8 @@ python:
 addons:
   postgresql: "9.4"
   apt:
-      packages:
-          - postfix
+    packages:
+      - postfix
 
 cache: pip
 
@@ -16,6 +16,7 @@ install: "pip install -r requirements.txt"
 before_script:
   - psql -c 'create database muesli;' -U postgres
   - psql -c 'create database mueslitest;' -U postgres
+  - psql -c 'create database muesli;' -U postgres
   - cp muesli.yml.example muesli.yml
   - smtp-sink -c localhost:25 10000
   - pip list
