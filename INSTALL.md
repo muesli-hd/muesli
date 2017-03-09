@@ -1,4 +1,4 @@
-bla        | fooo
+branch     | build status
 -----------|---------
 master     | ![travis master](https://travis-ci.org/muesli-hd/muesli.svg?branch=master)
 production | ![travis production](https://travis-ci.org/muesli-hd/muesli.svg?branch=production)
