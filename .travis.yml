@@ -10,7 +10,7 @@ addons:
 
 cache: pip
 
-sudo: required
+#sudo: required
 
 # command to install dependencies
 install: "pip install -r requirements.txt"
