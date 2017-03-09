@@ -114,6 +114,10 @@ class User(Base):
 		return mt
 	def name(self):
 		return self.first_name + ' ' + self.last_name
+	def getFirstName(self):
+		return self.first_name
+	def getLastName(self):
+		return self.last_name
 	def prepareTimePreferences(self):
 		time_preferences = self.time_preferences
 		tps = {}

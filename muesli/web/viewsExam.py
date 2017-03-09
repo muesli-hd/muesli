@@ -66,6 +66,8 @@ class Edit(object):
 				students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.admission==True))))
 			if exam.registration != None:
 				students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.registration==True))))
+			# first sort key: last_name, second sort key: first_name
+			students = sorted(students, key=lambda s: (s.student.getLastName().lower(), s.student.getFirstName().lower()))
 		else: students = None
 		return {'exam': exam,
 		        'form': form,
