@@ -1,5 +1,6 @@
 import unittest
 import sys
+import muesli.tests
 
 loader = unittest.TestLoader()
 
