@@ -20,6 +20,7 @@ before_script:
   - psql -c 'create database muesli;' -U postgres
   - cp muesli.yml.example muesli.yml
 #  - sudo smtp-sink -c localhost:25 10000
+  - pip list
   - pwd
 
 # command to run tests
