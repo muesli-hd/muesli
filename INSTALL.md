@@ -19,6 +19,7 @@ The following packages are needed in order to run Müsli:
     libjs-jquery-tablesorter
     libjs-jquery-fancybox
     libjs-scriptaculous
+    lp-solve
 
     pip install pyramid-chameleon
 
