@@ -342,9 +342,13 @@ class RemoveTutor(object):
 		self.db = self.request.db
 		self.lecture_id = request.matchdict['lecture_id']
 		self.tutor_id = request.matchdict['tutor_id']
+		self.tutorials = request.context.lecture.tutorials
 	def __call__(self):
 		lecture = self.db.query(models.Lecture).get(self.lecture_id)
 		tutor = self.db.query(models.User).get(self.tutor_id)
+		for tutorial in self.tutorials:
+			if tutorial.tutor_id == int(self.tutor_id):
+				tutorial.tutor = None
 		if not tutor:
 			return
 		if not tutor in lecture.tutors:
