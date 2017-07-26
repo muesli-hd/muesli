@@ -115,10 +115,12 @@ def delete(request):
 	elif len(user.student_grades.all())>0:
 		request.session.flash(u'Benutzer %s hat eingetragene Noten und kann daher nicht gelöscht werden' % user, queue='errors')
 		return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
+	elif len(user.tutorials_removed.all())>0:
+		request.session.flash(u'Benutzer %s war in Tutorien angemeldet und kann daher nicht gelöscht werden' % user, queue='errors')
+		return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
 	else:
 		for c in user.confirmations:
 			request.db.delete(c)
-		# TODO: lecture_removed_students
 		#old_name = str(user)
 		request.db.delete(user)
 		request.db.commit()

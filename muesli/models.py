@@ -104,6 +104,10 @@ class User(Base):
 	def tutorials_as_tutor(self):
 		session = Session.object_session(self)
 		return session.query(Tutorial).filter(Tutorial.tutor_id == self.id).join(Tutorial.lecture).order_by(Lecture.term,Lecture.name,Tutorial.time)
+	@property
+	def tutorials_removed(self):
+		session = Session.object_session(self)
+		return session.query(LectureRemovedStudent).filter(LectureRemovedStudent.student_id == self.id).join(LectureRemovedStudent.tutorial).join(Tutorial.lecture).order_by(Lecture.term,Lecture.name,Tutorial.time)
 	def prepareMultiTutorials(self):
 		mt = {}
 		for tutorial in self.tutorials_as_tutor:
@@ -153,6 +157,8 @@ class User(Base):
 		elif len(self.exercise_points)>0:
 			return False
 		elif len(self.student_grades.all())>0:
+			return False
+		elif len(self.tutorials_removed.all())>0:
 			return False
 		return True
 	def __unicode__(self):
