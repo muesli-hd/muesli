@@ -91,7 +91,7 @@ You should be able to start the test installation from the Müsli directory by
 If you want to run the tests as well, you have to create another database 'mueslitest'.
 then you can run the tests from the Müsli directory via
 
-    python test.py
+    pytest
 
 
 
