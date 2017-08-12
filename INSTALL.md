@@ -1,12 +1,7 @@
-branch     | build status
------------|---------
-master     | ![travis master](https://travis-ci.org/muesli-hd/muesli.svg?branch=master)
-production | ![travis production](https://travis-ci.org/muesli-hd/muesli.svg?branch=production)
-
-branch     | build status
------------|---------
-master     | ![codecov master](https://codecov.io/gh/muesli-hd/muesli/branch/master/graph/badge.svg)
-production | ![codecov production](https://codecov.io/gh/muesli-hd/muesli/branch/production/graph/badge.svg)
+branch     | build status                                                                       | codecoverage 
+-----------|------------------------------------------------------------------------------------|--------------
+master     | ![travis master](https://travis-ci.org/muesli-hd/muesli.svg?branch=master)         | ![codecov master](https://codecov.io/gh/muesli-hd/muesli/branch/master/graph/badge.svg)
+production | ![travis production](https://travis-ci.org/muesli-hd/muesli.svg?branch=production) | ![codecov production](https://codecov.io/gh/muesli-hd/muesli/branch/production/graph/badge.svg)
 
 Needed Packages:
 ================
