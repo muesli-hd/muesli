@@ -251,13 +251,19 @@ def change_assistants(request):
 		for nr, assistant in enumerate(lecture.assistants):
 			if 'change-%i' % assistant.id in request.POST:
 				new_assistant = request.db.query(models.User).get(request.POST['assistant-%i' % assistant.id])
-				lecture.assistants[nr] = new_assistant
+				if new_assistant in lecture.assistants:
+					request.session.flash(u'Assistent ist bereits in Vorlesung eingetragen', queue='errors')
+				else:
+					lecture.assistants[nr] = new_assistant
 			if 'remove-%i' % assistant.id in request.POST:
 				del lecture.assistants[nr]
 		if 'add-assistant' in request.POST:
-			new_assistant = request.db.query(models.User).get(request.POST['new-assistant'])
-			if new_assistant and new_assistant not in lecture.assistants:
-				lecture.assistants.append(new_assistant)
+			if request.POST['new-assistant'] == "None":
+				request.session.flash(u'Bitte einen Assistenten auswählen', queue='errors')
+			else:
+				new_assistant = request.db.query(models.User).get(request.POST['new-assistant'])
+				if new_assistant and new_assistant not in lecture.assistants:
+					lecture.assistants.append(new_assistant)
 	if request.db.new or request.db.dirty or request.db.deleted:
 		if len(lecture.assistants)>0:
 			lecture.old_assistant = lecture.assistants[0]
