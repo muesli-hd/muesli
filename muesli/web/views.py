@@ -28,7 +28,7 @@ from muesli.changelog import changelog as changelog_str
 
 from pyramid import security
 from pyramid.view import view_config
-from pyramid.response import Response
+from pyramid.response import Response, FileResponse
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPInternalServerError, HTTPFound
 import pyramid.exceptions
 from pyramid.url import route_url
@@ -189,3 +189,10 @@ def internalServerError(exc, request):
 	email = request.user.email if request.user else '<nobody>'
 	return {'now': now,
 	        'email': email}
+
+
+@view_config(name="favicon.ico")
+def favicon_view(request):
+	here = os.path.dirname(__file__)
+	icon = os.path.join(here, "static", "favicon.ico")
+	return FileResponse(icon, request=request)

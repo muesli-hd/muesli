@@ -41,6 +41,9 @@ class BaseTests(functionalTests.BaseTests):
 	def test_email_users(self):
 		res = self.testapp.get('/email_users', status=403)
 
+	def test_favicon(self):
+		res = self.testapp.get('/favicon.ico', status=200)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 	pass
 
