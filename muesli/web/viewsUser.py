@@ -75,7 +75,8 @@ def listSubjects(request):
 def listSubjectsByTerm(request):
 	settings = {
 		'starting_term': '20121', # SS 2012
-		'minimal_count': 20 # minimal count overall terms
+		'minimal_count': 20, # minimal count overall terms
+		'exclude_lecture_name': 'Vorkurs' # lecture name to exclude
 	}
 	subject_term_dict = collections.defaultdict(lambda: collections.defaultdict(int))
 	terms = [str(x[0]) for x in request.db.query(models.Lecture.term)
@@ -86,6 +87,7 @@ def listSubjectsByTerm(request):
 		.join(models.LectureStudent)\
 		.join(models.User)\
 		.filter(models.Lecture.term >= settings['starting_term'])\
+		.filter(sqlalchemy.not_(models.Lecture.name.contains(settings['exclude_lecture_name'])))\
 		.group_by(models.User.subject, models.Lecture.term)\
 		.order_by(models.Lecture.term, models.User.subject)
 	for (term, subject, count) in table:

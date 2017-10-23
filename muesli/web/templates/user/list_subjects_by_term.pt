@@ -5,7 +5,7 @@
 <h2>Liste aller eingetragenen Studiengänge nach Veranstaltungsteilnahmen pro Semester</h2>
 <p>
   Nur Werte ab ${settings['starting_term']}, mit minimal ${settings['minimal_count']} Teilnahmen über alle Semester pro
-  Studiengang.
+  Studiengang. Ausgeschlossen sind Veranstaltungen mit „${settings['exclude_lecture_name']}“ im Namen.
 </p>
 
 <table>
