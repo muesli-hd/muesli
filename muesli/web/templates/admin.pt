@@ -6,6 +6,7 @@
 <ul>
   <li><a tal:attributes="href request.route_path('user_list')">Nutzerliste</a></li>
   <li><a tal:attributes="href request.route_path('user_list_subjects')">Studiengangsliste</a></li>
+  <li><a tal:attributes="href request.route_path('user_list_subjects_by_term')">Studiengangsliste nach Semestern und Teilnahmen</a></li>
   <li><a tal:attributes="href request.route_path('lecture_list', _query={'show_all': 1 })">Liste aller Vorlesungen</a></li>
   <li><a tal:attributes="href request.route_path('lecture_export_yaml')">Aktuelle Vorlesungen als YAML exportieren</a>
     (<a tal:attributes="href request.route_path('lecture_export_yaml', _query={'show_all': 1})">Alle exportieren</a>)

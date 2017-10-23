@@ -71,6 +71,37 @@ def listSubjects(request):
 	subjects = request.db.query(models.User.subject, func.count(models.User.id)).group_by(models.User.subject).order_by(models.User.subject)
 	return {'subjects': subjects}
 
+@view_config(route_name='user_list_subjects_by_term', renderer='muesli.web:templates/user/list_subjects_by_term.pt', context=GeneralContext, permission='admin')
+def listSubjectsByTerm(request):
+	settings = {
+		'starting_term': '20121', # SS 2012
+		'minimal_count': 20 # minimal count overall terms
+	}
+	subject_term_dict = collections.defaultdict(lambda: collections.defaultdict(int))
+	terms = [str(x[0]) for x in request.db.query(models.Lecture.term)
+		.filter(models.Lecture.term >= settings['starting_term'])
+		.group_by(models.Lecture.term).order_by(models.Lecture.term.desc())]
+	subjects_by_term = []
+	table = request.db.query(models.Lecture.term, models.User.subject, func.count(models.User.id))\
+		.join(models.LectureStudent)\
+		.join(models.User)\
+		.filter(models.Lecture.term >= settings['starting_term'])\
+		.group_by(models.User.subject, models.Lecture.term)\
+		.order_by(models.Lecture.term, models.User.subject)
+	for (term, subject, count) in table:
+		subject = re.sub(r'\(.*\)', '', unicode(subject))
+		subject = re.sub(r'\s$', '', unicode(subject))
+		if subject == 'None' or subject == '':
+			subject = '<ohne Studiengang>'
+		subject_term_dict[subject][str(term)] += count
+	for subject in sorted(subject_term_dict.keys()):
+		counts = [((term), subject_term_dict[subject][term]) for term in terms]
+		if sum([x[1] for x in counts]) > settings['minimal_count']:
+			subjects_by_term.append((subject, counts))
+	readable_terms = [Term(x) for x in terms]
+	settings['starting_term'] = Term(settings['starting_term'])
+	return {'subjects_by_term': subjects_by_term, 'terms': readable_terms, 'settings': settings}
+
 @view_config(route_name='user_edit', renderer='muesli.web:templates/user/edit.pt', context=UserContext, permission='edit')
 def edit(request):
 	user_id = request.matchdict['user_id']
