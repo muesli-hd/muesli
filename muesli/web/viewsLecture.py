@@ -663,17 +663,17 @@ class DoExport(ExcelExport):
 				vstudent = len(tutorial.students.all())
 				tutorialItem = (vtutor_firstName,vtutor_lastName,vemail,lectureName,vstudent,vplace,vtime,vcomment)
 				tutorialList.append(tutorialItem)
+			#add summary lecture
+			newList = []
+			lectureItem = ('',lecture.lecturer,'',lectureName,lecture.lecture_students.count(),'',lecture.term.__html__(),'')
+			newList.append(lectureItem)
 			#sort by tutor fistName
 			tutorialList = sorted(tutorialList)
-			newList = []
 			tutorialIndex = 1
 			for item in tutorialList:
 				newItem = (item[0],item[1],item[2],item[3]+' Uebungsgruppe: '+str(tutorialIndex),item[4],item[5],item[6],item[7])
 				newList.append(newItem)
 				tutorialIndex = tutorialIndex + 1
-			#add summary lecture
-			lectureItem = ('',lecture.lecturer,'',lectureName,lecture.lecture_students.count(),'',lecture.term.__html__(),'')
-			newList.append(lectureItem)
 			#add to sheet
 			for item in newList:
 				for col, d in enumerate(item):
