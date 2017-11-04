@@ -39,6 +39,30 @@
     </td>
     </span>
   </tr>
+  <tr><td>&nbsp;</td></tr>
+  <tr>
+    <td>
+      GESAMT
+    </td>
+    <td>
+      <span tal:content="len(students)"></span>
+    </td>
+    <td>
+      <span tal:content="str(counter['admission'][True])+' J'"></span><br>
+      <span tal:content="str(counter['admission'][False])+' N'"></span><br>
+      <span tal:content="str(counter['admission'][None])+' ?'"></span>
+    </td>
+    <td>
+      <span tal:content="str(counter['registration'][True])+' J'"></span><br>
+      <span tal:content="str(counter['registration'][False])+' N'"></span><br>
+      <span tal:content="str(counter['registration'][None])+' ?'"></span>
+    </td>
+    <td>
+      <span tal:content="str(counter['medical_certificate'][True])+' J'"></span><br>
+      <span tal:content="str(counter['medical_certificate'][False])+' N'"></span><br>
+      <span tal:content="str(counter['medical_certificate'][None])+' ?'"></span>
+    </td>
+  </tr>
 </tbody>
 </table>
 

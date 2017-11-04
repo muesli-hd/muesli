@@ -36,6 +36,8 @@ import PIL.Image
 import PIL.ImageDraw
 import StringIO
 
+from collections import Counter
+
 import matplotlib
 
 matplotlib.use( 'Agg' )
@@ -243,6 +245,9 @@ class Admission(object):
 				admission = ExamAdmission(exam, student.student)
 				self.db.add(admission)
 				admissions[student.student_id] = admission
+		counter = {'admission': Counter([x.admission for x in admissions.itervalues()]),
+				   'registration': Counter([x.registration for x in admissions.itervalues()]),
+				   'medical_certificate': Counter([x.medical_certificate for x in admissions.itervalues()])}
 		if self.request.method == 'POST':
 			if not self.request.permissionInfo.has_permission('enter_points'):
 				return HTTPForbidden('Sie haben keine Rechte um Punkte einzutragen!')
@@ -262,6 +267,7 @@ class Admission(object):
 		        'tutorial_ids': self.request.matchdict['tutorial_ids'],
 		        'students': students,
 		        'admissions': admissions,
+				'counter': counter,
 		        }
 
 @view_config(route_name='exam_export', renderer='muesli.web:templates/exam/export.pt', context=ExamContext, permission='view_points')
