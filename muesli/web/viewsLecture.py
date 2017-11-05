@@ -391,9 +391,13 @@ def emailTutors(request):
 			body=form['body'])
 		if request.POST['attachments'] not in ['', None]:
 			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
-		sendMail(message)
-		request.session.flash('A mail has been sent to all tutors of this lecture', queue='messages')
-		return HTTPFound(location=request.route_url('lecture_edit', lecture_id=lecture.id))
+		try:
+			sendMail(message,request)
+		except:
+			pass
+		else:
+			request.session.flash('A mail has been sent to all tutors of this lecture', queue='messages')
+			return HTTPFound(location=request.route_url('lecture_edit', lecture_id=lecture.id))
 	return {'lecture': lecture,
 	        'form': form}
 
@@ -414,9 +418,13 @@ def emailStudents(request):
 			body=form['body'])
 		if request.POST['attachments'] not in ['', None]:
 			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
-		sendMail(message)
-		request.session.flash('A mail has been sent to all students of this lecture', queue='messages')
-		return HTTPFound(location=request.route_url('lecture_edit', lecture_id=lecture.id))
+		try:
+			sendMail(message,request)
+		except:
+			pass
+		else:
+			request.session.flash('A mail has been sent to all students of this lecture', queue='messages')
+			return HTTPFound(location=request.route_url('lecture_edit', lecture_id=lecture.id))
 	return {'lecture': lecture,
 	        'form': form}
 

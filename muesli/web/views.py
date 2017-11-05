@@ -88,8 +88,12 @@ def emailAllUsers(request):
 			body=form['body'])
 		if request.POST['attachments'] not in ['', None]:
 			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
-		sendMail(message)
-		request.session.flash('A Mail has been send to all students', queue='messages')
+		try:
+			sendMail(message,request)
+		except:
+			pass
+		else:
+			request.session.flash('A Mail has been send to all students', queue='messages')
 	return {'form': form,
 		'type': ttype,
 		'table': table,
@@ -144,8 +148,12 @@ def emailUsers(request):
 			body=form['body'])
 		if request.POST['attachments'] not in ['', None]:
 			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
-		sendMail(message)
-		request.session.flash('A Mail has been send to all students with wrong subject', queue='messages')
+		try:
+			sendMail(message,request)
+		except:
+			pass
+		else:
+			request.session.flash('A Mail has been send to all students with wrong subject', queue='messages')
 	return {'form': form,
 	        'type': ttype,
 	        'table': table,

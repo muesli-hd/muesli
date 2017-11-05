@@ -91,8 +91,13 @@ class Message(object):
 		data = data or open(filename)
 		self.outer.attach(createAttachment(filename, data))
 
-def sendMail(message):
+def sendMail(message, request=None):
 	s = smtplib.SMTP(server)
 	if not testing:
-		s.sendmail(message.sender, message.send_to, message.as_string())
+		try:
+			s.sendmail(message.sender, message.send_to, message.as_string())
+		except smtplib.SMTPSenderRefused as e:
+			if request:
+				request.session.flash(e[1], queue='errors')
+			raise
 	s.quit()
