@@ -24,10 +24,9 @@ import muesli.utils as utils
 
 
 class ContextTests(unittest.TestCase):
-	def test_list_strings(self):
-		self.assertEqual(utils.listStrings([]), '')
-		self.assertEqual(utils.listStrings(['test1']), 'test1')
-		self.assertEqual(utils.listStrings(['test1', 'test2']), 'test1 und test2')
-		self.assertEqual(utils.listStrings(['test1', 'test2', 'test3']), 'test1, test2 und test3')
-		self.assertEqual(utils.listStrings(['test1', 'test2', 'test3', 'test4']), 'test1, test2, test3 und test4')
-		
+    def test_list_strings(self):
+        self.assertEqual(utils.listStrings([]), '')
+        self.assertEqual(utils.listStrings(['test1']), 'test1')
+        self.assertEqual(utils.listStrings(['test1', 'test2']), 'test1 und test2')
+        self.assertEqual(utils.listStrings(['test1', 'test2', 'test3']), 'test1, test2 und test3')
+        self.assertEqual(utils.listStrings(['test1', 'test2', 'test3', 'test4']), 'test1, test2, test3 und test4')

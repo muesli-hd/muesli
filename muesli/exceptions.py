@@ -13,4 +13,4 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 class DatabaseError(Exception):
-	pass
+    pass

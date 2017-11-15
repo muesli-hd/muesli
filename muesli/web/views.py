@@ -42,165 +42,165 @@ import traceback
 
 @view_config(route_name='start', renderer='muesli.web:templates/start.pt')
 def start(request):
-	if not request.user:
-		return HTTPFound(location = request.route_url('user_login'))
-	tutorials_as_tutor = request.user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
-	tutorials = request.user.tutorials.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
-	lectures_as_assistant = request.user.lectures_as_assistant
-	if request.GET.get('show_all', '0')=='0':
-		semesterlimit = utils.getSemesterLimit()
-		tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
-		tutorials = tutorials.filter(Lecture.term >= semesterlimit)
-		lectures_as_assistant = lectures_as_assistant.filter(Lecture.term >= semesterlimit)
-	return {'time_preferences': request.user.prepareTimePreferences(),
-	        'penalty_names': utils.penalty_names,
-	        'tutorials_as_tutor': tutorials_as_tutor.all(),
-	        'tutorials': tutorials.all(),
-	        'lectures_as_assistant': lectures_as_assistant.all()}
+    if not request.user:
+        return HTTPFound(location = request.route_url('user_login'))
+    tutorials_as_tutor = request.user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
+    tutorials = request.user.tutorials.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
+    lectures_as_assistant = request.user.lectures_as_assistant
+    if request.GET.get('show_all', '0')=='0':
+        semesterlimit = utils.getSemesterLimit()
+        tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
+        tutorials = tutorials.filter(Lecture.term >= semesterlimit)
+        lectures_as_assistant = lectures_as_assistant.filter(Lecture.term >= semesterlimit)
+    return {'time_preferences': request.user.prepareTimePreferences(),
+            'penalty_names': utils.penalty_names,
+            'tutorials_as_tutor': tutorials_as_tutor.all(),
+            'tutorials': tutorials.all(),
+            'lectures_as_assistant': lectures_as_assistant.all()}
 
 @view_config(route_name='admin', renderer='muesli.web:templates/admin.pt', context=GeneralContext, permission='admin')
 def admin(request):
-	return {}
+    return {}
 
 @view_config(route_name='contact', renderer='muesli.web:templates/contact.pt')
 def contact(request):
-	return {}
+    return {}
 
 @view_config(route_name='index', renderer='muesli.web:templates/index.pt')
 def index(request):
-	return {}
+    return {}
 
 @view_config(route_name='email_all_users', renderer='muesli.web:templates/email_all_users.pt', context=GeneralContext, permission='admin')
 def emailAllUsers(request):
-	ttype = request.params.get('type', 'inform_message')
-	form = EmailWrongSubject(ttype, request)
-	semesterlimit = utils.getSemesterLimit()
-	students = request.db.query(models.User).filter(models.User.lecture_students.any(models.LectureStudent.lecture.has(models.Lecture.term >= semesterlimit))).all()
-	headers = ['MUESLI-Information']
-	table = []
-	for s in students:
-		table.append(s)
-	if request.method == 'POST' and form.processPostData(request.POST):
-		message = Message(subject=form['subject'],
-			sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
-			to= [],
-			bcc=[s.email for s in students],
-			body=form['body'])
-		if request.POST['attachments'] not in ['', None]:
-			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
-		try:
-			sendMail(message,request)
-		except:
-			pass
-		else:
-			request.session.flash('A Mail has been send to all students', queue='messages')
-	return {'form': form,
-		'type': ttype,
-		'table': table,
-		'headers': headers,
-		'students': students}
+    ttype = request.params.get('type', 'inform_message')
+    form = EmailWrongSubject(ttype, request)
+    semesterlimit = utils.getSemesterLimit()
+    students = request.db.query(models.User).filter(models.User.lecture_students.any(models.LectureStudent.lecture.has(models.Lecture.term >= semesterlimit))).all()
+    headers = ['MUESLI-Information']
+    table = []
+    for s in students:
+        table.append(s)
+    if request.method == 'POST' and form.processPostData(request.POST):
+        message = Message(subject=form['subject'],
+                sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+                to= [],
+                bcc=[s.email for s in students],
+                body=form['body'])
+        if request.POST['attachments'] not in ['', None]:
+            message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
+        try:
+            sendMail(message,request)
+        except:
+            pass
+        else:
+            request.session.flash('A Mail has been send to all students', queue='messages')
+    return {'form': form,
+            'type': ttype,
+            'table': table,
+            'headers': headers,
+            'students': students}
 
 
 
 
 @view_config(route_name='email_users', renderer='muesli.web:templates/email_users.pt', context=GeneralContext, permission='admin')
 def emailUsers(request):
-	ttype = request.params.get('type', 'wrong_subject')
-	form = EmailWrongSubject(ttype, request)
-	semesterlimit = utils.getSemesterLimit()
-	students = request.db.query(models.User).filter(models.User.lecture_students.any(models.LectureStudent.lecture.has(models.Lecture.term >= semesterlimit))).all()
-	bad_students = []
-	headers = []
-	table = []
-	if ttype=='wrong_subject':
-		headers = ['Fach', 'Beifach']
-		for student in students:
-			if not student.subject:
-				continue
-			lsub = student.subject.lower()
-			if 'mathematik (la)' in lsub:
-				if not ('hauptfach' in lsub or 'beifach' in lsub):
-					bad_students.append(student)
-				elif not student.second_subject:
-					bad_students.append(student)
-		for s in bad_students:
-			table.append((s,s.subject, s.second_subject))
-	elif ttype=='wrong_birthday':
-		headers = ["Geburtstag"]
-		validator = DateString()
-		for student in students:
-			try:
-				date = validator.to_python(student.birth_date)
-			except formencode.Invalid:
-				bad_students.append(student)
-		for s in bad_students:
-			table.append((s,s.birth_date))
-	elif ttype == 'unconfirmed':
-		headers = ['Anmeldedatum']
-		bad_students = request.db.query(models.User).filter(models.User.password == None).all()
-		for student in bad_students:
-			table.append((student, student.confirmations[0].created_on))
-	if request.method == 'POST' and form.processPostData(request.POST):
-		message = Message(subject=form['subject'],
-			sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
-			to= [],
-			bcc=[s.email for s in bad_students],
-			body=form['body'])
-		if request.POST['attachments'] not in ['', None]:
-			message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
-		try:
-			sendMail(message,request)
-		except:
-			pass
-		else:
-			request.session.flash('A Mail has been send to all students with wrong subject', queue='messages')
-	return {'form': form,
-	        'type': ttype,
-	        'table': table,
-	        'headers': headers,
-	        'students': bad_students}
+    ttype = request.params.get('type', 'wrong_subject')
+    form = EmailWrongSubject(ttype, request)
+    semesterlimit = utils.getSemesterLimit()
+    students = request.db.query(models.User).filter(models.User.lecture_students.any(models.LectureStudent.lecture.has(models.Lecture.term >= semesterlimit))).all()
+    bad_students = []
+    headers = []
+    table = []
+    if ttype=='wrong_subject':
+        headers = ['Fach', 'Beifach']
+        for student in students:
+            if not student.subject:
+                continue
+            lsub = student.subject.lower()
+            if 'mathematik (la)' in lsub:
+                if not ('hauptfach' in lsub or 'beifach' in lsub):
+                    bad_students.append(student)
+                elif not student.second_subject:
+                    bad_students.append(student)
+        for s in bad_students:
+            table.append((s,s.subject, s.second_subject))
+    elif ttype=='wrong_birthday':
+        headers = ["Geburtstag"]
+        validator = DateString()
+        for student in students:
+            try:
+                date = validator.to_python(student.birth_date)
+            except formencode.Invalid:
+                bad_students.append(student)
+        for s in bad_students:
+            table.append((s,s.birth_date))
+    elif ttype == 'unconfirmed':
+        headers = ['Anmeldedatum']
+        bad_students = request.db.query(models.User).filter(models.User.password == None).all()
+        for student in bad_students:
+            table.append((student, student.confirmations[0].created_on))
+    if request.method == 'POST' and form.processPostData(request.POST):
+        message = Message(subject=form['subject'],
+                sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+                to= [],
+                bcc=[s.email for s in bad_students],
+                body=form['body'])
+        if request.POST['attachments'] not in ['', None]:
+            message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
+        try:
+            sendMail(message,request)
+        except:
+            pass
+        else:
+            request.session.flash('A Mail has been send to all students with wrong subject', queue='messages')
+    return {'form': form,
+            'type': ttype,
+            'table': table,
+            'headers': headers,
+            'students': bad_students}
 
 @view_config(route_name='changelog', renderer='muesli.web:templates/changelog.pt')
 def changelog(request):
-	entries = []
-	for part in changelog_str.split('====')[1:]:
-		date = part.split('\n',1)[0]
-		text = []
-		for line in part.split('\n')[1:]:
-			if line.startswith('topic:'):
-				pass
-			elif line.startswith('concerns:'):
-				pass
-			else: text.append(line)
-		text = u'\n'.join(text)
-		entries.append({'date': date, 'description': text})
-	return {'entries': entries}
+    entries = []
+    for part in changelog_str.split('====')[1:]:
+        date = part.split('\n',1)[0]
+        text = []
+        for line in part.split('\n')[1:]:
+            if line.startswith('topic:'):
+                pass
+            elif line.startswith('concerns:'):
+                pass
+            else: text.append(line)
+        text = u'\n'.join(text)
+        entries.append({'date': date, 'description': text})
+    return {'entries': entries}
 
 
 @view_config(context=pyramid.exceptions.HTTPForbidden, renderer='muesli.web:templates/forbidden.pt')
 def forbidden(exc, request):
-	request.response.status=403
-	return {}
+    request.response.status=403
+    return {}
 
 ###################################
 ###################################
 ###################################
 @view_config(context = Exception, renderer='muesli.web:templates/error.pt')
 def internalServerError(exc, request):
-	if not muesli.productive:
-		print "TRYING TO RECONSTRUCT EXCEPTION"
-		traceback.print_exc()
-		print "RAISING ANYHOW"
-		raise exc
-	now = datetime.datetime.now()
-	traceback.print_exc()
-	email = request.user.email if request.user else '<nobody>'
-	return {'now': now,
-	        'email': email}
+    if not muesli.productive:
+        print "TRYING TO RECONSTRUCT EXCEPTION"
+        traceback.print_exc()
+        print "RAISING ANYHOW"
+        raise exc
+    now = datetime.datetime.now()
+    traceback.print_exc()
+    email = request.user.email if request.user else '<nobody>'
+    return {'now': now,
+            'email': email}
 
 
 @view_config(name="favicon.ico")
 def favicon_view(request):
-	here = os.path.dirname(__file__)
-	icon = os.path.join(here, "static", "favicon.ico")
-	return FileResponse(icon, request=request)
+    here = os.path.dirname(__file__)
+    icon = os.path.join(here, "static", "favicon.ico")
+    return FileResponse(icon, request=request)

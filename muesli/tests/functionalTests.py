@@ -30,332 +30,331 @@ from muesli import utils
 from sqlalchemy.orm import relationship, sessionmaker
 
 class OrigDatabaseTests(unittest.TestCase):
-	def setUp(self):
-		import muesli.web
-		from muesli.web import main
-		app = main({})
-		from webtest import TestApp
-		self.testapp = TestApp(app)
+    def setUp(self):
+        import muesli.web
+        from muesli.web import main
+        app = main({})
+        from webtest import TestApp
+        self.testapp = TestApp(app)
 
-	def test_root(self):
-		#session = muesli.models.Session()
-		#print "Anzahl lectures", session.query(muesli.models.Lecture).count()
-		res = self.testapp.get('/lecture/list', status=200)
-		self.failUnless('Liste' in res.body)
-	
-	def test_login(self):
-		res = self.testapp.get('/user/login', status=200)
-		self.failUnless(True)
+    def test_root(self):
+        #session = muesli.models.Session()
+        #print "Anzahl lectures", session.query(muesli.models.Lecture).count()
+        res = self.testapp.get('/lecture/list', status=200)
+        self.failUnless('Liste' in res.body)
+
+    def test_login(self):
+        res = self.testapp.get('/user/login', status=200)
+        self.failUnless(True)
 
 class BaseTests(unittest.TestCase):
-	def setUp(self):
-		import muesli
-		import sqlalchemy
-		self.engine = sqlalchemy.create_engine('postgresql:///mueslitest')
-		self.config = muesli.config
+    def setUp(self):
+        import muesli
+        import sqlalchemy
+        self.engine = sqlalchemy.create_engine('postgresql:///mueslitest')
+        self.config = muesli.config
 
-		import muesli.models
-		muesli.models.Base.metadata.create_all(self.engine)
-		muesli.mailerName = 'pyramid_mailer.testing'
-		muesli.mail.testing=True
-		muesli.old_engine = muesli.engine
-		muesli.engine = lambda: self.engine
-		import muesli.web
-		from muesli.web import main
-		self.app = main({})
-		from webtest import TestApp
-		self.testapp = TestApp(self.app)
-		self.session = muesli.models.Session()
-		for table in reversed(muesli.models.Base.metadata.sorted_tables):
-			self.session.execute(table.delete())
-		self.session.commit()
+        import muesli.models
+        muesli.models.Base.metadata.create_all(self.engine)
+        muesli.mailerName = 'pyramid_mailer.testing'
+        muesli.mail.testing=True
+        muesli.old_engine = muesli.engine
+        muesli.engine = lambda: self.engine
+        import muesli.web
+        from muesli.web import main
+        self.app = main({})
+        from webtest import TestApp
+        self.testapp = TestApp(self.app)
+        self.session = muesli.models.Session()
+        for table in reversed(muesli.models.Base.metadata.sorted_tables):
+            self.session.execute(table.delete())
+        self.session.commit()
 
-		self.populate()
+        self.populate()
 
-	def tearDown(self):
-		self.session.close()
-		self.engine.dispose()
-		muesli.engine = muesli.old_engine
+    def tearDown(self):
+        self.session.close()
+        self.engine.dispose()
+        muesli.engine = muesli.old_engine
 
-	def populate(self):
-		pass
+    def populate(self):
+        pass
 
-	def assertResContains(self, res, content):
-		self.assertTrue(content.encode(res.charset) in res.body)
+    def assertResContains(self, res, content):
+        self.assertTrue(content.encode(res.charset) in res.body)
 
-	def assertResContainsNot(self, res, content):
-		self.assertTrue(content.encode(res.charset) not in res.body)
+    def assertResContainsNot(self, res, content):
+        self.assertTrue(content.encode(res.charset) not in res.body)
 
-	def assertForm(self, res, name, newvalue, formindex=None, expectedvalue=None):
-		def getForm(res):
-			if formindex != None:
-				return res.forms[formindex]
-			else:
-				return res.form
-		form = getForm(res)
-		form[name] = newvalue
-		res2 = form.submit()
-		self.assertResContainsNot(res2, u'formerror')
-		form = getForm(res2)
-		if expectedvalue==None: expectedvalue=newvalue
-		self.assertTrue(form[name].value == expectedvalue)
-		return res2
+    def assertForm(self, res, name, newvalue, formindex=None, expectedvalue=None):
+        def getForm(res):
+            if formindex != None:
+                return res.forms[formindex]
+            else:
+                return res.form
+        form = getForm(res)
+        form[name] = newvalue
+        res2 = form.submit()
+        self.assertResContainsNot(res2, u'formerror')
+        form = getForm(res2)
+        if expectedvalue==None: expectedvalue=newvalue
+        self.assertTrue(form[name].value == expectedvalue)
+        return res2
 
 def setUserPassword(user, password):
-	user.realpassword = password
-	user.password = sha1(password.encode('utf-8')).hexdigest()
+    user.realpassword = password
+    user.password = sha1(password.encode('utf-8')).hexdigest()
 
 class PopulatedTests(BaseTests):
-	def populate(self):
-		self.user = muesli.models.User()
-		self.user.first_name = u'Stefan'
-		self.user.last_name = u'Student'
-		self.user.email = 'user@muesli.org'
-		self.user.subject = self.config['subjects'][0]
-		setUserPassword(self.user, 'userpassword')
-		self.session.add(self.user)
-		#self.session.commit()
+    def populate(self):
+        self.user = muesli.models.User()
+        self.user.first_name = u'Stefan'
+        self.user.last_name = u'Student'
+        self.user.email = 'user@muesli.org'
+        self.user.subject = self.config['subjects'][0]
+        setUserPassword(self.user, 'userpassword')
+        self.session.add(self.user)
+        #self.session.commit()
 
-		self.user2 = muesli.models.User()
-		self.user2.first_name = u'Sigmund'
-		self.user2.last_name = u'Student'
-		self.user2.email = 'user2@muesli.org'
-		self.user2.subject = self.config['subjects'][1]
-		setUserPassword(self.user2, 'user2password')
-		self.session.add(self.user2)
-		
-		self.user_without_lecture = muesli.models.User()
-		self.user_without_lecture.first_name = u'Sebastian'
-		self.user_without_lecture.last_name = u'Student'
-		self.user_without_lecture.email = 'user_without_lecture@muesli.org'
-		self.user_without_lecture.subject = self.config['subjects'][1]
-		setUserPassword(self.user_without_lecture, 'user_without_lecturepassword')
-		self.session.add(self.user_without_lecture)
+        self.user2 = muesli.models.User()
+        self.user2.first_name = u'Sigmund'
+        self.user2.last_name = u'Student'
+        self.user2.email = 'user2@muesli.org'
+        self.user2.subject = self.config['subjects'][1]
+        setUserPassword(self.user2, 'user2password')
+        self.session.add(self.user2)
 
-		self.user_unconfirmed = muesli.models.User()
-		self.user_unconfirmed.first_name = u'Ulrich'
-		self.user_unconfirmed.last_name = u'Student'
-		self.user_unconfirmed.email = 'user_unconfirmed@muesli.org'
-		confirmation = muesli.models.Confirmation()
-		confirmation.user = self.user_unconfirmed
-		confirmation.source = u'user/register'
-		self.session.add(self.user_unconfirmed)
-		self.session.add(confirmation)
-		
-		self.unicodeuser = muesli.models.User()
-		self.unicodeuser.first_name = u'Uli'
-		self.unicodeuser.last_name = u'Unicode'
-		self.unicodeuser.email = 'unicodeuser@muesli.org'
-		self.unicodeuser.subject = self.config['subjects'][1]
-		setUserPassword(self.unicodeuser, u'üüü')
-		self.session.add(self.unicodeuser)
-		#self.session.commit()
+        self.user_without_lecture = muesli.models.User()
+        self.user_without_lecture.first_name = u'Sebastian'
+        self.user_without_lecture.last_name = u'Student'
+        self.user_without_lecture.email = 'user_without_lecture@muesli.org'
+        self.user_without_lecture.subject = self.config['subjects'][1]
+        setUserPassword(self.user_without_lecture, 'user_without_lecturepassword')
+        self.session.add(self.user_without_lecture)
 
-		self.tutor = muesli.models.User()
-		self.tutor.first_name = u'Thorsten'
-		self.tutor.last_name = u'Tutor'
-		self.tutor.email = 'tutor@muesli.org'
-		self.tutor.subject = self.config['subjects'][2]
-		setUserPassword(self.tutor, 'tutorpassword')
-		self.session.add(self.tutor)
-		#self.session.commit()
+        self.user_unconfirmed = muesli.models.User()
+        self.user_unconfirmed.first_name = u'Ulrich'
+        self.user_unconfirmed.last_name = u'Student'
+        self.user_unconfirmed.email = 'user_unconfirmed@muesli.org'
+        confirmation = muesli.models.Confirmation()
+        confirmation.user = self.user_unconfirmed
+        confirmation.source = u'user/register'
+        self.session.add(self.user_unconfirmed)
+        self.session.add(confirmation)
 
-		self.tutor2 = muesli.models.User()
-		self.tutor2.first_name = u'Thor2sten'
-		self.tutor2.last_name = u'Tu2tor'
-		self.tutor2.email = 'tutor2@muesli.org'
-		self.tutor2.subject = self.config['subjects'][0]
-		setUserPassword(self.tutor2, 'tutor2password')
-		self.session.add(self.tutor2)
-		#self.session.commit()
+        self.unicodeuser = muesli.models.User()
+        self.unicodeuser.first_name = u'Uli'
+        self.unicodeuser.last_name = u'Unicode'
+        self.unicodeuser.email = 'unicodeuser@muesli.org'
+        self.unicodeuser.subject = self.config['subjects'][1]
+        setUserPassword(self.unicodeuser, u'üüü')
+        self.session.add(self.unicodeuser)
+        #self.session.commit()
 
-		self.assistant = muesli.models.User()
-		self.assistant.first_name = u'Armin'
-		self.assistant.last_name = u'Assistent'
-		self.assistant.email = 'assistant@muesli.org'
-		self.assistant.subject = self.config['subjects'][0]
-		setUserPassword(self.assistant, 'assistantpassword')
-		self.assistant.is_assistant=1
-		self.session.add(self.assistant)
-		#self.session.commit()
+        self.tutor = muesli.models.User()
+        self.tutor.first_name = u'Thorsten'
+        self.tutor.last_name = u'Tutor'
+        self.tutor.email = 'tutor@muesli.org'
+        self.tutor.subject = self.config['subjects'][2]
+        setUserPassword(self.tutor, 'tutorpassword')
+        self.session.add(self.tutor)
+        #self.session.commit()
 
-		self.assistant2 = muesli.models.User()
-		self.assistant2.first_name = u'Armin'
-		self.assistant2.last_name = u'Assistent2'
-		self.assistant2.email = 'assistant2@muesli.org'
-		self.assistant2.subject = self.config['subjects'][0]
-		setUserPassword(self.assistant2, 'assistant2password')
-		self.assistant2.is_assistant=1
-		self.session.add(self.assistant2)
-		#self.session.commit()
+        self.tutor2 = muesli.models.User()
+        self.tutor2.first_name = u'Thor2sten'
+        self.tutor2.last_name = u'Tu2tor'
+        self.tutor2.email = 'tutor2@muesli.org'
+        self.tutor2.subject = self.config['subjects'][0]
+        setUserPassword(self.tutor2, 'tutor2password')
+        self.session.add(self.tutor2)
+        #self.session.commit()
 
-		self.admin = muesli.models.User()
-		self.admin.first_name = u'Anton'
-		self.admin.last_name = u'Admin'
-		self.admin.email = 'admin@muesli.org'
-		self.admin.subject = self.config['subjects'][0]
-		self.admin.is_admin = 1
-		setUserPassword(self.admin, 'adminpassword')
-		self.session.add(self.admin)
-		#self.session.commit()
+        self.assistant = muesli.models.User()
+        self.assistant.first_name = u'Armin'
+        self.assistant.last_name = u'Assistent'
+        self.assistant.email = 'assistant@muesli.org'
+        self.assistant.subject = self.config['subjects'][0]
+        setUserPassword(self.assistant, 'assistantpassword')
+        self.assistant.is_assistant=1
+        self.session.add(self.assistant)
+        #self.session.commit()
 
-		self.lecture = muesli.models.Lecture()
-		self.lecture.name = "Irgendwas"
-		self.lecture.mode = 'direct'
-		self.lecture.password = 'geheim'
-		self.lecture.assistants.append(self.assistant)
-		self.lecture.tutor_rights = utils.editOwnTutorials
-		self.session.add(self.lecture)
-		self.lecture.tutors.append(self.tutor2)
-		self.lecture.tutors.append(self.tutor)
-		#self.session.commit()
+        self.assistant2 = muesli.models.User()
+        self.assistant2.first_name = u'Armin'
+        self.assistant2.last_name = u'Assistent2'
+        self.assistant2.email = 'assistant2@muesli.org'
+        self.assistant2.subject = self.config['subjects'][0]
+        setUserPassword(self.assistant2, 'assistant2password')
+        self.assistant2.is_assistant=1
+        self.session.add(self.assistant2)
+        #self.session.commit()
 
-		self.exam = muesli.models.Exam()
-		self.exam.name = u"Aufgabenblatt 1"
-		self.exam.lecture = self.lecture
-		self.exam.category = utils.categories[0]['id']
-		self.admission = True
-		self.registration = True
-		self.session.add(self.exam)
-		self.exercise = muesli.models.Exercise()
-		self.exercise.nr = 1
-		self.exercise.maxpoints = 4
-		self.exercise.exam = self.exam
-		self.session.add(self.exercise)
+        self.admin = muesli.models.User()
+        self.admin.first_name = u'Anton'
+        self.admin.last_name = u'Admin'
+        self.admin.email = 'admin@muesli.org'
+        self.admin.subject = self.config['subjects'][0]
+        self.admin.is_admin = 1
+        setUserPassword(self.admin, 'adminpassword')
+        self.session.add(self.admin)
+        #self.session.commit()
 
-		self.exam2 = muesli.models.Exam()
-		self.exam2.name = u"Aufgabenblatt 2"
-		self.exam2.lecture = self.lecture
-		self.exam2.category = utils.categories[0]['id']
-		self.session.add(self.exam2)
-		#self.session.commit()
+        self.lecture = muesli.models.Lecture()
+        self.lecture.name = "Irgendwas"
+        self.lecture.mode = 'direct'
+        self.lecture.password = 'geheim'
+        self.lecture.assistants.append(self.assistant)
+        self.lecture.tutor_rights = utils.editOwnTutorials
+        self.session.add(self.lecture)
+        self.lecture.tutors.append(self.tutor2)
+        self.lecture.tutors.append(self.tutor)
+        #self.session.commit()
 
-		self.lecture2 = muesli.models.Lecture()
-		self.lecture2.name = "Irgendwas2"
-		self.lecture2.assistants.append(self.assistant2)
-		self.session.add(self.lecture2)
+        self.exam = muesli.models.Exam()
+        self.exam.name = u"Aufgabenblatt 1"
+        self.exam.lecture = self.lecture
+        self.exam.category = utils.categories[0]['id']
+        self.admission = True
+        self.registration = True
+        self.session.add(self.exam)
+        self.exercise = muesli.models.Exercise()
+        self.exercise.nr = 1
+        self.exercise.maxpoints = 4
+        self.exercise.exam = self.exam
+        self.session.add(self.exercise)
 
-		tutorial = muesli.models.Tutorial()
-		tutorial.lecture = self.lecture2
-		tutorial.tutor = self.tutor
-		tutorial.place = 'In einer weiter entfernten Galaxis'
-		tutorial.max_students = 42
-		tutorial.time = muesli.types.TutorialTime('0 14:00')
-		self.lecture2_tutorial = tutorial
-		self.session.add(self.lecture2_tutorial)
-		#self.session.commit()
+        self.exam2 = muesli.models.Exam()
+        self.exam2.name = u"Aufgabenblatt 2"
+        self.exam2.lecture = self.lecture
+        self.exam2.category = utils.categories[0]['id']
+        self.session.add(self.exam2)
+        #self.session.commit()
 
-		self.tutorial = muesli.models.Tutorial()
-		self.tutorial.lecture = self.lecture
-		self.tutorial.tutor = self.tutor
-		self.tutorial.place = 'In einer weit entfernten Galaxis'
-		self.tutorial.max_students = 42
-		self.tutorial.time = muesli.types.TutorialTime('0 12:00')
-		self.session.add(self.tutorial)
+        self.lecture2 = muesli.models.Lecture()
+        self.lecture2.name = "Irgendwas2"
+        self.lecture2.assistants.append(self.assistant2)
+        self.session.add(self.lecture2)
 
-		tutorial = muesli.models.Tutorial()
-		tutorial.lecture = self.lecture
-		tutorial.tutor = self.tutor2
-		tutorial.place = 'In einer noch weiter entfernten Galaxis'
-		tutorial.max_students = 42
-		tutorial.time = muesli.types.TutorialTime('0 16:00')
-		self.tutorial_tutor2 = tutorial
-		self.session.add(self.tutorial_tutor2)
+        tutorial = muesli.models.Tutorial()
+        tutorial.lecture = self.lecture2
+        tutorial.tutor = self.tutor
+        tutorial.place = 'In einer weiter entfernten Galaxis'
+        tutorial.max_students = 42
+        tutorial.time = muesli.types.TutorialTime('0 14:00')
+        self.lecture2_tutorial = tutorial
+        self.session.add(self.lecture2_tutorial)
+        #self.session.commit()
 
-		tutorial = muesli.models.Tutorial()
-		tutorial.lecture = self.lecture
-		tutorial.place = 'In einer noch viel weiter entfernten Galaxis'
-		tutorial.max_students = 42
-		tutorial.time = muesli.types.TutorialTime('0 18:00')
-		self.tutorial_no_tutor= tutorial
-		self.session.add(self.tutorial_no_tutor)
+        self.tutorial = muesli.models.Tutorial()
+        self.tutorial.lecture = self.lecture
+        self.tutorial.tutor = self.tutor
+        self.tutorial.place = 'In einer weit entfernten Galaxis'
+        self.tutorial.max_students = 42
+        self.tutorial.time = muesli.types.TutorialTime('0 12:00')
+        self.session.add(self.tutorial)
 
-		self.lecture_student = muesli.models.LectureStudent()
-		self.lecture_student.student = self.user
-		self.lecture_student.lecture = self.lecture
-		self.lecture_student.tutorial = self.tutorial
-		self.session.add(self.lecture_student)
+        tutorial = muesli.models.Tutorial()
+        tutorial.lecture = self.lecture
+        tutorial.tutor = self.tutor2
+        tutorial.place = 'In einer noch weiter entfernten Galaxis'
+        tutorial.max_students = 42
+        tutorial.time = muesli.types.TutorialTime('0 16:00')
+        self.tutorial_tutor2 = tutorial
+        self.session.add(self.tutorial_tutor2)
 
-		#self.session.commit()
-		
-		self.tutorial2 = muesli.models.Tutorial()
-		self.tutorial2.lecture = self.lecture
-		self.tutorial2.tutor = self.tutor
-		self.tutorial2.place = 'In einer weit entfernten Galaxis'
-		self.tutorial2.max_students = 42
-		self.tutorial2.time = muesli.types.TutorialTime('0 14:00')
-		self.session.add(self.tutorial2)
+        tutorial = muesli.models.Tutorial()
+        tutorial.lecture = self.lecture
+        tutorial.place = 'In einer noch viel weiter entfernten Galaxis'
+        tutorial.max_students = 42
+        tutorial.time = muesli.types.TutorialTime('0 18:00')
+        self.tutorial_no_tutor= tutorial
+        self.session.add(self.tutorial_no_tutor)
 
-		self.lecture_student2 = muesli.models.LectureStudent()
-		self.lecture_student2.student = self.user2
-		self.lecture_student2.lecture = self.lecture
-		self.lecture_student2.tutorial = self.tutorial2
-		self.session.add(self.lecture_student2)
+        self.lecture_student = muesli.models.LectureStudent()
+        self.lecture_student.student = self.user
+        self.lecture_student.lecture = self.lecture
+        self.lecture_student.tutorial = self.tutorial
+        self.session.add(self.lecture_student)
 
-		self.grading = muesli.models.Grading()
-		self.grading.name = 'Endnote'
-		self.grading.lecture = self.lecture
-		self.grading.exams.append(self.exam)
-		self.session.add(self.grading)
+        #self.session.commit()
 
-		self.prefLecture = muesli.models.Lecture()
-		self.prefLecture.name = "Vorlieben"
-		self.prefLecture.mode = 'prefs'
-		self.prefLecture.assistants.append(self.assistant)
-		self.session.add(self.prefLecture)
+        self.tutorial2 = muesli.models.Tutorial()
+        self.tutorial2.lecture = self.lecture
+        self.tutorial2.tutor = self.tutor
+        self.tutorial2.place = 'In einer weit entfernten Galaxis'
+        self.tutorial2.max_students = 42
+        self.tutorial2.time = muesli.types.TutorialTime('0 14:00')
+        self.session.add(self.tutorial2)
 
-		self.prefTutorial = muesli.models.Tutorial()
-		self.prefTutorial.lecture = self.prefLecture
-		self.prefTutorial.tutor = self.tutor2
-		self.prefTutorial.place = 'In einer weit entfernten Galaxis'
-		self.prefTutorial.max_students = 42
-		self.prefTutorial.time = muesli.types.TutorialTime('0 14:00')
-		self.session.add(self.prefTutorial)
+        self.lecture_student2 = muesli.models.LectureStudent()
+        self.lecture_student2.student = self.user2
+        self.lecture_student2.lecture = self.lecture
+        self.lecture_student2.tutorial = self.tutorial2
+        self.session.add(self.lecture_student2)
 
-		self.prefTutorial2 = muesli.models.Tutorial()
-		self.prefTutorial2.lecture = self.prefLecture
-		self.prefTutorial2.tutor = self.tutor2
-		self.prefTutorial2.place = 'In einer weiter entfernten Galaxis'
-		self.prefTutorial2.max_students = 42
-		self.prefTutorial2.time = muesli.types.TutorialTime('0 16:00')
-		self.session.add(self.prefTutorial2)
+        self.grading = muesli.models.Grading()
+        self.grading.name = 'Endnote'
+        self.grading.lecture = self.lecture
+        self.grading.exams.append(self.exam)
+        self.session.add(self.grading)
 
-		self.timePreference = muesli.models.TimePreference(self.prefLecture, self.user, self.prefTutorial.time, 1)
-		self.session.add(self.timePreference)
+        self.prefLecture = muesli.models.Lecture()
+        self.prefLecture.name = "Vorlieben"
+        self.prefLecture.mode = 'prefs'
+        self.prefLecture.assistants.append(self.assistant)
+        self.session.add(self.prefLecture)
 
-		self.session.commit()
+        self.prefTutorial = muesli.models.Tutorial()
+        self.prefTutorial.lecture = self.prefLecture
+        self.prefTutorial.tutor = self.tutor2
+        self.prefTutorial.place = 'In einer weit entfernten Galaxis'
+        self.prefTutorial.max_students = 42
+        self.prefTutorial.time = muesli.types.TutorialTime('0 14:00')
+        self.session.add(self.prefTutorial)
 
-	def setUser(self, user):
-		self.loggedUser = user
-		res = self.testapp.get('/user/login', status=200)
-		res.form['email'] = user.email
-		res.form['password'] = user.realpassword
-		res = res.form.submit()
-		self.assertEqual(res.status_int, 302)
-		#res = self.testapp.post('/user/login',{'email': user.email, 'password': user.realpassword}, status=302)
+        self.prefTutorial2 = muesli.models.Tutorial()
+        self.prefTutorial2.lecture = self.prefLecture
+        self.prefTutorial2.tutor = self.tutor2
+        self.prefTutorial2.place = 'In einer weiter entfernten Galaxis'
+        self.prefTutorial2.max_students = 42
+        self.prefTutorial2.time = muesli.types.TutorialTime('0 16:00')
+        self.session.add(self.prefTutorial2)
+
+        self.timePreference = muesli.models.TimePreference(self.prefLecture, self.user, self.prefTutorial.time, 1)
+        self.session.add(self.timePreference)
+
+        self.session.commit()
+
+    def setUser(self, user):
+        self.loggedUser = user
+        res = self.testapp.get('/user/login', status=200)
+        res.form['email'] = user.email
+        res.form['password'] = user.realpassword
+        res = res.form.submit()
+        self.assertEqual(res.status_int, 302)
+        #res = self.testapp.post('/user/login',{'email': user.email, 'password': user.realpassword}, status=302)
 
 class UserLoggedInTests(PopulatedTests):
-	def setUp(self):
-		PopulatedTests.setUp(self)
-		self.setUser(self.user)
+    def setUp(self):
+        PopulatedTests.setUp(self)
+        self.setUser(self.user)
 
 class TutorLoggedInTests(UserLoggedInTests):
-	def setUp(self):
-		UserLoggedInTests.setUp(self)
-		self.setUser(self.tutor)
+    def setUp(self):
+        UserLoggedInTests.setUp(self)
+        self.setUser(self.tutor)
 
 class AssistantLoggedInTests(TutorLoggedInTests):
-	def setUp(self):
-		TutorLoggedInTests.setUp(self)
-		self.setUser(self.assistant)
+    def setUp(self):
+        TutorLoggedInTests.setUp(self)
+        self.setUser(self.assistant)
 
 class AdminLoggedInTests(AssistantLoggedInTests):
-	def setUp(self):
-		AssistantLoggedInTests.setUp(self)
-		self.setUser(self.admin)
+    def setUp(self):
+        AssistantLoggedInTests.setUp(self)
+        self.setUser(self.admin)
 
 class UnicodeUserTests(PopulatedTests):
-	def setUp(self):
-		PopulatedTests.setUp(self)
-		self.setUser(self.unicodeuser)
-
+    def setUp(self):
+        PopulatedTests.setUp(self)
+        self.setUser(self.unicodeuser)

@@ -26,81 +26,81 @@ import muesli.web
 from muesli.tests import functionalTests
 
 class BaseTests(functionalTests.BaseTests):
-	def test_grading_edit(self):
-		res = self.testapp.get('/grading/edit/%s' % 12345, status=404)
+    def test_grading_edit(self):
+        res = self.testapp.get('/grading/edit/%s' % 12345, status=404)
 
-	def test_grading_associate_exam(self):
-		res = self.testapp.get('/grading/associate_exam/%s' % 12345, status=404)
+    def test_grading_associate_exam(self):
+        res = self.testapp.get('/grading/associate_exam/%s' % 12345, status=404)
 
-	def test_grading_delete_exam_association(self):
-		res = self.testapp.get('/grading/delete_exam_association/%s/%s' % (12345,12), status=404)
+    def test_grading_delete_exam_association(self):
+        res = self.testapp.get('/grading/delete_exam_association/%s/%s' % (12345,12), status=404)
 
-	def test_grading_enter_grades(self):
-		res = self.testapp.get('/grading/enter_grades/%s' % 12345, status=404)
+    def test_grading_enter_grades(self):
+        res = self.testapp.get('/grading/enter_grades/%s' % 12345, status=404)
 
-	def test_grading_export(self):
-		res = self.testapp.get('/grading/export/%s.xls' % 12345, status=404)
+    def test_grading_export(self):
+        res = self.testapp.get('/grading/export/%s.xls' % 12345, status=404)
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
-	def test_grading_edit(self):
-		res = self.testapp.get('/grading/edit/%s' % self.grading.id, status=403)
+    def test_grading_edit(self):
+        res = self.testapp.get('/grading/edit/%s' % self.grading.id, status=403)
 
-	def test_grading_associate_exam(self):
-		res = self.testapp.get('/grading/associate_exam/%s' % self.grading.id, status=403)
+    def test_grading_associate_exam(self):
+        res = self.testapp.get('/grading/associate_exam/%s' % self.grading.id, status=403)
 
-	def test_grading_delete_exam_association(self):
-		res = self.testapp.get('/grading/delete_exam_association/%s/%s' % (self.grading.id, self.exam.id), status=403)
+    def test_grading_delete_exam_association(self):
+        res = self.testapp.get('/grading/delete_exam_association/%s/%s' % (self.grading.id, self.exam.id), status=403)
 
-	def test_grading_enter_grades(self):
-		res = self.testapp.get('/grading/enter_grades/%s' % self.grading.id, status=403)
+    def test_grading_enter_grades(self):
+        res = self.testapp.get('/grading/enter_grades/%s' % self.grading.id, status=403)
 
-	def test_grading_export(self):
-		res = self.testapp.get('/grading/export/%s.xls' % self.grading.id, status=403)
+    def test_grading_export(self):
+        res = self.testapp.get('/grading/export/%s.xls' % self.grading.id, status=403)
 
 class UserLoggedInTests(UnloggedTests):
-	def setUp(self):
-		UnloggedTests.setUp(self)
-		self.setUser(self.user)
+    def setUp(self):
+        UnloggedTests.setUp(self)
+        self.setUser(self.user)
 
 
 class TutorLoggedInTests(UserLoggedInTests):
-	def setUp(self):
-		UserLoggedInTests.setUp(self)
-		self.setUser(self.tutor)
+    def setUp(self):
+        UserLoggedInTests.setUp(self)
+        self.setUser(self.tutor)
 
 
 class AssistantLoggedInTests(TutorLoggedInTests):
-	def setUp(self):
-		TutorLoggedInTests.setUp(self)
-		self.setUser(self.assistant)
+    def setUp(self):
+        TutorLoggedInTests.setUp(self)
+        self.setUser(self.assistant)
 
-	def test_grading_edit(self):
-		res = self.testapp.get('/grading/edit/%s' % self.grading.id, status=200)
+    def test_grading_edit(self):
+        res = self.testapp.get('/grading/edit/%s' % self.grading.id, status=200)
 
-	def test_grading_associate_exam(self):
-		self.assertTrue(self.exam2 not in self.grading.exams)
-		res = self.testapp.post('/grading/associate_exam/%s' % self.grading.id, {'new_exam': self.exam2.id}, status=302)
-		self.session.expire_all()
-		self.assertTrue(self.exam2 in self.grading.exams)
+    def test_grading_associate_exam(self):
+        self.assertTrue(self.exam2 not in self.grading.exams)
+        res = self.testapp.post('/grading/associate_exam/%s' % self.grading.id, {'new_exam': self.exam2.id}, status=302)
+        self.session.expire_all()
+        self.assertTrue(self.exam2 in self.grading.exams)
 
-	def test_grading_delete_exam_association(self):
-		self.assertTrue(self.exam in self.grading.exams)
-		res = self.testapp.get('/grading/delete_exam_association/%s/%s' % (self.grading.id, self.exam.id), status=302)
-		self.session.expire_all()
-		self.assertTrue(self.exam not in self.grading.exams)
+    def test_grading_delete_exam_association(self):
+        self.assertTrue(self.exam in self.grading.exams)
+        res = self.testapp.get('/grading/delete_exam_association/%s/%s' % (self.grading.id, self.exam.id), status=302)
+        self.session.expire_all()
+        self.assertTrue(self.exam not in self.grading.exams)
 
-	def test_grading_enter_grades(self):
-		res = self.testapp.get('/grading/enter_grades/%s' % self.grading.id, status=200)
-		# Caution: Need format 'x.y', otherwise test will fail
-		self.assertForm(res, 'grade-%i' % self.user.id, '2.0', formindex=2)
+    def test_grading_enter_grades(self):
+        res = self.testapp.get('/grading/enter_grades/%s' % self.grading.id, status=200)
+        # Caution: Need format 'x.y', otherwise test will fail
+        self.assertForm(res, 'grade-%i' % self.user.id, '2.0', formindex=2)
 
-	def test_grading_export(self):
-		res = self.testapp.get('/grading/export/%s.xls' % self.grading.id, status=200)
-		self.test_grading_enter_grades()
-		res = self.testapp.get('/grading/export/%s.xls' % self.grading.id, status=200)
+    def test_grading_export(self):
+        res = self.testapp.get('/grading/export/%s.xls' % self.grading.id, status=200)
+        self.test_grading_enter_grades()
+        res = self.testapp.get('/grading/export/%s.xls' % self.grading.id, status=200)
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):
-	def setUp(self):
-		AssistantLoggedInTests.setUp(self)
-		self.setUser(self.admin)
+    def setUp(self):
+        AssistantLoggedInTests.setUp(self)
+        self.setUser(self.admin)

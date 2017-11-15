@@ -26,58 +26,58 @@ import muesli.web
 from muesli.tests import functionalTests
 
 class BaseTests(functionalTests.BaseTests):
-	def test_index(self):
-		res = self.testapp.get('/', status=200)
+    def test_index(self):
+        res = self.testapp.get('/', status=200)
 
-	def test_start(self):
-		res = self.testapp.get('/start', status=302)
+    def test_start(self):
+        res = self.testapp.get('/start', status=302)
 
-	def test_admin(self):
-		res = self.testapp.get('/admin', status=403)
+    def test_admin(self):
+        res = self.testapp.get('/admin', status=403)
 
-	def test_contact(self):
-		res = self.testapp.get('/contact', status=200)
+    def test_contact(self):
+        res = self.testapp.get('/contact', status=200)
 
-	def test_email_users(self):
-		res = self.testapp.get('/email_users', status=403)
+    def test_email_users(self):
+        res = self.testapp.get('/email_users', status=403)
 
-	def test_favicon(self):
-		res = self.testapp.get('/favicon.ico', status=200)
+    def test_favicon(self):
+        res = self.testapp.get('/favicon.ico', status=200)
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
-	pass
+    pass
 
 class UserLoggedInTests(UnloggedTests):
-	def setUp(self):
-		UnloggedTests.setUp(self)
-		self.setUser(self.user)
+    def setUp(self):
+        UnloggedTests.setUp(self)
+        self.setUser(self.user)
 
-	def test_start(self):
-		# Now we are logged in, thus we should
-		# get 200 instead of 302
-		res = self.testapp.get('/start', status=200)
+    def test_start(self):
+        # Now we are logged in, thus we should
+        # get 200 instead of 302
+        res = self.testapp.get('/start', status=200)
 
 class TutorLoggedInTests(UserLoggedInTests):
-	def setUp(self):
-		UserLoggedInTests.setUp(self)
-		self.setUser(self.tutor)
+    def setUp(self):
+        UserLoggedInTests.setUp(self)
+        self.setUser(self.tutor)
 
 class AssistantLoggedInTests(TutorLoggedInTests):
-	def setUp(self):
-		TutorLoggedInTests.setUp(self)
-		self.setUser(self.assistant)
+    def setUp(self):
+        TutorLoggedInTests.setUp(self)
+        self.setUser(self.assistant)
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):
-	def setUp(self):
-		AssistantLoggedInTests.setUp(self)
-		self.setUser(self.admin)
+    def setUp(self):
+        AssistantLoggedInTests.setUp(self)
+        self.setUser(self.admin)
 
-	def test_admin(self):
-		res = self.testapp.get('/admin', status=200)
+    def test_admin(self):
+        res = self.testapp.get('/admin', status=200)
 
-	def test_email_users(self):
-		res = self.testapp.get('/email_users', status=200)
-		res = self.testapp.get('/email_users?type=wrong_subject', status=200)
-		res = self.testapp.get('/email_users?type=wrong_birthday', status=200)
-		res = self.testapp.get('/email_users?type=unconfirmed', status=200)
+    def test_email_users(self):
+        res = self.testapp.get('/email_users', status=200)
+        res = self.testapp.get('/email_users?type=wrong_subject', status=200)
+        res = self.testapp.get('/email_users?type=wrong_birthday', status=200)
+        res = self.testapp.get('/email_users?type=unconfirmed', status=200)

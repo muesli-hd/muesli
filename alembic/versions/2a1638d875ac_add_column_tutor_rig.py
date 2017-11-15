@@ -15,13 +15,13 @@ import sqlalchemy as sa
 from sqlalchemy.sql import table, column
 
 
-lectures = table('lectures', 
+lectures = table('lectures',
     column('tutor_rights', sa.Text)
 )
 
 def upgrade():
     op.add_column('lectures', sa.Column('tutor_rights', sa.Text, nullable=False, default='editOwnTutorial', server_default='editOwnTutorial'))
-	
+
 
 def downgrade():
     op.drop_colum('lectures', 'tutor_rights')
