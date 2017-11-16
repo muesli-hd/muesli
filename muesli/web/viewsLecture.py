@@ -396,8 +396,12 @@ def emailTutors(request):
         except:
             pass
         else:
+            if request.permissionInfo.has_permission('edit'):
+                routeback_url = 'lecture_edit'
+            else:
+                routeback_url = 'lecture_view'
             request.session.flash('A mail has been sent to all tutors of this lecture', queue='messages')
-            return HTTPFound(location=request.route_url('lecture_edit', lecture_id=lecture.id))
+            return HTTPFound(location=request.route_url(routeback_url, lecture_id=lecture.id))
     return {'lecture': lecture,
             'form': form}
 
