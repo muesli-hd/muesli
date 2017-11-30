@@ -20,6 +20,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog=u"""
+====2017-11-30
+concerns:users,assistants,tutors
+Alle Bugs im MÜSLI sind jetzt in den IssueTracker von Github umgezogen. Dort
+können gerne weitere programmtechnische Probleme gemeldet werden. Support
+für die Installation im Mathematischen Institut gibt es weiterhin über die
+unter Kontakt genannte Adresse.
+
 ====2016-02-19
 concerns:users,assistants,tutors
 In den nächsten Wochen zieht die Fakultät für Mathematik und Informatik
