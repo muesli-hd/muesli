@@ -9,11 +9,13 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
 ]]>
 </script>
 
-<p>Zurück zur <a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial_ids)">Übungsgruppe</a>.</p>
 
 <h2>Punkte eintragen</h2>
 
-<h3>${exam.name} der Vorlesung ${exam.lecture.name}</h3>
+  <p>
+   ${exam.name},
+   <a tal:attributes="href request.route_path('lecture_edit', lecture_id=exam.lecture.id)">${exam.lecture.name}</a>
+  </p>
 
   <p tal:condition="exam.admissions_string" tal:omit-tag="">
     Zu dieser Prüfung ist eine <a tal:attributes="href request.route_path('exam_admission', exam_id=exam.id, tutorial_ids=tutorial_ids)">${exam.admissions_string}</a> erforderlich.
