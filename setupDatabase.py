@@ -21,4 +21,4 @@ else:
     user = session.query(User).filter(User.email==admin_user_mail).one()
     user.is_admin = True
     session.commit()
-    print "%s is admin now" % admin_user_mail
+    print("%s is admin now" % admin_user_mail)

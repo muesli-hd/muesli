@@ -162,7 +162,7 @@ class Allocation(object):
         tmpfile = tempfile.NamedTemporaryFile(prefix='muesli')
         tmpfile.write(inputfile)
         tmpfile.flush()
-        #print tmpfile.name
+        #print(tmpfile.name)
         out, err = subprocess.Popen([utils.lpsolve, '-rxli', 'xli_DIMACS', tmpfile.name], stdout=subprocess.PIPE).communicate()
         tmpfile.close()
         if 'Successfully' not in out:

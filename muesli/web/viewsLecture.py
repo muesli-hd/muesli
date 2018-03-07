@@ -287,7 +287,7 @@ class Preferences(object):
         student_count = sum([subj[0] for subj in subjects])
         times = lecture.prepareTimePreferences(user=None)
         times = sorted([t for t in times], key=lambda s:s['time'].value)
-        #print times
+        #print(times)
         return {'lecture': lecture,
                 'names': names,
                 'pref_subjects': pref_subjects,

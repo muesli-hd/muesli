@@ -39,7 +39,7 @@ class OrigDatabaseTests(unittest.TestCase):
 
     def test_root(self):
         #session = muesli.models.Session()
-        #print "Anzahl lectures", session.query(muesli.models.Lecture).count()
+        #print("Anzahl lectures", session.query(muesli.models.Lecture).count())
         res = self.testapp.get('/lecture/list', status=200)
         self.failUnless('Liste' in res.body)
 

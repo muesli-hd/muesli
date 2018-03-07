@@ -179,7 +179,7 @@ class EnterGradesBasic(object):
             try:
                 parser.parseString(formula)
                 for ls in lecture_students:
-                #print student
+                #print(student)
                     d = {}
                     for exam in grading.exams:
                         result = grades[ls.student_id]['exams'][exam.id]['points']

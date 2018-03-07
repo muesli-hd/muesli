@@ -778,20 +778,20 @@ def ajaxSavePoints(request):
                     #from sqlalchemy.orm import object_session
                     #from sqlalchemy.orm.util import has_identity
                     #if object_session(obj) is None and not has_identity(obj):
-                        #print "transient"
+                        #print("transient")
                     #if object_session(obj) is not None and not has_identity(obj):
-                        #print "pending"
+                        #print("pending")
                     #if object_session(obj) is None and has_identity(obj):
-                        #print "detached"
+                        #print("detached")
                     #if object_session(obj) is not None and has_identity(obj):
-                        #print "persistent"
+                        #print("persistent")
                     try:
                         request.db.delete(d_points[exercise.id])
-                        #print "deleted"
+                        #print("deleted")
                     except sqlalchemy.exc.InvalidRequestError:
                         # Object not really added
                         # Seems not to work really
-                        #print "not deleted"
+                        #print("not deleted")
                         pass
     request.db.commit()
     json_data['msg'] = json_data['msg'] or 'sucessfull'

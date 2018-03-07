@@ -36,6 +36,6 @@ while True:
             # Don't start endless loop on syntax errors
             sys.exit()
     except Exception as e:
-        print traceback.print_exc()
-        print "Terminating..."
+        print(traceback.print_exc())
+        print("Terminating...")
         sys.exit()

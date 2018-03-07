@@ -26,7 +26,7 @@ class DBUpdate(object):
         self.statements = statements
         self.callable = callable
     def run(self, connection):
-        print "Upgrading to schema version {0}".format(self.schema_version)
+        print("Upgrading to schema version {0}".format(self.schema_version))
         with connection.begin():
         if self.schema_version != 1:
             old_version = connection.execute("SELECT value FROM config WHERE key = 'schema_version'").scalar()

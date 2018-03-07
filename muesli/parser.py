@@ -137,10 +137,10 @@ class Parser(object):
         self.L=self.pattern.parseString(string )
         #except ParseException,err:
         #       self.L=['Parse Failure', string]
-        #       print 'Parse Failure'
-        #       print err.line
-        #       print " "*(err.column-1) + "^"
-        #       print err
+        #       print('Parse Failure')
+        #       print(err.line)
+        #       print(" "*(err.column-1) + "^")
+        #       print(err)
     def pushFirst(self, str, loc, toks ):
         self.exprStack.append( toks[0] )
     def pushEnd(self, str, loc, toks):
@@ -152,7 +152,7 @@ class Parser(object):
     # Recursive function that evaluates the stack
     def evaluateStack(self, s ):
         op = s.pop()
-        #print "evaluating", op
+        #print("evaluating", op)
         if op in "+-*/^":
             op2 = self.evaluateStack( s )
             op1 = self.evaluateStack( s )
@@ -241,10 +241,10 @@ if __name__ == '__main__':
     p = Parser()
     input_string = raw_input("> ")
     p.parseString(input_string)
-    print p.calculate({})
+    print(p.calculate({}))
 
   ## Display instructions on how to quit the program
-  #print "Type in the string to be parse or 'quit' to exit the program"
+  #print("Type in the string to be parse or 'quit' to exit the program")
   #input_string = raw_input("> ")
 
   #while input_string != 'quit':
@@ -260,30 +260,30 @@ if __name__ == '__main__':
         #L=['Parse Failure',input_string]
       
       ## show result of parsing the input string
-      #if debug_flag: print input_string, "->", L
+      #if debug_flag: print(input_string, "->", L)
       #if len(L)==0 or L[0] != 'Parse Failure':
-        #if debug_flag: print "exprStack=", exprStack
+        #if debug_flag: print("exprStack=", exprStack)
   
         ## calculate result , store a copy in ans , display the result to user
         #result=evaluateStack(exprStack)
         #variables['ans']=result
-        #print result
+        #print(result)
   
         ## Assign result to a variable if required
-        #if debug_flag: print "var=",varStack
+        #if debug_flag: print("var=",varStack)
         #if len(varStack)==1:
           #variables[varStack.pop()]=result
-        #if debug_flag: print "variables=",variables
+        #if debug_flag: print("variables=",variables)
       #else:
-        #print 'Parse Failure'
-        #print err.line
-        #print " "*(err.column-1) + "^"
-        #print err
+        #print('Parse Failure')
+        #print(err.line)
+        #print(" "*(err.column-1) + "^")
+        #print(err)
   
     ## obtain new input string
     #input_string = raw_input("> ")
   
   ## if user type 'quit' then say goodbye
-  #print "Good bye!"
+  #print("Good bye!")
 
 
