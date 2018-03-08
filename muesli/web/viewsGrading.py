@@ -33,7 +33,7 @@ from sqlalchemy.orm import exc
 from sqlalchemy.sql import func
 import sqlalchemy
 
-import pyExcelerator
+from openpyxl import Workbook
 
 import re
 import os
@@ -234,7 +234,7 @@ class GetRow(EnterGradesBasic):
 class ExcelView(object):
     def __init__(self, request):
         self.request = request
-        self.w = pyExcelerator.Workbook()
+        self.w = Workbook()
     def createResponse(self):
         output = io.StringIO()
         self.w.save(output)

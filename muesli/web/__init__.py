@@ -66,7 +66,7 @@ def add_session_to_request(event):
         wevent = weak_event()
         if wevent:
             wevent.request.queries += 1
-    saevent.listen(Session.get_bind(event.request.db), "before_execute", before_execute)
+    saevent.listen(event.request.db.get_bind(), "before_execute", before_execute)
 
     def callback(request):
         request.db.rollback()

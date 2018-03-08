@@ -1,0 +1,15 @@
+codecov
+FormEncode
+matplotlib
+openpyxl
+Paste
+Pillow
+psycopg2-binary
+pyramid
+pyramid-beaker
+pyramid-chameleon
+pytest
+pytest-cov
+PyYaml
+sqlalchemy
+WebTest

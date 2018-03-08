@@ -175,7 +175,7 @@ class Confirmation(Base):
     what = Column(Text)
     created_on = Column(DateTime, nullable=False, default=text('CURRENT_TIMESTAMP'))
     def __init__(self):
-        self.hash = hashlib.sha1("%s-%s" % (time.time(), random.random())).hexdigest()
+        self.hash = hashlib.sha1(bytes("%s-%s" % (time.time(), random.random()), "utf-8")).hexdigest()
 
 class Lecture(Base):
     __tablename__ = 'lectures'

@@ -38,7 +38,7 @@ from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
 import sqlalchemy
 #
-import pyExcelerator
+from openpyxl import Workbook
 import io
 #
 from muesli import types
@@ -636,7 +636,7 @@ def exportYaml_details(request):
 class ExcelExport(object):
     def __init__(self,request):
         self.request = request
-        self.w = pyExcelerator.Workbook()
+        self.w = Workbook()
 
     def createResponse(self):
         output = io.StringIO()
