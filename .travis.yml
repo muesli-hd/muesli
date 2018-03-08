@@ -1,7 +1,7 @@
 language: python
 dist: trusty
 python:
-  - "2.7.12"
+  - "3.5.2"
 
 addons:
   postgresql: "9.4"
