@@ -60,23 +60,23 @@ def autoCorrectSubjects():
         corrections['%s (LA) (Hauptfach)' % subject] = autoListLAHaupt(subject)
         corrections['%s (LA) (Beifach)' % subject] = autoListLABei(subject)
         corrections['%s (LA)' % subject] = autoListLA(subject)
-    for right, wrongs in corrections.items():
+    for right, wrongs in list(corrections.items()):
         for wrong in wrongs:
-            print "%s -> %s" % (wrong, right)
+            print("%s -> %s" % (wrong, right))
             correctSubjects(wrong, right)
 
 def correctSubjects(old, new):
     us = session.query(models.User).filter(models.User.subject == old).all()
     if us:
         for u in us:
-            print u
-        answer = raw_input("Change subject to %s? (y/N)" % new).lower()
+            print(u)
+        answer = input("Change subject to %s? (y/N)" % new).lower()
         if answer == 'y':
             for u in us:
                 u.subject = new
-                print "Changed", u
-        print "Do not forget to commit"
+                print("Changed", u)
+        print("Do not forget to commit")
 
 
-print "A muesli-session has been initialized as 'session'"
-print "The muesli models have been included via 'models'"
+print("A muesli-session has been initialized as 'session'")
+print("The muesli models have been included via 'models'")

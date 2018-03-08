@@ -28,15 +28,15 @@ class DBUpdate(object):
     def run(self, connection):
         print("Upgrading to schema version {0}".format(self.schema_version))
         with connection.begin():
-        if self.schema_version != 1:
-            old_version = connection.execute("SELECT value FROM config WHERE key = 'schema_version'").scalar()
-            if int(old_version) + 1 != self.schema_version:
-                raise DatabaseError("Tried to update schema from {0} to {1}".format(old_version, self.schema_version))
-        if self.statements:
-            for s in self.statements:
-                connection.execute(s)
-        if self.callable:
-            self.callable(connection)
+            if self.schema_version != 1:
+                old_version = connection.execute("SELECT value FROM config WHERE key = 'schema_version'").scalar()
+                if int(old_version) + 1 != self.schema_version:
+                    raise DatabaseError("Tried to update schema from {0} to {1}".format(old_version, self.schema_version))
+            if self.statements:
+                for s in self.statements:
+                    connection.execute(s)
+            if self.callable:
+                self.callable(connection)
         connection.execute(text("UPDATE config SET value = :version WHERE key = 'schema_version'"), version=self.schema_version)
 
 class DBUpdater(object):
@@ -49,15 +49,15 @@ class DBUpdater(object):
     def run(self, engine, create_database=False):
         connection = engine.connect()
         try:
-        if create_database:
-            old_version = 0
-        else:
-            old_version = int(connection.execute("SELECT value FROM config WHERE key = 'schema_version'").scalar())
-        new_version = max(self.updates.keys())
-        for v in range(old_version + 1, new_version + 1):
-            self.updates[v].run(connection)
+            if create_database:
+                old_version = 0
+            else:
+                old_version = int(connection.execute("SELECT value FROM config WHERE key = 'schema_version'").scalar())
+            new_version = max(self.updates.keys())
+            for v in range(old_version + 1, new_version + 1):
+                self.updates[v].run(connection)
         finally:
-        connection.close()
+            connection.close()
 
 DBUpdater().add(1, statements=[
         """

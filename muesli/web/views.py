@@ -82,7 +82,7 @@ def emailAllUsers(request):
         table.append(s)
     if request.method == 'POST' and form.processPostData(request.POST):
         message = Message(subject=form['subject'],
-                sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+                sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
                 to= [],
                 bcc=[s.email for s in students],
                 body=form['body'])
@@ -142,7 +142,7 @@ def emailUsers(request):
             table.append((student, student.confirmations[0].created_on))
     if request.method == 'POST' and form.processPostData(request.POST):
         message = Message(subject=form['subject'],
-                sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+                sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
                 to= [],
                 bcc=[s.email for s in bad_students],
                 body=form['body'])
@@ -172,7 +172,7 @@ def changelog(request):
             elif line.startswith('concerns:'):
                 pass
             else: text.append(line)
-        text = u'\n'.join(text)
+        text = '\n'.join(text)
         entries.append({'date': date, 'description': text})
     return {'entries': entries}
 

@@ -38,7 +38,7 @@ import os
 
 import PIL.Image
 import PIL.ImageDraw
-import StringIO
+import io
 
 @view_config(route_name='tutorial_view', renderer='muesli.web:templates/tutorial/view.pt', context=TutorialContext, permission='viewOverview')
 class View(object):
@@ -82,7 +82,7 @@ class OccupancyBar(object):
             draw.rectangle([(0,0),(float(self.width)*self.count/self.max_count,10)], fill=self.color1)
         else:
             draw.rectangle([(0,0),(float(self.width),10)], fill=self.color1)
-        output = StringIO.StringIO()
+        output = io.StringIO()
         image.save(output, format='PNG')
         response = Response()
         response.content_type = 'image/png'
@@ -107,7 +107,7 @@ class Add(object):
             form.obj = tutorial
             form.saveValues()
             self.request.db.commit()
-            form.message = u"Neue Übungsgruppe angelegt."
+            form.message = "Neue Übungsgruppe angelegt."
         return {'lecture': lecture,
                 'names': self.request.config['lecture_types'][lecture.type],
                 'form': form,
@@ -117,12 +117,12 @@ class Add(object):
 def delete(request):
     for tutorial in request.context.tutorials:
         if tutorial.student_count:
-            request.session.flash(u'Übungsgruppe ist nicht leer!', queue='errors')
+            request.session.flash('Übungsgruppe ist nicht leer!', queue='errors')
         else:
             for lrs in tutorial.lecture_removed_students:
                 lrs.tutorial = None
             request.db.delete(tutorial)
-            request.session.flash(u'Übungsgruppe gelöscht.', queue='messages')
+            request.session.flash('Übungsgruppe gelöscht.', queue='messages')
     request.db.commit()
     return HTTPFound(location=request.route_url('lecture_edit', lecture_id = request.context.lecture.id))
 
@@ -139,7 +139,7 @@ class Edit(object):
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
             form.saveValues()
             self.request.db.commit()
-            form.message = u"Änderungen gespeichert"
+            form.message = "Änderungen gespeichert"
         return {'tutorial': tutorial,
                 'names': self.request.config['lecture_types'][tutorial.lecture.type],
                 'form': form,
@@ -173,10 +173,10 @@ def take(request):
     tutorials = request.context.tutorials
     for tutorial in tutorials:
         if tutorial.tutor_id:
-            request.session.flash(u'Für das Tutorial ist bereits ein Tutor eingetragen!', queue='errors')
+            request.session.flash('Für das Tutorial ist bereits ein Tutor eingetragen!', queue='errors')
         else:
             tutorial.tutor = request.user
-            request.session.flash(u'Sie wurden als Übungsleiter eingetragen!', queue='messages')
+            request.session.flash('Sie wurden als Übungsleiter eingetragen!', queue='messages')
     if request.db.dirty:
         request.db.commit()
     return HTTPFound(location=request.route_url('lecture_view', lecture_id = request.context.lecture.id))
@@ -186,10 +186,10 @@ def resignAsTutor(request):
     tutorials = request.context.tutorials
     for tutorial in tutorials:
         if tutorial.tutor != request.user:
-            request.session.flash(u'Sie sind nicht Tutor eines Tutorials', queue='errors')
+            request.session.flash('Sie sind nicht Tutor eines Tutorials', queue='errors')
         else:
             tutorial.tutor = None
-            request.session.flash(u'Sie sind als Tutor zurückgetreten', queue='messages')
+            request.session.flash('Sie sind als Tutor zurückgetreten', queue='messages')
     if request.db.dirty or request.db.new or request.db.deleted:
         request.db.commit()
     return HTTPFound(location=request.route_url('lecture_view', lecture_id = request.context.lecture.id))
@@ -216,9 +216,9 @@ def subscribe(request):
         if oldtutorial:
             sendChangesMailUnsubscribe(request, oldtutorial, request.user, toTutorial=tutorial)
         sendChangesMailSubscribe(request, tutorial, request.user, fromTutorial=oldtutorial)
-        request.session.flash(u'Erfolgreich in Übungsgruppe eingetragen', queue='messages')
+        request.session.flash('Erfolgreich in Übungsgruppe eingetragen', queue='messages')
     else:
-        request.session.flash(u'Maximale Teilnehmerzahl bereits erreicht', queue='errors')
+        request.session.flash('Maximale Teilnehmerzahl bereits erreicht', queue='errors')
         pass
     return HTTPFound(location=request.route_url('lecture_view', lecture_id=lecture.id))
 
@@ -240,7 +240,7 @@ def unsubscribe(request):
     request.db.delete(ls)
     request.db.commit()
     sendChangesMailUnsubscribe(request, tutorial, request.user)
-    request.session.flash(u'Erfolgreich aus Übungsgruppe ausgetragen', queue='messages')
+    request.session.flash('Erfolgreich aus Übungsgruppe ausgetragen', queue='messages')
     return HTTPFound(location=request.route_url('start'))
 
 @view_config(route_name='tutorial_remove_student', context=TutorialContext, permission='remove_student')
@@ -257,7 +257,7 @@ def removeStudent(request):
         request.db.add(lrs)
         request.db.delete(ls)
         request.db.commit()
-        request.session.flash(u'Student aus Übungsgruppe ausgetragen!', queue='messages')
+        request.session.flash('Student aus Übungsgruppe ausgetragen!', queue='messages')
     if request.referrer:
         return HTTPFound(location=request.referrer)
     else:
@@ -266,7 +266,7 @@ def removeStudent(request):
 def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
     if not tutorial.tutor:
         return
-    text = u'In Ihre Übungsgruppe zur Vorlesung %s am %s hat sich %s eingetragen'\
+    text = 'In Ihre Übungsgruppe zur Vorlesung %s am %s hat sich %s eingetragen'\
             % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
     if fromTutorial:
         text += ' (Wechsel aus der Gruppe am %s von %s).' % (fromTutorial.time.__html__(), fromTutorial.tutor.name() if fromTutorial.tutor else 'NN')
@@ -276,7 +276,7 @@ def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
 def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
     if not tutorial.tutor:
         return
-    text = u'Aus Ihrer Übungsgruppe zur Vorlesung %s am %s hat sich %s ausgetragen'\
+    text = 'Aus Ihrer Übungsgruppe zur Vorlesung %s am %s hat sich %s ausgetragen'\
                     % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
     if toTutorial:
         text += ' (Wechsel in die Gruppe am %s von %s).' % (toTutorial.time.__html__(), toTutorial.tutor.name() if toTutorial.tutor else 'NN')
@@ -285,10 +285,10 @@ def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
     sendChangesMail(request, tutorial.tutor, text)
 
 def sendChangesMail(request, tutor, text):
-    message = Message(subject=u'MÜSLI: Änderungen in Ihrer Übungsgruppe',
-            sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+    message = Message(subject='MÜSLI: Änderungen in Ihrer Übungsgruppe',
+            sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
             to = [tutor.email],
-            body=u'Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
+            body='Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
     muesli.mail.sendMail(message)
 
 @view_config(route_name='tutorial_email', renderer='muesli.web:templates/tutorial/email.pt', context=TutorialContext, permission='sendMail')

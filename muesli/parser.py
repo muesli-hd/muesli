@@ -22,7 +22,7 @@
 # Inspired by SimpleCalc.py (http://pyparsing.wikispaces.com/file/view/SimpleCalc.py)
 #
 
-from __future__ import division
+
 
 import re
 from pyparsing import Word, alphas, ParseException, Literal, CaselessLiteral \
@@ -111,7 +111,7 @@ class Parser(object):
                 'round3down': self.round3down
                 }
     def min(self, arr):
-        arr = filter(lambda a: a != None, arr)
+        arr = [a for a in arr if a != None]
         if arr:
             return min(arr)
         else:
@@ -172,12 +172,12 @@ class Parser(object):
         elif op == "E":
             return Decimal(math.e)
         elif re.search('^\$[a-zA-Z0-9_]*$',op):
-            if self.variables.has_key(op):
+            if op in self.variables:
                 return self.variables[op]
             else:
                 return None
         elif re.search('^[-+]?[0-9]+$',op):
-            return long( op )
+            return int( op )
         else:
             return Decimal( op )
     def cases(self, parameters):
@@ -190,7 +190,7 @@ class Parser(object):
             raise Exception('Not enough results or boundaries')
         if val < bs[0]-Decimal('0.000001'):
             return results[0]
-        for b,r in reversed(zip(bs,results[1:])):
+        for b,r in reversed(list(zip(bs,results[1:]))):
             if val >= b-Decimal('0.00001'): return r
         raise Exception('could not evaluate cases')
     def cases1(self, parameters):
@@ -239,7 +239,7 @@ class Parser(object):
 
 if __name__ == '__main__':
     p = Parser()
-    input_string = raw_input("> ")
+    input_string = eval(input("> "))
     p.parseString(input_string)
     print(p.calculate({}))
 

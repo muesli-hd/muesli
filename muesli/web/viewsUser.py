@@ -50,7 +50,7 @@ def login(request):
             request.user = user
             url = request.route_url('start')
             return HTTPFound(location=url)
-        request.session.flash(u'Nicht gefunden', queue='errors')
+        request.session.flash('Nicht gefunden', queue='errors')
     return { 'form': form, 'user': security.authenticated_userid(request) }
 
 @view_config(route_name='user_logout')
@@ -91,8 +91,8 @@ def listSubjectsByTerm(request):
             .group_by(models.User.subject, models.Lecture.term)\
             .order_by(models.Lecture.term, models.User.subject)
     for (term, subject, count) in table:
-        subject = re.sub(r'\(.*\)', '', unicode(subject))
-        subject = re.sub(r'\s$', '', unicode(subject))
+        subject = re.sub(r'\(.*\)', '', str(subject))
+        subject = re.sub(r'\s$', '', str(subject))
         if subject == 'None' or subject == '':
             subject = '<ohne Studiengang>'
         subject_term_dict[subject][str(term)] += count
@@ -119,7 +119,7 @@ def edit(request):
                         del l.assistants[nr]
         form.saveValues()
         request.db.commit()
-        request.session.flash(u'Daten geändert', queue='messages')
+        request.session.flash('Daten geändert', queue='messages')
     return {'user': user,
             'form': form,
             'time_preferences': user.prepareTimePreferences(),
@@ -131,25 +131,25 @@ def edit(request):
 def delete(request):
     user = request.context.user
     if (user.tutorials.all()):
-        request.session.flash(u'Benutzer %s ist zu Tutorien angemeldet und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s ist zu Tutorien angemeldet und kann daher nicht gelöscht werden' % user, queue='errors')
         return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
     elif user.tutorials_as_tutor.all():
-        request.session.flash(u'Benutzer %s ist Tutor von Tutorien und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s ist Tutor von Tutorien und kann daher nicht gelöscht werden' % user, queue='errors')
         return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
     elif user.lectures_as_tutor:
-        request.session.flash(u'Benutzer %s ist als Tutor eingetragen und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s ist als Tutor eingetragen und kann daher nicht gelöscht werden' % user, queue='errors')
         return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
     elif user.lectures_as_assistant.all():
-        request.session.flash(u'Benutzer %s verwaltet Vorlesungen und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s verwaltet Vorlesungen und kann daher nicht gelöscht werden' % user, queue='errors')
         return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
     elif len(user.exercise_points)>0:
-        request.session.flash(u'Benutzer %s hat eingetragene Punkte und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s hat eingetragene Punkte und kann daher nicht gelöscht werden' % user, queue='errors')
         return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
     elif len(user.student_grades.all())>0:
-        request.session.flash(u'Benutzer %s hat eingetragene Noten und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s hat eingetragene Noten und kann daher nicht gelöscht werden' % user, queue='errors')
         return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
     elif len(user.tutorials_removed.all())>0:
-        request.session.flash(u'Benutzer %s war in Tutorien angemeldet und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s war in Tutorien angemeldet und kann daher nicht gelöscht werden' % user, queue='errors')
         return HTTPFound(location = request.route_url('user_edit', user_id = user.id))
     else:
         for c in user.confirmations:
@@ -157,7 +157,7 @@ def delete(request):
         #old_name = str(user)
         request.db.delete(user)
         request.db.commit()
-        request.session.flash(u'Benutzer %s wurde gelöscht!' % user, queue='messages')
+        request.session.flash('Benutzer %s wurde gelöscht!' % user, queue='messages')
         return HTTPFound(location = request.route_url('admin'))
 
 @view_config(route_name='user_delete_unconfirmed', renderer = 'muesli.web:templates/user/delete_unconfirmed.pt', context=GeneralContext, permission='admin')
@@ -176,7 +176,7 @@ def deleteUnconfirmed(request):
                 request.db.delete(c)
             request.db.delete(student)
         request.db.commit()
-        request.session.flash(u'%i Studenten gelöscht' % len(bad_students), queue='messages')
+        request.session.flash('%i Studenten gelöscht' % len(bad_students), queue='messages')
         bad_students = []
     return {'unconfirmed_students': bad_students}
 
@@ -187,10 +187,10 @@ def doublets(request):
     for user in request.db.query(models.User).all():
         doublets[user.email.lower()].append(user)
         #doublets[user.name().lower()].append(user)
-    for key, value in doublets.items():
+    for key, value in list(doublets.items()):
         if len(value)<=1:
             del doublets[key]
-    doublets_list = doublets.items()
+    doublets_list = list(doublets.items())
     doublets_list.sort(key=lambda e: e[1][0].last_name)
     return {'doublets': doublets_list}
 
@@ -200,7 +200,7 @@ def update(request):
     if request.method == 'POST' and form.processPostData(request.POST):
         form.saveValues()
         request.db.commit()
-        request.session.flash(u'Angaben geändert', queue='messages')
+        request.session.flash('Angaben geändert', queue='messages')
     return {'form': form}
 
 @view_config(route_name='user_register', renderer='muesli.web:templates/user/register.pt', context=GeneralContext)
@@ -223,7 +223,7 @@ def registerCommon(request, form):
     mails = request.db.query(models.User.email).all()
     mails = [m.email.lower() for m in mails]
     if form['email'].lower() in mails:
-        request.session.flash(u'Ein Benutzer mit dieser E-Mail-Adresse existiert bereits.', queue='messages')
+        request.session.flash('Ein Benutzer mit dieser E-Mail-Adresse existiert bereits.', queue='messages')
         return False
     else:
         user = models.User()
@@ -231,7 +231,7 @@ def registerCommon(request, form):
         form.saveValues()
         request.db.add(user)
         confirmation = models.Confirmation()
-        confirmation.source = u'user/register'
+        confirmation.source = 'user/register'
         confirmation.user = user
         request.db.add(confirmation)
         request.db.commit()
@@ -239,7 +239,7 @@ def registerCommon(request, form):
         return True
 
 def send_confirmation_mail(request, user, confirmation):
-    body =u"""
+    body ="""
 Hallo!
 
 Sie haben sich bei MÜSLI mit den folgenden Daten angemeldet:
@@ -257,8 +257,8 @@ einfach.
 Mit freudlichen Grüßen,
 Das MÜSLI-Team
     """ %(user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
-    message = Message(subject=u'MÜSLI: Ihre Registrierung bei MÜSLI',
-            sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+    message = Message(subject='MÜSLI: Ihre Registrierung bei MÜSLI',
+            sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
             to=[user.email],
             body=body)
     sendMail(message)
@@ -272,7 +272,7 @@ def resendConfirmationMail(request):
     user_id = request.matchdict['user_id']
     confirmation = request.db.query(Confirmation).filter(Confirmation.user_id == user_id).first()
     user = confirmation.user
-    body =u"""
+    body ="""
 Hallo!
 
 Sie haben sich am %s bei MÜSLI mit den folgenden Daten angemeldet:
@@ -290,8 +290,8 @@ einfach.
 Mit freudlichen Grüßen,
 Das MÜSLI-Team
     """ %(confirmation.created_on, user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
-    message = Message(subject=u'MÜSLI: Ihre Registrierung bei MÜSLI',
-            sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+    message = Message(subject='MÜSLI: Ihre Registrierung bei MÜSLI',
+            sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
             to=[user.email],
             body=body)
     sendMail(message)
@@ -317,13 +317,13 @@ def changeEmail(request):
     if request.method == 'POST' and form.processPostData(request.POST):
         email = form['email']
         if request.db.query(models.User).filter(models.User.email==email).count() > 0:
-            request.session.flash(u'Die Adresse "%s" kann nicht verwendet werden' % email, queue='messages')
+            request.session.flash('Die Adresse "%s" kann nicht verwendet werden' % email, queue='messages')
         else:
             confirmation = models.Confirmation()
-            confirmation.source = u'user/change_email'
+            confirmation.source = 'user/change_email'
             confirmation.user = request.user
             confirmation.what = email
-            body =u"""
+            body ="""
 Hallo!
 
 Sie haben bei MÜSLI Ihre E-Mail-Adresse geändert.
@@ -340,8 +340,8 @@ einfach.
 Mit freundlichen Grüßen,
 Das MÜSLI-Team
             """ %(email, request.route_url('user_confirm_email', confirmation=confirmation.hash))
-            message = Message(subject=u'MÜSLI: E-Mail-Adresse ändern',
-                    sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+            message = Message(subject='MÜSLI: E-Mail-Adresse ändern',
+                    sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
                     to=[email],
                     body=body)
             # As we are not using transactions,
@@ -394,12 +394,12 @@ def resetPassword(request):
     if request.method == 'POST' and form.processPostData(request.POST):
         user = request.db.query(models.User).filter(models.User.email==form['email']).first()
         if not user:
-            request.session.flash(u'User not found', queue='errors')
+            request.session.flash('User not found', queue='errors')
         else:
             confirmation = models.Confirmation()
             confirmation.user = user
-            confirmation.source = u'user/reset_password'
-            body =u"""
+            confirmation.source = 'user/reset_password'
+            body ="""
 Hallo!
 
 Um Ihr Passwort bei MÜSLI zurückzusetzen besuchen Sie bitte die Seite
@@ -413,8 +413,8 @@ Mit freundlichen Grüßen,
 Das MÜSLI-Team
 
             """ %(request.route_url('user_reset_password3', confirmation=confirmation.hash))
-            message = Message(subject=u'MÜSLI: Passwort zurücksetzen',
-                    sender=(u'%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+            message = Message(subject='MÜSLI: Passwort zurücksetzen',
+                    sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
                     to=[user.email],
                     body=body)
             # As we are not using transactions,

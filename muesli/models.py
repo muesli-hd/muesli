@@ -162,7 +162,7 @@ class User(Base):
             return False
         return True
     def __unicode__(self):
-        return u'{name} <{email}>'.format(name=self.name(), email=self.email)
+        return '{name} <{email}>'.format(name=self.name(), email=self.email)
     def __repr__(self):
         return 'u<User %r <%r>>' % (self.name(), self.email)
 
@@ -284,7 +284,7 @@ class Lecture(Base):
         for res in lecture_results:
             results[res.student_id][res.Exam.id] = res.points
         for exam in self.exams:
-            for student_results in results.values():
+            for student_results in list(results.values()):
                 student_results[exam.category] = student_results.get(exam.category,0)+(student_results.get(exam.id,0) or 0)
         return results
     def getGradingResults(self, tutorials = [], students = None):
@@ -334,7 +334,7 @@ class Exam(Base):
         for points in pointsQuery.all():
             results[points.exercise_id] = {'points': points.points,
                     'exercise': points.exercise}
-        results['sum'] = sum(filter(lambda x: x, [r['points'] for r in results.values()]))
+        results['sum'] = sum([x for x in [r['points'] for r in list(results.values())] if x])
         for e in self.exercises:
             if not e.id in results:
                 results[e.id] = {'points': None, 'exercise': e}

@@ -1,5 +1,5 @@
 import sqlalchemy
-import models
+from . import models
 
 engine = sqlalchemy.create_engine('postgresql:///mueslitest', echo=False)
 Session = sqlalchemy.orm.sessionmaker(bind=engine)

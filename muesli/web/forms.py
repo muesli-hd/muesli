@@ -57,11 +57,11 @@ class DateString(formencode.FancyValidator):
         month = int(gd['month'])
         year = int(gd['year'])
         if not (day >=1 and day <= 31):
-            raise formencode.Invalid(u'Ungültiger Tag!', value, state)
+            raise formencode.Invalid('Ungültiger Tag!', value, state)
         if not (month >=1 and month <= 12):
-            raise formencode.Invalid(u'Ungültiger Monat!', value, state)
+            raise formencode.Invalid('Ungültiger Monat!', value, state)
         if not (year >= 1900):
-            raise formencode.Invalid(u'Ungültiges Jahr!', value, state)
+            raise formencode.Invalid('Ungültiges Jahr!', value, state)
         return string
 
 class FormField(object):
@@ -169,9 +169,9 @@ class FormValidator(object):
             return False
     __getitem__ = lambda self, key: self.value.get(key, "")
     __contains__ = lambda self, key: key in self.value
-    __iter__ = lambda self: self.value.iterkeys()
+    __iter__ = lambda self: iter(list(self.value.keys()))
     iterkeys = __iter__
-    iteritems = lambda self: self.value.iteritems()
+    iteritems = lambda self: iter(list(self.value.items()))
     update = lambda self, *args, **kwargs: self.value.update(*args, **kwargs)
     def bind(self, obj, fields):
         """
@@ -208,7 +208,7 @@ class LectureEdit(ObjectForm):
                 FormField('type',
                    label='Typ',
                    type='select',
-                   options=[[type, data['name']] for type, data in request.config['lecture_types'].items()],
+                   options=[[type, data['name']] for type, data in list(request.config['lecture_types'].items())],
                    value=lecture.type,
                    required=True),
                 FormField('name',
@@ -242,20 +242,20 @@ class LectureEdit(ObjectForm):
                    options=utils.modes,
                    value=lecture.mode),
                 FormField('minimum_preferences',
-                   label=u'Minimum möglicher Termine',
+                   label='Minimum möglicher Termine',
                    size=5,
-                   comment=u'Bei Präferenzenanmeldung: Studenten müssen mindestens an soviel Terminen können. (Leer: Defaultformel)',
+                   comment='Bei Präferenzenanmeldung: Studenten müssen mindestens an soviel Terminen können. (Leer: Defaultformel)',
                    value=lecture.minimum_preferences,
                    validator=validators.Int()),
                 FormField('tutor_rights',
-                    label=u'Tutorenrechte',
+                    label='Tutorenrechte',
                     type='select',
                     options=utils.tutorRights,
                     value=lecture.tutor_rights),
                 FormField('password',
-                   label=u'Passwort für Übungsleiter',
+                   label='Passwort für Übungsleiter',
                    size=40,
-                   comment=u'Bei leerem Passwort keine Anmeldung als Übungsleiter möglich',
+                   comment='Bei leerem Passwort keine Anmeldung als Übungsleiter möglich',
                    value=lecture.password),
                 FormField('is_visible',
                    label='Sichtbar',
@@ -273,7 +273,7 @@ class LectureEdit(ObjectForm):
                    #value=lecture.assistant.id,
                    #required=True,
                    #))
-        ObjectForm.__init__(self, lecture, formfields, request, send=u'Ändern')
+        ObjectForm.__init__(self, lecture, formfields, request, send='Ändern')
     def saveField(self, fieldName):
         if fieldName == 'is_visible':
             self.obj.is_visible = valueToBool(self['is_visible'])
@@ -287,7 +287,7 @@ class LectureAdd(ObjectForm):
                 FormField('type',
                    label='Typ',
                    type='select',
-                   options=[[type, data['name']] for type, data in request.config['lecture_types'].items()],
+                   options=[[type, data['name']] for type, data in list(request.config['lecture_types'].items())],
                    #value=lecture.type,
                    required=True),
                 FormField('name',
@@ -326,11 +326,11 @@ class LectureAdd(ObjectForm):
               FormField('assistant',
                label='Assistent',
                type='select',
-               options=[[a.id, unicode(a)] for a in assistants],
+               options=[[a.id, str(a)] for a in assistants],
                #value=lecture.assistant.id,
                required=True,
                ))
-        ObjectForm.__init__(self, None, formfields, request, send=u'Anlegen')
+        ObjectForm.__init__(self, None, formfields, request, send='Anlegen')
     def saveField(self, fieldName):
         if fieldName == 'assistant':
             assistant = self.request.db.query(models.User).get(self['assistant'])
@@ -367,7 +367,7 @@ class UserEdit(ObjectForm):
                    value=user.subject,
                    options=utils.getSubjects(user)),
                 FormField('subject_alt',
-                   label='Studiengang', size=30, comment=u'Genauer Studiengang (falls Sonstiges gewählt). Bitte in der Form "Fach (Studiengang)".',
+                   label='Studiengang', size=30, comment='Genauer Studiengang (falls Sonstiges gewählt). Bitte in der Form "Fach (Studiengang)".',
                    value=''),
                 FormField('second_subject',
                    label='Beifach',
@@ -391,7 +391,7 @@ class UserEdit(ObjectForm):
                    options=[[1, 'Ja'], [0, 'Nein']],
                    value=1 if user.is_admin else 0)
                 ]
-        ObjectForm.__init__(self, user, formfields, request, send=u'Änderungen übernehmen')
+        ObjectForm.__init__(self, user, formfields, request, send='Änderungen übernehmen')
     def saveField(self, fieldName):
         if fieldName == 'subject':
             if self['subject']=='Sonstiges':
@@ -432,7 +432,7 @@ class UserUpdate(ObjectForm):
                    value=user.subject,
                    options=utils.getSubjects(user)),
                 FormField('subject_alt',
-                   label='Studiengang', size=30, comment=u'Genauer Studiengang (falls Sonstiges gewählt). Bitte in der Form "Fach (Studiengang)".',
+                   label='Studiengang', size=30, comment='Genauer Studiengang (falls Sonstiges gewählt). Bitte in der Form "Fach (Studiengang)".',
                    value=''),
                 FormField('second_subject',
                    label='Beifach',
@@ -446,7 +446,7 @@ class UserUpdate(ObjectForm):
                    label='Geburtsort', size=20,
                    value=user.birth_place),
                 ]
-        ObjectForm.__init__(self, user, formfields, request, send=u'Änderungen übernehmen')
+        ObjectForm.__init__(self, user, formfields, request, send='Änderungen übernehmen')
         self.editok = ['title', 'subject', 'subject_alt', 'second_subject']
         for field in ['matrikel', 'birth_date', 'birth_place']:
             if not getattr(user, field):
@@ -488,7 +488,7 @@ class UserRegister(ObjectForm):
                    #value=user.last_name,
                    required=True),
                 FormField('matrikel',
-                   label='Matrikelnummer', size=10, comment=u'Falls noch keine Matrikelnummer bekannt ist bitte 00000 eintragen. Die Matrikelnummer muss dann baldmöglichst unter „Angaben ergänzen“ richtig gestellt werden!',
+                   label='Matrikelnummer', size=10, comment='Falls noch keine Matrikelnummer bekannt ist bitte 00000 eintragen. Die Matrikelnummer muss dann baldmöglichst unter „Angaben ergänzen“ richtig gestellt werden!',
                    validator=validators.Number,
                    #value=user.matrikel,
                    required=True
@@ -500,7 +500,7 @@ class UserRegister(ObjectForm):
                    options=utils.getSubjects(),
                    required=True),
                 FormField('subject_alt',
-                   label='Studiengang', size=30, comment=u'Genauer Studiengang (falls Sonstiges gewählt). Bitte in der Form "Fach (Studiengang)".',
+                   label='Studiengang', size=30, comment='Genauer Studiengang (falls Sonstiges gewählt). Bitte in der Form "Fach (Studiengang)".',
                    value=''),
                 FormField('birth_date',
                    label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
@@ -514,7 +514,7 @@ class UserRegister(ObjectForm):
                    required=True
                    )
                 ]
-        ObjectForm.__init__(self, None, formfields, request, send=u'Registrieren')
+        ObjectForm.__init__(self, None, formfields, request, send='Registrieren')
     def saveField(self, fieldName):
         if fieldName == 'subject':
             if self['subject']=='Sonstiges':
@@ -552,7 +552,7 @@ class UserRegisterOther(ObjectForm):
                    #value=user.last_name,
                    required=True),
                 ]
-        ObjectForm.__init__(self, None, formfields, request, send=u'Registrieren')
+        ObjectForm.__init__(self, None, formfields, request, send='Registrieren')
     def saveField(self, fieldName):
         ObjectForm.saveField(self, fieldName)
 
@@ -574,7 +574,7 @@ class UserConfirm(ObjectForm):
                 HiddenField('hash',
                    value=confirmation.hash),
                 ]
-        ObjectForm.__init__(self, None, formfields, request, send=u'Registrierung abschließen',
+        ObjectForm.__init__(self, None, formfields, request, send='Registrierung abschließen',
                 chained_validators=[validators.FieldsMatch('password', 'password_repeat')])
 
 class UserChangeEmail(ObjectForm):
@@ -586,7 +586,7 @@ class UserChangeEmail(ObjectForm):
                    required=True,
                    validator=validators.Email()),
                 ]
-        ObjectForm.__init__(self, user, formfields, request, send=u'E-Mail-Adresse ändern')
+        ObjectForm.__init__(self, user, formfields, request, send='E-Mail-Adresse ändern')
     def saveField(self, fieldName):
         pass
 
@@ -603,7 +603,7 @@ class LectureAddExam(ObjectForm):
                 FormField('url',
                    label='URL', size=100)
                 ]
-        ObjectForm.__init__(self, None, formfields, request, send=u'Anlegen')
+        ObjectForm.__init__(self, None, formfields, request, send='Anlegen')
 
 class UserChangePassword(ObjectForm):
     def __init__(self, request):
@@ -621,7 +621,7 @@ class UserChangePassword(ObjectForm):
                    required=True
                    ),
                 ]
-        ObjectForm.__init__(self, None, formfields, request, send=u'Neues Passwort setzen',
+        ObjectForm.__init__(self, None, formfields, request, send='Neues Passwort setzen',
                 chained_validators=[validators.FieldsMatch('new_password', 'new_password_repeat')])
 
 class UserResetPassword(ObjectForm):
@@ -632,7 +632,7 @@ class UserResetPassword(ObjectForm):
                    required=True,
                    validator=validators.Email()),
                 ]
-        ObjectForm.__init__(self, None, formfields, request,  send=u'Passwort zurücksetzen')
+        ObjectForm.__init__(self, None, formfields, request,  send='Passwort zurücksetzen')
 
 class UserResetPassword3(ObjectForm):
     def __init__(self, request, confirmation):
@@ -650,7 +650,7 @@ class UserResetPassword3(ObjectForm):
                    required=True
                    ),
                 ]
-        ObjectForm.__init__(self, None, formfields, request, send=u'Neues Passwort setzen',
+        ObjectForm.__init__(self, None, formfields, request, send='Neues Passwort setzen',
                 chained_validators=[validators.FieldsMatch('password', 'password_repeat')])
 
 class LectureEditExam(ObjectForm):
@@ -689,7 +689,7 @@ class LectureEditExam(ObjectForm):
                    value=boolToValue(exam.medical_certificate),
                    options=[[1, 'Editieren erlaubt'], [0, 'Editieren gesperrt'], ['None', 'Nicht notwendig']]),
                 ]
-        ObjectForm.__init__(self, exam, formfields, request, send=u'Änderungen speichern')
+        ObjectForm.__init__(self, exam, formfields, request, send='Änderungen speichern')
     def saveField(self, fieldName):
         if fieldName in ['admission', 'registration', 'medical_certificate', 'results_hidden']:
             setattr(self.obj, fieldName, valueToBool(self[fieldName]))
@@ -732,7 +732,7 @@ class TutorialEdit(ObjectForm):
                    options=[[1, 'Ja'], [0, 'Nein']],
                    value=boolToValue(tutorial.is_special) if tutorial else 0)
                 ]
-        ObjectForm.__init__(self, tutorial, formfields, request, send=u'Ändern')
+        ObjectForm.__init__(self, tutorial, formfields, request, send='Ändern')
     def saveField(self, fieldName):
         if fieldName == 'is_special':
             setattr(self.obj, fieldName, valueToBool(self[fieldName]))
@@ -760,17 +760,17 @@ class TutorialEmail(CSRFSecureForm):
                    label='Nachricht', cols=64, rows=24,
                    type='textarea'),
                 FileField('attachments',
-                   label=u'Anhänge', size=64,
+                   label='Anhänge', size=64,
                    growable=False
                    ),
                 FormField('copytome',
-                   label=u'Kopie an mich',
+                   label='Kopie an mich',
                    type='radio',
-                   options=list(enumerate([u'Senden', u'Nicht senden'])),
+                   options=list(enumerate(['Senden', 'Nicht senden'])),
                    value=0
                    ),
                 ]
-        CSRFSecureForm.__init__(self, formfields, request, send=u'Senden')
+        CSRFSecureForm.__init__(self, formfields, request, send='Senden')
 
 class ExamAddOrEditExercise(ObjectForm):
     def __init__(self, request, exercise):
@@ -787,7 +787,7 @@ class ExamAddOrEditExercise(ObjectForm):
                    validator=validators.Number(min=0),
                    required = True),
                 ]
-        ObjectForm.__init__(self, exercise, formfields, request, send=u'Anlegen/Ändern')
+        ObjectForm.__init__(self, exercise, formfields, request, send='Anlegen/Ändern')
 
 class LectureAddGrading(ObjectForm):
     def __init__(self, request):
@@ -796,7 +796,7 @@ class LectureAddGrading(ObjectForm):
                    label='Name', size=100,
                    required=True),
                 ]
-        ObjectForm.__init__(self, None, formfields, request, send=u'Anlegen')
+        ObjectForm.__init__(self, None, formfields, request, send='Anlegen')
 
 class LectureEmailTutors(CSRFSecureForm):
     def __init__(self, request):
@@ -808,11 +808,11 @@ class LectureEmailTutors(CSRFSecureForm):
                    label='Nachricht', cols=64, rows=24,
                    type='textarea'),
                 FileField('attachments',
-                   label=u'Anhänge', size=64,
+                   label='Anhänge', size=64,
                    growable=False
                    ),
                 ]
-        CSRFSecureForm.__init__(self, formfields, request, send=u'Senden')
+        CSRFSecureForm.__init__(self, formfields, request, send='Senden')
 
 class LectureEmailStudents(CSRFSecureForm):
     def __init__(self, request):
@@ -824,17 +824,17 @@ class LectureEmailStudents(CSRFSecureForm):
                    label='Nachricht', cols=64, rows=24,
                    type='textarea'),
                 FileField('attachments',
-                   label=u'Anhänge', size=64,
+                   label='Anhänge', size=64,
                    growable=False
                    ),
                 FormField('copytotutors',
-                   label=u'Kopie an Tutoren senden',
+                   label='Kopie an Tutoren senden',
                    type='radio',
-                   options=list(enumerate([u'Senden', u'Nicht senden'])),
+                   options=list(enumerate(['Senden', 'Nicht senden'])),
                    value=0
                    ),
                 ]
-        CSRFSecureForm.__init__(self, formfields, request, send=u'Senden')
+        CSRFSecureForm.__init__(self, formfields, request, send='Senden')
 
 class EmailWrongSubject(CSRFSecureForm):
     def __init__(self, type, request):
@@ -844,17 +844,17 @@ class EmailWrongSubject(CSRFSecureForm):
                 FormField('subject',
                    label='Betreff', size=64,
                    required=True,
-                   value=u"Bitte Studiengang in Müsli anpassen!"),
+                   value="Bitte Studiengang in Müsli anpassen!"),
                 FormField('body',
                    label='Nachricht', cols=64, rows=24,
                    type='textarea',
                    required=True),
                 FileField('attachments',
-                   label=u'Anhänge', size=64,
+                   label='Anhänge', size=64,
                    growable=False
                    ),
                 ]
-        CSRFSecureForm.__init__(self, formfields, request, send=u'Senden')
+        CSRFSecureForm.__init__(self, formfields, request, send='Senden')
 
 class GradingEdit(ObjectForm):
     def __init__(self, request, grading):
@@ -873,7 +873,7 @@ class GradingEdit(ObjectForm):
                    comment='(TT.MM.JJJJ)',
                    value=grading.hispos_date),
                 FormField('examiner_id',
-                   label=u'Prüfer-Id', size=10,
+                   label='Prüfer-Id', size=10,
                    value=grading.examiner_id),
                 ]
-        ObjectForm.__init__(self, grading, formfields, request, send=u'Ändern')
+        ObjectForm.__init__(self, grading, formfields, request, send='Ändern')

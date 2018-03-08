@@ -193,7 +193,7 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
         form['birth_place'] = 'Hintertupfingen'
         res = form.submit()
         self.assertTrue(res.status.startswith('200'))
-        self.assertResContains(res, u'existiert bereits')
+        self.assertResContains(res, 'existiert bereits')
 
     def test_user_delete(self):
         res = self.testapp.get('/user/delete/%s' % (self.user2.id), status=403)
@@ -303,7 +303,7 @@ class AdminLoggedInTests(AssistantLoggedInTests):
         res = self.testapp.get('/user/edit/%s' % self.tutor.id, status=200)
         res = self.testapp.get('/user/edit/%s' % self.assistant.id, status=200)
         res = self.testapp.get('/user/edit/%s' % self.admin.id, status=200)
-        self.user.subject=u'Ein süßer Umlaut'
+        self.user.subject='Ein süßer Umlaut'
         self.session.commit()
         res = self.testapp.get('/user/edit/%s' % self.user.id, status=200)
 
@@ -316,21 +316,21 @@ class AdminLoggedInTests(AssistantLoggedInTests):
         self.assertIn('/user/edit/%s' % self.user2.id, res.headers['location'])
         res = res.follow()
         self.assertResContains(res, 'Tutorien angemeldet')
-        self.assertResContainsNot(res, u'wurde gelöscht')
+        self.assertResContainsNot(res, 'wurde gelöscht')
 
         #Do not delete tutors
         res = self.testapp.get('/user/delete/%s' % (self.tutor.id), status=302)
         self.assertIn('/user/edit/%s' % self.tutor.id, res.headers['location'])
         res = res.follow()
         self.assertResContains(res, 'Tutor von Tutorien')
-        self.assertResContainsNot(res, u'wurde gelöscht')
+        self.assertResContainsNot(res, 'wurde gelöscht')
 
         # Do not delete assistants
         res = self.testapp.get('/user/delete/%s' % (self.assistant.id), status=302)
         self.assertIn('/user/edit/%s' % self.assistant.id, res.headers['location'])
         res = res.follow()
         self.assertResContains(res, 'verwaltet Vorlesungen')
-        self.assertResContainsNot(res, u'wurde gelöscht')
+        self.assertResContainsNot(res, 'wurde gelöscht')
 
         # Do not delete students who have points in Müsli
         e = ExerciseStudent()
@@ -342,7 +342,7 @@ class AdminLoggedInTests(AssistantLoggedInTests):
         self.assertIn('/user/edit/%s' % self.user_without_lecture.id, res.headers['location'])
         res = res.follow()
         self.assertResContains(res, 'eingetragene Punkte')
-        self.assertResContainsNot(res, u'wurde gelöscht')
+        self.assertResContainsNot(res, 'wurde gelöscht')
         self.session.delete(e)
         self.session.commit()
 
@@ -356,19 +356,19 @@ class AdminLoggedInTests(AssistantLoggedInTests):
         self.assertIn('/user/edit/%s' % self.user_without_lecture.id, res.headers['location'])
         res = res.follow()
         self.assertResContains(res, 'eingetragene Noten')
-        self.assertResContainsNot(res, u'wurde gelöscht')
+        self.assertResContainsNot(res, 'wurde gelöscht')
         self.session.delete(e)
         self.session.commit()
 
         res = self.testapp.get('/user/delete/%s' % (self.user_unconfirmed.id), status=302)
         self.assertIn('/admin', res.headers['location'])
         res = res.follow()
-        self.assertResContains(res, u'wurde gelöscht')
+        self.assertResContains(res, 'wurde gelöscht')
 
         res = self.testapp.get('/user/delete/%s' % (self.user_without_lecture.id), status=302)
         self.assertIn('/admin', res.headers['location'])
         res = res.follow()
-        self.assertResContains(res, u'wurde gelöscht')
+        self.assertResContains(res, 'wurde gelöscht')
 
     def test_user_delete_unconfirmed(self):
         student_count = self.session.query(muesli.models.User).count()
@@ -376,7 +376,7 @@ class AdminLoggedInTests(AssistantLoggedInTests):
         res = res.form.submit()
         self.assertEqual(res.status_int, 200)
         # Do not delete students with too new confirmations
-        self.assertResContains(res, u'0 Studenten gelöscht')
+        self.assertResContains(res, '0 Studenten gelöscht')
         self.session.expire_all()
         self.assertEqual(self.session.query(muesli.models.User).count(), student_count)
         # But do delete students with old confirmations
@@ -385,7 +385,7 @@ class AdminLoggedInTests(AssistantLoggedInTests):
         res = self.testapp.get('/user/delete_unconfirmed', status=200)
         res = res.form.submit()
         self.assertEqual(res.status_int, 200)
-        self.assertResContains(res, u'1 Studenten gelöscht')
+        self.assertResContains(res, '1 Studenten gelöscht')
         self.session.expire_all()
         self.assertEqual(self.session.query(muesli.models.User).count(), student_count-1)
 

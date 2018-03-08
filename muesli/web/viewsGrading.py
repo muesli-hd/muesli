@@ -37,7 +37,7 @@ import pyExcelerator
 
 import re
 import os
-import StringIO
+import io
 import datetime
 
 @view_config(route_name='grading_edit', renderer='muesli.web:templates/grading/edit.pt', context=GradingContext, permission='edit')
@@ -51,7 +51,7 @@ class Edit(object):
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
             form.saveValues()
             self.request.db.commit()
-            form.message = u"Änderungen gespeichert."
+            form.message = "Änderungen gespeichert."
         return {'grading': grading,
                 'form': form,
                }
@@ -190,7 +190,7 @@ class EnterGradesBasic(object):
                     grades[ls.student_id]['calc'] = result if result != None else ''
                     if 'fill' in self.request.GET:
                         grades[ls.student_id]['gradestr'] = result if result != None else ''
-            except Exception, err:
+            except Exception as err:
                 error_msgs.append(str(err))
         if 'fill' in self.request.GET:
             self.request.session.flash('Achtung, die Noten sind noch nicht abgespeichert!', queue='errors')
@@ -221,7 +221,7 @@ class GetRow(EnterGradesBasic):
     def __call__(self):
         result = super(GetRow, self).__call__()
         grades = result['grades']
-        for key, value in result['grades'].items():
+        for key, value in list(result['grades'].items()):
             del value['grade']
             value['gradestr'] = str(value['gradestr'])
             for exam_id  in value['exams']:
@@ -236,7 +236,7 @@ class ExcelView(object):
         self.request = request
         self.w = pyExcelerator.Workbook()
     def createResponse(self):
-        output = StringIO.StringIO()
+        output = io.StringIO()
         self.w.save(output)
         response = Response(content_type='application/vnd.ms-excel')
         response.body = output.getvalue()

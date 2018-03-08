@@ -34,7 +34,7 @@ import sqlalchemy
 
 import PIL.Image
 import PIL.ImageDraw
-import StringIO
+import io
 
 from collections import Counter
 
@@ -60,7 +60,7 @@ class Edit(object):
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
             form.saveValues()
             self.request.db.commit()
-            form.message = u"Änderungen gespeichert."
+            form.message = "Änderungen gespeichert."
         if exam.admission!=None or exam.registration!=None:
             students = exam.lecture.lecture_students.options(sqlalchemy.orm.joinedload(LectureStudent.student))\
                     .options(sqlalchemy.orm.joinedload_all('tutorial.tutor'))
@@ -80,11 +80,11 @@ class Edit(object):
 def delete(request):
     exam = request.context.exam
     if exam.exercises:
-        request.session.flash(u'Dieses Testat hat noch Aufgaben!', queue='errors')
+        request.session.flash('Dieses Testat hat noch Aufgaben!', queue='errors')
     else:
         request.db.delete(exam)
         request.db.commit()
-        request.session.flash(u'Testat gelöscht!', queue='messages')
+        request.session.flash('Testat gelöscht!', queue='messages')
     return HTTPFound(location=request.route_url('lecture_edit', lecture_id = exam.lecture.id))
 
 @view_config(route_name='exam_add_or_edit_exercise', renderer='muesli.web:templates/exam/add_or_edit_exercise.pt', context=ExamContext, permission='edit')
@@ -109,7 +109,7 @@ class AddOrEditExercise(object):
             form.saveValues()
             self.request.db.commit()
             if creating: form['nr'] = form['nr'] + 1
-            form.message = u"Änderungen gespeichert."
+            form.message = "Änderungen gespeichert."
         return {'form': form,
                 'exam': exam}
 
@@ -125,13 +125,13 @@ class DeleteExercise(object):
         points = exercise.exercise_points.all()
         none_points = [p.points == None for p in points]
         if not all(none_points):
-            self.request.session.flash(u'Für diese Aufgabe sind bereits Punkte eingetragen!', queue='errors')
+            self.request.session.flash('Für diese Aufgabe sind bereits Punkte eingetragen!', queue='errors')
         else:
             for point in points:
                 self.request.db.delete(point)
             self.request.db.delete(exercise)
             self.request.db.commit()
-            self.request.session.flash(u'Aufgabe gelöscht', queue='messages')
+            self.request.session.flash('Aufgabe gelöscht', queue='messages')
         return HTTPFound(location=self.request.route_url('exam_edit', exam_id = exam.id))
 
 class EnterPointsBasic(object):
@@ -184,9 +184,9 @@ class EnterPointsBasic(object):
                                 value = float(value)
                                 points[student.student_id][e.id].points = value
                             except:
-                                error_msgs.append(u'Could not convert "%s" (%s, Exercise %i)'%(value, student.student.name(), e.nr))
+                                error_msgs.append('Could not convert "%s" (%s, Exercise %i)'%(value, student.student.name(), e.nr))
         for student in points:
-            points[student]['total'] = sum([v.points for v in points[student].values() if v.points])
+            points[student]['total'] = sum([v.points for v in list(points[student].values()) if v.points])
         if self.db.new or self.db.dirty or self.db.deleted:
             self.db.commit()
         # TODO: Die Statistik scheint recht langsm zu sein. Evt lohnt es sich,
@@ -203,7 +203,7 @@ class EnterPointsBasic(object):
                 'students': students,
                 'points': points,
                 'statistics': statistics,
-                'error_msg': u'\n'.join(error_msgs)}
+                'error_msg': '\n'.join(error_msgs)}
 
 @view_config(route_name='exam_enter_points', renderer='muesli.web:templates/exam/enter_points.pt', context=ExamContext, permission='view_points')
 class EnterPoints(EnterPointsBasic):
@@ -245,9 +245,9 @@ class Admission(object):
                 admission = ExamAdmission(exam, student.student)
                 self.db.add(admission)
                 admissions[student.student_id] = admission
-        counter = {'admission': Counter([x.admission for x in admissions.itervalues()]),
-                           'registration': Counter([x.registration for x in admissions.itervalues()]),
-                           'medical_certificate': Counter([x.medical_certificate for x in admissions.itervalues()])}
+        counter = {'admission': Counter([x.admission for x in list(admissions.values())]),
+                           'registration': Counter([x.registration for x in list(admissions.values())]),
+                           'medical_certificate': Counter([x.medical_certificate for x in list(admissions.values())])}
         if self.request.method == 'POST':
             if not self.request.permissionInfo.has_permission('enter_points'):
                 return HTTPForbidden('Sie haben keine Rechte um Punkte einzutragen!')
@@ -295,7 +295,7 @@ class Export(object):
         if self.db.new or self.db.dirty or self.db.deleted:
             self.db.commit()
         for student in points:
-            points[student]['total'] = sum([v.points for v in points[student].values() if v.points])
+            points[student]['total'] = sum([v.points for v in list(points[student].values()) if v.points])
         if exam.admission!=None or exam.registration!=None or exam.medical_certificate!=None:
             admissions = exam.exam_admissions
             for a in admissions:
@@ -409,7 +409,7 @@ class ExamStatisticsBar(object):
         for i,bar in enumerate(self.values):
             draw.rectangle([(0,i*barheight),(float(self.width)*bar[1]/self.max,(i+1)*barheight)], fill=self.color2)
             draw.rectangle([(0,i*barheight),(float(self.width)*bar[0]/self.max,(i+1)*barheight)], fill=self.color1)
-        output = StringIO.StringIO()
+        output = io.StringIO()
         image.save(output, format='PNG')
         response = Response()
         response.content_type = 'image/png'
@@ -422,7 +422,7 @@ class MatplotlibView(object):
     def __init__(self):
         self.fig = pyplot.figure()
     def createResponse(self):
-        output = StringIO.StringIO()
+        output = io.StringIO()
         self.fig.savefig(output, format='png', dpi=50, bbox_inches='tight')
         pyplot.close(self.fig)
         response = Response()
@@ -459,7 +459,7 @@ class Histogram(MatplotlibView):
 class HistogramForExercise(Histogram):
     def __init__(self, request):
         Histogram.__init__(self, request)
-        self.label = u'Punkteverteilung diese Gruppe' if self.request.context.tutorials else u'Punkteverteilung alle Gruppen'
+        self.label = 'Punkteverteilung diese Gruppe' if self.request.context.tutorials else 'Punkteverteilung alle Gruppen'
         self.exercise = self.request.context.exercise
         exercise_points = self.exercise.exercise_points
         students = self.exercise.exam.lecture.lecture_students_for_tutorials(tutorials=self.request.context.tutorials, order=False)
@@ -471,7 +471,7 @@ class HistogramForExercise(Histogram):
 class HistogramForExam(Histogram):
     def __init__(self, request):
         Histogram.__init__(self, request)
-        self.label = u'Punkteverteilung diese Gruppe' if self.request.context.tutorials else u'Punkteverteilung alle Gruppen'
+        self.label = 'Punkteverteilung diese Gruppe' if self.request.context.tutorials else 'Punkteverteilung alle Gruppen'
         self.exam = self.request.context.exam
         students = self.exam.lecture.lecture_students_for_tutorials(tutorials=self.request.context.tutorials, order=False)
         exercise_points = self.exam.getResults(students=students)
@@ -512,7 +512,7 @@ class Correlation(MatplotlibView):
         source2 = self.request.GET['source2']
         data1, max1, name1 = self.getData(source1)
         data2, max2, name2 = self.getData(source2)
-        student_ids =  set(data1.keys()).intersection(data2.keys())
+        student_ids =  set(data1.keys()).intersection(list(data2.keys()))
         data = np.array([(float(data1[s_id]), float(data2[s_id])) for s_id in student_ids])
         if len(data):
             x = data[:,0]
@@ -530,7 +530,7 @@ class Correlation(MatplotlibView):
             yedges = xedges
 
         color_stepsize = int(math.ceil(hist.max()/10.0)) or 1
-        color_ticks = range(0, int(hist.max()) or 1, color_stepsize)
+        color_ticks = list(range(0, int(hist.max()) or 1, color_stepsize))
         color_bins = [-color_stepsize/2.0]
         color_bins.extend([t+color_stepsize/2.0 for t in color_ticks])
 

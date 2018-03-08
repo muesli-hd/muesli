@@ -20,7 +20,7 @@
 
 from sqlalchemy import create_engine
 
-from utils import Configuration
+from .utils import Configuration
 
 import os
 

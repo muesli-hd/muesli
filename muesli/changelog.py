@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-changelog=u"""
+changelog="""
 ====2017-11-30
 concerns:users,assistants,tutors
 Alle Bugs im MÜSLI sind jetzt in den IssueTracker von Github umgezogen. Dort

@@ -39,7 +39,7 @@ from sqlalchemy.sql.expression import desc
 import sqlalchemy
 #
 import pyExcelerator
-import StringIO
+import io
 #
 from muesli import types
 
@@ -115,13 +115,13 @@ def addTutor(request):
         password = request.POST['password']
         if lecture.password and lecture.password == password:
             if request.user in lecture.tutors:
-                request.session.flash(u'Sie sind bereits als Übungsleiter für diese Vorlesung eingetragen.', queue='messages')
+                request.session.flash('Sie sind bereits als Übungsleiter für diese Vorlesung eingetragen.', queue='messages')
             else:
                 lecture.tutors.append(request.user)
                 request.db.commit()
-                request.session.flash(u'Sie wurden als Übungsleiter für diese Vorlesung eingetragen', queue='messages')
+                request.session.flash('Sie wurden als Übungsleiter für diese Vorlesung eingetragen', queue='messages')
         else:
-            request.session.flash(u'Bei der Anmeldung als Übungsleiter ist ein Fehler aufgetreten. Möglicherweise haben Sie ein falsches Passwort eingegeben oder die Anmeldung als Übungsleiter ist nicht mehr notwendig.', queue='errors')
+            request.session.flash('Bei der Anmeldung als Übungsleiter ist ein Fehler aufgetreten. Möglicherweise haben Sie ein falsches Passwort eingegeben oder die Anmeldung als Übungsleiter ist nicht mehr notwendig.', queue='errors')
     else:
         raise ValueError('lecture_add_tutor can only be called by POST-requests!')
     return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))
@@ -161,7 +161,7 @@ class AddStudent(object):
             try:
                 student = self.db.query(models.User).filter(models.User.email==student_email).one()
             except exc.NoResultFound:
-                self.request.session.flash(u'Emailadresse nicht gefunden!', queue='errors')
+                self.request.session.flash('Emailadresse nicht gefunden!', queue='errors')
                 return {'lecture': lecture,
                         'tutorials': tutorials
                         }
@@ -170,7 +170,7 @@ class AddStudent(object):
                 raise HTTPForbidden('Tutorial gehoert nicht zu dieser Vorlesung!')
             tutorial = tutorial[0]
             if student in lecture.students.all():
-                self.request.session.flash(u'Der Student ist in diese Vorlesung bereits eingetragen!', queue='errors')
+                self.request.session.flash('Der Student ist in diese Vorlesung bereits eingetragen!', queue='errors')
             else:
                 lrs = self.request.db.query(models.LectureRemovedStudent).get((lecture.id, student.id))
                 if lrs:
@@ -186,7 +186,7 @@ class AddStudent(object):
                 ls.tutorial = tutorial
                 if not ls in self.request.db: self.request.db.add(ls)
                 self.request.db.commit()
-                self.request.session.flash(u'Der Student %s wurde in das Tutorial %s (%s) eingetragen' % (student, tutorial.time.__html__(), tutorial.tutor_name), queue='messages')
+                self.request.session.flash('Der Student %s wurde in das Tutorial %s (%s) eingetragen' % (student, tutorial.time.__html__(), tutorial.tutor_name), queue='messages')
         return {'lecture': lecture,
                 'tutorials': tutorials
                 }
@@ -224,24 +224,24 @@ class Edit(object):
 def delete(request):
     lecture = request.context.lecture
     if lecture.tutorials:
-        request.session.flash(u'Vorlesung hat noch Übungsgruppen!', queue='errors')
+        request.session.flash('Vorlesung hat noch Übungsgruppen!', queue='errors')
     elif lecture.tutors:
-        request.session.flash(u'Vorlesung hat noch Tutoren!', queue='errors')
+        request.session.flash('Vorlesung hat noch Tutoren!', queue='errors')
     elif lecture.lecture_students.all():
-        request.session.flash(u'Vorlesung hat noch Studenten', queue='errors')
+        request.session.flash('Vorlesung hat noch Studenten', queue='errors')
     elif lecture.lecture_removed_students.all():
-        request.session.flash(u'Vorlesung hat noch gelöschte Studenten', queue='errors')
+        request.session.flash('Vorlesung hat noch gelöschte Studenten', queue='errors')
     elif lecture.exams.all():
-        request.session.flash(u'Vorlesung hat noch Testate', queue='errors')
+        request.session.flash('Vorlesung hat noch Testate', queue='errors')
     elif lecture.gradings:
-        request.session.flash(u'Vorlesung hat noch Benotungen', queue='errors')
+        request.session.flash('Vorlesung hat noch Benotungen', queue='errors')
     elif lecture.time_preferences.all():
-        request.session.flash(u'Vorlesung hat noch Präferenzen', queue='errors')
+        request.session.flash('Vorlesung hat noch Präferenzen', queue='errors')
     else:
         lecture.assistants = []
         request.db.delete(lecture)
         request.db.commit()
-        request.session.flash(u'Vorlesung gelöscht', queue='messages')
+        request.session.flash('Vorlesung gelöscht', queue='messages')
     return HTTPFound(location=request.route_url('lecture_list'))
 
 @view_config(route_name='lecture_change_assistants', context=LectureContext, permission='change_assistant')
@@ -252,14 +252,14 @@ def change_assistants(request):
             if 'change-%i' % assistant.id in request.POST:
                 new_assistant = request.db.query(models.User).get(request.POST['assistant-%i' % assistant.id])
                 if new_assistant in lecture.assistants:
-                    request.session.flash(u'Assistent ist bereits in Vorlesung eingetragen', queue='errors')
+                    request.session.flash('Assistent ist bereits in Vorlesung eingetragen', queue='errors')
                 else:
                     lecture.assistants[nr] = new_assistant
             if 'remove-%i' % assistant.id in request.POST:
                 del lecture.assistants[nr]
         if 'add-assistant' in request.POST:
             if request.POST['new-assistant'] == "None":
-                request.session.flash(u'Bitte einen Assistenten auswählen', queue='errors')
+                request.session.flash('Bitte einen Assistenten auswählen', queue='errors')
             else:
                 new_assistant = request.db.query(models.User).get(request.POST['new-assistant'])
                 if new_assistant and new_assistant not in lecture.assistants:
@@ -312,7 +312,7 @@ class PrefHistogram(MatplotlibView):
         for count, penalty in preferences:
             prefdict[penalty]=count
         self.bars = [prefdict.get(p['penalty'],0) for p in utils.preferences]
-        self.inds = range(len(utils.preferences))
+        self.inds = list(range(len(utils.preferences)))
         self.xticks = [p['name'] for p in utils.preferences]
         self.label=types.TutorialTime(time).__html__()
     def __call__(self):
@@ -495,7 +495,7 @@ def removeAllocation(request):
     lecture = request.context.lecture
     lecture.lecture_students.delete()
     lecture.mode = 'prefs'
-    request.session.flash(u'Eintragung zurückgesetzt', queue='messages')
+    request.session.flash('Eintragung zurückgesetzt', queue='messages')
     db.commit()
     return HTTPFound(location=request.route_url('lecture_edit', lecture_id = lecture.id))
 
@@ -513,7 +513,7 @@ def setPreferences(request):
         tps.append(tp)
         row +=  1
     if lecture.minimum_preferences:
-        valid = len(filter(lambda tp: tp.penalty < 100, tps)) >= lecture.minimum_preferences
+        valid = len([tp for tp in tps if tp.penalty < 100]) >= lecture.minimum_preferences
     else:
         #TODO: Works not for just one tutorial!
         min_number_of_times = len(tps)/100.0+1
@@ -521,10 +521,10 @@ def setPreferences(request):
         valid = penalty_count > min_number_of_times
     if not valid:
         request.db.rollback()
-        request.session.flash(u'Fehler: Sie haben zu wenige Zeiten ausgewählt', queue='errors')
+        request.session.flash('Fehler: Sie haben zu wenige Zeiten ausgewählt', queue='errors')
     else:
         request.db.commit()
-        request.session.flash(u'Präferenzen gespeichert.', queue='messages')
+        request.session.flash('Präferenzen gespeichert.', queue='messages')
     return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))
 
 @view_config(route_name='lecture_remove_preferences', context=LectureContext, permission='view')
@@ -532,7 +532,7 @@ def removePreferences(request):
     lecture = request.context.lecture
     lecture.time_preferences.filter(models.TimePreference.student_id == request.user.id).delete()
     request.db.commit()
-    request.session.flash(u'Präferenzen wurden entfernt.', queue='messages')
+    request.session.flash('Präferenzen wurden entfernt.', queue='messages')
     return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))
 
 @view_config(route_name='lecture_view_points', renderer='muesli.web:templates/lecture/view_points.pt', context=LectureContext, permission='view_own_points')
@@ -551,8 +551,8 @@ def viewPoints(request):
     for exam in exams:
         results[exam.id] = exam.getResultsForStudent(ls.student)
     for exams in exams_by_category:
-        sum_all = sum(filter(lambda x:x, [results[e.id]['sum'] for e in exams['exams']]))
-        max_all = sum(filter(lambda x:x, [e.getMaxpoints() for e in exams['exams']]))
+        sum_all = sum([x for x in [results[e.id]['sum'] for e in exams['exams']] if x])
+        max_all = sum([x for x in [e.getMaxpoints() for e in exams['exams']] if x])
         exams['sum'] = sum_all
         exams['max'] = max_all
     exams_with_registration = [e for e in lecture.exams.all() if e.registration != None]
@@ -639,7 +639,7 @@ class ExcelExport(object):
         self.w = pyExcelerator.Workbook()
 
     def createResponse(self):
-        output = StringIO.StringIO()
+        output = io.StringIO()
         self.w.save(output)
         response = Response(content_type='application/vnd.ms-exel')
         response.body = output.getvalue()

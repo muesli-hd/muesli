@@ -47,10 +47,10 @@ modes = [['off', 'Keine Anmeldung'],
         ['prefs', 'Praeferenzen'],
         ['static', 'Weder An- noch Abmeldung']]
 
-categories = [{'id': 'assignment', 'name': u'Übungszettel'},
+categories = [{'id': 'assignment', 'name': 'Übungszettel'},
         {'id': 'exam', 'name': 'Klausur'},
-        {'id': 'practical_assignment', 'name': u'Praktische Übung'},
-        {'id': 'presence_assignment', 'name': u'Präsenzübung'},
+        {'id': 'practical_assignment', 'name': 'Praktische Übung'},
+        {'id': 'presence_assignment', 'name': 'Präsenzübung'},
         {'id': 'mock_exam', 'name': 'Probeklausur'}]
 
 class Configuration(object):
@@ -73,7 +73,7 @@ def getSubjects(user=None):
     hisSubjects = list(muesli.config['subjects'])
     if user and not user.subject in hisSubjects:
         hisSubjects.append(user.subject)
-    hisSubjects = zip(hisSubjects,hisSubjects)
+    hisSubjects = list(zip(hisSubjects,hisSubjects))
     return hisSubjects
 
 def getSemesterLimit():
