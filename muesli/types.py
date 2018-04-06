@@ -60,5 +60,7 @@ class TutorialTime(WrappedColumn):
         return self.weekdays[self.weekday()]+' '+self.time()
     def formatted(self):
         return self.__html__()
+    def __hash__(self):
+        return hash(self.value)
     #def __str__(self):
     #       return self.__html__()

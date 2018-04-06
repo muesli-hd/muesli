@@ -82,7 +82,7 @@ class OccupancyBar(object):
             draw.rectangle([(0,0),(float(self.width)*self.count/self.max_count,10)], fill=self.color1)
         else:
             draw.rectangle([(0,0),(float(self.width),10)], fill=self.color1)
-        output = io.StringIO()
+        output = io.BytesIO()
         image.save(output, format='PNG')
         response = Response()
         response.content_type = 'image/png'

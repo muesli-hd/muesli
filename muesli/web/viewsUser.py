@@ -60,10 +60,10 @@ def logout(request):
     return HTTPFound(location=request.route_url('index'))
 
 @view_config(route_name='user_list', renderer='muesli.web:templates/user/list.pt', context=GeneralContext, permission='admin')
-def list(request):
+def listUser(request):
     users = request.db.query(models.User).order_by(models.User.last_name, models.User.first_name)
     if 'subject' in request.GET:
-        users = users.filter(models.User.subject==request.GET['subject'])
+        users = users.filter(models.User.subject == request.GET['subject'])
     return {'users': users}
 
 @view_config(route_name='user_list_subjects', renderer='muesli.web:templates/user/list_subjects.pt', context=GeneralContext, permission='admin')

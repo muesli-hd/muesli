@@ -41,7 +41,7 @@ class OrigDatabaseTests(unittest.TestCase):
         #session = muesli.models.Session()
         #print("Anzahl lectures", session.query(muesli.models.Lecture).count())
         res = self.testapp.get('/lecture/list', status=200)
-        self.assertTrue('Liste' in res.body)
+        self.assertTrue('Liste' in res)
 
     def test_login(self):
         res = self.testapp.get('/user/login', status=200)
@@ -81,10 +81,10 @@ class BaseTests(unittest.TestCase):
         pass
 
     def assertResContains(self, res, content):
-        self.assertTrue(content.encode(res.charset) in res.body)
+        self.assertTrue(content in res)
 
     def assertResContainsNot(self, res, content):
-        self.assertTrue(content.encode(res.charset) not in res.body)
+        self.assertTrue(content not in res)
 
     def assertForm(self, res, name, newvalue, formindex=None, expectedvalue=None):
         def getForm(res):

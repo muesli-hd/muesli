@@ -209,12 +209,12 @@ class TutorLoggedInTests(UserLoggedInTests):
         post = {'student_id': self.user.id}
         res = self.testapp.post('/exam/ajax_get_points/%s/%s,%s' % (self.exam.id, self.tutorial.id,self.tutorial2.id), post, status=200)
         self.assertTrue(res.status.startswith('200'))
-        data = json.loads(res.body)
+        data = res.json
         self.assertTrue(len(data['points'])==0)
         self.test_exam_ajax_save_points()
         res = self.testapp.post('/exam/ajax_get_points/%s/%s,%s' % (self.exam.id, self.tutorial.id,self.tutorial2.id), post, status=200)
         self.assertTrue(res.status.startswith('200'))
-        data = json.loads(res.body)
+        data = res.json
         self.assertTrue(len(data['points'])==1)
         self.assertTrue(data['points']['%s' % self.exercise.id]==3)
 

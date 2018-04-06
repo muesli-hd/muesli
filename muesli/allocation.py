@@ -159,11 +159,11 @@ class Allocation(object):
             else:
                 inputfile += '1 %i\n' % arc.priority
 
-        tmpfile = tempfile.NamedTemporaryFile(prefix='muesli')
+        tmpfile = tempfile.NamedTemporaryFile(prefix='muesli', mode='w')
         tmpfile.write(inputfile)
         tmpfile.flush()
-        #print(tmpfile.name)
-        out, err = subprocess.Popen([utils.lpsolve, '-rxli', 'xli_DIMACS', tmpfile.name], stdout=subprocess.PIPE).communicate()
+        out, err = subprocess.Popen([utils.lpsolve, '-rxli', 'xli_DIMACS', tmpfile.name], stdout=subprocess.PIPE,
+                                    universal_newlines=True).communicate()
         tmpfile.close()
         if 'Successfully' not in out:
             raise Exception('Optimizer Error: File Format wrong')

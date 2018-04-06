@@ -603,7 +603,7 @@ def exportYaml(request):
         lecture_dict['term'] = lecture.term.__html__()
         out.append(lecture_dict)
     response = Response(content_type='application/x-yaml')
-    response.body = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
+    response.text = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
     return response
 
 @view_config(route_name='lecture_export_yaml_details',context = GeneralContext, permission = 'export_yaml')

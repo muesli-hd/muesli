@@ -422,7 +422,7 @@ class MatplotlibView(object):
     def __init__(self):
         self.fig = pyplot.figure()
     def createResponse(self):
-        output = io.StringIO()
+        output = io.BytesIO()
         self.fig.savefig(output, format='png', dpi=50, bbox_inches='tight')
         pyplot.close(self.fig)
         response = Response()

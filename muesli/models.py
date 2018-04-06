@@ -421,7 +421,7 @@ class Exam(Base):
                     }
         return statistics
     def getMaxpoints(self):
-        return sum([e.maxpoints for e in self.exercises])
+        return int(sum([e.maxpoints for e in self.exercises]))
     def getQuantils(self, students=None):
         results = self.getResults(students=students).all()
         allcount = len([res for res in results if res.points >= 0])

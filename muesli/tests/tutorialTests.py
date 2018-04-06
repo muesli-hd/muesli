@@ -35,7 +35,7 @@ class BaseTests(functionalTests.BaseTests):
         res = self.testapp.get('/tutorial/occupancy_bar/50/30', status=200)
         res = self.testapp.get('/tutorial/occupancy_bar/0/0', status=200)
         res = self.testapp.get('/tutorial/occupancy_bar/30/0', status=200)
-        self.assertTrue(res.content_type=='image/png')
+        self.assertEqual(res.content_type, 'image/png')
 
     def test_tutorial_add(self):
         res = self.testapp.get('/tutorial/add/%s' % 12456, status=404)

@@ -93,8 +93,8 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
     def test_lecture_view(self):
         res = self.testapp.get('/lecture/list', status=200)
-        self.assertTrue('Irgendwas' in res.body)
-        self.assertTrue('Assistent' in res.body)
+        self.assertTrue('Irgendwas' in res)
+        self.assertTrue('Assistent' in res)
 
     def test_lecture_view(self):
         res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=403)
@@ -241,13 +241,13 @@ class AssistantLoggedInTests(TutorLoggedInTests):
     def test_lecture_do_allocation(self):
         res = self.testapp.get('/lecture/do_allocation/%s' % self.prefLecture.id, status=200)
         self.session.expire_all()
-        self.assertTrue(self.prefLecture.lecture_students.count()>0)
+        self.assertGreater(self.prefLecture.lecture_students.count(), 0)
         for ls in self.prefLecture.lecture_students.all():
-            self.assertTrue(ls.tutorial.lecture_id == self.prefLecture.id)
+            self.assertEqual(ls.tutorial.lecture_id, self.prefLecture.id)
         res = res.forms[0].submit()
         self.assertTrue(res.status.startswith('302'))
         self.session.expire_all()
-        self.assertTrue(self.prefLecture.lecture_students.count()==0)
+        self.assertEqual(self.prefLecture.lecture_students.count(), 0)
         # Should be catched:
         res = self.testapp.get('/lecture/do_allocation/%s' % self.lecture.id, status=403)
 
