@@ -39,7 +39,7 @@ class BaseTests(functionalTests.BaseTests):
         res = self.testapp.get('/grading/enter_grades/%s' % 12345, status=404)
 
     def test_grading_export(self):
-        res = self.testapp.get('/grading/export/%s.xls' % 12345, status=404)
+        res = self.testapp.get('/grading/export/%s.xlsx' % 12345, status=404)
 
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
     def test_grading_edit(self):
@@ -55,7 +55,7 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
         res = self.testapp.get('/grading/enter_grades/%s' % self.grading.id, status=403)
 
     def test_grading_export(self):
-        res = self.testapp.get('/grading/export/%s.xls' % self.grading.id, status=403)
+        res = self.testapp.get('/grading/export/%s.xlsx' % self.grading.id, status=403)
 
 class UserLoggedInTests(UnloggedTests):
     def setUp(self):
@@ -95,9 +95,9 @@ class AssistantLoggedInTests(TutorLoggedInTests):
         self.assertForm(res, 'grade-%i' % self.user.id, '2.0', formindex=2)
 
     def test_grading_export(self):
-        res = self.testapp.get('/grading/export/%s.xls' % self.grading.id, status=200)
+        res = self.testapp.get('/grading/export/%s.xlsx' % self.grading.id, status=200)
         self.test_grading_enter_grades()
-        res = self.testapp.get('/grading/export/%s.xls' % self.grading.id, status=200)
+        res = self.testapp.get('/grading/export/%s.xlsx' % self.grading.id, status=200)
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):

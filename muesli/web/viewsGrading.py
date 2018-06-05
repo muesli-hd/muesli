@@ -34,6 +34,8 @@ from sqlalchemy.sql import func
 import sqlalchemy
 
 from openpyxl import Workbook
+from openpyxl.styles import Font
+from openpyxl.writer.excel import save_virtual_workbook
 
 import re
 import os
@@ -236,11 +238,8 @@ class ExcelView(object):
         self.request = request
         self.w = Workbook()
     def createResponse(self):
-        output = io.StringIO()
-        self.w.save(output)
         response = Response(content_type='application/vnd.ms-excel')
-        response.body = output.getvalue()
-        output.close()
+        response.body = save_virtual_workbook(self.w)
         return response
 
 @view_config(route_name='grading_export', context=GradingContext, permission='edit')
@@ -249,15 +248,14 @@ class Export(ExcelView):
         grading = self.request.context.grading
         lecture = grading.lecture
         w = self.w
-        worksheet_exams = w.add_sheet('Pruefung')
-        worksheet_exams.set_col_default_width(20)
-        header_style = pyExcelerator.XFStyle()
-        header_style.font.bold=True
-        date_style = pyExcelerator.XFStyle()
-        date_style.num_format_str = 'dd.mm.yyyy'
+
+        # sheet Pruefung
+        worksheet_exams = w.active
+        worksheet_exams.title = 'Pruefung'
+        date_style = 'dd.mm.yyyy'
         header = ['Tabellenname', 'Veranstaltungsnummer', 'Titel', 'Semester', 'Termin', 'Datum', 'PrueferId', 'Pruefername']
-        for i,h in enumerate(header):
-            worksheet_exams.write(0,i,h,header_style)
+        worksheet_exams.append(header)
+        worksheet_exams.row_dimensions[1].font = Font(bold=True)
         data = ['Pruefungsteilnehmer',
                 lecture.lsf_id,
                 lecture.name,
@@ -266,45 +264,63 @@ class Export(ExcelView):
                 None,
                 grading.examiner_id,
                 lecture.lecturer]
-        for i,d in enumerate(data):
-            worksheet_exams.write(1,i,d if d != None else '')
+        worksheet_exams.append(data)
         date_p = re.compile('(\d{1,2}).(\d{1,2}).(\d{4})$')
         m = date_p.match(grading.hispos_date or '')
         if m:
             date = datetime.datetime(year=int(m.group(3)), month=int(m.group(2)), day=int(m.group(1)))
-            worksheet_exams.write(1,5,date, date_style)
-        worksheet_grades =self.w.add_sheet('Pruefungsteilnehmer')
-        worksheet_grades.set_col_default_width(16)
+            date_cell = worksheet_exams.cell(row=2, column=6)
+            date_cell.value = date
+            date_cell.number_format = date_style
+        # set column width
+        for column_cells in worksheet_exams.columns:
+            max_length = max(len(str(cell.value)) for cell in column_cells)
+            worksheet_exams.column_dimensions[column_cells[0].column].width = max_length*1.2
+
+        # sheet Pruefungsteilnehmer
+        worksheet_grades = self.w.create_sheet('Pruefungsteilnehmer')
         header = ['mtknr', 'name', 'stg', 'stg_txt', 'accnr', 'pnr', 'pnote', 'pstatus', 'ppunkte', 'pbonus']
-        for i,h in enumerate(header):
-            worksheet_grades.write(0,i,h,header_style)
+        worksheet_grades.append(header)
+        worksheet_grades.row_dimensions[1].font = Font(bold=True)
         grades = grading.student_grades.options(sqlalchemy.orm.joinedload(models.StudentGrade.student)).all()
-        for i,grade in enumerate(grades):
-            if grade.grade != None:
+        for i, grade in enumerate(grades, 1):
+            if grade.grade is not None:
                 g = float(grade.grade*100)
             else:
                 g = ''
-            data = [grade.student.matrikel, grade.student.last_name, '', grade.student.formatCompleteSubject(), '', '', g, '']
-            for j,d in enumerate(data):
-                worksheet_grades.write(1+i,j,d if d != None else '')
-        worksheet_data = self.w.add_sheet('Daten')
-        worksheet_data.set_col_default_width(17)
+            data = [grade.student.matrikel,
+                    grade.student.last_name, '',
+                    grade.student.formatCompleteSubject(), '', '', g, '']
+            for j, d in enumerate(data, 1):
+                worksheet_grades.cell(row=1+i, column=j, value=d)
+        # set column width
+        for column_cells in worksheet_grades.columns:
+            max_length = max(len(str(cell.value)) for cell in column_cells)
+            worksheet_grades.column_dimensions[column_cells[0].column].width = max_length*1.2
+
+        # sheet Daten
+        worksheet_data = self.w.create_sheet('Daten')
         header = ['Matrikel', 'Nachname', 'Vorname', 'Geburtsort', 'Geburtsdatum', 'Note', 'Vortragstitel', 'Studiengang']
-        for i,h in enumerate(header):
-            worksheet_data.write(0,i,h,header_style)
-        for i,grade in enumerate(grades):
+        worksheet_data.append(header)
+        worksheet_data.row_dimensions[1].font = Font(bold=True)
+        for i, grade in enumerate(grades, 1):
             m = date_p.match(grade.student.birth_date or '')
-            if m: date = datetime.datetime(year=int(m.group(3)), month=int(m.group(2)), day=int(m.group(1)))
-            else: date = ''
+            date = datetime.datetime(year=int(m.group(3)), month=int(m.group(2)), day=int(m.group(1))) if m else ''
             data = [grade.student.matrikel,
                     grade.student.last_name,
                     grade.student.first_name,
                     grade.student.birth_place,
                     None,
-                    float(grade.grade) if grade.grade != None else '',
+                    float(grade.grade) if grade.grade is not None else '',
                     '',
                     grade.student.formatCompleteSubject()]
-            for j,d in enumerate(data):
-                worksheet_data.write(1+i,j,d if d != None else '')
-            worksheet_data.write(1+i,4, date, date_style)
+            for j, d in enumerate(data, 1):
+                worksheet_data.cell(row=1+i, column=j, value=d)
+            date_cell = worksheet_data.cell(row=1+i, column=5)
+            date_cell.value = date
+            date_cell.number_format = date_style
+        # set column width
+        for column_cells in worksheet_data.columns:
+            max_length = max(len(str(cell.value)) for cell in column_cells)
+            worksheet_data.column_dimensions[column_cells[0].column].width = max_length*1.2
         return self.createResponse()

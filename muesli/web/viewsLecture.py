@@ -39,6 +39,8 @@ from sqlalchemy.sql.expression import desc
 import sqlalchemy
 #
 from openpyxl import Workbook
+from openpyxl.styles import Font
+from openpyxl.writer.excel import save_virtual_workbook
 import io
 #
 from muesli import types
@@ -632,63 +634,74 @@ def exportYaml_details(request):
     response.body = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
     return response
 
-#Canh added
+
 class ExcelExport(object):
-    def __init__(self,request):
+    def __init__(self, request):
         self.request = request
         self.w = Workbook()
 
     def createResponse(self):
-        output = io.StringIO()
-        self.w.save(output)
-        response = Response(content_type='application/vnd.ms-exel')
-        response.body = output.getvalue()
-        output.close()
+        response = Response(content_type='application/vnd.ms-excel')
+        response.body = save_virtual_workbook(self.w)
         return response
 
 
-@view_config(route_name='lecture_export_excel', context = GeneralContext, permission='view')
+@view_config(route_name='lecture_export_excel', context=GeneralContext, permission='view')
 class DoExport(ExcelExport):
     def __call__(self):
         lectures = self.request.db.query(models.Lecture)
-        lectures = lectures.filter(models.Lecture.is_visible==True)
-        header = ['Tutor FirstName','Tutor LastName','Tutor Email','Tutorial Information','Student Count','Tutorial Room','Time','Comments']
+        lectures = lectures.filter(models.Lecture.is_visible)
         w = self.w
-        worksheet_tutorials = w.add_sheet('Tutorials')
-        worksheet_tutorials.set_col_default_width(20)
-        header_style = pyExcelerator.XFStyle()
-        header_style.font.bold = True
-        for i, h in enumerate(header):
-            worksheet_tutorials.write(0,i,h,header_style)
-        rowIndex = 1
+
+        # sheet Tutorials
+        worksheet_tutorials = w.active
+        worksheet_tutorials.title = 'Tutorials'
+        header = ['Tutor FirstName',
+                  'Tutor LastName',
+                  'Tutor Email',
+                  'Tutorial Information',
+                  'Student Count',
+                  'Tutorial Room',
+                  'Time',
+                  'Comments']
+        worksheet_tutorials.append(header)
+        worksheet_tutorials.row_dimensions[1].font = Font(bold=True)
+        row_index = 2
         for lecture in lectures.all():
-            tutorialList = []
-            lectureName = lecture.name
+            tutorial_list = []
+            lecture_name = lecture.name
             for tutorial in lecture.tutorials:
-                vtutor = tutorial.tutor.name() if tutorial.tutor!=None else 'None'
-                vtutor_firstName = tutorial.tutor.first_name if tutorial.tutor!=None else 'None'
-                vtutor_lastName = tutorial.tutor.last_name if tutorial.tutor!=None else 'None'
-                vemail = tutorial.tutor.email if tutorial.tutor!=None else 'None'
+                vtutor = tutorial.tutor.name() if tutorial.tutor is not None else 'None'
+                vtutor_first_name = tutorial.tutor.first_name if tutorial.tutor is not None else 'None'
+                vtutor_last_name = tutorial.tutor.last_name if tutorial.tutor is not None else 'None'
+                vemail = tutorial.tutor.email if tutorial.tutor is not None else 'None'
                 vplace = tutorial.place
                 vtime = tutorial.time.__html__()
                 vcomment = tutorial.comment
                 vstudent = len(tutorial.students.all())
-                tutorialItem = (vtutor_firstName,vtutor_lastName,vemail,lectureName,vstudent,vplace,vtime,vcomment)
-                tutorialList.append(tutorialItem)
-            #add summary lecture
-            newList = []
-            lectureItem = ('',lecture.lecturer,'',lectureName,lecture.lecture_students.count(),'',lecture.term.__html__(),'')
-            newList.append(lectureItem)
-            #sort by tutor fistName
-            tutorialList = sorted(tutorialList)
-            tutorialIndex = 1
-            for item in tutorialList:
-                newItem = (item[0],item[1],item[2],item[3]+' Uebungsgruppe: '+str(tutorialIndex),item[4],item[5],item[6],item[7])
-                newList.append(newItem)
-                tutorialIndex = tutorialIndex + 1
-            #add to sheet
-            for item in newList:
-                for col, d in enumerate(item):
-                    worksheet_tutorials.write(rowIndex,col,d)
-                rowIndex = rowIndex + 1
+                tutorial_item = (vtutor_first_name, vtutor_last_name, vemail,
+                                 lecture_name, vstudent, vplace, vtime, vcomment)
+                tutorial_list.append(tutorial_item)
+            # add summary lecture
+            new_list = []
+            lecture_item = ('', lecture.lecturer, '', lecture_name,
+                            lecture.lecture_students.count(), '', lecture.term.__html__(), '')
+            new_list.append(lecture_item)
+            # sort by tutor fistName
+            tutorial_list = sorted(tutorial_list)
+            tutorial_index = 1
+            for item in tutorial_list:
+                new_item = (item[0], item[1], item[2], item[3]+' Uebungsgruppe: '+str(tutorial_index),
+                            item[4], item[5], item[6], item[7])
+                new_list.append(new_item)
+                tutorial_index = tutorial_index + 1
+            # add to sheet
+            for item in new_list:
+                for col, d in enumerate(item, 1):
+                    worksheet_tutorials.cell(row=row_index, column=col, value=d)
+                row_index = row_index + 1
+        # set column width
+        for column_cells in worksheet_tutorials.columns:
+            max_length = max(len(str(cell.value)) for cell in column_cells)
+            worksheet_tutorials.column_dimensions[column_cells[0].column].width = max_length*1.2
         return self.createResponse()

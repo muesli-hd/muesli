@@ -87,6 +87,9 @@ class BaseTests(functionalTests.BaseTests):
     def test_lecture_export_yaml(self):
         res = self.testapp.get('/lecture/export_yaml', status=403)
 
+    def test_all_lecture_export_excel(self):
+        res = self.testapp.get('/lecture/export_excel/downloadDetailTutorials.xlsx', status=403)
+
 class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
     def test_lecture_view(self):
         res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=403)
@@ -147,6 +150,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
     def test_lecture_add_student(self):
         res = self.testapp.get('/lecture/add_student/%s' % self.lecture.id, status=403)
 
+    def test_all_lecture_export_excel(self):
+        res = self.testapp.get('/lecture/export_excel/downloadDetailTutorials.xlsx', status=403)
+
 class UserLoggedInTests(UnloggedTests):
     def setUp(self):
         UnloggedTests.setUp(self)
@@ -190,6 +196,9 @@ class UserLoggedInTests(UnloggedTests):
         else:
             res.mustcontain('Sie wurden als')
 
+    def test_all_lecture_export_excel(self):
+        res = self.testapp.get('/lecture/export_excel/downloadDetailTutorials.xlsx', status=403)
+
 class TutorLoggedInTests(UserLoggedInTests):
     def setUp(self):
         UserLoggedInTests.setUp(self)
@@ -204,6 +213,9 @@ class TutorLoggedInTests(UserLoggedInTests):
 
     def test_lecture_email_tutors(self):
         res = self.testapp.get('/lecture/email_tutors/%s' % self.lecture.id, status=200)
+
+    def test_all_lecture_export_excel(self):
+        res = self.testapp.get('/lecture/export_excel/downloadDetailTutorials.xlsx', status=403)
 
 
 class AssistantLoggedInTests(TutorLoggedInTests):
@@ -324,3 +336,7 @@ class AdminLoggedInTests(AssistantLoggedInTests):
     def test_lecture_export_yaml(self):
         res = self.testapp.get('/lecture/export_yaml', status=200)
         self.assertEqual(res.content_type, 'application/x-yaml')
+
+    def test_all_lecture_export_excel(self):
+        res = self.testapp.get('/lecture/export_excel/downloadDetailTutorials.xlsx', status=200)
+        self.assertEqual(res.content_type, 'application/vnd.ms-excel')
