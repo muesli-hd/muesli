@@ -9,32 +9,16 @@ Needed Packages:
 The following packages are needed in order to run Müsli:
 
     postgresql-server-dev-all
-    python-chameleon
-    python-excelerator
-    python-formencode
-    python-matplotlib
-    python-paste
-    python-pi
-    python-pyramid
-    python-pyramid-beaker
-    python-psycopg2
-    python-sqlalchemy (==0.7.x, i.e. from backports, ...)
-    python-yaml
-    python-numpy
     libjs-jquery-tablesorter
     libjs-jquery-fancybox
     libjs-scriptaculous
     lp-solve
 
-    pip install pyramid-chameleon
+    pip3 install -r requirements.txt
 
 For database-upgrade, the following packages is needed in addition:
 
     alembic
-
-In order to run the tests, this package is needed:
-
-    python-webtest
 
 General Information:
 ====================
