@@ -20,6 +20,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 changelog="""
+====2018-09-05
+concerns:users,assistants,tutors
+Das MÜSLI läuft ab sofort mit Python Version 3 und nutzt teilweise neuere
+Python Module.
+
 ====2017-11-30
 concerns:users,assistants,tutors
 Alle Bugs im MÜSLI sind jetzt in den IssueTracker von Github umgezogen. Dort
