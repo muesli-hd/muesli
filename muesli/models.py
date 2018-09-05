@@ -161,7 +161,7 @@ class User(Base):
         elif len(self.tutorials_removed.all())>0:
             return False
         return True
-    def __unicode__(self):
+    def __str__(self):
         return '{name} <{email}>'.format(name=self.name(), email=self.email)
     def __repr__(self):
         return 'u<User %r <%r>>' % (self.name(), self.email)
