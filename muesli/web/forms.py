@@ -761,7 +761,8 @@ class TutorialEmail(CSRFSecureForm):
                    type='textarea'),
                 FileField('attachments',
                    label='Anhänge', size=64,
-                   growable=False
+                   growable=False,
+                   validator=validators.FieldStorageUploadConverter()
                    ),
                 FormField('copytome',
                    label='Kopie an mich',
@@ -809,7 +810,8 @@ class LectureEmailTutors(CSRFSecureForm):
                    type='textarea'),
                 FileField('attachments',
                    label='Anhänge', size=64,
-                   growable=False
+                   growable=False,
+                   validator=validators.FieldStorageUploadConverter()
                    ),
                 ]
         CSRFSecureForm.__init__(self, formfields, request, send='Senden')
@@ -825,7 +827,8 @@ class LectureEmailStudents(CSRFSecureForm):
                    type='textarea'),
                 FileField('attachments',
                    label='Anhänge', size=64,
-                   growable=False
+                   growable=False,
+                   validator=validators.FieldStorageUploadConverter()
                    ),
                 FormField('copytotutors',
                    label='Kopie an Tutoren senden',
@@ -851,7 +854,8 @@ class EmailWrongSubject(CSRFSecureForm):
                    required=True),
                 FileField('attachments',
                    label='Anhänge', size=64,
-                   growable=False
+                   growable=False,
+                   validator=validators.FieldStorageUploadConverter()
                    ),
                 ]
         CSRFSecureForm.__init__(self, formfields, request, send='Senden')

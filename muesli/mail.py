@@ -31,6 +31,7 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.message import MIMEMessage
+from email.utils import parseaddr, formataddr
 
 import smtplib
 
@@ -77,7 +78,7 @@ class Message(object):
         self.body = body
         self.outer = MIMEMultipart()
         self.outer['Subject'] = self.subject
-        self.outer['From'] = self.sender
+        self.outer['From'] = formataddr(parseaddr(self.sender))
         self.outer['To'] = ', '.join(self.to)
         self.outer['Cc'] = ', '.join(self.cc)
         self.outer['Bcc'] = ', '.join(self.bcc)

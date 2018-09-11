@@ -258,7 +258,7 @@ Mit freudlichen Grüßen,
 Das MÜSLI-Team
     """ %(user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
     message = Message(subject='MÜSLI: Ihre Registrierung bei MÜSLI',
-            sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+            sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])),
             to=[user.email],
             body=body)
     sendMail(message)
@@ -291,7 +291,7 @@ Mit freudlichen Grüßen,
 Das MÜSLI-Team
     """ %(confirmation.created_on, user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
     message = Message(subject='MÜSLI: Ihre Registrierung bei MÜSLI',
-            sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+            sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])),
             to=[user.email],
             body=body)
     sendMail(message)
@@ -341,7 +341,7 @@ Mit freundlichen Grüßen,
 Das MÜSLI-Team
             """ %(email, request.route_url('user_confirm_email', confirmation=confirmation.hash))
             message = Message(subject='MÜSLI: E-Mail-Adresse ändern',
-                    sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+                    sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])),
                     to=[email],
                     body=body)
             # As we are not using transactions,
@@ -414,7 +414,7 @@ Das MÜSLI-Team
 
             """ %(request.route_url('user_reset_password3', confirmation=confirmation.hash))
             message = Message(subject='MÜSLI: Passwort zurücksetzen',
-                    sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+                    sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])),
                     to=[user.email],
                     body=body)
             # As we are not using transactions,
