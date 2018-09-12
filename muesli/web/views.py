@@ -82,7 +82,7 @@ def emailAllUsers(request):
         table.append(s)
     if request.method == 'POST' and form.processPostData(request.POST):
         message = Message(subject=form['subject'],
-                sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+                sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])),
                 to= [],
                 bcc=[s.email for s in students],
                 body=form['body'])
@@ -142,7 +142,7 @@ def emailUsers(request):
             table.append((student, student.confirmations[0].created_on))
     if request.method == 'POST' and form.processPostData(request.POST):
         message = Message(subject=form['subject'],
-                sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])).encode('utf-8'),
+                sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])),
                 to= [],
                 bcc=[s.email for s in bad_students],
                 body=form['body'])
