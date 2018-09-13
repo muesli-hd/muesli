@@ -165,7 +165,7 @@ class TutorLoggedInTests(UserLoggedInTests):
         res.form['subject'] = 'test'
         res.form['body'] = 'testtext'
         res = res.form.submit()
-        self.assertTrue(res.status.startswith('200'))
+        self.assertTrue(res.status.startswith('302'))
 
     def test_tutorial_ajax_tutorial(self):
         res = self.testapp.post('/tutorial/ajax_get_tutorial/%s' % (self.lecture.id),
