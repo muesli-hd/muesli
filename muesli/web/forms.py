@@ -129,6 +129,11 @@ class Form(object):
         for field in self.formfields:
             self.named_fields[field.name] = field
     def processPostData(self, postData):
+        try:
+            if postData['attachments'] in [b'', '', None]:
+                postData['attachments'] = None
+        except KeyError:
+            pass
         if self.formValidator.validate(postData):
             self.values = {}
             for name in self.named_fields:
