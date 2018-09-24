@@ -566,8 +566,14 @@ def viewPoints(request):
             registrations[exam.id] = models.ExamAdmission(exam=exam, student=request.user)
         if 'registration-%s' % exam.id in request.POST:
             newreg = request.POST['registration-%s' % exam.id]
-            if newreg=='':
-                newreg=None
+            if newreg == '':
+                newreg = None
+            elif newreg == '0':
+                newreg = False
+            elif newreg == '1':
+                newreg = True
+            else:
+                raise ValueError
             registrations[exam.id].registration=newreg
             request.db.merge(registrations[exam.id])
             request.db.commit()
