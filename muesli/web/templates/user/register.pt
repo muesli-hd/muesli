@@ -11,6 +11,8 @@ Um sich anzumelden füllen Sie bitte das Formular unten aus.  Bitte beachten Sie
 <p>
 Assistenten und Übungsleiter, die <strong>nicht</strong> selbst an Übungsgruppen teilnehmen, können sich auch <a tal:attributes="href request.route_path('user_register_other')">mit weniger Angaben anmelden</a>.
 Werden Rechte zum Eintragen von Vorlesungen benötigt so <a tal:attributes="href request.route_path('contact')">melden Sie sich bitte bei uns</a> nach der Anmeldung.
+<br/><br/>
+Verwenden Sie eine mit <strong>uni-heidelberg.de</strong> endende Mailadresse. Falls Sie noch keine besitzen, benutzen Sie bitte eine andere und ändern Sie diese sobald eine uni-heidelberg.de Adresse vorliegt.
 </p>
 
 

@@ -476,7 +476,7 @@ class UserRegister(ObjectForm):
     def __init__(self, request):
         formfields = [
                 FormField('email',
-                   label='E-Mail', size=40,
+                   label='E-Mail', size=40, comment='ACHTUNG: Unbedingt eine uni-heidelberg.de Mailadresse verwenden!',
                    #value=user.email,
                    required=True,
                    validator=validators.Email()),
