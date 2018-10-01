@@ -424,10 +424,10 @@ class Exam(Base):
         return int(sum([e.maxpoints for e in self.exercises]))
     def getQuantils(self, students=None):
         results = self.getResults(students=students).all()
-        allcount = len([res for res in results if res.points >= 0])
+        allcount = len([res for res in results if res.points and res.points >= 0])
         quantils = []
         for i in range(self.getMaxpoints()+1):
-            count = len([res for res in results if res.points >= i])
+            count = len([res for res in results if res.points and res.points >= i])
             quantils.append({
                     'min_points': i,
                     'min_percent': i/float(self.getMaxpoints()) if self.getMaxpoints() else 0,

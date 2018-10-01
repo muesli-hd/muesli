@@ -409,7 +409,7 @@ class ExamStatisticsBar(object):
         for i,bar in enumerate(self.values):
             draw.rectangle([(0,i*barheight),(float(self.width)*bar[1]/self.max,(i+1)*barheight)], fill=self.color2)
             draw.rectangle([(0,i*barheight),(float(self.width)*bar[0]/self.max,(i+1)*barheight)], fill=self.color1)
-        output = io.StringIO()
+        output = io.BytesIO()
         image.save(output, format='PNG')
         response = Response()
         response.content_type = 'image/png'
