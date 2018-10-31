@@ -1,0 +1,3 @@
+FROM postgres:latest
+
+COPY travis-muesli-origDb.sql /docker-entrypoint-initdb.d/
