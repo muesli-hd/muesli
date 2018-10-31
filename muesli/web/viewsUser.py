@@ -44,7 +44,7 @@ import collections
 def login(request):
     form = FormValidator(UserLogin())
     if request.method == 'POST' and form.validate(request.POST):
-        user = request.db.query(models.User).filter_by(email=form['email'], password=sha1(form['password'].encode('utf-8')).hexdigest()).first()
+        user = request.db.query(models.User).filter_by(email=form['email'].strip(), password=sha1(form['password'].encode('utf-8')).hexdigest()).first()
         if user is not None:
             security.remember(request, user.id)
             request.user = user
