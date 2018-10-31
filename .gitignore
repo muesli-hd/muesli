@@ -7,3 +7,8 @@ alembic.ini
 .cache
 TODO
 .coverage
+
+venv
+.idea
+.pytest_cache
+maintainance_scripts
