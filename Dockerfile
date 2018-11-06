@@ -9,7 +9,7 @@ ENV MUESLI_PATH=/opt/muesli4
 EXPOSE 8080
 CMD ["/opt/muesli4/muesli-test"]
 
-RUN adduser -D -U muesli
+RUN useradd -U --uid 10043 muesli
 
 RUN apt-get update && apt-get install -y python3.5 python3.5-dev lp-solve postgresql-server-dev-9.5 wget python-pip python-all-dev python3-pip libjs-jquery-fancybox && rm -rf /var/lib/apt/lists/*
 RUN wget https://www.mathi.uni-heidelberg.de/~jvisintini/lp_solve -O /usr/bin/lp_solve
@@ -21,5 +21,5 @@ RUN pip install -r requirements.txt
 
 USER muesli:muesli
 
-COPY --chown=muesli:muesli ./ /usr/src/app
-RUN cp muesli.yml.example muesli.yml
+COPY --chown=muesli:muesli ./ /opt/muesli4
+RUN sed 's/\/\/\//\/\/postgres@postgres\//' muesli.yml.example | sed 's/localhost/0.0.0.0/' > muesli.yml

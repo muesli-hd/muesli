@@ -1,0 +1,15 @@
+version: '2.1'
+
+services:
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - POSTGRES_DB=muesli
+    volumes:
+      - './travis-muesli-origDb.sql:/docker-entrypoint-initdb.d/travis-muesli-origDb.sql'
+  muesli:
+    build: .
+    ports:
+      - '127.0.0.1:8080:8080'
+    depends_on:
+      - postgres
