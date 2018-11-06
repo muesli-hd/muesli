@@ -11,15 +11,22 @@ CMD ["/opt/muesli4/muesli-test"]
 
 RUN useradd -U --uid 10043 muesli
 
-RUN apt-get update && apt-get install -y python3.5 python3.5-dev lp-solve postgresql-server-dev-9.5 wget python-pip python-all-dev python3-pip libjs-jquery-fancybox && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y python3.5 python3.5-dev lp-solve postgresql-server-dev-9.5 wget python3-pip libjs-jquery-fancybox locales && rm -rf /var/lib/apt/lists/*
+
+RUN locale-gen de_DE.UTF-8
+ENV LANG de_DE.UTF-8
+ENV LANGUAGE de_DE:de
+ENV LC_ALL de_DE.UTF-8
+
 RUN wget https://www.mathi.uni-heidelberg.de/~jvisintini/lp_solve -O /usr/bin/lp_solve
 RUN wget https://www.mathi.uni-heidelberg.de/~jvisintini/libxli_DIMACS.so -O /usr/lib/lp_solve/libxli_DIMACS.so
 
 COPY --chown=muesli:muesli ./requirements.txt /opt/muesli4
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
 
 USER muesli:muesli
 
 COPY --chown=muesli:muesli ./ /opt/muesli4
 RUN sed 's/\/\/\//\/\/postgres@postgres\//' muesli.yml.example | sed 's/localhost/0.0.0.0/' > muesli.yml
+
