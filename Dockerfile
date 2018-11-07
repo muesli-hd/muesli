@@ -9,8 +9,6 @@ ENV MUESLI_PATH=/opt/muesli4
 EXPOSE 8080
 CMD ["/opt/muesli4/muesli-test"]
 
-RUN useradd -U --uid 10043 muesli
-
 RUN apt-get update && apt-get install -y python3.5 python3.5-dev lp-solve postgresql-server-dev-9.5 wget python3-pip libjs-jquery-fancybox locales && rm -rf /var/lib/apt/lists/*
 
 RUN locale-gen de_DE.UTF-8
