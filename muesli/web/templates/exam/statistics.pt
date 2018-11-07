@@ -68,8 +68,8 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
     <th tal:repeat="e exam.exercises">${e.nr}</th>
     <th>Σ</th>
   </tr>
-  <tr tal:repeat="subject sorted(statistics_by_subject.keys())">
-    <td>${subject or '(Keine Angabe)'}</td>
+  <tr tal:repeat="subject sorted(statistics_by_subject.keys(), key=lambda x: (x is None, x))">
+    <td>${'(Keine Angabe)' if subject is None else subject}</td>
     <td tal:repeat="e exam.exercises">
       <span tal:define="statisticsData statistics_by_subject[subject][e.id]; statistics_images True" tal:omit-tag="">
         <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
