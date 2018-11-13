@@ -442,6 +442,9 @@ def resetPassword3(request):
     #       return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
     return {'form': form,
             'confirmation': request.context.confirmation}
+@view_config(route_name='user_api_keys', renderer='muesli.web:templates/user/api_keys.pt', context=GeneralContext)
+def auth_keys(request):
+    return {}
 
 @view_config(route_name='user_ajax_complete', renderer='muesli.web:templates/user/ajax_complete.pt', context=TutorialContext, permission='viewOverview')
 def ajaxComplete(request):
