@@ -586,3 +586,14 @@ class StudentGrade(Base):
     student_id = Column('student', Integer, ForeignKey(User.id), nullable=False, primary_key=True)
     student = relationship(User, backref=backref('student_grades', lazy='dynamic'))
     grade = Column(Numeric(precision=2, scale=1), CheckConstraint('grade >= 1.0 AND grade <= 5.0'))
+
+class Client(Base):
+    __tablename__ = 'clients'
+    id = Column(String(100), primary_key=True, unique=True)
+    name = Column(Text)
+    description = Column(Text)
+    user_id = Column(ForeignKey(User.id))
+    user = relationship(User)
+    grant_type = Column(String(18), CheckConstraint('grant_type == "authorization_code"'))
+    response_type = Column(String(4), CheckConstraint('response_type == "code"'))
+    scopes = Column(Text)
