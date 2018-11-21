@@ -27,4 +27,4 @@ RUN pip3 install -r requirements.txt
 
 COPY --chown=muesli:muesli ./ /opt/muesli4
 RUN sed 's/\/\/\//\/\/postgres@postgres\//' muesli.yml.example | sed 's/localhost/0.0.0.0/' > muesli.yml
-
+RUN sed 's/\/\/\//\/\/postgres@postgres\//' alembic.ini.example > alembic.ini
