@@ -1,3 +1,4 @@
+alembic==1.0.3
 attrs==17.4.0
 Beaker==1.9.0
 beautifulsoup4==4.6.0
