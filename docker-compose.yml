@@ -9,6 +9,8 @@ services:
       - './travis-muesli-origDb.sql:/docker-entrypoint-initdb.d/travis-muesli-origDb.sql'
   muesli:
     build: .
+    volumes:
+      - './:/opt/muesli4'
     ports:
       - '127.0.0.1:8080:8080'
     depends_on:

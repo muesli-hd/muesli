@@ -24,7 +24,3 @@ RUN wget https://www.mathi.uni-heidelberg.de/~jvisintini/libxli_DIMACS.so -O /us
 COPY --chown=muesli:muesli ./requirements.txt /opt/muesli4
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
-
-COPY --chown=muesli:muesli ./ /opt/muesli4
-RUN sed 's/\/\/\//\/\/postgres@postgres\//' muesli.yml.example | sed 's/localhost/0.0.0.0/' > muesli.yml
-RUN sed 's/\/\/\//\/\/postgres@postgres\//' alembic.ini.example > alembic.ini
