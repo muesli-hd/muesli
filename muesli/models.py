@@ -609,3 +609,13 @@ class BearerToken(Base):
     refresh_token = Column(String(100),unique=True)
     expires = Column(DateTime)
 
+class AuthCode(Base):
+    __tablename__ = 'authcode'
+    id = Column(Integer, primary_key=True)
+    client_id = Column(ForeignKey(Client.id))
+    client = relationship(Client)
+    user_id = Column(ForeignKey(User.id))
+    user = relationship(User)
+    scopes = Column(Text)
+    code = Column(String(100),unique=True)
+    expires = Column(DateTime)
