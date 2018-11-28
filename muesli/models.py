@@ -597,3 +597,15 @@ class Client(Base):
     grant_type = Column(String(18), CheckConstraint('grant_type == "authorization_code"'))
     response_type = Column(String(4), CheckConstraint('response_type == "code"'))
     scopes = Column(Text)
+
+class BearerToken(Base):
+    __tablename__ = 'bearertokens'
+    client_id = Column(ForeignKey(Client.id))
+    client = relationship(Client)
+    user_id = Column(ForeignKey(User.id))
+    user = relationship(User)
+    scopes = Column(Text)
+    access_token = Column(String(100),unique=True)
+    refresh_token = Column(String(100),unique=True)
+    expires = Column(DateTime)
+
