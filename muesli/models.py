@@ -597,9 +597,11 @@ class Client(Base):
     grant_type = Column(String(18), CheckConstraint('grant_type == "authorization_code"'))
     response_type = Column(String(4), CheckConstraint('response_type == "code"'))
     scopes = Column(Text)
+    redirect_urls = Column(Text)
 
 class BearerToken(Base):
     __tablename__ = 'bearertokens'
+    id = Column(Integer, primary_key=True)
     client_id = Column(ForeignKey(Client.id))
     client = relationship(Client)
     user_id = Column(ForeignKey(User.id))
