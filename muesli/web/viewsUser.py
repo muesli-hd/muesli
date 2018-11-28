@@ -32,13 +32,13 @@ from pyramid.url import route_url
 from sqlalchemy.orm import exc
 from sqlalchemy import func, or_
 from hashlib import sha1
-
 from muesli.mail import Message, sendMail
 
 import re
 import os
 import datetime
 import collections
+import binascii
 
 @view_config(route_name='user_login', renderer='muesli.web:templates/user/login.pt')
 def login(request):
@@ -444,7 +444,30 @@ def resetPassword3(request):
             'confirmation': request.context.confirmation}
 @view_config(route_name='user_api_keys', renderer='muesli.web:templates/user/api_keys.pt', context=GeneralContext)
 def auth_keys(request):
-    return {}
+    auth_code = request.db.query(models.AuthCode).filter_by(user_id=request.user.id).all()
+    if auth_code:
+        return {'code': auth_code}
+    else:
+        return {}
+
+@view_config(route_name='generate_dummy_key',context=GeneralContext)
+def dummyKey(request):
+    try:
+        dummy_client = request.db.query(models.Client).filter_by(id='1').one()
+    except exc.NoResultFound:
+        dummy_client = models.Client(id=1,
+                              name="Test Client",
+                              description="This is a test client",
+                              user=request.user,
+                              grant_type="authorization_code",
+                              response_type="code",
+                              scopes="test",
+                              redirect_urls="/")
+        request.db.add(dummy_client)
+    dummy_key = models.AuthCode(client=dummy_client,user=request.user,scopes="test",code=binascii.b2a_hex(os.urandom(32)).decode("utf-8"),expires=datetime.datetime.now()+datetime.timedelta(days=30))
+    request.db.add(dummy_key)
+    request.db.commit()
+    return HTTPFound(location=request.referrer)
 
 @view_config(route_name='user_ajax_complete', renderer='muesli.web:templates/user/ajax_complete.pt', context=TutorialContext, permission='viewOverview')
 def ajaxComplete(request):
