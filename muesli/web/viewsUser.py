@@ -448,12 +448,12 @@ def auth_keys(request):
     if auth_code:
         return {'code': auth_code}
     else:
-        return {}
+        return {'code': ""}
 
 @view_config(route_name='generate_dummy_key',context=GeneralContext)
 def dummyKey(request):
     try:
-        dummy_client = request.db.query(models.Client).filter_by(id='1').one()
+        dummy_client = request.db.query(models.Client).filter_by(id='1').one() # TODO use get()
     except exc.NoResultFound:
         dummy_client = models.Client(id=1,
                               name="Test Client",
@@ -468,6 +468,22 @@ def dummyKey(request):
     request.db.add(dummy_key)
     request.db.commit()
     return HTTPFound(location=request.referrer)
+
+@view_config(route_name='remove_api_key',context=GeneralContext)
+def removeKey(request):
+    code_id = int(request.matchdict['key_id'])
+    api_key = request.db.query(models.AuthCode).get(code_id) # TODO check if api_key.user_id matches user_id??
+    if not api_key:
+        request.session.flash('API Key nicht gefunden', queue='errors')
+    else:
+        request.db.delete(api_key)
+        request.db.commit()
+        request.session.flash('API Key entfernt ',queue='messages')
+    if request.referrer:
+        return HTTPFound(location=request.referrer)
+    else:
+        return HTTPFound(location=request.route_url('start'))
+
 
 @view_config(route_name='user_ajax_complete', renderer='muesli.web:templates/user/ajax_complete.pt', context=TutorialContext, permission='viewOverview')
 def ajaxComplete(request):

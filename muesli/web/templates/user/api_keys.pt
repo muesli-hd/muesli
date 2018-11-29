@@ -16,12 +16,11 @@ Hier können Sie ihre aktuellen API Keys verwalten.
         <th> Entfernen </th>
     </tr>
 <tbody>
-    <tr tal:repeat="codes code">
+    <tr tal:condition="code" tal:repeat="codes code">
         <td>${codes.code}</td>
         <td>${codes.expires}</td>
         <td>
-            <form method="post">
-                <!--<form method="post" tal:attributes="action request.route_path('remove_api_key')"> -->
+            <form method="post" tal:attributes="action request.route_path('remove_api_key',key_id=codes.id)">
                 <input type="submit" value="Entfernen"/>
             </form>
         </td>
