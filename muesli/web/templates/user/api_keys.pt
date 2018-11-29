@@ -13,12 +13,20 @@ Hier können Sie ihre aktuellen API Keys verwalten.
     <tr>
         <th> API Key </th>
         <th> Ablaufdatum </th>
+        <th> Beschreibung </th>
         <th> Entfernen </th>
     </tr>
 <tbody>
     <tr tal:condition="code" tal:repeat="codes code">
-        <td>${codes.code}</td>
-        <td>${codes.expires}</td>
+        <td style="font-family:monospace;font-size=20pt;">
+            ${codes.code}
+        </td>
+        <td>
+            ${codes.expires}
+        </td>
+        <td>
+            ${codes.description}
+        </td>
         <td>
             <form method="post" tal:attributes="action request.route_path('remove_api_key',key_id=codes.id)">
                 <input type="submit" value="Entfernen"/>
@@ -28,6 +36,7 @@ Hier können Sie ihre aktuellen API Keys verwalten.
 </tbody>
 </thead>
 </table>
+<br>
 <form method="post" tal:attributes="action request.route_path('generate_dummy_key')">
     <input type="submit" value="Generate Dummy API Key"/>
 </form>

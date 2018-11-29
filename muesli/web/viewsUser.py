@@ -442,9 +442,19 @@ def resetPassword3(request):
     #       return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
     return {'form': form,
             'confirmation': request.context.confirmation}
-@view_config(route_name='user_api_keys', renderer='muesli.web:templates/user/api_keys.pt', context=GeneralContext, permission='view_keys')
+
+
+@view_config(route_name='user_api_keys',
+             renderer='muesli.web:templates/user/api_keys.pt',
+             context=GeneralContext,
+             permission='view_keys')
 def auth_keys(request):
-    auth_code = request.db.query(models.AuthCode).filter_by(user_id=request.user.id).all()
+    auth_code = (request.db.query(models.AuthCode)
+                       .filter_by(user_id=request.user.id).all())
+    for code in auth_code:
+        code.expires = code.expires.strftime("%d. %B %Y, %H:%M Uhr")
+        if not code.description:
+            code.description = "Keine Beschreibung"
     if auth_code:
         return {'code': auth_code}
     else:
