@@ -388,6 +388,15 @@ def changePassword(request):
         request.db.commit()
     return {'form': form}
 
+@view_config(route_name='user_set_auth_description', renderer='muesli.web:templates/user/change_password.pt', context=GeneralContext, permission='change_password')
+def setAuthCodeDescription(request):
+    form = SetAuthCodeDescription(request)
+    if request.method == 'POST' and form.processPostData(request.POST):
+        request.user.password = sha1(form['new_password'].encode('utf-8')).hexdigest()
+        request.session.flash('Neues Passwort gesetzt', queue='messages')
+        request.db.commit()
+    return {'form': form}
+
 @view_config(route_name='user_reset_password', renderer='muesli.web:templates/user/reset_password.pt', context=GeneralContext)
 def resetPassword(request):
     form = UserResetPassword(request)
