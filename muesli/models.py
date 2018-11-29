@@ -621,3 +621,4 @@ class AuthCode(Base):
     scopes = Column(Text)
     code = Column(String(100),unique=True)
     expires = Column(DateTime)
+    description = Column(String(20))
