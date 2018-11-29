@@ -442,7 +442,7 @@ def resetPassword3(request):
     #       return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
     return {'form': form,
             'confirmation': request.context.confirmation}
-@view_config(route_name='user_api_keys', renderer='muesli.web:templates/user/api_keys.pt', context=GeneralContext)
+@view_config(route_name='user_api_keys', renderer='muesli.web:templates/user/api_keys.pt', context=GeneralContext, permission='view_keys')
 def auth_keys(request):
     auth_code = request.db.query(models.AuthCode).filter_by(user_id=request.user.id).all()
     if auth_code:
@@ -450,7 +450,7 @@ def auth_keys(request):
     else:
         return {'code': ""}
 
-@view_config(route_name='generate_dummy_key',context=GeneralContext)
+@view_config(route_name='generate_dummy_key',context=GeneralContext,permission='remove_keys')
 def dummyKey(request):
     try:
         dummy_client = request.db.query(models.Client).filter_by(id='1').one() # TODO use get()
@@ -467,7 +467,10 @@ def dummyKey(request):
     dummy_key = models.AuthCode(client=dummy_client,user=request.user,scopes="test",code=binascii.b2a_hex(os.urandom(32)).decode("utf-8"),expires=datetime.datetime.now()+datetime.timedelta(days=30))
     request.db.add(dummy_key)
     request.db.commit()
-    return HTTPFound(location=request.referrer)
+    if request.referrer:
+        return HTTPFound(location=request.referrer)
+    else:
+        return HTTPFound(location=request.route_url('start'))
 
 @view_config(route_name='remove_api_key',context=GeneralContext)
 def removeKey(request):
