@@ -495,19 +495,20 @@ def auth_keys(request):
         return {'code': ""}
 
 
-@view_config(route_name='generate_dummy_key',context=GeneralContext,permission='remove_keys')
+@view_config(route_name='generate_dummy_key', context=GeneralContext, permission='remove_keys')
 def dummyKey(request):
     try:
-        dummy_client = request.db.query(models.Client).filter_by(id='1').one()  # TODO use get()
+        # TODO use get()
+        dummy_client = request.db.query(models.Client).filter_by(id='1').one()
     except exc.NoResultFound:
         dummy_client = models.Client(id=1,
-                              name="Test Client",
-                              description="This is a test client",
-                              user=request.user,
-                              grant_type="authorization_code",
-                              response_type="code",
-                              scopes="test",
-                              redirect_urls="/")
+                                     name="Test Client",
+                                     description="This is a test client",
+                                     user=request.user,
+                                     grant_type="authorization_code",
+                                     response_type="code",
+                                     scopes="test",
+                                     redirect_urls="/")
         request.db.add(dummy_client)
     dummy_key = models.AuthCode(client=dummy_client,
                                 user=request.user,
