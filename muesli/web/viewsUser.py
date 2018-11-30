@@ -412,14 +412,14 @@ def changePassword(request):
     return {'form': form}
 
 
-@view_config(route_name='user_set_auth_description', renderer='muesli.web:templates/user/change_password.pt', context=context.GeneralContext, permission='change_password')
-def setAuthCodeDescription(request):
-    form = forms.SetAuthCodeDescription(request)
-    if request.method == 'POST' and form.processPostData(request.POST):
-        request.user.password = sha1(form['new_password'].encode('utf-8')).hexdigest()
-        request.session.flash('Neues Passwort gesetzt', queue='messages')
-        request.db.commit()
-    return {'form': form}
+#@view_config(route_name='user_set_auth_description', renderer='muesli.web:templates/user/change_password.pt', context=context.GeneralContext, permission='change_password')
+#def setAuthCodeDescription(request):
+#    form = forms.SetAuthCodeDescription(request)
+#    if request.method == 'POST' and form.processPostData(request.POST):
+#        request.user.password = sha1(form['new_password'].encode('utf-8')).hexdigest()
+#        request.session.flash('Neues Passwort gesetzt', queue='messages')
+#        request.db.commit()
+#    return {'form': form}
 
 @view_config(route_name='user_reset_password', renderer='muesli.web:templates/user/reset_password.pt', context=context.GeneralContext)
 def resetPassword(request):
@@ -485,14 +485,14 @@ def resetPassword3(request):
              context=context.GeneralContext,
              permission='view_keys')
 def auth_keys(request):
-    auth_code = (request.db.query(models.AuthCode)
+    tokens = (request.db.query(models.BearerToken)
                  .filter_by(user_id=request.user.id).all())
-    for code in auth_code:
-        code.expires = code.expires.strftime("%d. %B %Y, %H:%M Uhr")
-        if not code.description:
-            code.description = "Keine Beschreibung"
-    if auth_code:
-        return {'code': auth_code}
+    for token in tokens:
+        token.expires = token.expires.strftime("%d. %B %Y, %H:%M Uhr")
+        if not token.description:
+            token.description = "Keine Beschreibung"
+    if tokens:
+        return {'code': tokens}
     else:
         return {'code': ""}
 
@@ -512,12 +512,12 @@ def dummyKey(request):
                                      scopes="test",
                                      redirect_urls="/")
         request.db.add(dummy_client)
-    dummy_key = models.AuthCode(client=dummy_client,
-                                user=request.user,
-                                scopes="test",
-                                code=binascii.b2a_hex(os.urandom(32)).decode("utf-8"),
-                                expires=datetime.datetime.now()+datetime.timedelta(days=30)
-                                )
+    dummy_key = models.BearerToken(client=dummy_client,
+                                   user=request.user,
+                                   scopes="test",
+                                   access_token=binascii.b2a_hex(os.urandom(32)).decode("utf-8"),
+                                   expires=datetime.datetime.now()+datetime.timedelta(days=30)
+                                  )
     request.db.add(dummy_key)
     request.db.commit()
     if request.referrer:
@@ -530,7 +530,7 @@ def dummyKey(request):
 def removeKey(request):
     code_id = int(request.matchdict['key_id'])
     #  TODO check if api_key.user_id matches user_id??
-    api_key = request.db.query(models.AuthCode).get(code_id)
+    api_key = request.db.query(models.BearerToken).get(code_id)
     if not api_key:
         request.session.flash('API Key nicht gefunden', queue='errors')
     else:

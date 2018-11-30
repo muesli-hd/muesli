@@ -19,7 +19,7 @@ Hier können Sie ihre aktuellen API Keys verwalten.
 <tbody>
     <tr tal:condition="code" tal:repeat="codes code">
         <td style="font-family:monospace;font-size:16pt;">
-            ${codes.code}
+            ${codes.access_token}
         </td>
         <td>
             ${codes.expires}
