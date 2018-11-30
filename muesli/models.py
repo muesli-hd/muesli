@@ -607,9 +607,10 @@ class BearerToken(Base):
     user_id = Column(ForeignKey(User.id))
     user = relationship(User)
     scopes = Column(Text)
-    access_token = Column(String(100),unique=True)
-    refresh_token = Column(String(100),unique=True)
+    access_token = Column(String(100), unique=True)
+    refresh_token = Column(String(100), unique=True)
     expires = Column(DateTime)
+    description = Column(String(20))
 
 class AuthCode(Base):
     __tablename__ = 'authcode'
@@ -619,6 +620,5 @@ class AuthCode(Base):
     user_id = Column(ForeignKey(User.id))
     user = relationship(User)
     scopes = Column(Text)
-    code = Column(String(100),unique=True)
+    code = Column(String(100), unique=True)
     expires = Column(DateTime)
-    description = Column(String(20))
