@@ -2,22 +2,22 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<h2>API Keys verwalten</h2>
+    <h2>API Keys verwalten</h2>
 
-<p>
-Hier können Sie ihre aktuellen API Keys verwalten.
-</p>
+    <p>
+    Hier können Sie ihre aktuellen API Keys verwalten.
+    </p>
 
-<table class="colored">
-<thead>
-    <tr>
+    <table class="colored">
+    <thead>
+      <tr>
         <th> API Key </th>
         <th> Ablaufdatum </th>
         <th> Beschreibung </th>
         <th> Entfernen </th>
-    </tr>
-<tbody>
-    <tr tal:condition="code" tal:repeat="codes code">
+      </tr>
+    <tbody>
+      <tr tal:condition="code" tal:repeat="codes code">
         <td style="font-family:monospace;font-size:16pt;">
             ${codes.access_token}
         </td>
@@ -28,19 +28,18 @@ Hier können Sie ihre aktuellen API Keys verwalten.
             ${codes.description}
         </td>
         <td>
-            <form method="post" tal:attributes="action request.route_path('remove_api_key',key_id=codes.id)">
-                <input type="submit" value="Entfernen"/>
-            </form>
+          <form method="post" tal:attributes="action request.route_path('remove_api_key',key_id=codes.id)">
+            <input type="submit" value="Entfernen"/>
+          </form>
         </td>
-    </tr>
-</tbody>
-</thead>
-</table>
-<br>
-<form method="post" tal:attributes="action request.route_path('generate_dummy_key')">
-    <input type="submit" value="Generate Dummy API Key"/>
-</form>
-
+      </tr>
+    </tbody>
+    </thead>
+    </table>
+    <br>
+    <form method="post" tal:attributes="action request.route_path('generate_dummy_key')">
+      <input type="submit" value="Generate Dummy API Key"/>
+    </form>
 
   </metal:main>
 </metal:main>
