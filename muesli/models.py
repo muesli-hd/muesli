@@ -187,6 +187,11 @@ class User(Base):
     def __repr__(self):
         return 'u<User %r <%r>>' % (self.name(), self.email)
 
+    def __json__(self, _):
+        dict_copy = self.__dict__.copy()
+        del dict_copy['_sa_instance_state']
+        return dict_copy
+
 
 class Confirmation(Base):
     __tablename__ = 'confirmations'
@@ -323,6 +328,11 @@ class Lecture(Base):
     def getGradingResults(self, tutorials=[], students=None):
         session = Session.object_session(self)
         return session.query(StudentGrade).filter(StudentGrade.grading_id.in_([g.id for g in self.gradings]))
+    
+    def __json__(self, _):
+        dict_copy = self.__dict__.copy()
+        del dict_copy['_sa_instance_state']
+        return dict_copy
 
 
 class Exam(Base):
