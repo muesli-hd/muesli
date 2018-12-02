@@ -18,7 +18,7 @@
       </tr>
     <tbody>
       <tr tal:condition="code" tal:repeat="codes code">
-        <td style="font-family:monospace;font-size:16pt;">
+        <td style="font-family:monospace;font-size:1.1em;">
             ${codes.access_token}
         </td>
         <td>
