@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED=1
 ENV MUESLI_PATH=/opt/muesli4
 
 EXPOSE 8080
-CMD ["/opt/muesli4/docker-serve-test.sh"]
+CMD ["/opt/muesli4/docker-serve.sh"]
 
 RUN useradd muesli
 
