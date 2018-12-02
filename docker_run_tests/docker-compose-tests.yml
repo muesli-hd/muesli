@@ -13,7 +13,7 @@ services:
     container_name: muesli_testrunner
     build: 
       context: ..
-      dockerfile: ./Dockerfile_run_tests
+      dockerfile: ./docker_run_tests/Dockerfile_run_tests
     volumes:
       - './:/opt/muesli4'
     ports:
