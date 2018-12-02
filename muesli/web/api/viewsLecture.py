@@ -10,7 +10,7 @@ from sqlalchemy.sql.expression import desc
 
 @resource(collection_path='/api/lectures',
           path='/api/lectures/{id}',
-          factory=context.LectureContext,
+          factory=context.GeneralContext,
           permission='view')  # TODO Api specific permission
 class Lecture(object):
     def __init__(self, request, context=None):
