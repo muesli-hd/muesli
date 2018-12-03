@@ -5,7 +5,7 @@ services:
     container_name: muesli_postgres_testrunner
     image: 'postgres:latest'
     environment:
-      - POSTGRES_DB=muesli
+      - POSTGRES_DB=mueslitest
     volumes:
       - '../travis-muesli-origDb.sql:/docker-entrypoint-initdb.d/travis-muesli-origDb.sql'
   muesli:
