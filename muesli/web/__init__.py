@@ -212,6 +212,7 @@ def main(global_config=None, **settings):
 
 
     config.add_route('tutorial_edit', '/tutorial/edit/{tutorial_id}', factory=TutorialContext)
+    config.add_route('tutorial_duplicate', '/tutorial/duplicate/{tutorial_id}', factory=TutorialContext)
     config.add_route('tutorial_set_tutor', '/tutorial/set_tutor/{tutorial_id}')
     config.add_route('tutorial_take', '/tutorial/take/{tutorial_id}', factory=TutorialContext)
     config.add_route('tutorial_remove_student', '/tutorial/remove_student/{tutorial_ids}/{student_id}', factory=TutorialContext)

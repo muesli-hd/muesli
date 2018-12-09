@@ -113,6 +113,35 @@ class Add(object):
                 'form': form,
                 'error_msg': error_msg}
 
+@view_config(route_name='tutorial_duplicate', renderer='muesli.web:templates/tutorial/edit.pt', context=TutorialContext, permission='edit')
+class Duplicate(object):
+    def __init__(self, request):
+        self.request = request
+        self.db = self.request.db
+        self.tutorial_id = request.matchdict['tutorial_id']
+    def __call__(self):
+        error_msg = ''
+        orig_tutorial = self.db.query(models.Tutorial).get(self.tutorial_id)
+
+        tutorial = models.Tutorial()
+        tutorial.lecture = orig_tutorial.lecture
+        tutorial.place=orig_tutorial.place
+        tutorial.time = orig_tutorial.time
+        tutorial.max_students=orig_tutorial.max_students
+        tutorial.comment=orig_tutorial.comment
+        tutorial.is_special=orig_tutorial.is_special
+        self.request.db.commit()
+
+        form = TutorialEdit(self.request, tutorial)
+        if self.request.method == 'POST' and form.processPostData(self.request.POST):
+            form.saveValues()
+            self.request.db.commit()
+            form.message = "Änderungen gespeichert"
+        return {'tutorial': tutorial,
+                'names': self.request.config['lecture_types'][tutorial.lecture.type],
+                'form': form,
+                'error_msg': error_msg}
+
 @view_config(route_name='tutorial_delete', context=TutorialContext, permission='edit')
 def delete(request):
     for tutorial in request.context.tutorials:
