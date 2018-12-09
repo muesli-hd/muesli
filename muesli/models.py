@@ -187,9 +187,13 @@ class User(Base):
     def __repr__(self):
         return 'u<User %r <%r>>' % (self.name(), self.email)
 
-    def __json__(self, _):
+    def __json__(self, request):
+        # Make a copy because we don't want to delete keys
+        # from the original object (dicts are mutable)
         dict_copy = self.__dict__.copy()
-        del dict_copy['_sa_instance_state']
+        for key in list(dict_copy.keys()):
+            if key not in request.context.allowedKeys['user']:
+                del dict_copy[key]
         return dict_copy
 
 
@@ -328,11 +332,14 @@ class Lecture(Base):
     def getGradingResults(self, tutorials=[], students=None):
         session = Session.object_session(self)
         return session.query(StudentGrade).filter(StudentGrade.grading_id.in_([g.id for g in self.gradings]))
-    
-    def __json__(self, _):
+
+    def __json__(self, request):
         dict_copy = self.__dict__.copy()
-        del dict_copy['_sa_instance_state']
+        for key in list(dict_copy.keys()):
+            if key not in request.context.allowedKeys['lecture']:
+                del dict_copy[key]
         return dict_copy
+
 
 
 class Exam(Base):
