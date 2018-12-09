@@ -113,32 +113,33 @@ class Add(object):
                 'form': form,
                 'error_msg': error_msg}
 
-@view_config(route_name='tutorial_duplicate', renderer='muesli.web:templates/tutorial/edit.pt', context=TutorialContext, permission='edit')
+@view_config(route_name='tutorial_duplicate', renderer='muesli.web:templates/tutorial/add.pt', context=LectureContext, permission='edit')
 class Duplicate(object):
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
+        self.lecture_id = request.matchdict['lecture_id']
         self.tutorial_id = request.matchdict['tutorial_id']
     def __call__(self):
         error_msg = ''
         orig_tutorial = self.db.query(models.Tutorial).get(self.tutorial_id)
+        lecture = self.db.query(models.Lecture).get(self.lecture_id)
 
-        tutorial = models.Tutorial()
-        tutorial.lecture = orig_tutorial.lecture
-        tutorial.place=orig_tutorial.place
-        tutorial.time = orig_tutorial.time
-        tutorial.max_students=orig_tutorial.max_students
-        tutorial.comment=orig_tutorial.comment
-        tutorial.is_special=orig_tutorial.is_special
-        self.request.db.commit()
-
-        form = TutorialEdit(self.request, tutorial)
+        form = TutorialEdit(self.request, orig_tutorial)
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
+            tutorial = models.Tutorial()
+            tutorial.lecture = orig_tutorial.lecture
+            tutorial.place=orig_tutorial.place
+            tutorial.time = orig_tutorial.time
+            tutorial.max_students=orig_tutorial.max_students
+            tutorial.comment=orig_tutorial.comment
+            tutorial.is_special=orig_tutorial.is_special
+            form.obj = tutorial
             form.saveValues()
             self.request.db.commit()
-            form.message = "Änderungen gespeichert"
-        return {'tutorial': tutorial,
-                'names': self.request.config['lecture_types'][tutorial.lecture.type],
+            form.message = "Neue Übungsgruppe angelegt."
+        return {'lecture': lecture,
+                'names': self.request.config['lecture_types'][lecture.type],
                 'form': form,
                 'error_msg': error_msg}
 
