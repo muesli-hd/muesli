@@ -66,3 +66,5 @@ class TutorialTime(WrappedColumn):
         return hash(self.value)
     #def __str__(self):
     #       return self.__html__()
+    def __json__(self, _):
+        return self.__html__()

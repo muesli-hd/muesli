@@ -536,6 +536,14 @@ class Tutorial(Base):
     is_special = Column(Boolean, nullable=False, default=False)
     # student_count defined below, after LectureStudent is defined
 
+    def __json__(self, request):
+        dict_copy = self.__dict__.copy()
+        for key in list(dict_copy.keys()):
+            if key not in request.context.allowedKeys['tutorial']:
+                del dict_copy[key]
+        return dict_copy
+
+
 
 class TimePreference(Base):
     __tablename__ = 'time_preferences'
