@@ -11,7 +11,7 @@ services:
   muesli:
     image: "muesli:tests"
     container_name: muesli_testrunner
-    build: 
+    build:
       context: ..
       dockerfile: ./docker_run_tests/Dockerfile
     volumes:

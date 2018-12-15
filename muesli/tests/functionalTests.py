@@ -33,7 +33,7 @@ class OrigDatabaseTests(unittest.TestCase):
     def setUp(self):
         import muesli.web
         from muesli.web import main
-        app = main({})
+        app = main({}, testmode=True)
         from webtest import TestApp
         self.testapp = TestApp(app)
 
@@ -54,7 +54,8 @@ class BaseTests(unittest.TestCase):
         self.config = muesli.config
 
         databaseName = muesli.config['database']['connection']
-        self.engine = sqlalchemy.create_engine(databaseName+'test')
+        databaseName = databaseName + "test"
+        self.engine = sqlalchemy.create_engine(databaseName)
 
         import muesli.models
         muesli.models.Base.metadata.create_all(self.engine)
