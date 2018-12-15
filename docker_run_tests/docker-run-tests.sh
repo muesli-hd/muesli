@@ -3,4 +3,4 @@ sed 's/\/\/\//\/\/postgres@postgres\//' muesli.yml.example | sed 's/localhost/0.
 sed 's/\/\/\//\/\/postgres@postgres\//' alembic.ini.example > alembic.ini
 sleep 5;
 python3 -m smtpd -n -c DebuggingServer localhost:25 &
-MUESLI_PATH=$(pwd) py.test --cov=muesli muesli/tests && codecov && exit
+MUESLI_PATH=$(pwd) py.test --cov=muesli muesli/tests && exit
