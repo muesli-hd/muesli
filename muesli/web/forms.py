@@ -603,8 +603,8 @@ class SetAuthCodeDescription(ObjectForm):
                           label='Beschreibung', size=20,
                           required=False)
                 ]
-        ObjectForm.__init__(self, formfields,
-                            request, send='Beschreibung: ')
+        ObjectForm.__init__(self, None, formfields,
+                            request, send='Generate Dummy API Key')
 
     def saveField(self, fieldName):
         pass

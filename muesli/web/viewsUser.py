@@ -485,7 +485,31 @@ def resetPassword3(request):
              context=context.GeneralContext,
              permission='view_keys')
 def list_auth_keys(request):
-    form = forms.UserChangePassword(request)
+    form = forms.SetAuthCodeDescription(request)
+    if request.method == 'POST' and form.processPostData(request.POST):
+        try:
+        #TODO use get()
+            dummy_client = request.db.query(models.Client).filter_by(id='1').one()
+        except exc.NoResultFound:
+            dummy_client = models.Client(id=1,
+                                         name="Test Client",
+                                         description="This is a test client",
+                                         user=request.user,
+                                         grant_type="authorization_code",
+                                         response_type="code",
+                                         scopes="test",
+                                         redirect_urls="/")
+            request.db.add(dummy_client)
+        dummy_key = models.BearerToken(client=dummy_client,
+                                   user=request.user,
+                                   scopes="test",
+                                   description=form['description'],
+                                   access_token=binascii.b2a_hex(os.urandom(32)).decode("utf-8"),
+                                   expires=datetime.datetime.now()+datetime.timedelta(days=30)
+                                  )
+        request.db.add(dummy_key)
+        request.db.commit()
+
     tokens = (request.db.query(models.BearerToken)
                  .filter_by(user_id=request.user.id).all())
     for token in tokens:
@@ -498,35 +522,6 @@ def list_auth_keys(request):
     else:
         return {'code': "",
                 'form': form}
-
-
-@view_config(route_name='generate_dummy_key', context=context.GeneralContext, permission='remove_keys')
-def dummyKey(request):
-    try:
-        # TODO use get()
-        dummy_client = request.db.query(models.Client).filter_by(id='1').one()
-    except exc.NoResultFound:
-        dummy_client = models.Client(id=1,
-                                     name="Test Client",
-                                     description="This is a test client",
-                                     user=request.user,
-                                     grant_type="authorization_code",
-                                     response_type="code",
-                                     scopes="test",
-                                     redirect_urls="/")
-        request.db.add(dummy_client)
-    dummy_key = models.BearerToken(client=dummy_client,
-                                   user=request.user,
-                                   scopes="test",
-                                   access_token=binascii.b2a_hex(os.urandom(32)).decode("utf-8"),
-                                   expires=datetime.datetime.now()+datetime.timedelta(days=30)
-                                  )
-    request.db.add(dummy_key)
-    request.db.commit()
-    if request.referrer:
-        return HTTPFound(location=request.referrer)
-    else:
-        return HTTPFound(location=request.route_url('start'))
 
 
 @view_config(route_name='remove_api_key', context=context.GeneralContext)
