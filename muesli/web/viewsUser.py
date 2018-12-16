@@ -488,8 +488,7 @@ def list_auth_keys(request):
     form = forms.SetAuthCodeDescription(request)
     if request.method == 'POST' and form.processPostData(request.POST):
         try:
-        #TODO use get()
-            dummy_client = request.db.query(models.Client).filter_by(id='1').one()
+            dummy_client = request.db.query(models.Client).get('1')
         except exc.NoResultFound:
             dummy_client = models.Client(id=1,
                                          name="Test Client",
