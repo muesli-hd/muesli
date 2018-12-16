@@ -34,6 +34,8 @@ from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
 from muesli.types import *
 from muesli.utils import DictOfObjects, AutoVivification, editOwnTutorials, listStrings
 
+from marshmallow import Schema, fields
+
 from sqlalchemy.dialects.sqlite.base import SQLiteDialect
 from sqlalchemy.interfaces import PoolListener
 
@@ -641,6 +643,52 @@ class StudentGrade(Base):
     student_id = Column('student', Integer, ForeignKey(User.id), nullable=False, primary_key=True)
     student = relationship(User, backref=backref('student_grades', lazy='dynamic'))
     grade = Column(Numeric(precision=2, scale=1), CheckConstraint('grade >= 1.0 AND grade <= 5.0'))
+
+# Schemas
+
+
+class UserSchema(Schema):
+    id = fields.Integer()
+    email = fields.Email()
+    first_name = fields.String()
+    last_name = fields.String()
+    matrikel = fields.String()
+    birth_date = fields.String()
+    birth_place = fields.String()
+    subject = fields.String()
+    # TODO rest
+
+
+class TutorialSchema(Schema):
+    id = fields.Integer()
+    place = fields.String()
+    time = fields.Method("get_time")
+    max_students = fields.Integer()
+    tutor = fields.Nested(
+        UserSchema, only=['first_name', 'last_name', 'email'])
+    comment = fields.String()
+    # TODO rest
+    def get_time(self, obj):
+        return obj.time.__html__()
+
+
+class LectureSchema(Schema):
+    id = fields.Integer()
+    assistant_id = fields.Integer()
+    assistants = fields.Nested(
+        UserSchema, many=True, only=['first_name', 'last_name', 'email'])
+    name = fields.String()
+    type = fields.String()
+    term = fields.Method("get_term")
+    lsf_id = fields.String()
+    lecturer = fields.String()
+    url = fields.Url()
+    is_visible = fields.Boolean()
+    tutorials = fields.Nested(TutorialSchema, many=True)
+    tutors = fields.Nested(UserSchema, many=True)
+
+    def get_term(self, obj):
+        return obj.term.__html__()
 
 
 class Client(Base):
