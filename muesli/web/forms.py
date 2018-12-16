@@ -597,14 +597,13 @@ class UserChangeEmail(ObjectForm):
 
 
 class SetAuthCodeDescription(ObjectForm):
-    def __init__(self, request, auth_code):
+    def __init__(self, request):
         formfields = [
                 FormField('description',
                           label='Beschreibung', size=20,
-                          value=auth_code.description,
                           required=False)
                 ]
-        ObjectForm.__init__(self, auth_code, formfields,
+        ObjectForm.__init__(self, formfields,
                             request, send='Beschreibung: ')
 
     def saveField(self, fieldName):

@@ -484,7 +484,8 @@ def resetPassword3(request):
              renderer='muesli.web:templates/user/api_keys.pt',
              context=context.GeneralContext,
              permission='view_keys')
-def auth_keys(request):
+def list_auth_keys(request):
+    form = forms.UserChangePassword(request)
     tokens = (request.db.query(models.BearerToken)
                  .filter_by(user_id=request.user.id).all())
     for token in tokens:
@@ -492,9 +493,11 @@ def auth_keys(request):
         if not token.description:
             token.description = "Keine Beschreibung"
     if tokens:
-        return {'code': tokens}
+        return {'code': tokens,
+                'form': form}
     else:
-        return {'code': ""}
+        return {'code': "",
+                'form': form}
 
 
 @view_config(route_name='generate_dummy_key', context=context.GeneralContext, permission='remove_keys')
