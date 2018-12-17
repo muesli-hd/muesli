@@ -209,12 +209,3 @@ class CorrelationContext(object):
                 raise HTTPNotFound('Lecture not found')
         else:
             raise ValueError('Sourcetype not known: %s' % source_type)
-
-
-class TestContext(object):
-    def __init__(self, request):
-        self.allowedKeys = {}
-        self.__acl__ = [(Allow, 'group:administrators', ALL_PERMISSIONS)]
-
-    def setAllowedKeys(self, keys):
-        self.allowedKeys = keys
