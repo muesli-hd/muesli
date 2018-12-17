@@ -168,10 +168,19 @@ class EnterPointsBasic(object):
                     exerciseStudent.exercise = e
                     points[student.student_id][e.id] = exerciseStudent
                     self.db.add(exerciseStudent)
+
+        db_admissions = exam.exam_admissions.filter(ExamAdmission.student_id.in_([s.student.id for s  in students])).all()
+        admissions={}
+        for admission in db_admissions:
+            admissions[admission.student_id] = admission
+
         if self.request.method == 'POST':
             if not self.request.permissionInfo.has_permission('enter_points'):
                 return HTTPForbidden('Sie haben keine Rechte um Punkte einzutragen!')
             for student in students:
+                certificate_parameter = 'medical_certificate-{0}'.format(student.student_id)
+                if exam.medical_certificate and certificate_parameter in self.request.POST:
+                    admissions[student.student_id].medical_certificate = self.valueToBool(self.request.POST[certificate_parameter])
                 for e in exam.exercises:
                     param = 'points-%u-%u' % (student.student_id, e.id)
                     if param in self.request.POST:
@@ -202,6 +211,7 @@ class EnterPointsBasic(object):
                 'tutorial_ids': self.request.matchdict['tutorial_ids'],
                 'students': students,
                 'points': points,
+                'admissions': admissions,
                 'statistics': statistics,
                 'error_msg': '\n'.join(error_msgs)}
 
@@ -209,6 +219,14 @@ class EnterPointsBasic(object):
 class EnterPoints(EnterPointsBasic):
     def __init__(self, request):
         super(EnterPoints, self).__init__(request, raw=False)
+    def valueToBool(self, value):
+        if value=='1':
+            return True
+        if value=='0':
+            return False
+        if value=='':
+            return None
+        raise ValueError('"%r" could not be converted to boolean' % value)
 
 @view_config(route_name='exam_enter_points_raw', renderer='muesli.web:templates/exam/enter_points_raw.pt', context=ExamContext, permission='view_points')
 class EnterPointsRaw(EnterPointsBasic):
