@@ -48,8 +48,6 @@ def ColumnWrapper(type):
 class Term(WrappedColumn):
     def __html__(self):
         return self.value[0:4]+' '+('SS' if self.value[4] == '1' else 'WS') if self.value else '-'
-    def __json__(self, _):
-        return self.__html__()
 
 class TutorialTime(WrappedColumn):
     weekdays = {'0': 'Mo', '1': 'Di', '2': 'Mi',\
@@ -66,5 +64,3 @@ class TutorialTime(WrappedColumn):
         return hash(self.value)
     #def __str__(self):
     #       return self.__html__()
-    def __json__(self, _):
-        return self.__html__()

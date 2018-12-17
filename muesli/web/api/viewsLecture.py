@@ -12,7 +12,7 @@ from sqlalchemy.sql.expression import desc
           factory=context.GeneralContext,
           permission='view')  # TODO Api specific permission
 class Lecture(object):
-    def __init__(self, request, context=None):  # TODO was ist hier der Kontext
+    def __init__(self, request, context=None):
         self.request = request
         self.db = request.db
 
@@ -21,7 +21,7 @@ class Lecture(object):
             self.db.query(models.Lecture)
             .order_by(desc(models.Lecture.term), models.Lecture.name)
             .options(joinedload(models.Lecture.assistants))
-            .filter(models.Lecture.is_visible == True) # noqa: 712
+            .filter(models.Lecture.is_visible == True) # noqa
             .all()
         )
         allowed_attr_lecture = ['id', 'name', 'lecturer', 'assistants', 'term']
@@ -43,7 +43,9 @@ class Lecture(object):
             'url',
             'tutorials',
         ]
+
         schema = models.LectureSchema(only=allowed_attr_lecture)
         return {'lecture': schema.dump(lecture),
                 'subscribed': subscribed,
                 'times': times}
+

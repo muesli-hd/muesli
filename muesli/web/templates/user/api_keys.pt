@@ -37,9 +37,8 @@
     </thead>
     </table>
     <br>
-    <form action="/user/api_keys" tal:attributes="action request.route_path('user_api_keys')" method="POST">
-        <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
-        <!--<input type="submit" value="Generate Dummy API Key"/>-->
+    <form method="post" tal:attributes="action request.route_path('generate_dummy_key')">
+      <input type="submit" value="Generate Dummy API Key"/>
     </form>
 
   </metal:main>
