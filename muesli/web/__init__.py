@@ -104,8 +104,11 @@ def principals_for_user(user_id, request):
     return principals
 
 
-def main(global_config=None, **settings):
-    engine = muesli.engine()
+def main(global_config=None, testmode=False, **settings):
+    if testmode:
+        engine = muesli.testengine()
+    else:
+        engine = muesli.engine()
     initializeSession(engine)
     #settings.update({
     #})
