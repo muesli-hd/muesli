@@ -601,7 +601,8 @@ class SetAuthCodeDescription(ObjectForm):
         formfields = [
                 FormField('description',
                           label='Beschreibung', size=20,
-                          required=False)
+                          required=False,
+                          validator=validators.MaxLength(20))
                 ]
         ObjectForm.__init__(self, None, formfields,
                             request, send='Generiere Dummy-Key')
