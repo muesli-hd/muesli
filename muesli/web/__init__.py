@@ -33,6 +33,7 @@ from muesli.models import *
 from muesli.web.views import *
 from muesli.web.viewsLecture import *
 from muesli.web.viewsUser import *
+from muesli.web.viewsApi import *
 from muesli.web.api import *
 from muesli import utils
 import muesli
@@ -250,6 +251,12 @@ def main(global_config=None, **settings):
 
     config.include('pyramid_chameleon')
     config.include('cornice')
+
+    # Begin: Stuff for the API-Browser
+    config.include('pyramid_apispec.views')
+    config.add_route("openapi_spec", "/openapi.json")
+    config.pyramid_apispec_add_explorer(spec_route_name='openapi_spec')
+    # End: Stuff for the API-Browser
 
     config.scan()
 
