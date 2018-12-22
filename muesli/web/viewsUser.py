@@ -57,6 +57,21 @@ def login(request):
     return {'form': form, 'user': security.authenticated_userid(request)}
 
 
+@view_config(route_name='debug_login', renderer='json', request_method='POST')
+def debug_login(request):
+    user = request.db.query(models.User).filter_by(email=request.POST['email'].strip(), password=sha1(request.POST['password'].encode('utf-8')).hexdigest()).first()
+    print(user.id)
+    if user:
+        return {
+            'result': 'ok',
+            'token': request.create_jwt_token(user.id, admin=(user.is_admin))
+        }
+    else:
+        return {
+            'result': 'error'
+        }
+
+
 @view_config(route_name='user_logout')
 def logout(request):
     security.forget(request)

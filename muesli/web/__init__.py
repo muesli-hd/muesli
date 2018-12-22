@@ -24,6 +24,8 @@ from pyramid.events import subscriber, BeforeRender, NewRequest
 from pyramid.renderers import get_renderer
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
+from muesli.web.pyramid_jwt import JWTAuthenticationPolicy
+from pyramid_multiauth import MultiAuthenticationPolicy
 import pyramid_beaker
 import beaker.ext.sqla
 import tempfile
@@ -129,8 +131,9 @@ def main(global_config=None, **settings):
             'beaker.session.timeout': 7200,
     })
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
-
-    authentication_policy = SessionAuthenticationPolicy(callback=principals_for_user)
+    jwt_authentication_policy = JWTAuthenticationPolicy('secret',callback=principals_for_user) # TODO GET SECRET FROM ENV-VARS
+    session_authentication_policy = SessionAuthenticationPolicy(callback=principals_for_user)
+    authentication_policy = MultiAuthenticationPolicy([session_authentication_policy,jwt_authentication_policy])
 
     authorization_policy = ACLAuthorizationPolicy()
     config = Configurator(
@@ -139,7 +142,9 @@ def main(global_config=None, **settings):
             session_factory=session_factory,
             settings=settings,
             )
-
+    config.include('muesli.web.pyramid_jwt')
+    config.add_route('debug_login', '/debug/login')
+    config.set_jwt_authentication_policy(jwt_authentication_policy)
     config.add_static_view('static', 'muesli.web:static')
 
     config.add_route('start', '/start', factory = GeneralContext)
@@ -250,7 +255,6 @@ def main(global_config=None, **settings):
 
     config.include('pyramid_chameleon')
     config.include('cornice')
-
     config.scan()
 
     return config.make_wsgi_app()
