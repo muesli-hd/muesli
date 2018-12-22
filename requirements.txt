@@ -32,6 +32,7 @@ pyramid==1.9.1
 pyramid-beaker==0.8
 pyramid-chameleon==0.3
 pyramid_apispec==0.3.0
+pyramid_debugtoolbar==4.5
 pytest==3.4.2
 pytest-cov==2.5.1
 python-dateutil==2.6.1
