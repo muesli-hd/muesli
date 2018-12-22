@@ -23,6 +23,7 @@ from pyramid.view import view_config
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from pyramid_apispec.helpers import add_pyramid_paths
+from muesli import models
 
 
 @view_config(route_name='openapi_spec', renderer='json')
@@ -36,4 +37,5 @@ def api_spec(request):
         ]
     )
     add_pyramid_paths(spec, 'collection_lecture', request=request)
+    spec.components.schema('User', schema=models.UserSchema)
     return spec.to_dict()
