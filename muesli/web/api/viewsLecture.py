@@ -1,11 +1,11 @@
-from cornice.resource import resource
-
+from cornice.resource import resource, view
 from muesli import models
 from muesli.web import context
 
+from sqlalchemy import inspect
 from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
-
+from marshmallow.exceptions import ValidationError
 
 @resource(collection_path='/api/lectures',
           path='/api/lectures/{lecture_id}',
@@ -49,3 +49,25 @@ class Lecture(object):
                 'subscribed': subscribed,
                 'times': times}
 
+    @view(permission='put')  # TODO API specific permission
+    def put(self):
+        lecture_id = self.request.matchdict['lecture_id']
+        lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'), joinedload(models.Lecture.assistants)).get(lecture_id)
+        schema = models.LectureSchema()
+        # attatch db session to schema so it can be used during validation
+        schema.context['session'] = self.request.db
+        try:
+            schema = schema.load(self.request.json_body)
+        except ValidationError as e:
+            self.request.errors.add('body', 'fail', e.messages)
+        else:
+            # TODO mark in schema as dump_only
+            for k, v in schema.items():
+                setattr(lecture, k, v)
+            try:
+                self.db.commit()
+            except exc.SQLAlchemyError:
+                # TODO better exception
+                self.db.rollback()
+            else:
+                return {'result': 'ok', 'update': self.get()}
