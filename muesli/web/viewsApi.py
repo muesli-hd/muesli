@@ -36,5 +36,4 @@ def api_spec(request):
         ]
     )
     add_pyramid_paths(spec, 'collection_lecture', request=request)
-    add_pyramid_paths(spec, '', request=request)
     return spec.to_dict()
