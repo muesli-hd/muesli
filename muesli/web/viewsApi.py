@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# muesli/web/viewsExam.py
+# muesli/web/viewsApi.py
 #
 # This file is part of MUESLI.
 #
