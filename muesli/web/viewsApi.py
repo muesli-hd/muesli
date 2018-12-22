@@ -28,17 +28,13 @@ from pyramid_apispec.helpers import add_pyramid_paths
 @view_config(route_name='openapi_spec', renderer='json')
 def api_spec(request):
     spec = APISpec(
-        title='Some API',
+        title='MÜSLI-API',
         version='1.0.0',
-        openapi_version='3.0',
+        openapi_version='3.0.0',
         plugins=[
             MarshmallowPlugin()
         ]
     )
-    # inspect the `foo_route` and generate operations from docstring
-    add_pyramid_paths(spec, 'foo_route', request=request)
-
-    # inspection supports filtering via pyramid add_view predicate arguments
-    add_pyramid_paths(
-        spec, 'bar_route', request=request, request_method='post')
+    add_pyramid_paths(spec, 'collection_lecture', request=request)
+    add_pyramid_paths(spec, '', request=request)
     return spec.to_dict()
