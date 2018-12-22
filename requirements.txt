@@ -27,10 +27,12 @@ plaster-pastedeploy==0.4.2
 pluggy==0.6.0
 psycopg2-binary==2.7.4
 py==1.5.2
+pyjwt==1.7.1
 pyparsing==2.2.0
 pyramid==1.9.1
 pyramid-beaker==0.8
 pyramid-chameleon==0.3
+pyramid_multiauth==0.9.0
 pytest==3.4.2
 pytest-cov==2.5.1
 python-dateutil==2.6.1
