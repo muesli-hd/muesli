@@ -28,6 +28,13 @@ from muesli import models
 
 @view_config(route_name='openapi_spec', renderer='json')
 def api_spec(request):
+    """ Return something.
+    ---
+    get:
+        description: outputs the Open-API specification with version 3.0.0
+        tags:
+        - "Open API"
+    """
     spec = APISpec(
         title='MÜSLI-API',
         version='1.0.0',
@@ -37,5 +44,9 @@ def api_spec(request):
         ]
     )
     add_pyramid_paths(spec, 'collection_lecture', request=request)
+    add_pyramid_paths(spec, 'lecture', request=request)
+    add_pyramid_paths(spec, 'openapi_spec', request=request)
     spec.components.schema('User', schema=models.UserSchema)
+    spec.components.schema('Lecture', schema=models.LectureSchema)
+    spec.components.schema('Tutorial', schema=models.TutorialSchema)
     return spec.to_dict()

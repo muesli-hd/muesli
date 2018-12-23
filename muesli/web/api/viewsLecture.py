@@ -12,11 +12,35 @@ from sqlalchemy.sql.expression import desc
           factory=context.GeneralContext,
           permission='view')  # TODO Api specific permission
 class Lecture(object):
+    """A greeting endpoint.
+
+    ---
+    x-extension: value
+    get:
+        description: some description
+        responses:
+            200:
+                description: response for 200 code
+                schema:
+                    $ref: #/definitions/LectureSchema
+    """
     def __init__(self, request, context=None):
         self.request = request
         self.db = request.db
 
     def collection_get(self):
+        """A greeting endpoint.
+
+        ---
+        x-extension: value
+        get:
+            description: some description
+            responses:
+                200:
+                    description: response for 200 code
+                    schema:
+                        $ref: #/definitions/BarBodySchema
+        """
         lectures = (
             self.db.query(models.Lecture)
             .order_by(desc(models.Lecture.term), models.Lecture.name)
@@ -29,6 +53,18 @@ class Lecture(object):
         return schema.dump(lectures)
 
     def get(self):
+        """A greeting endpoint.
+
+        ---
+        x-extension: value
+        get:
+            description: some description
+            responses:
+                200:
+                    description: response for 200 code
+                    schema:
+                        $ref: #/definitions/BarBodySchema
+        """
         lecture_id = self.request.matchdict['lecture_id']
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'), joinedload(models.Lecture.assistants), joinedload(models.Lecture.tutorials)).get(lecture_id)
         # TODO What are these?
