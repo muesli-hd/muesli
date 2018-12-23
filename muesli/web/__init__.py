@@ -33,6 +33,7 @@ from muesli.models import *
 from muesli.web.views import *
 from muesli.web.viewsLecture import *
 from muesli.web.viewsUser import *
+from muesli.web.viewsApi import *
 from muesli.web.api import *
 from muesli import utils
 import muesli
@@ -41,10 +42,10 @@ import time
 import datetime
 import numbers
 
-#import objgraph
-#import inspect
-#import random
-#mport gc
+# import objgraph
+# import inspect
+# import random
+# mport gc
 
 import weakref
 
@@ -127,6 +128,10 @@ def main(global_config=None, **settings):
             'beaker.session.table': session_table,
             'beaker.session.data_dir': tempfile.mkdtemp(),
             'beaker.session.timeout': 7200,
+    })
+    # DEBUG
+    settings.update({
+        'debugtoolbar.hosts': '0.0.0.0/0',
     })
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
 
@@ -250,6 +255,16 @@ def main(global_config=None, **settings):
 
     config.include('pyramid_chameleon')
     config.include('cornice')
+
+    # Begin: config for the API-Browser
+    config.include('pyramid_apispec.views')
+    config.add_route("openapi_spec", "/openapi.json")
+    config.pyramid_apispec_add_explorer(spec_route_name='openapi_spec')
+    # End: config for the API-Browser
+
+
+    # DEBUG
+    config.include('pyramid_debugtoolbar')
 
     config.scan()
 
