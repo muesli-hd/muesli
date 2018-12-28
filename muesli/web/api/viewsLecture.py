@@ -57,13 +57,13 @@ class Lecture(object):
         # attatch db session to schema so it can be used during validation
         schema.context['session'] = self.request.db
         try:
-            schema = schema.load(self.request.json_body)
+            result = schema.load(self.request.json_body, partial=True)
         except ValidationError as e:
             self.request.errors.add('body', 'fail', e.messages)
         else:
-            # TODO mark in schema as dump_only
-            for k, v in schema.items():
+            for k, v in result.items():
                 setattr(lecture, k, v)
+                # TODO do we need to catch this exception?
             try:
                 self.db.commit()
             except exc.SQLAlchemyError:
@@ -71,3 +71,17 @@ class Lecture(object):
                 self.db.rollback()
             else:
                 return {'result': 'ok', 'update': self.get()}
+
+    @view(permission='post')  # TODO API specific permission
+    def collection_post(self):
+        schema = models.LectureSchema()
+        schema.context['session'] = self.request.db
+        try:
+            result = schema.load(self.request.json_body)
+        except ValidationError as e:
+            self.request.errors.add('body', 'fail', e.messages)
+        else:
+            lecture = models.Lecture(**result)
+            self.db.add(lecture)
+            self.db.commit()
+            return {'result': 'ok', 'created': schema.dump(lecture)}
