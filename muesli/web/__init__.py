@@ -139,7 +139,8 @@ def main(global_config=None, testmode=False, **settings):
         'debugtoolbar.hosts': '0.0.0.0/0',
     })
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
-    jwt_authentication_policy = JWTAuthenticationPolicy('secret',callback=principals_for_user) # TODO GET SECRET FROM ENV-VARS
+    jwt_secret_token = os.environ["JWT_SECRET_TOKEN"]
+    jwt_authentication_policy = JWTAuthenticationPolicy('jwt_secret_token',callback=principals_for_user)
     session_authentication_policy = SessionAuthenticationPolicy(callback=principals_for_user)
     authentication_policy = MultiAuthenticationPolicy([session_authentication_policy,jwt_authentication_policy])
 
