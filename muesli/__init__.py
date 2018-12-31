@@ -35,3 +35,7 @@ productive=True
 
 def engine():
     return create_engine(databaseName)
+
+
+def testengine():
+    return create_engine(databaseName + "test")
