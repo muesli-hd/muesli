@@ -1,11 +1,11 @@
-from cornice.resource import resource
-
+from cornice.resource import resource, view
 from muesli import models
 from muesli.web import context
 
+from sqlalchemy import inspect
 from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
-
+from marshmallow.exceptions import ValidationError
 
 @resource(collection_path='/api/lectures',
           path='/api/lectures/{lecture_id}',
@@ -85,3 +85,39 @@ class Lecture(object):
                 'subscribed': subscribed,
                 'times': times}
 
+    @view(permission='put')  # TODO API specific permission
+    def put(self):
+        lecture_id = self.request.matchdict['lecture_id']
+        lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'), joinedload(models.Lecture.assistants)).get(lecture_id)
+        schema = models.LectureSchema()
+        # attatch db session to schema so it can be used during validation
+        schema.context['session'] = self.request.db
+        try:
+            result = schema.load(self.request.json_body, partial=True)
+        except ValidationError as e:
+            self.request.errors.add('body', 'fail', e.messages)
+        else:
+            for k, v in result.items():
+                setattr(lecture, k, v)
+                # TODO do we need to catch this exception?
+            try:
+                self.db.commit()
+            except exc.SQLAlchemyError:
+                # TODO better exception
+                self.db.rollback()
+            else:
+                return {'result': 'ok', 'update': self.get()}
+
+    @view(permission='post')  # TODO API specific permission
+    def collection_post(self):
+        schema = models.LectureSchema()
+        schema.context['session'] = self.request.db
+        try:
+            result = schema.load(self.request.json_body)
+        except ValidationError as e:
+            self.request.errors.add('body', 'fail', e.messages)
+        else:
+            lecture = models.Lecture(**result)
+            self.db.add(lecture)
+            self.db.commit()
+            return {'result': 'ok', 'created': schema.dump(lecture)}

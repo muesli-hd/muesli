@@ -31,10 +31,11 @@ import sqlalchemy as sa
 import sqlalchemy.ext.declarative
 from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, String, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table, text
 from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
-from muesli.types import *
-from muesli.utils import DictOfObjects, AutoVivification, editOwnTutorials, listStrings
+from muesli.types import Term, TutorialTime, ColumnWrapper
+from muesli.utils import DictOfObjects, AutoVivification, editOwnTutorials, listStrings, getTerms
 
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, pre_load, post_load
+from marshmallow.exceptions import ValidationError
 
 from sqlalchemy.dialects.sqlite.base import SQLiteDialect
 from sqlalchemy.interfaces import PoolListener
@@ -648,7 +649,7 @@ class StudentGrade(Base):
 
 
 class UserSchema(Schema):
-    id = fields.Integer()
+    id = fields.Integer(dump_only=True)
     email = fields.Email()
     first_name = fields.String()
     last_name = fields.String()
@@ -656,39 +657,66 @@ class UserSchema(Schema):
     birth_date = fields.String()
     birth_place = fields.String()
     subject = fields.String()
-    # TODO rest
+    #TODO Rest
+
+#TODO MANY???!?
+    @post_load()
+    def get_user(self, data):
+        # TODO check also by mail because it's unique
+        usr = self.context['session'].query(User).filter(User.email == data["email"]).one()
+        if usr is None:
+            raise ValidationError("User not found")
+        return usr
 
 
 class TutorialSchema(Schema):
-    id = fields.Integer()
+    id = fields.Integer(dump_only=True)
     place = fields.String()
     time = fields.Method("get_time")
     max_students = fields.Integer()
     tutor = fields.Nested(
         UserSchema, only=['first_name', 'last_name', 'email'])
     comment = fields.String()
+    students = fields.Nested(UserSchema, many=True, only=['first_name', 'last_name', 'email'])
+    student_count = fields.Method("get_student_num")
     # TODO rest
+
     def get_time(self, obj):
         return obj.time.__html__()
 
+    def get_student_num(self, obj):
+        return obj.students.count()
+
 
 class LectureSchema(Schema):
-    id = fields.Integer()
-    assistant_id = fields.Integer()
+    id = fields.Integer(dump_only=True)
     assistants = fields.Nested(
-        UserSchema, many=True, only=['first_name', 'last_name', 'email'])
-    name = fields.String()
-    type = fields.String()
-    term = fields.Method("get_term")
+        UserSchema, required=True, many=True, only=['first_name', 'last_name', 'email'])
+    name = fields.String(required=True)
+    type = fields.String()  # per default lecture
+    term = fields.Method("get_term", deserialize="load_term")
     lsf_id = fields.String()
     lecturer = fields.String()
     url = fields.Url()
+    password = fields.String()
     is_visible = fields.Boolean()
     tutorials = fields.Nested(TutorialSchema, many=True)
     tutors = fields.Nested(UserSchema, many=True)
 
     def get_term(self, obj):
         return obj.term.__html__()
+
+    def load_term(self, value):
+        term = [Term(str(value)), Term(str(value))]
+        if term in getTerms():
+            return term[0]
+
+
+class ExerciseSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    exam_id = fields.Integer()
+    nr = fields.Integer()
+    maxpoints = fields.Float()
 
 
 class Client(Base):
