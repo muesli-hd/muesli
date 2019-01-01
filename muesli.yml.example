@@ -100,3 +100,5 @@ default_language: de
 View::Email:
   envelope_from: "no-reply@mathi.uni-heidelberg.de"
 
+api:
+  key_expiration: 30
