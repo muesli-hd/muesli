@@ -181,20 +181,27 @@ def changelog(request):
 
 @view_config(context=pyramid.exceptions.HTTPForbidden)
 def forbidden(exc, request):
-    request.response.status=403
-    if "application/json" in request.headers.environ["HTTP_ACCEPT"]:
-        return render_to_response("json",
-                                  {'error': "Sie haben nicht die nötigen Rechte um auf diese Seite zuzugreifen!",
-                                  'route': request.path},
-                                  )
-    return render_to_response('muesli.web:templates/forbidden.pt',
-                              {},
-                              request=request)
+    try:
+        if "application/json" in request.headers.environ["HTTP_ACCEPT"]:
+            response = render_to_response("json",
+                                          {'error': "Sie haben nicht die nötigen Rechte um auf diese Seite zuzugreifen!",
+                                           'route': request.path},
+                                          )
+            response.status = 403
+            return response
+    except KeyError:
+        pass
+    response = render_to_response('muesli.web:templates/forbidden.pt',
+                                  {},
+                                  request=request)
+    response.status = 403
+    return response
+
 
 ###################################
 ###################################
 ###################################
-@view_config(context=Exception, renderer="json")
+@view_config(context=Exception)
 def internalServerError(exc, request):
     if not muesli.productive:
         print("TRYING TO RECONSTRUCT EXCEPTION")
@@ -204,12 +211,15 @@ def internalServerError(exc, request):
     now = datetime.datetime.now().strftime("%d. %B %Y, %H:%M Uhr")
     traceback.print_exc()
     email = request.user.email if request.user else '<nobody>'
-    if "application/json" in request.headers.environ["HTTP_ACCEPT"]:
-        return render_to_response("json", {'time': now, 'user': email,
-                                  'contact': request.config['contact']['email'],
-                                  'error': "Bei der Beabeitung ist ein interner Fehler aufgetreten!",
-                                  'route': request.path},
-                                  )
+    try:
+        if "application/json" in request.headers.environ["HTTP_ACCEPT"]:
+            return render_to_response("json", {'time': now, 'user': email,
+                                      'contact': request.config['contact']['email'],
+                                      'error': "Bei der Beabeitung ist ein interner Fehler aufgetreten!",
+                                      'route': request.path},
+                                      )
+    except KeyError:
+        pass
     return render_to_response('muesli.web:templates/error.pt',
                               {'now': now, 'email': email},
                               request=request)
