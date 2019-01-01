@@ -1,1 +1,2 @@
 Authorization: JWT eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NDYyNjAyMDIsImFkbWluIjoxLCJzdWIiOjY3MjA4fQ.ZKKnHLVJ4xUA7Tsz-HzUAKKcCsNUtzruvrvrj9xlISZNqPjuFhnMCjkikUiwi8OfQjyl1wrq4j2b8yIL-lDWIA
+Accept: application/json

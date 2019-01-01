@@ -30,6 +30,7 @@ from pyramid import security
 from pyramid.view import view_config
 from pyramid.response import Response, FileResponse
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPInternalServerError, HTTPFound
+from pyramid.renderers import render_to_response, get_renderer
 import pyramid.exceptions
 from pyramid.url import route_url
 from sqlalchemy.orm import exc, joinedload
@@ -39,6 +40,7 @@ import re
 import os
 import datetime
 import traceback
+
 
 @view_config(route_name='start', renderer='muesli.web:templates/start.pt')
 def start(request):
@@ -177,26 +179,40 @@ def changelog(request):
     return {'entries': entries}
 
 
-@view_config(context=pyramid.exceptions.HTTPForbidden, renderer='muesli.web:templates/forbidden.pt')
+@view_config(context=pyramid.exceptions.HTTPForbidden)
 def forbidden(exc, request):
     request.response.status=403
-    return {}
+    if "application/json" in request.headers.environ["HTTP_ACCEPT"]:
+        return render_to_response("json",
+                                  {'error': "Sie haben nicht die nötigen Rechte um auf diese Seite zuzugreifen!",
+                                  'route': request.path},
+                                  )
+    return render_to_response('muesli.web:templates/forbidden.pt',
+                              {},
+                              request=request)
 
 ###################################
 ###################################
 ###################################
-@view_config(context = Exception, renderer='muesli.web:templates/error.pt')
+@view_config(context=Exception, renderer="json")
 def internalServerError(exc, request):
     if not muesli.productive:
         print("TRYING TO RECONSTRUCT EXCEPTION")
         traceback.print_exc()
         print("RAISING ANYHOW")
         raise exc
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().strftime("%d. %B %Y, %H:%M Uhr")
     traceback.print_exc()
     email = request.user.email if request.user else '<nobody>'
-    return {'now': now,
-            'email': email}
+    if "application/json" in request.headers.environ["HTTP_ACCEPT"]:
+        return render_to_response("json", {'time': now, 'user': email,
+                                  'contact': request.config['contact']['email'],
+                                  'error': "Bei der Beabeitung ist ein interner Fehler aufgetreten!",
+                                  'route': request.path},
+                                  )
+    return render_to_response('muesli.web:templates/error.pt',
+                              {'now': now, 'email': email},
+                              request=request)
 
 
 @view_config(name="favicon.ico")

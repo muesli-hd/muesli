@@ -513,7 +513,6 @@ def list_auth_keys(request):
                                   )
         request.db.add(dummy_key)
         request.db.commit()
-
     tokens = (request.db.query(models.BearerToken)
                  .filter_by(user_id=request.user.id).all())
     for token in tokens:
