@@ -71,6 +71,21 @@ def debug_login(request):
             'result': 'error'
         }
 
+@view_config(route_name='debug_login', renderer='json', request_method='GET')
+def refresh(request):
+    user = request.db.query(models.User).get(request.authenticated_userid)
+    print(user.id)
+    if user:
+        return {
+            'result': 'ok',
+            'token': request.create_jwt_token(user.id, admin=(user.is_admin))
+        }
+    else:
+        return {
+            'result': 'error'
+        }
+
+
 
 @view_config(route_name='user_logout')
 def logout(request):
@@ -187,7 +202,7 @@ def delete(request):
 
 @view_config(route_name='user_delete_unconfirmed', renderer='muesli.web:templates/user/delete_unconfirmed.pt', context=context.GeneralContext, permission='admin')
 def deleteUnconfirmed(request):
-    potentially_bad_students = request.db.query(models.User).filter(models.User.password is None).all()
+    potentially_bad_students = request.db.query(models.User).filter(models.User.password == None).all()
     bad_students = []
     # We delete everything older than 30 days
     limit = datetime.datetime.now() - datetime.timedelta(30)
