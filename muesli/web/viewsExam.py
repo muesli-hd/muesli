@@ -206,7 +206,7 @@ class EnterPointsBasic(object):
         else:
             statistics = exam.getStatistics(students=students)
         if not self.raw:
-            self.request.javascript.add('prototype.js')
+            self.request.javascript.append('prototype.js')
         return {'exam': exam,
                 'tutorial_ids': self.request.matchdict['tutorial_ids'],
                 'students': students,
@@ -381,7 +381,7 @@ def statistics(request):
         for i,q in enumerate(exam.getQuantils(students=tutorialstudents)):
             quantils[i]['tutorial'] = q
         #quantils['tutorials'] = exam.getQuantils(students=tutorialstudents)
-    request.javascript.add('prototype.js')
+    request.javascript.append('prototype.js')
     #pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
     #points = DictOfObjects(lambda: {})
     #for point in pointsQuery:
@@ -571,8 +571,8 @@ class Correlation(MatplotlibView):
 def enterPointsSingle(request):
     exam = request.context.exam
     exercises = exam.exercises
-    request.javascript.add('prototype.js')
-    request.javascript.add('scriptaculous/scriptaculous.js')
+    request.javascript.append('prototype.js')
+    request.javascript.append('scriptaculous/scriptaculous.js')
     show_tutor = not request.context.tutorials
     show_time = (not request.context.tutorials) or len(request.context.tutorials) > 1
     code = """
