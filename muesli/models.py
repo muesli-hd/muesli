@@ -719,40 +719,17 @@ class ExerciseSchema(Schema):
     maxpoints = fields.Float()
 
 
-class Client(Base):
-    __tablename__ = 'clients'
-    id = Column(String(100), primary_key=True, unique=True)
-    name = Column(Text)
-    description = Column(Text)
-    user_id = Column(ForeignKey(User.id))
-    user = relationship(User)
-    grant_type = Column(String(18), CheckConstraint('grant_type == "authorization_code"'))
-    response_type = Column(String(4), CheckConstraint('response_type == "code"'))
-    scopes = Column(Text)
-    redirect_urls = Column(Text)
-
-
 class BearerToken(Base):
     __tablename__ = 'bearertokens'
     id = Column(Integer, primary_key=True)
-    client_id = Column(ForeignKey(Client.id))
-    client = relationship(Client)
+    client = Column(Text)
     user_id = Column(ForeignKey(User.id))
     user = relationship(User)
     scopes = Column(Text)
     access_token = Column(String(100), unique=True)
     refresh_token = Column(String(100), unique=True)
     expires = Column(DateTime)
-    description = Column(String(20))
+    description = Column(Text)
+    revoked = Column(Boolean, default=False)
 
 
-class AuthCode(Base):
-    __tablename__ = 'authcode'
-    id = Column(Integer, primary_key=True)
-    client_id = Column(ForeignKey(Client.id))
-    client = relationship(Client)
-    user_id = Column(ForeignKey(User.id))
-    user = relationship(User)
-    scopes = Column(Text)
-    code = Column(String(100), unique=True)
-    expires = Column(DateTime)
