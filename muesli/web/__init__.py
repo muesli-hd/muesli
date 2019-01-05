@@ -85,7 +85,7 @@ def add_session_to_request(event):
     #event.request.gc = gc
 @subscriber(NewRequest)
 def add_javascript_to_request(event):
-    event.request.javascript = set()
+    event.request.javascript = list()
 
 @subscriber(NewRequest)
 def add_config_to_request(event):
