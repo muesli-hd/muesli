@@ -571,191 +571,41 @@ class Correlation(MatplotlibView):
 def enterPointsSingle(request):
     exam = request.context.exam
     exercises = exam.exercises
-#    request.javascript.append('prototype.js')
-#    request.javascript.append('scriptaculous/scriptaculous.js')
+    request.javascript.append('prototype.js')
+    request.javascript.append('jquery/jquery.min.js')
+    request.javascript.append('jquery/select2.min.js')
     show_tutor = not request.context.tutorials
     show_time = (not request.context.tutorials) or len(request.context.tutorials) > 1
 
     lecture_students = exam.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)
     students = [ls.student for ls in lecture_students]
-
     code = """
-var current_row_counter = 0;
-var currentrow = 0;
-
-function processkey(row,event) {
-if (event.keyCode == 13) {
-  submit_points(row);
-} else {
-}
-}
-
-function student_selected() {
-if ($('student_hidden').value == '') {
-  return;
-}
-var table = $('enter_points_table');
-var rows = table.rows.length;
-currentrow = rows;
-var tr = table.insertRow(rows);
-tr.id = 'row-'+rows;
-tr.onkeypress = function(event) {processkey(rows,event);};
-"""
-    if show_tutor:
-        code += """
-var td_tutor = document.createElement('td');
-td_tutor.id = 'tutor-'+rows;
-tr.appendChild(td_tutor);
-"""
-    if show_time:
-        code += """
-var td_time = document.createElement('td');
-td_time.id = 'time-'+rows;
-tr.appendChild(td_time);
-"""
-    if show_tutor or show_time:
-        code += """
-var parameterHash = new Hash();
-parameterHash.set('student_id', $('student_hidden').value);
-new Ajax.Request('%s', {
-parameters: parameterHash,
-onComplete:function(transport){
-""" % (request.route_path('tutorial_ajax_get_tutorial', lecture_id = request.context.exam.lecture_id))
-        if show_tutor: code += """
-  $('tutor-'+rows).innerHTML = transport.responseJSON['tutor'];
-"""
-        if show_time: code += """
-  $('time-'+rows).innerHTML = transport.responseJSON['time'];
-"""
-        code += """
-}
-}
-);
-"""
-    code += """
-var td_student_name = document.createElement('td');
-var input_student_id = document.createElement('input');
-input_student_id.type = 'hidden';
-input_student_id.id = 'id-'+rows;
-input_student_id.value = $('student_hidden').value;
-td_student_name.innerHTML = $('student').value;
-td_student_name.appendChild(input_student_id);
-tr.appendChild(td_student_name);
-var td_exercise;
-var input_exercise;
-"""
+function submit_points(student_id) {
+    var parameterHash = new Hash();
+    parameterHash.set('student_id', student_id);
+    var current_input;
+    """
     for e in exercises:
         code += """
-td_exercise = document.createElement('td');
-tr.appendChild(td_exercise);
-input_exercise = document.createElement('input');
-td_exercise.appendChild(input_exercise);
-input_exercise.id = 'points-'+rows+'-%s';
-input_exercise.onchange = function(event) {update_total(rows)};
-input_exercise.className = 'points';
-input_exercise.size = 3;
-""" % (e.id)
+    current_input = document.getElementsByName('points-%s')[0];
+    parameterHash.set('points-%s', current_input.value);
+    """ %(e.nr, e.id)
     code += """
-var td_sum = document.createElement('td');
-tr.appendChild(td_sum);
-var sum_input = document.createElement('input');
-sum_input.id = 'total-'+rows;
-sum_input.readOnly = true;
-sum_input.size=4;
-td_sum.appendChild(sum_input);
-var td_button = document.createElement('td');
-tr.appendChild(td_button);
-var button_save = document.createElement('input');
-button_save.id = 'button-save-'+rows;
-button_save.type = 'button';
-button_save.value = 'Abspeichern';
-button_save.onclick = function() {submit_points(rows);};
-td_button.appendChild(button_save);
-var button_correct = document.createElement('input');
-button_correct.id = 'button-correct-'+rows;
-button_correct.type = 'button';
-button_correct.value = 'Korrigieren';
-button_correct.onclick = function() {correct_points(rows);};
-button_correct.hide();
-td_button.appendChild(button_correct);
-var td_status = document.createElement('td');
-tr.appendChild(td_status);
-td_status.id = 'status-'+rows;
-var getParameterHash = new Hash();
-getParameterHash.set('student_id', $('student_hidden').value);
-"""
-    code += """
-new Ajax.Request('%s', {
-""" % (request.route_path('exam_ajax_get_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str))
-    code += """
-    parameters: getParameterHash,
-    onComplete:function(transport){
-"""
-    for e in exercises:
-        code += """
-  if ($('points-'+rows+'-%s').value == '') {
-    var value = transport.responseJSON['points']['%s'];
-    if (value == null)
-      value = '';
-    $('points-'+rows+'-%s').value = value;
-  }
-""" % (e.id, e.id, e.id)
-    code += """
-      update_total(rows);
+    var status = 0;
+    new Ajax.Request('%s', {
+        parameters: parameterHash,
+        onSuccess:function(transport){
+        status = 0;
+        },
+        onFailure:function(transport){
+        status = 1;
+        }
     }
-  }
-);
+    );
+    return status;
+}
+    """  % request.route_path('exam_ajax_save_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)
 
-$('select_student_form').hide();
-$('points-'+rows+'-%s').focus();
-}
-""" % (exercises[0].id)
-    code += """
-
-function submit_points(row) {
-$('select_student_form').show();
-var parameterHash = new Hash();
-parameterHash.set('student_id', $('id-'+row).value);
-var current_input;
-"""
-    for e in exercises:
-        code += """
-current_input = $('points-'+row+'-%s');
-parameterHash.set('points-%s', current_input.value);
-current_input.readOnly = true;
-""" %(e.id, e.id)
-    code += """
-$('button-save-'+row).hide();
-$('button-correct-'+row).show();
-$('status-'+row).innerHTML = 'saving...';
-new Ajax.Request('%s', {
-    parameters: parameterHash,
-    onSuccess:function(transport){
-      $('status-'+row).innerHTML = transport.responseJSON['msg'];//'transmitted';
-    },
-    onFailure:function(transport){
-      $('status-'+row).innerHTML = 'failed';
-    }
-  }
-);
-$('student_hidden').value = '';
-$('student').value = '';
-$('student').focus();
-}
-""" % request.route_path('exam_ajax_save_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)
-    code += """
-function correct_points(row) {
-$('button-correct-'+row).hide();
-"""
-    for e in exercises:
-        code += """
-$('points-'+row+'-%s').readOnly = false;
-""" % e.id
-    code += """
-$('status-'+row).innerHTML = '';
-$('button-save-'+row).show();
-}
-"""
     return {
             'code': code,
             'students': students,

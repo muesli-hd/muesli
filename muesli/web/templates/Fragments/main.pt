@@ -10,6 +10,7 @@
   <title>MÜSLI</title>
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/muesli.css')"></link>
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/fancybox/jquery.fancybox.css')"></link>
+  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/select2.min.css')"></link>
   <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
 </head>
 <body>
