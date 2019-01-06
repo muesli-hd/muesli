@@ -518,7 +518,7 @@ def list_auth_keys(request):
         request.session.flash("Ihr API Token: {0}".format(jwt_token), queue='messages')
         request.db.commit()
     tokens = (request.db.query(models.BearerToken)
-                 .filter_by(user_id=request.user.id).all())
+                 .filter_by(user_id=request.user.id).filter(models.BearerToken.revoked == False).all())
     for token in tokens:
         token.expires = token.expires.strftime("%d. %B %Y, %H:%M Uhr")
         if not token.description:
@@ -539,7 +539,8 @@ def removeKey(request):
     if not api_key:
         request.session.flash('API Key nicht gefunden', queue='errors')
     else:
-        request.db.delete(api_key)
+        api_key.revoked = True
+        request.db.add(api_key)
         request.db.commit()
         request.session.flash('API Key entfernt ', queue='messages')
     if request.referrer:

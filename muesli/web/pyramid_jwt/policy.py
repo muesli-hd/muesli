@@ -31,7 +31,7 @@ import jwt
 from zope.interface import implementer
 from pyramid.authentication import CallbackAuthenticationPolicy
 from pyramid.interfaces import IAuthenticationPolicy
-
+from muesli import models
 
 log = logging.getLogger('pyramid_jwt')
 marker = []
@@ -98,7 +98,10 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             claims = jwt.decode(token, self.public_key, algorithms=[self.algorithm],
                                 leeway=self.leeway, audience=self.audience)
             print(claims)
-            return claims
+            if request.db.query(models.BearerToken).get(claims["jti"]).revoked:
+                return {}
+            else:
+                return claims
         except jwt.InvalidTokenError as e:
             log.warning('Invalid JWT token from %s: %s', request.remote_addr, e)
             return {}
