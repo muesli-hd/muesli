@@ -579,6 +579,7 @@ def enterPointsSingle(request):
 
     lecture_students = exam.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)
     students = [ls.student for ls in lecture_students]
+
     code = """
 function submit_points(student_id) {
     var parameterHash = new Hash();

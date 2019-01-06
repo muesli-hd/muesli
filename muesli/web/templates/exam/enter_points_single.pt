@@ -103,7 +103,7 @@ ${code}
     <td tal:condition="show_time">Zeit</td>
     <td>
         <select class="student_select" name="students" multiple="multiple">
-            <option tal:repeat="student students" value="${student.id}">${student.last_name}, ${student.first_name}</option>
+            <option tal:repeat="student students" value="${student.id}">${student.last_name}, ${student.first_name} (${student.matrikel})</option>
         </select>
     </td>
     <td tal:repeat="e exercises"><input type="text" class="points" name="points-${e.nr}" size="3" onchange="update_total() "></td>
