@@ -25,6 +25,7 @@ from muesli import utils
 from muesli.web import forms
 from muesli.web import context
 from muesli.types import Term
+import muesli
 
 from pyramid import security
 from pyramid.view import view_config
@@ -60,7 +61,6 @@ def login(request):
 @view_config(route_name='debug_login', renderer='json', request_method='POST')
 def debug_login(request):
     user = request.db.query(models.User).filter_by(email=request.POST['email'].strip(), password=sha1(request.POST['password'].encode('utf-8')).hexdigest()).first()
-    print(user.id)
     if user:
         return {
             'result': 'ok',
@@ -74,7 +74,6 @@ def debug_login(request):
 @view_config(route_name='debug_login', renderer='json', request_method='GET')
 def refresh(request):
     user = request.db.query(models.User).get(request.authenticated_userid)
-    print(user.id)
     if user:
         return {
             'result': 'ok',
@@ -507,26 +506,16 @@ def resetPassword3(request):
 def list_auth_keys(request):
     form = forms.SetAuthCodeDescription(request)
     if request.method == 'POST' and form.processPostData(request.POST):
-        try:
-            dummy_client = request.db.query(models.Client).get('1')
-        except exc.NoResultFound:
-            dummy_client = models.Client(id=1,
-                                         name="Test Client",
-                                         description="This is a test client",
-                                         user=request.user,
-                                         grant_type="authorization_code",
-                                         response_type="code",
-                                         scopes="test",
-                                         redirect_urls="/")
-            request.db.add(dummy_client)
-        dummy_key = models.BearerToken(client=dummy_client,
+        exp = datetime.timedelta(days=muesli.config["api"]["key_expiration"])
+        token = models.BearerToken(client="Personal Token",
                                    user=request.user,
-                                   scopes="test",
                                    description=form['description'],
-                                   access_token=binascii.b2a_hex(os.urandom(32)).decode("utf-8"),
-                                   expires=datetime.datetime.now()+datetime.timedelta(days=30)
+                                   expires=datetime.datetime.utcnow()+exp
                                   )
-        request.db.add(dummy_key)
+        request.db.add(token)
+        request.db.flush()
+        jwt_token = request.create_jwt_token(request.user.id, admin=(request.user.is_admin), jti=token.id, expiration=exp)
+        request.session.flash("Ihr API Token: {0}".format(jwt_token), queue='messages')
         request.db.commit()
     tokens = (request.db.query(models.BearerToken)
                  .filter_by(user_id=request.user.id).all())

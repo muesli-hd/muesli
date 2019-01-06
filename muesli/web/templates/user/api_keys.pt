@@ -14,7 +14,7 @@
     <table class="colored">
     <thead>
       <tr>
-        <th> API Key </th>
+        <th> API Key Identifier </th>
         <th> Ablaufdatum </th>
         <th> Beschreibung </th>
         <th> Entfernen </th>
@@ -22,7 +22,7 @@
     <tbody>
       <tr tal:condition="code" tal:repeat="codes code">
         <td style="font-family:monospace;font-size:1.1em;">
-            ${codes.access_token}
+            ${codes.id}
         </td>
         <td>
             ${codes.expires}
