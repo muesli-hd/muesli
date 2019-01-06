@@ -571,10 +571,14 @@ class Correlation(MatplotlibView):
 def enterPointsSingle(request):
     exam = request.context.exam
     exercises = exam.exercises
-    request.javascript.append('prototype.js')
-    request.javascript.append('scriptaculous/scriptaculous.js')
+#    request.javascript.append('prototype.js')
+#    request.javascript.append('scriptaculous/scriptaculous.js')
     show_tutor = not request.context.tutorials
     show_time = (not request.context.tutorials) or len(request.context.tutorials) > 1
+
+    lecture_students = exam.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)
+    students = [ls.student for ls in lecture_students]
+
     code = """
 var current_row_counter = 0;
 var currentrow = 0;
@@ -754,6 +758,7 @@ $('button-save-'+row).show();
 """
     return {
             'code': code,
+            'students': students,
             'exam': exam,
             'exercises': exercises,
             'tutorial_ids': request.context.tutorial_ids_str,
