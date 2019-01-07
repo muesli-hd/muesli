@@ -2,6 +2,19 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
+    <script tal:condition="freshtoken">
+      const copyToClipboard = str => {
+        if (! str == "") {
+          const el = document.createElement('textarea');
+          el.value = str;
+          document.body.appendChild(el);
+          el.select();
+          console.log("Copied JWT Token!")
+          document.execCommand('copy');
+          document.body.removeChild(el);
+        }
+      };
+    </script>
     <h2>API Keys verwalten</h2>
 
     <p>
@@ -18,6 +31,7 @@
         <th> Ablaufdatum </th>
         <th> Beschreibung </th>
         <th> Entfernen </th>
+        <th tal:condition="freshtoken"></th>
       </tr>
     <tbody>
       <tr tal:condition="code" tal:repeat="codes code">
@@ -34,6 +48,9 @@
           <form method="post" tal:attributes="action request.route_path('remove_api_key',key_id=codes.id)">
             <input type="submit" value="Entfernen"/>
           </form>
+        </td>
+        <td tal:condition="freshtoken">
+          <button tal:condition="codes.id == max([e.id for e in code])" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
         </td>
       </tr>
     </tbody>
