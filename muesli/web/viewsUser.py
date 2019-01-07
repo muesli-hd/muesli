@@ -505,6 +505,7 @@ def resetPassword3(request):
              permission='view_keys')
 def list_auth_keys(request):
     form = forms.SetAuthCodeDescription(request)
+    jwt_token = ""
     if request.method == 'POST' and form.processPostData(request.POST):
         exp = datetime.timedelta(days=muesli.config["api"]["key_expiration"])
         token = models.BearerToken(client="Personal Token",
@@ -514,8 +515,11 @@ def list_auth_keys(request):
                                   )
         request.db.add(token)
         request.db.flush()
-        jwt_token = request.create_jwt_token(request.user.id, admin=(request.user.is_admin), jti=token.id, expiration=exp)
-        request.session.flash("Ihr API Token: {0}".format(jwt_token), queue='messages')
+        jwt_token = request.create_jwt_token(request.user.id,
+                                             admin=(request.user.is_admin),
+                                             jti=token.id,
+                                             expiration=exp)
+        request.session.flash("Ihr API Token wurde erstellt!", queue='messages')
         request.db.commit()
     tokens = (request.db.query(models.BearerToken)
                  .filter_by(user_id=request.user.id).filter(models.BearerToken.revoked == False).all())
@@ -523,12 +527,11 @@ def list_auth_keys(request):
         token.expires = token.expires.strftime("%d. %B %Y, %H:%M Uhr")
         if not token.description:
             token.description = "Keine Beschreibung"
-    if tokens:
-        return {'code': tokens,
-                'form': form}
-    else:
-        return {'code': '',
-                'form': form}
+    if not tokens:
+        tokens = ""
+    return {'code': tokens,
+            'form': form,
+            'freshtoken': jwt_token}
 
 
 @view_config(route_name='remove_api_key', context=context.GeneralContext)
