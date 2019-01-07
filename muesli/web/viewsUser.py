@@ -61,10 +61,20 @@ def login(request):
 @view_config(route_name='debug_login', renderer='json', request_method='POST')
 def debug_login(request):
     user = request.db.query(models.User).filter_by(email=request.POST['email'].strip(), password=sha1(request.POST['password'].encode('utf-8')).hexdigest()).first()
+    exp = datetime.timedelta(days=muesli.config["api"]["key_expiration"])
+    token = models.BearerToken(client="Personal Token",
+                               user=user,
+                               description="Requested from API",
+                               expires=datetime.datetime.utcnow()+exp
+                               )
+    request.db.add(token)
+    request.db.flush()
+    jwt_token = request.create_jwt_token(user.id, admin=(user.is_admin), jti=token.id, expiration=exp)
+    request.db.commit()
     if user:
         return {
             'result': 'ok',
-            'token': request.create_jwt_token(user.id, admin=(user.is_admin))
+            'token': jwt_token
         }
     else:
         return {
