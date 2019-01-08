@@ -90,8 +90,6 @@ ${code}
 <input type="hidden" id="student_id" name="student_id" />
 <table id="enter_points_table">
   <tr>
-    <th tal:condition="show_tutor">Tutor</th>
-    <th tal:condition="show_time">Zeit</th>
     <th>Namen</th>
     <th tal:repeat="e exercises">${e.nr}</th>
     <th>Σ</th>
@@ -99,8 +97,6 @@ ${code}
     <th></th>
   </tr>
   <tr id="row-0">
-    <td tal:condition="show_tutor">Tutor</td>
-    <td tal:condition="show_time">Zeit</td>
     <td>
         <select class="student_select" name="students" multiple="multiple">
             <option tal:repeat="student students" value="${student.id}">${student.last_name}, ${student.first_name} (${student.matrikel})</option>
