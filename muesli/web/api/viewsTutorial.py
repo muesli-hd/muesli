@@ -24,7 +24,16 @@ class Tutorial(object):
         return schema.dump(tutorials)
 
     def get(self):
-        pass
+        #tutorial_id = self.request.matchdict['tutorial.id']
+        tutorial = self.request.user.tutorials.options(joinedload(models.Tutorial.tutor), joinedload(models.Tutorial.lecture)).filter(models.Tutorial.id==self.request.matchdict['tutorial_id']).one()
+        lecture = tutorial.lecture
+        schema = models.TutorialSchema()
+        exa = tutorial.exams
+        #visible_exams = lecture.exams.filter(((models.Exam.results_hidden==False)|(models.Exam.results_hidden==None))&(models.Exam.category=="assignment")).all()
+        ex = models.ExamSchema(many=True)
+        return ex.dump(exa)
+        return schema.dump(tutorial)
+        #tutorial = self.db.query(models.Tutorial)
         #lecture_id = self.request.matchdict['lecture_id']
         #lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'), joinedload(models.Lecture.assistants), joinedload(models.Lecture.tutorials)).get(lecture_id)
         ## TODO What are these?

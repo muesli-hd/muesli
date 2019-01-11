@@ -501,6 +501,11 @@ class Tutorial(Base):
     comment = Column(Text)
 
     @property
+    def exams(self):
+        session = Session.object_session(self)
+        return session.query(Exam).filter(Exam.lecture_id == self.lecture_id).filter((Exam.results_hidden==False)|(Exam.results_hidden==None))
+
+    @property
     def students(self):
         session = Session.object_session(self)
         return session.query(User).filter(User.lecture_students.any(LectureStudent.tutorial==self))
@@ -679,7 +684,6 @@ class TutorialSchema(Schema):
     comment = fields.String()
     students = fields.Nested(UserSchema, many=True, only=['first_name', 'last_name', 'email'])
     student_count = fields.Method("get_student_num")
-    # TODO rest
 
     def get_time(self, obj):
         return obj.time.__html__()
@@ -710,6 +714,13 @@ class LectureSchema(Schema):
         term = [Term(str(value)), Term(str(value))]
         if term in getTerms():
             return term[0]
+
+class ExamSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    lecture_id = fields.Integer(dump_only=True)
+    name = fields.String()
+    category = fields.String()  # TODO verify
+    url = fields.Url()
 
 
 class ExerciseSchema(Schema):
