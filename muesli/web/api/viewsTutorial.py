@@ -16,41 +16,21 @@ class Tutorial(object):
         self.request = request
         self.db = request.db
 
-    def collection_get(self):
+    def collection_get(self):  # Done
         tutorials = self.request.user.tutorials.options(joinedload(models.Tutorial.tutor), joinedload(models.Tutorial.lecture))
-        #allowed_attr_tutorials = ['id', 'name', 'lecturer', 'assistants', 'term']
-        # TODO Look at LectureStudent ExamStudent and Exam
-        schema = models.TutorialSchema(many=True)#, only=allowed_attr_lecture)
+        schema = models.TutorialSchema(many=True, exclude=["students"])
         return schema.dump(tutorials)
 
-    def get(self):
-        #tutorial_id = self.request.matchdict['tutorial.id']
+    def get(self):  # TODO Check if part of tutorial or allowed to view
         tutorial = self.request.user.tutorials.options(joinedload(models.Tutorial.tutor), joinedload(models.Tutorial.lecture)).filter(models.Tutorial.id==self.request.matchdict['tutorial_id']).one()
-        lecture = tutorial.lecture
-        schema = models.TutorialSchema()
-        exa = tutorial.exams
-        #visible_exams = lecture.exams.filter(((models.Exam.results_hidden==False)|(models.Exam.results_hidden==None))&(models.Exam.category=="assignment")).all()
-        ex = models.ExamSchema(many=True)
-        return ex.dump(exa)
-        return schema.dump(tutorial)
-        #tutorial = self.db.query(models.Tutorial)
-        #lecture_id = self.request.matchdict['lecture_id']
-        #lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'), joinedload(models.Lecture.assistants), joinedload(models.Lecture.tutorials)).get(lecture_id)
-        ## TODO What are these?
-        #times = lecture.prepareTimePreferences(user=self.request.user)
-        #subscribed = self.request.user.id in [s.id for s in lecture.students]
-        #allowed_attr_lecture = [
-        #    'id',
-        #    'name',
-        #    'lecturer',
-        #    'assistants',
-        #    'term',
-        #    'url',
-        #    'tutorials',
-        #]
+        exa = tutorial.lecture.exams.filter((models.Exam.results_hidden==False)|(models.Exam.results_hidden==None))
+        if True:  # TODO CHECK IF TUTOR/ASSISTANT
+            tut_schema = models.TutorialSchema()
+        else:
+            tut_schema = models.TutorialSchema(exclude=["students"])
+        exam_schema = models.ExamSchema(many=True, only=["id", "name"])
 
-        #schema = models.LectureSchema(only=allowed_attr_lecture)
-        #return {'lecture': schema.dump(lecture),
-        #        'subscribed': subscribed,
-        #        'times': times}
+        result = tut_schema.dump(tutorial)
+        result.update({"exams": exam_schema.dump(exa)})
+        return result
 

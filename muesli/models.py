@@ -499,12 +499,7 @@ class Tutorial(Base):
     place = Column(Text)
     max_students = Column(Integer, nullable=False, default=0)
     comment = Column(Text)
-
-    @property
-    def exams(self):
-        session = Session.object_session(self)
-        return session.query(Exam).filter(Exam.lecture_id == self.lecture_id).filter((Exam.results_hidden==False)|(Exam.results_hidden==None))
-
+    
     @property
     def students(self):
         session = Session.object_session(self)
@@ -682,7 +677,7 @@ class TutorialSchema(Schema):
     tutor = fields.Nested(
         UserSchema, only=['first_name', 'last_name', 'email'])
     comment = fields.String()
-    students = fields.Nested(UserSchema, many=True, only=['first_name', 'last_name', 'email'])
+    students = fields.Nested(UserSchema, many=True, only=['first_name', 'last_name', 'email', 'id'])
     student_count = fields.Method("get_student_num")
 
     def get_time(self, obj):
@@ -715,6 +710,7 @@ class LectureSchema(Schema):
         if term in getTerms():
             return term[0]
 
+
 class ExamSchema(Schema):
     id = fields.Integer(dump_only=True)
     lecture_id = fields.Integer(dump_only=True)
@@ -728,6 +724,12 @@ class ExerciseSchema(Schema):
     exam_id = fields.Integer()
     nr = fields.Integer()
     maxpoints = fields.Float()
+
+
+class ExerciseStudentSchema(Schema):
+    #exercise = fields.Nested(ExerciseSchema)
+    student = fields.Nested(UserSchema, only=['first_name', 'last_name', 'email', 'id'])
+    points = fields.Float()
 
 
 class BearerToken(Base):
