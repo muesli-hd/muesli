@@ -159,7 +159,7 @@ def results(request):
     request.javascript.add('jquery/jquery.min.js')
     request.javascript.add('jquery/jquery.tablesorter.min.js')
     return {'tutorials': tutorials,
-            'tutorial_ids': request.context.tutorial_ids,
+            'tutorial_ids': request.context.tutorial_ids_str,
             'lecture_students': lecture_students,
             'results': results,
             'names': request.config['lecture_types'][lecture.type],
