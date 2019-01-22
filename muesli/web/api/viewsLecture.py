@@ -1,45 +1,41 @@
 from cornice.resource import resource, view
 from muesli import models
 from muesli.web import context
+from muesli.web.api import allowed_attributes
 
 from sqlalchemy import inspect
 from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
 from marshmallow.exceptions import ValidationError
 
+
 @resource(collection_path='/api/lectures',
           path='/api/lectures/{lecture_id}',
           factory=context.GeneralContext,
           permission='view')  # TODO Api specific permission
 class Lecture(object):
-    """A greeting endpoint.
-
-    ---
-    x-extension: value
-    get:
-        description: some description
-        responses:
-            200:
-                description: response for 200 code
-                schema:
-                    $ref: #/definitions/LectureSchema
-    """
     def __init__(self, request, context=None):
         self.request = request
         self.db = request.db
 
     def collection_get(self):
-        """A greeting endpoint.
-
+        """
         ---
-        x-extension: value
         get:
-            description: some description
-            responses:
-                200:
-                    description: response for 200 code
-                    schema:
-                        $ref: #/definitions/BarBodySchema
+          tags:
+            - "Muesli API"
+          summary: "return all lectures"
+          description: ""
+          operationId: "lecture_get"
+          consumes:
+            - "application/json"
+          produces:
+            - "application/json"
+          responses:
+            200:
+              description: "response for 200 code"
+              schema:
+                $ref: "#/definitions/CollectionLecture"
         """
         lectures = (
             self.db.query(models.Lecture)
@@ -48,39 +44,32 @@ class Lecture(object):
             .filter(models.Lecture.is_visible == True) # noqa
             .all()
         )
-        allowed_attr_lecture = ['id', 'name', 'lecturer', 'assistants', 'term']
-        schema = models.LectureSchema(many=True, only=allowed_attr_lecture)
+        schema = models.LectureSchema(many=True, only=allowed_attributes.collection_lecture())
         return schema.dump(lectures)
 
     def get(self):
-        """A greeting endpoint.
-
+        """
         ---
-        x-extension: value
         get:
-            description: some description
-            responses:
-                200:
-                    description: response for 200 code
-                    schema:
-                        $ref: #/definitions/BarBodySchema
+          tags:
+            - "Muesli API"
+          summary: "return a specific lecture"
+          description: ""
+          operationId: "lecture_get"
+          produces:
+            - "application/json"
+          responses:
+            200:
+              description: response for 200 code
+              schema:
+                $ref: "#/definitions/Lecture"
         """
         lecture_id = self.request.matchdict['lecture_id']
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'), joinedload(models.Lecture.assistants), joinedload(models.Lecture.tutorials)).get(lecture_id)
         # TODO What are these?
         times = lecture.prepareTimePreferences(user=self.request.user)
         subscribed = self.request.user.id in [s.id for s in lecture.students]
-        allowed_attr_lecture = [
-            'id',
-            'name',
-            'lecturer',
-            'assistants',
-            'term',
-            'url',
-            'tutorials',
-        ]
-
-        schema = models.LectureSchema(only=allowed_attr_lecture)
+        schema = models.LectureSchema(only=allowed_attributes.lecture())
         return {'lecture': schema.dump(lecture),
                 'subscribed': subscribed,
                 'times': times}

@@ -19,11 +19,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 from pyramid.view import view_config
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from pyramid_apispec.helpers import add_pyramid_paths
 from muesli import models
+from muesli.web.api import allowed_attributes
 
 
 @view_config(route_name='openapi_spec', renderer='json')
@@ -37,8 +39,8 @@ def api_spec(request):
     """
     spec = APISpec(
         title='MÜSLI-API',
-        version='1.0.0',
-        openapi_version='3.0.0',
+        version='0.0.1',
+        openapi_version='2.0.0',
         plugins=[
             MarshmallowPlugin()
         ]
@@ -46,7 +48,10 @@ def api_spec(request):
     add_pyramid_paths(spec, 'collection_lecture', request=request)
     add_pyramid_paths(spec, 'lecture', request=request)
     add_pyramid_paths(spec, 'openapi_spec', request=request)
-    spec.components.schema('User', schema=models.UserSchema)
-    spec.components.schema('Lecture', schema=models.LectureSchema)
+    spec.components.schema('User',
+            schema=models.UserSchema(only=allowed_attributes.user()))
+    spec.components.schema('Lecture', schema=models.LectureSchema(only=allowed_attributes.lecture()))
+    spec.components.schema('CollectionLecture',
+            schema=models.LectureSchema(only=allowed_attributes.collection_lecture()))
     spec.components.schema('Tutorial', schema=models.TutorialSchema)
     return spec.to_dict()

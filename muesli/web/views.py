@@ -184,10 +184,11 @@ def forbidden(exc, request):
     try:
         if "application/json" in request.headers.environ["HTTP_ACCEPT"]:
             response = render_to_response("json",
-                                          {'error': "Sie haben nicht die nötigen Rechte um auf diese Seite zuzugreifen!",
+                                          {'error': "Sie haben nicht die noetigen Rechte um auf diese Seite zuzugreifen!",
                                            'route': request.path},
                                           )
             response.status = 403
+            response.content_type = "application/json"
             return response
     except KeyError:
         pass
@@ -213,11 +214,13 @@ def internalServerError(exc, request):
     email = request.user.email if request.user else '<nobody>'
     try:
         if "application/json" in request.headers.environ["HTTP_ACCEPT"]:
-            return render_to_response("json", {'time': now, 'user': email,
-                                      'contact': request.config['contact']['email'],
-                                      'error': "Bei der Beabeitung ist ein interner Fehler aufgetreten!",
-                                      'route': request.path},
-                                      )
+            response = render_to_response("json", {'time': now, 'user': email,
+                                                   'contact': request.config['contact']['email'],
+                                                   'error': "Bei der Beabeitung ist ein interner Fehler aufgetreten!",
+                                                   'route': request.path},
+                                          )
+            response.content_type = "application/json"
+            return response
     except KeyError:
         pass
     return render_to_response('muesli.web:templates/error.pt',

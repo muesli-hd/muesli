@@ -33,6 +33,7 @@ from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, String, Intege
 from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
 from muesli.types import Term, TutorialTime, ColumnWrapper
 from muesli.utils import DictOfObjects, AutoVivification, editOwnTutorials, listStrings, getTerms
+from muesli.web.api import allowed_attributes
 
 from marshmallow import Schema, fields, pre_load, post_load
 from marshmallow.exceptions import ValidationError
@@ -675,9 +676,9 @@ class TutorialSchema(Schema):
     time = fields.Method("get_time")
     max_students = fields.Integer()
     tutor = fields.Nested(
-        UserSchema, only=['first_name', 'last_name', 'email'])
+        UserSchema, only=allowed_attributes.user())
     comment = fields.String()
-    students = fields.Nested(UserSchema, many=True, only=['first_name', 'last_name', 'email'])
+    students = fields.Nested(UserSchema, many=True, only=allowed_attributes.user())
     student_count = fields.Method("get_student_num")
     # TODO rest
 
@@ -690,8 +691,7 @@ class TutorialSchema(Schema):
 
 class LectureSchema(Schema):
     id = fields.Integer(dump_only=True)
-    assistants = fields.Nested(
-        UserSchema, required=True, many=True, only=['first_name', 'last_name', 'email'])
+    assistants = fields.Nested(UserSchema, required=True, many=True, only=allowed_attributes.user())
     name = fields.String(required=True)
     type = fields.String()  # per default lecture
     term = fields.Method("get_term", deserialize="load_term")
