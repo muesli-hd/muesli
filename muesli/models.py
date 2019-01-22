@@ -500,7 +500,7 @@ class Tutorial(Base):
     place = Column(Text)
     max_students = Column(Integer, nullable=False, default=0)
     comment = Column(Text)
-
+    
     @property
     def students(self):
         session = Session.object_session(self)
@@ -680,7 +680,6 @@ class TutorialSchema(Schema):
     comment = fields.String()
     students = fields.Nested(UserSchema, many=True, only=allowed_attributes.user())
     student_count = fields.Method("get_student_num")
-    # TODO rest
 
     def get_time(self, obj):
         return obj.time.__html__()
@@ -712,11 +711,25 @@ class LectureSchema(Schema):
             return term[0]
 
 
+class ExamSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    lecture_id = fields.Integer(dump_only=True)
+    name = fields.String()
+    category = fields.String()  # TODO verify
+    url = fields.Url()
+
+
 class ExerciseSchema(Schema):
     id = fields.Integer(dump_only=True)
     exam_id = fields.Integer()
     nr = fields.Integer()
     maxpoints = fields.Float()
+
+
+class ExerciseStudentSchema(Schema):
+    #exercise = fields.Nested(ExerciseSchema)
+    student = fields.Nested(UserSchema, only=['first_name', 'last_name', 'email', 'id'])
+    points = fields.Float()
 
 
 class BearerToken(Base):
