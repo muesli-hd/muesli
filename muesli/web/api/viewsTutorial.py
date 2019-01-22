@@ -9,8 +9,8 @@ from sqlalchemy.sql.expression import desc
 
 @resource(collection_path='/api/tutorials',
           path='/api/tutorials/{tutorial_id}',
-          factory=context.GeneralContext,
-          permission='view')  # TODO Api specific permission
+          factory=context.TutorialContext,
+          permission='viewOverview')  # TODO Api specific permission
 class Tutorial(object):
     def __init__(self, request, context=None):
         self.request = request

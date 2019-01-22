@@ -2,15 +2,15 @@ from cornice.resource import resource, view
 from muesli import models
 from muesli.web import context
 
-from sqlalchemy import inspect
 from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
 from marshmallow.exceptions import ValidationError
+from pyramid.view import view_config
+
 
 @resource(collection_path='/api/lectures',
           path='/api/lectures/{lecture_id}',
-          factory=context.GeneralContext,
-          permission='view')  # TODO Api specific permission
+          factory=context.LectureEndpointContext)
 class Lecture(object):
     """A greeting endpoint.
 
@@ -28,6 +28,8 @@ class Lecture(object):
         self.request = request
         self.db = request.db
 
+    #TODO view_config vs view
+    @view_config(context=context.LectureEndpointContext, permission='view')
     def collection_get(self):
         """A greeting endpoint.
 
@@ -52,6 +54,7 @@ class Lecture(object):
         schema = models.LectureSchema(many=True, only=allowed_attr_lecture)
         return schema.dump(lectures)
 
+    @view(permission='view')
     def get(self):
         """A greeting endpoint.
 
@@ -67,7 +70,6 @@ class Lecture(object):
         """
         lecture_id = self.request.matchdict['lecture_id']
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'), joinedload(models.Lecture.assistants), joinedload(models.Lecture.tutorials)).get(lecture_id)
-        # TODO What are these?
         times = lecture.prepareTimePreferences(user=self.request.user)
         subscribed = self.request.user.id in [s.id for s in lecture.students]
         allowed_attr_lecture = [
@@ -85,7 +87,7 @@ class Lecture(object):
                 'subscribed': subscribed,
                 'times': times}
 
-    @view(permission='put')  # TODO API specific permission
+    @view(permission='edit')
     def put(self):
         lecture_id = self.request.matchdict['lecture_id']
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'), joinedload(models.Lecture.assistants)).get(lecture_id)
@@ -108,7 +110,7 @@ class Lecture(object):
             else:
                 return {'result': 'ok', 'update': self.get()}
 
-    @view(permission='post')  # TODO API specific permission
+    @view(permission='create_lecture')
     def collection_post(self):
         schema = models.LectureSchema()
         schema.context['session'] = self.request.db

@@ -209,3 +209,17 @@ class CorrelationContext(object):
                 raise HTTPNotFound('Lecture not found')
         else:
             raise ValueError('Sourcetype not known: %s' % source_type)
+
+
+class LectureEndpointContext(object):
+    def __init__(self, request):
+        lecture_id = request.matchdict.get('lecture_id', None)
+        self.__acl__ = [
+                (Allow, Authenticated, ('view')),
+                (Allow, 'group:administrators', ALL_PERMISSIONS),
+                ]+[(Allow, 'user:{0}'.format(a.id), 'create_lecture') for a in request.db.query(User).filter(User.is_assistant==1).all()]
+
+        if lecture_id is not None:
+            self.lecture = request.db.query(Lecture).get(lecture_id)
+            if self.lecture is not None:
+                self.__acl__ += [(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in self.lecture.assistants]
