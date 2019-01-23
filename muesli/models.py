@@ -670,6 +670,14 @@ class UserSchema(Schema):
         return usr
 
 
+class ExamSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    lecture_id = fields.Integer(dump_only=True)
+    name = fields.String()
+    category = fields.String()  # TODO verify
+    url = fields.Url()
+
+
 class TutorialSchema(Schema):
     id = fields.Integer(dump_only=True)
     place = fields.String()
@@ -679,6 +687,10 @@ class TutorialSchema(Schema):
         UserSchema, only=allowed_attributes.user())
     comment = fields.String()
     students = fields.Nested(UserSchema, many=True, only=allowed_attributes.user())
+
+    # CORRECT ?! TODO
+    exams = fields.Nested(ExamSchema, many=True, only=["id", "name"])
+    
     student_count = fields.Method("get_student_num")
 
     def get_time(self, obj):
@@ -709,14 +721,6 @@ class LectureSchema(Schema):
         term = [Term(str(value)), Term(str(value))]
         if term in getTerms():
             return term[0]
-
-
-class ExamSchema(Schema):
-    id = fields.Integer(dump_only=True)
-    lecture_id = fields.Integer(dump_only=True)
-    name = fields.String()
-    category = fields.String()  # TODO verify
-    url = fields.Url()
 
 
 class ExerciseSchema(Schema):

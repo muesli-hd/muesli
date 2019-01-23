@@ -33,9 +33,9 @@ def api_spec(request):
     """ Return something.
     ---
     get:
-        description: outputs the Open-API specification with version 3.0.0
-        tags:
-        - "Open API"
+      description: "Outputs the Open-API specification with version 2.0.0. More information can be found on https://swagger.io/docs/specification/2-0/basic-structure/"
+      tags:
+      - "Open API"
     """
     spec = APISpec(
         title='MÜSLI-API',
@@ -47,11 +47,17 @@ def api_spec(request):
     )
     add_pyramid_paths(spec, 'collection_lecture', request=request)
     add_pyramid_paths(spec, 'lecture', request=request)
+
+    add_pyramid_paths(spec, 'collection_tutorial', request=request)
+    add_pyramid_paths(spec, 'tutorial', request=request)
+
     add_pyramid_paths(spec, 'openapi_spec', request=request)
-    spec.components.schema('User',
-            schema=models.UserSchema(only=allowed_attributes.user()))
+
+    spec.components.schema('User', schema=models.UserSchema(only=allowed_attributes.user()))
+
     spec.components.schema('Lecture', schema=models.LectureSchema(only=allowed_attributes.lecture()))
-    spec.components.schema('CollectionLecture',
-            schema=models.LectureSchema(only=allowed_attributes.collection_lecture()))
-    spec.components.schema('Tutorial', schema=models.TutorialSchema)
+    spec.components.schema('CollectionLecture', schema=models.LectureSchema(only=allowed_attributes.collection_lecture()))
+
+    spec.components.schema('Tutorial', schema=models.TutorialSchema(only=allowed_attributes.tutorial()))
+    spec.components.schema('CollectionTutorial', schema=models.TutorialSchema(only=allowed_attributes.collection_tutorial()))
     return spec.to_dict()

@@ -58,7 +58,7 @@ class Lecture(object):
             - "Muesli API"
           summary: "return a specific lecture"
           description: ""
-          operationId: "lecture_get"
+          operationId: "lecture_collection_get"
           produces:
             - "application/json"
           responses:

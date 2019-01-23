@@ -25,6 +25,17 @@ def user():
         return attributes
 
 
+def collection_lecture():
+        attributes = [
+            'id',
+            'name',
+            'lecturer',
+            'assistants',
+            'term',
+        ]
+        return attributes
+
+
 def lecture():
         attributes = [
             'id',
@@ -38,12 +49,32 @@ def lecture():
         return attributes
 
 
-def collection_lecture():
+def collection_tutorial():
         attributes = [
+            'comment',
+            'place',
+            'tutor',
+            'max_students',
+            'time',
+            'student_count',
             'id',
-            'name',
-            'lecturer',
-            'assistants',
-            'term',
         ]
         return attributes
+
+
+def tutorial():
+        attributes = [
+            'comment',
+            'place',
+            'tutor',
+            'max_students',
+            'time',
+            'student_count',
+            'id',
+            'time',
+            'students',
+            'exams'
+        ]
+        return attributes
+
+
