@@ -15,11 +15,16 @@
         }
       };
     </script>
+    <h2>Dokumentation</h2>
+    <p>
+    Die Verschiedenen API-Zugriffe sind mit über eine Swagger-UI dokumentiert.
+    <br>
+    Diese finden Sie
+    <a href="../api-explorer" target="_blank" rel="noopener noreferrer"
+       title="Link zur Swagger UI">hier</a>.
+    </p>
     <h2>API Keys verwalten</h2>
 
-    <p>
-    <a href="../api-explorer" target="_blank" rel="noopener noreferrer"
-       title="Link zur Swagger UI">Dokumentation</a> zur API.
     <p>
     Hier können Sie ihre aktuellen API Keys verwalten.
     </p>
