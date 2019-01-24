@@ -96,6 +96,48 @@ class Lecture(object):
 
     @view(permission='create_lecture')
     def collection_post(self):
+        """
+        ---
+        post:
+          tags:
+            - "Muesli API"
+          summary: "create a lecture"
+          description: "test123"
+          operationId: "lecture_collection_post"
+          produces:
+            - "application/json"
+          consumes:
+            - "application/json"
+          parameters:
+          - in: "body"
+            name: "body"
+            description: ""
+            required: true
+            schema:
+              $ref: "#/definitions/Lecture"
+          responses:
+            200:
+              description: successfull creation of a lecture
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: ok
+                  created:
+                    $ref: "#/definitions/CollectionLecture"
+            400:
+              description: HTTPBadRequest (Example uses A bad attribute)
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: error
+                  error:
+                    type: array
+                    example: [{'description': {'name': ['Missing data for required field.'], 'test123': ['Unknown field.']}, 'name': 'fail', 'location': 'body'}]
+        """
         schema = models.LectureSchema()
         schema.context['session'] = self.request.db
         try:
