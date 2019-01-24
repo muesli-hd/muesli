@@ -6,8 +6,6 @@ from muesli.web.api import allowed_attributes
 from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
 from marshmallow.exceptions import ValidationError
-from pyramid.view import view_config
-
 
 
 @resource(collection_path='/api/lectures',
@@ -18,8 +16,7 @@ class Lecture(object):
         self.request = request
         self.db = request.db
 
-    #TODO view_config vs view
-    @view_config(context=context.LectureEndpointContext, permission='view')
+    @view(permission='view')
     def collection_get(self):
         """
         ---
@@ -69,12 +66,10 @@ class Lecture(object):
         """
         lecture_id = self.request.matchdict['lecture_id']
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'), joinedload(models.Lecture.assistants), joinedload(models.Lecture.tutorials)).get(lecture_id)
-        times = lecture.prepareTimePreferences(user=self.request.user)
         subscribed = self.request.user.id in [s.id for s in lecture.students]
         schema = models.LectureSchema(only=allowed_attributes.lecture())
         return {'lecture': schema.dump(lecture),
-                'subscribed': subscribed,
-                'times': times}
+                'subscribed': subscribed}
 
     @view(permission='edit')
     def put(self):
