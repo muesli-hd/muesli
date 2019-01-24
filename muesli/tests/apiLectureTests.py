@@ -23,19 +23,20 @@
 import unittest
 from muesli.tests import functionalTests
 
+accept_header = {'Accept': 'application/json'}
 
 class BaseTests(functionalTests.BaseTests):
-    def test_apispec(self):
-        res = self.testapp.get('/openapi.json', status=200)
+    def test_collection_lecture_get(self):
+        res = self.testapp.get('/api/lectures', accept_header, status=403)
 
-    def test_collection_lecture(self):
-        res = self.testapp.get('/api/lectures', status=403)
+    def test_lecture_get(self):
+        res = self.testapp.get('/api/lectures/20110', accept_header, status=403)
 
-    def test_lecture(self):
-        res = self.testapp.get('/api/lectures/20110', status=403)
+    # TODO: add a valid PUT request
+    def test_lecture_put(self):
+        res = self.testapp.put('/api/lectures', {}, accept_header, status=403)
 
-    def test_tutorials_collection(self):
-        res = self.testapp.get('/api/tutorials', status=403)
+    def test_lecture_post(self):
+        lecture = {"term": 20182, "name": "Informatik", "assistants": [{"email": "test@test.de"}]}
+        res = self.testapp.post('/api/lectures', lecture, accept_header, status=403)
 
-    def test_tutorials(self):
-        res = self.testapp.get('/api/tutorials/46839', status=403)
