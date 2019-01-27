@@ -32,30 +32,36 @@
     <table class="colored">
     <thead>
       <tr>
-        <th> API Key Identifier </th>
+        <th> ID </th>
         <th> Ablaufdatum </th>
         <th> Beschreibung </th>
         <th> Entfernen </th>
         <th tal:condition="freshtoken"></th>
       </tr>
     <tbody>
-      <tr tal:condition="code" tal:repeat="codes code">
+      <tr tal:condition="keys" tal:repeat="key keys">
         <td style="font-family:monospace;font-size:1.1em;">
-            ${codes.id}
+            ${key.id}
         </td>
         <td>
-            ${codes.expires}
+            ${key.expires.strftime("%d. %B %Y, %H:%M Uhr")}
+
+        </td>
+
+        <td tal:define="italic 'font-style: italic !important;;font-size: 0.9em;;'" tal:attributes="style italic" tal:condition="not key.description">
+            Keine Beschreibung
+        </td>
+
+        <td tal:condition="key.description">
+            ${key.description}
         </td>
         <td>
-            ${codes.description}
-        </td>
-        <td>
-          <form method="post" tal:attributes="action request.route_path('remove_api_key',key_id=codes.id)">
+          <form method="post" tal:attributes="action request.route_path('remove_api_key',key_id=key.id)">
             <input type="submit" value="Entfernen"/>
           </form>
         </td>
         <td tal:condition="freshtoken">
-          <button tal:condition="codes.id == max([e.id for e in code])" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
+          <button tal:condition="key.id == max([e.id for e in code])" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
         </td>
       </tr>
     </tbody>

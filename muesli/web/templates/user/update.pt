@@ -12,6 +12,5 @@
   zu korrigieren, <a tal:attributes="href 'mailto:'+request.config['contact']['email']">schreiben Sie
   uns bitte eine Mail</a>.
 </p>
-
   </metal:main>
 </metal:main>

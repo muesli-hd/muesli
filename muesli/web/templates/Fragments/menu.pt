@@ -8,7 +8,7 @@
       <li><a tal:attributes="href request.route_path('user_update')">Angaben ergänzen</a></li>
       <li><a tal:attributes="href request.route_path('user_change_email')">E-Mail ändern</a></li>
       <li><a tal:attributes="href request.route_path('user_change_password')">Passwort ändern</a></li>
-      <li tal:condition="request.userInfo.is_admin()"><a tal:attributes="href request.route_path('user_api_keys')">API</a></li>
+      <li ><a tal:attributes="href request.route_path('user_api_keys')">API</a></li>
       <li><a tal:attributes="href request.route_path('user_logout')">Abmelden</a></li>
     </div>
     <div tal:omit-tag="" tal:condition="not request.userInfo.is_loggedin()">
