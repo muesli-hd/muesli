@@ -51,6 +51,9 @@ def api_spec(request):
     add_pyramid_paths(spec, 'collection_tutorial', request=request)
     add_pyramid_paths(spec, 'tutorial', request=request)
 
+    add_pyramid_paths(spec, 'collection_exercise', request=request)
+    add_pyramid_paths(spec, 'exercise', request=request)
+
     add_pyramid_paths(spec, 'openapi_spec', request=request)
 
     spec.components.schema('User', schema=models.UserSchema(only=allowed_attributes.user()))
@@ -60,4 +63,7 @@ def api_spec(request):
 
     spec.components.schema('Tutorial', schema=models.TutorialSchema(only=allowed_attributes.tutorial()))
     spec.components.schema('CollectionTutorial', schema=models.TutorialSchema(only=allowed_attributes.collection_tutorial()))
+
+    spec.components.schema('ExerciseStudent', schema=models.ExerciseStudentSchema)
+    spec.components.schema('Exercise', schema=models.ExerciseSchema)
     return spec.to_dict()

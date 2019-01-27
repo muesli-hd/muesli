@@ -728,11 +728,12 @@ class ExerciseSchema(Schema):
     exam_id = fields.Integer()
     nr = fields.Integer()
     maxpoints = fields.Float()
+    students = fields.Nested(UserSchema, only=allowed_attributes.user(), many=True)
 
 
 class ExerciseStudentSchema(Schema):
     #exercise = fields.Nested(ExerciseSchema)
-    student = fields.Nested(UserSchema, only=['first_name', 'last_name', 'email', 'id'])
+    student = fields.Nested(UserSchema, only=allowed_attributes.user())
     points = fields.Float()
 
 

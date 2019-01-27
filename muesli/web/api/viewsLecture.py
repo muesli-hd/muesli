@@ -60,7 +60,7 @@ class Lecture(object):
             - "application/json"
           responses:
             200:
-              description: response for 200 code
+              description: successfull return of the lecture
               schema:
                 $ref: "#/definitions/Lecture"
         """
