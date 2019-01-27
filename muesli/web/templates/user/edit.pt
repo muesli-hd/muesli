@@ -61,8 +61,8 @@
 </ul>
 </div>
 
-    <h2 tal:condition="len(keys) is not 0">API Keys</h2>
-    <table tal:condition="len(keys) is not 0" class="colored">
+    <h2 tal:condition="keys">API Keys</h2>
+    <table tal:condition="keys" class="colored">
     <thead>
       <tr>
         <th> ID </th>
