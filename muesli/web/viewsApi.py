@@ -66,4 +66,13 @@ def api_spec(request):
 
     spec.components.schema('ExerciseStudent', schema=models.ExerciseStudentSchema)
     spec.components.schema('Exercise', schema=models.ExerciseSchema)
-    return spec.to_dict()
+    openapi_json = spec.to_dict()
+    from collections import OrderedDict
+    cleared_paths = OrderedDict({})
+    for k, v in openapi_json["paths"].items():
+        if ":" in k:
+            cleared_paths[k.split(":")[0]+"}"] = v
+        else:
+            cleared_paths[k] = v
+    openapi_json["paths"] = cleared_paths
+    return openapi_json
