@@ -101,8 +101,8 @@ def remove_regex(openapi_json: dict) -> dict:
                     path_splitted = [e.replace(substr,
                                                (re.sub(r':.*[^}]', "", substr))
                                                ) for e in path_splitted]
-            path = "".join(path_splitted)
-            cleared_paths[path] = description
+            new_path = "".join(path_splitted)
+            cleared_paths[new_path] = description
         else:
             cleared_paths[path] = description
     openapi_json["paths"] = cleared_paths
