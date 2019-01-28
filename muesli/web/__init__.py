@@ -135,9 +135,9 @@ def main(global_config=None, testmode=False, **settings):
             'beaker.session.timeout': 7200,
     })
     # DEBUG
-    settings.update({
-        'debugtoolbar.hosts': '0.0.0.0/0',
-    })
+    #settings.update({
+    #    'debugtoolbar.hosts': '0.0.0.0/0',
+    #})
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
     jwt_secret_token = os.environ["JWT_SECRET_TOKEN"]
     jwt_authentication_policy = JWTAuthenticationPolicy(jwt_secret_token, callback=principals_for_user, expiration=datetime.timedelta(days=muesli.config["api"]["key_expiration"]))
@@ -273,7 +273,7 @@ def main(global_config=None, testmode=False, **settings):
 
 
     # DEBUG
-    config.include('pyramid_debugtoolbar')
+    #config.include('pyramid_debugtoolbar')
 
     config.scan()
 
