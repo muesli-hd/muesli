@@ -26,6 +26,9 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 from pyramid_apispec.helpers import add_pyramid_paths
 from muesli import models
 from muesli.web.api import allowed_attributes
+from collections import OrderedDict
+
+import re
 
 
 @view_config(route_name='openapi_spec', renderer='json')
@@ -67,11 +70,39 @@ def api_spec(request):
     spec.components.schema('ExerciseStudent', schema=models.ExerciseStudentSchema)
     spec.components.schema('Exercise', schema=models.ExerciseSchema)
     openapi_json = spec.to_dict()
-    from collections import OrderedDict
+
+    return remove_regex(openapi_json)
+
+
+def remove_regex(openapi_json):
+    """Docstring for remove_regex.
+
+    :openapi_json: OpenAPI-Spec with version 2.0
+    :returns: cleared up Spec
+
+    since the following block is hard to understand:
+    The function removes all the regex from the paths such as
+
+        "/api/exercises/{exercise_id:\d+}/{user_id:(\d+)+\/?}"
+
+    is transformed to
+
+        "/api/exercises/{exercise_id}/{user_id}"
+
+    It is important to note that this function does not serve a "real" need,
+    the output for the Swagger-UI (or other documentation) is just nicer to look at
+    """
     cleared_paths = OrderedDict({})
     for k, v in openapi_json["paths"].items():
         if ":" in k:
-            cleared_paths[k.split(":")[0]+"}"] = v
+            path_splitted = re.split("(/{)", k)
+            for substr in path_splitted:
+                if ":" in substr:
+                    path_splitted = [e.replace(substr,
+                                               (re.sub(r':.*[^}]', "", substr))
+                                               ) for e in path_splitted]
+            path = "".join(path_splitted)
+            cleared_paths[path] = v
         else:
             cleared_paths[k] = v
     openapi_json["paths"] = cleared_paths
