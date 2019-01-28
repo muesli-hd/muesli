@@ -22,6 +22,8 @@
     Diese finden Sie
     <a href="../api-explorer" target="_blank" rel="noopener noreferrer"
        title="Link zur Swagger UI">hier</a>.
+    <br>
+    <strong>Achtung:</strong> Die dort angezeigten "Try it out"-Knöpfe führen die Anfragen auch tatsächlich aus.
     </p>
     <h2>API Keys verwalten</h2>
 
@@ -61,7 +63,7 @@
           </form>
         </td>
         <td tal:condition="freshtoken">
-          <button tal:condition="key.id == max([e.id for e in code])" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
+          <button tal:condition="key.id == max([e.id for e in keys])" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
         </td>
       </tr>
     </tbody>

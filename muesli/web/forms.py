@@ -605,7 +605,7 @@ class SetAuthCodeDescription(ObjectForm):
                           validator=validators.MaxLength(20))
                 ]
         ObjectForm.__init__(self, None, formfields,
-                            request, send='Generiere Dummy-Key')
+                            request, send='Generiere API-Key')
 
     def saveField(self, fieldName):
         pass
