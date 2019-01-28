@@ -93,17 +93,17 @@ def remove_regex(openapi_json: dict) -> dict:
     the output for the UI (or other documentation) is just nicer to look at.
     """
     cleared_paths = OrderedDict({})
-    for k, v in openapi_json["paths"].items():
-        if ":" in k:
-            path_splitted = re.split("(/{)", k)
+    for path, description in openapi_json["paths"].items():
+        if ":" in path:
+            path_splitted = re.split("(/{)", path)
             for substr in path_splitted:
                 if ":" in substr:
                     path_splitted = [e.replace(substr,
                                                (re.sub(r':.*[^}]', "", substr))
                                                ) for e in path_splitted]
             path = "".join(path_splitted)
-            cleared_paths[path] = v
+            cleared_paths[path] = description
         else:
-            cleared_paths[k] = v
+            cleared_paths[path] = description
     openapi_json["paths"] = cleared_paths
     return openapi_json
