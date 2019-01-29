@@ -193,6 +193,7 @@ def main(global_config=None, **settings):
     config.add_route('lecture_add_exam', '/lecture/add_exam/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_add_grading', '/lecture/add_grading/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_add_student', '/lecture/add_student/{lecture_id}', factory = LectureContext)
+    config.add_route('lecture_switch_students', '/lecture/switch_students/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_export_students_html', '/lecture/export_students_html/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_export_totals', '/lecture/export_totals/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory = GeneralContext)

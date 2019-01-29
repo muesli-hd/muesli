@@ -55,6 +55,7 @@ function getSelectedStudents() {
     // return array containing references to selected option elements
     return opts;
 }
+
 function submit_all_points() {
     var selectedStudents = getSelectedStudents();
     var savestatus = document.getElementsByName('savestatus')[0];
