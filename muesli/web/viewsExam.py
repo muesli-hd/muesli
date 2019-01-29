@@ -73,6 +73,7 @@ class Edit(object):
         else: students = None
         return {'exam': exam,
                 'form': form,
+                'tutorial_ids': self.request.context.tutorial_ids_str,
                 'students': students
                }
 
