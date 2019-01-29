@@ -58,6 +58,11 @@ function getSelectedStudents() {
 function submit_all_points() {
     var selectedStudents = getSelectedStudents();
     var savestatus = document.getElementsByName('savestatus')[0];
+
+    if ( selectedStudents.length == 0 ) {
+        return true;
+    }
+
     var i = 0;
     for(i = 0; i < selectedStudents.length; i++){
         if(submit_points(selectedStudents[i].value)){
