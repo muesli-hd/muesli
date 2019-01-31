@@ -38,8 +38,6 @@ Ihre Person nicht möglich.
 
 Nehmen Sie Kontakt mit dem Wesbseitenbetreiber über die im Reiter „Kontakt“ angegebene E-Mail Adresse auf, wird Ihre Email für einen Zeitraum von sechs Monaten gespeichert, damit diese zur Bearbeitung und Beantwortung Ihrer Anfrage und für den Fall von Anschlussfragen zurückgegriffen werden kann. Falls Sie sich in einer Email auf eine bereits laufende Korrespondenz mit dem Webseitenbetreiber beziehen, wird Ihre Email mit allen anderen der Korrespondenz zugehörigen Nachrichten in Verbindung gebracht.
 
-TODO: Das URZ speichert Logs 2 Wochen lang
-
 ## Zugriffsdaten
 
 Wir, der Websitebetreiber bzw. Seitenprovider, erheben aufgrund unseres berechtigten Interesses (s. Art. 6 Abs. 1 lit. f. DSGVO) Daten über Zugriffe auf die Website und speichern diese als “Server-Logfiles” auf dem Server der Website ab. Folgende Daten werden so protokolliert:
@@ -71,7 +69,6 @@ Sie können ein Benutzerkonto auch mit weniger Angaben erstellen, falls Sie nur 
 Im Folgenden werden die Angaben, die Sie bei der Registrierung gemacht haben, bzw. die aktualisierte Fassung dieser, als Registrierungsdaten bezeichnet.
 
 ## Angaben mit Benutzerkonto
-TODO: Vielleicht Assistenten auf Uni Angestellte (uni-heidelberg Mailadresse) beschränken
 
 Auf dieser Webseite aufgeführte Veranstaltungen werden von Personen durchgeführt, welche nicht im Zusammenhang mit dem Webseitenbetreiber stehen. Falls Sie ein Benutzerkonto erstellen, können Sie sich hiermit in Veranstaltungen und Veranstaltungen zugeordnete Übungsgruppen eintragen. Mit dem Eintragen in eine Übungsgruppe werden Ihre Registrierungsdaten an die das Personal der Veranstaltung weitergegeben. Zum Personal der Veranstaltung gehören die, auf der Webseite neben der Vorlesung aufgeführten, Dozenten, und Tutoren, welche per E-Mail an die aufgeführten Dozenten erfragt werden können.
 
