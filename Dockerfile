@@ -21,9 +21,6 @@ ENV LC_ALL de_DE.UTF-8
 RUN wget https://www.mathi.uni-heidelberg.de/~jvisintini/lp_solve -O /usr/bin/lp_solve
 RUN wget https://www.mathi.uni-heidelberg.de/~jvisintini/libxli_DIMACS.so -O /usr/lib/lp_solve/libxli_DIMACS.so
 
-# temporary fix for Philipp-g/muesli #75
-COPY --chown=muesli:muesli ./fix_apispec_cornice.diff ./requirements.txt /opt/muesli4/
 RUN pip3 install --upgrade pip
+COPY --chown=muesli:muesli ./requirements.txt /opt/muesli4/
 RUN pip3 install -r requirements.txt
-# temporary fix for Philipp-g/muesli #75
-RUN patch /usr/local/lib/python3.5/dist-packages/pyramid_apispec/helpers.py fix_apispec_cornice.diff
