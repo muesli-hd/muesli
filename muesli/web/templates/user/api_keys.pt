@@ -23,7 +23,7 @@
     <a href="../api-explorer" target="_blank" rel="noopener noreferrer"
        title="Link zur Swagger UI">hier</a>.
     <br>
-    <strong>Achtung:</strong> Die dort angezeigten "Try it out"-Knöpfe führen die Anfragen auch tatsächlich aus.
+    <strong>Achtung:</strong> Die dort angezeigten <em>"Try it out"</em>-Knöpfe führen die Anfragen auch tatsächlich aus.
     </p>
     <h2>API Keys verwalten</h2>
 

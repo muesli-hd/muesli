@@ -59,13 +59,19 @@ def api_spec(request):
 
     add_pyramid_paths(spec, 'openapi_spec', request=request)
 
-    spec.components.schema('User', schema=models.UserSchema(only=allowed_attributes.user()))
+    # Be careful how the schemes are defined:
+    #
+    # If one (or its member) are instantiated as object and some are as class
+    # they can cause weird behavior with double definitions of schemes in the
+    # spec.
 
-    spec.components.schema('Lecture', schema=models.LectureSchema(only=allowed_attributes.lecture()))
-    spec.components.schema('CollectionLecture', schema=models.LectureSchema(only=allowed_attributes.collection_lecture()))
+    spec.components.schema('User', schema=models.UserSchema(only=allowed_attributes.user()))
 
     spec.components.schema('Tutorial', schema=models.TutorialSchema(only=allowed_attributes.tutorial()))
     spec.components.schema('CollectionTutorial', schema=models.TutorialSchema(only=allowed_attributes.collection_tutorial()))
+
+    spec.components.schema('Lecture', schema=models.LectureSchema(only=allowed_attributes.lecture()))
+    spec.components.schema('CollectionLecture', schema=models.LectureSchema(only=allowed_attributes.collection_lecture()))
 
     spec.components.schema('ExerciseStudent', schema=models.ExerciseStudentSchema)
     spec.components.schema('Exercise', schema=models.ExerciseSchema)

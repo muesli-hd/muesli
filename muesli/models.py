@@ -683,8 +683,7 @@ class TutorialSchema(Schema):
     place = fields.String()
     time = fields.Method("get_time")
     max_students = fields.Integer()
-    tutor = fields.Nested(
-        UserSchema, only=allowed_attributes.user())
+    tutor = fields.Nested( UserSchema, only=allowed_attributes.user())
     comment = fields.String()
     students = fields.Nested(UserSchema, many=True, only=allowed_attributes.user())
 
@@ -711,7 +710,7 @@ class LectureSchema(Schema):
     url = fields.Url()
     password = fields.String()
     is_visible = fields.Boolean()
-    tutorials = fields.Nested(TutorialSchema, many=True)
+    tutorials = fields.Nested(TutorialSchema, many=True, only=allowed_attributes.tutorial())
     tutors = fields.Nested(UserSchema, many=True)
 
     def get_term(self, obj):
