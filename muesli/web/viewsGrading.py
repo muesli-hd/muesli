@@ -196,9 +196,9 @@ class EnterGradesBasic(object):
                 error_msgs.append(str(err))
         if 'fill' in self.request.GET:
             self.request.session.flash('Achtung, die Noten sind noch nicht abgespeichert!', queue='errors')
-        #self.request.javascript.add('prototype.js')
-        self.request.javascript.add('jquery/jquery.min.js')
-        self.request.javascript.add('jquery/jquery.fancybox.min.js')
+        #self.request.javascript.append('prototype.js')
+        self.request.javascript.append('jquery/jquery.min.js')
+        self.request.javascript.append('jquery/jquery.fancybox.min.js')
         #grades = {key: value for key,value in grades.items()}
 
         return {'grading': grading,

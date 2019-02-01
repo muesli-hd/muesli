@@ -233,3 +233,11 @@ def favicon_view(request):
     here = os.path.dirname(__file__)
     icon = os.path.join(here, "static", "favicon.ico")
     return FileResponse(icon, request=request)
+
+
+@view_config(name='datenschutzerklaerung.html', renderer='muesli.web:templates/dataprotection.pt')
+def datenschutzerklaerung_view(request):
+    here = os.path.dirname(__file__)
+    dataprotection_path = os.path.join(here, "static", "datenschutzerklaerung.html")
+    dataprotection = open(dataprotection_path, mode='r')
+    return {'dataprotection': dataprotection.read()}

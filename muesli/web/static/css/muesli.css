@@ -185,9 +185,18 @@ table.colored tr:nth-child(odd) {
   color: black;
 }
 
+#bottom {
+    text-align: right;
+    font-size: 70%;
+}
+
+#datenschutz {
+    display: inline-block;
+    margin-right: 10px;
+}
+
 #debug {
-  text-align: right;
-  font-size: 70%;
+    display: inline-block;
 }
 
 .changelog_date {
