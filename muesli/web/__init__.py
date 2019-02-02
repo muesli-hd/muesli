@@ -262,15 +262,15 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('grading_enter_grades', '/grading/enter_grades/{grading_id}', factory=GradingContext)
     config.add_route('grading_get_row', '/grading/get_row/{grading_id}', factory=GradingContext)
 
-    config.include('pyramid_chameleon')
-    config.include('cornice')
-
     # Begin: config for the API-Browser
     config.include('pyramid_apispec.views')
     config.add_route("openapi_spec", "/openapi.json")
     config.pyramid_apispec_add_explorer(spec_route_name='openapi_spec')
     # End: config for the API-Browser
 
+    config.include('pyramid_chameleon')
+    config.route_prefix = 'v1'
+    config.include('cornice')
 
     # DEBUG
     #config.include('pyramid_debugtoolbar')
