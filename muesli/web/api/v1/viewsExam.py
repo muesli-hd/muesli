@@ -7,7 +7,7 @@ from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
 
 
-@resource(path='/api/exams/{exam_id}',
+@resource(path='/exams/{exam_id}',
           factory=context.GeneralContext,
           permission='view')  # TODO Api specific permission
 class Exam(object):

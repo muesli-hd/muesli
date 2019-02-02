@@ -2,14 +2,14 @@ from cornice.resource import resource
 
 from muesli import models
 from muesli.web import context
-from muesli.web.api import allowed_attributes
+from muesli.web.api.v1 import allowed_attributes
 
 from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
 
 
-@resource(collection_path='/api/tutorials',
-          path='/api/tutorials/{tutorial_id}',
+@resource(collection_path='/tutorials',
+          path='/tutorials/{tutorial_id}',
           factory=context.TutorialContext,
           permission='viewOverview')  # TODO Api specific permission
 class Tutorial(object):

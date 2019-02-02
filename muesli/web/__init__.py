@@ -36,7 +36,7 @@ from muesli.web.views import *
 from muesli.web.viewsLecture import *
 from muesli.web.viewsUser import *
 from muesli.web.viewsApi import *
-from muesli.web.api import *
+from muesli.web.api.v1 import *
 from muesli import utils
 import muesli
 
@@ -135,9 +135,9 @@ def main(global_config=None, testmode=False, **settings):
             'beaker.session.timeout': 7200,
     })
     # DEBUG
-    #settings.update({
-    #    'debugtoolbar.hosts': '0.0.0.0/0',
-    #})
+    # settings.update({
+    #     'debugtoolbar.hosts': '0.0.0.0/0',
+    # })
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
     jwt_secret_token = os.environ["JWT_SECRET_TOKEN"]
     jwt_authentication_policy = JWTAuthenticationPolicy(jwt_secret_token, callback=principals_for_user, expiration=datetime.timedelta(days=muesli.config["api"]["key_expiration"]))
@@ -269,11 +269,13 @@ def main(global_config=None, testmode=False, **settings):
     # End: config for the API-Browser
 
     config.include('pyramid_chameleon')
-    config.route_prefix = 'v1'
+    # TODO: move the prefix addition into a seperate function for later
+    # developed API's.
+    config.route_prefix = 'api/v1'
     config.include('cornice')
 
     # DEBUG
-    #config.include('pyramid_debugtoolbar')
+    # config.include('pyramid_debugtoolbar')
 
     config.scan()
 

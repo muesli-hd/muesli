@@ -33,7 +33,7 @@ from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, String, Intege
 from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
 from muesli.types import Term, TutorialTime, ColumnWrapper
 from muesli.utils import DictOfObjects, AutoVivification, editOwnTutorials, listStrings, getTerms
-from muesli.web.api import allowed_attributes
+from muesli.web.api.v1 import allowed_attributes
 
 from marshmallow import Schema, fields, pre_load, post_load
 from marshmallow.exceptions import ValidationError

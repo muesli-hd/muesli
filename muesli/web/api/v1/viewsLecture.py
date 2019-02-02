@@ -1,15 +1,15 @@
 from cornice.resource import resource, view
 from muesli import models
 from muesli.web import context
-from muesli.web.api import allowed_attributes
+from muesli.web.api.v1 import allowed_attributes
 
 from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
 from marshmallow.exceptions import ValidationError
 
 
-@resource(collection_path='/api/lectures',
-          path='/api/lectures/{lecture_id}',
+@resource(collection_path='/lectures',
+          path='/lectures/{lecture_id}',
           factory=context.LectureEndpointContext)
 class Lecture(object):
     def __init__(self, request, context=None):

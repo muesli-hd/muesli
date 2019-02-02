@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# muesli/web/api/attributes.py
+# muesli/web/api/v1/attributes.py
 #
 # This file is part of MUESLI.
 #

@@ -25,7 +25,7 @@ from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from pyramid_apispec.helpers import add_pyramid_paths
 from muesli import models
-from muesli.web.api import allowed_attributes
+from muesli.web.api.v1 import allowed_attributes
 from collections import OrderedDict
 
 import re
@@ -48,6 +48,7 @@ def api_spec(request):
             MarshmallowPlugin()
         ]
     )
+    # Paths for API v1
     add_pyramid_paths(spec, 'collection_lecture', request=request)
     add_pyramid_paths(spec, 'lecture', request=request)
 

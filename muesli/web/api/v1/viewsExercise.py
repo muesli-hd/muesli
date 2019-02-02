@@ -7,8 +7,8 @@ from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
 
 
-@resource(collection_path='/api/exercises/{exercise_id:(\d+)+\/?}',
-          path='/api/exercises/{exercise_id:\d+}/{user_id:(\d+)+\/?}',
+@resource(collection_path='/exercises/{exercise_id:(\d+)+\/?}',
+          path='/exercises/{exercise_id:\d+}/{user_id:(\d+)+\/?}',
           factory=context.GeneralContext,
           permission='view')  # TODO Api specific permission
 class Exercise(object):
