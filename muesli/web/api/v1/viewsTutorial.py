@@ -22,7 +22,7 @@ class Tutorial(object):
         ---
         get:
           tags:
-            - "Muesli API"
+            - "v1"
           summary: "return all tutorials"
           description: ""
           operationId: "tutorial_collection_get"
@@ -43,7 +43,7 @@ class Tutorial(object):
         ---
         get:
           tags:
-            - "Muesli API"
+            - "v1"
           summary: "return a specific tutorial"
           description: ""
           operationId: "tutorial_get"

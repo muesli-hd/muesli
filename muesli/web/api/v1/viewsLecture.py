@@ -22,7 +22,7 @@ class Lecture(object):
         ---
         get:
           tags:
-            - "Muesli API"
+            - "v1"
           summary: "return all lectures"
           description: ""
           operationId: "lecture_get"
@@ -52,7 +52,7 @@ class Lecture(object):
         ---
         get:
           tags:
-            - "Muesli API"
+            - "v1"
           summary: "return a specific lecture"
           description: ""
           operationId: "lecture_collection_get"
@@ -100,7 +100,7 @@ class Lecture(object):
         ---
         post:
           tags:
-            - "Muesli API"
+            - "v1"
           summary: "create a lecture"
           description: "test123"
           operationId: "lecture_collection_post"

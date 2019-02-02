@@ -21,7 +21,7 @@ class Exercise(object):
         ---
         get:
           tags:
-            - "Muesli API"
+            - "v1"
           summary: "return an exercise for given student"
           description: ""
           operationId: "exercise_student_get"
@@ -49,7 +49,7 @@ class Exercise(object):
         ---
         get:
           tags:
-            - "Muesli API"
+            - "v1"
           summary: "return an exercise"
           description: ""
           operationId: "exercise_get"
