@@ -4,7 +4,8 @@
 #
 # This file is part of MUESLI.
 #
-# Copyright (C) 2018, Christian Heusel <christian (at) heusel.eu>
+# Copyright (C) 2018, Philipp Göldner  <pgoeldner (at) stud.uni-heidelberg.de>
+#                     Christian Heusel <christian (at) heusel.eu>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

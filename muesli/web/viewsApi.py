@@ -4,7 +4,8 @@
 #
 # This file is part of MUESLI.
 #
-# Copyright (C) 2018, Christian Heusel <christian (at) heusel.eu>
+# Copyright (C) 2018, Philipp Göldner  <pgoeldner (at) stud.uni-heidelberg.de>
+#                     Christian Heusel <christian (at) heusel.eu>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,6 +20,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import re
+from collections import OrderedDict
 
 from pyramid.view import view_config
 from apispec import APISpec
@@ -26,9 +29,7 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 from pyramid_apispec.helpers import add_pyramid_paths
 from muesli import models
 from muesli.web.api.v1 import allowed_attributes
-from collections import OrderedDict
 
-import re
 
 
 @view_config(route_name='openapi_spec', renderer='json')
@@ -37,8 +38,11 @@ def api_spec(request):
     ---
     get:
       description: "Outputs the Open-API specification with version 2.0.0. More information can be found on https://swagger.io/docs/specification/2-0/basic-structure/"
+      operationId: "lecture_get"
       tags:
       - "Open API"
+      produces:
+        - "application/json"
     """
     spec = APISpec(
         title='MÜSLI-API',
