@@ -1,3 +1,4 @@
+---
 language: python
 dist: xenial
 python:
@@ -6,9 +7,9 @@ python:
 addons:
   postgresql: "9.4"
   apt:
-      packages:
-        - lp-solve
-        - postgresql-server-dev-9.4
+    packages:
+      - lp-solve
+      - postgresql-server-dev-9.4
 
 cache: pip
 
@@ -23,7 +24,7 @@ before_script:
   - psql -d muesli < travis-muesli-origDb.sql
   - cp muesli.yml.example muesli.yml
   - export JWT_SECRET_TOKEN="secret"
-    # ugly hack
+  # ugly hack
   - sudo wget https://www.mathi.uni-heidelberg.de/~jvisintini/lp_solve -O /usr/bin/lp_solve
   - sudo wget https://www.mathi.uni-heidelberg.de/~jvisintini/libxli_DIMACS.so -O /usr/lib/lp_solve/libxli_DIMACS.so
   - sudo python -m smtpd -n -c DebuggingServer localhost:25 &
