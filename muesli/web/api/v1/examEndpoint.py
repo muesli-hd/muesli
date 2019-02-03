@@ -27,6 +27,7 @@ from muesli.web import context
 
 from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
+from pyramid.httpexceptions import HTTPBadRequest
 
 
 @resource(path='/exams/{exam_id}',
@@ -40,6 +41,8 @@ class Exam(object):
     def get(self):  # TODO Check if Lecture Student maybe list all lecturestudents
         exam_id = self.request.matchdict["exam_id"]
         exam = self.request.db.query(models.Exam).get(exam_id)
+        if exam is None:
+            raise HTTPBadRequest("The exam you want to access does not exist!")
         exer_schema = models.ExerciseSchema(many=True)
         exam_schema = models.ExamSchema()
         result = exam_schema.dump(exam)

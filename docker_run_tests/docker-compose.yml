@@ -11,8 +11,6 @@ services:
   muesli:
     image: "muesli:tests"
     container_name: muesli_testrunner
-    environment:
-      - JWT_SECRET_TOKEN=secret
     build:
       context: ..
       dockerfile: ./docker_run_tests/Dockerfile

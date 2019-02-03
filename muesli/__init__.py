@@ -31,7 +31,7 @@ import muesli.mail
 muesli.mail.server = config['contact']['server']
 
 databaseName = config['database']['connection']
-PRODUCTION_INSTANCE = False
+PRODUCTION_INSTANCE = True
 
 def engine():
     if not PRODUCTION_INSTANCE:

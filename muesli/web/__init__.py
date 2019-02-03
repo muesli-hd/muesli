@@ -139,7 +139,7 @@ def main(global_config=None, testmode=False, **settings):
             'debugtoolbar.hosts': '0.0.0.0/0',
         })
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
-    jwt_secret_token = os.environ["JWT_SECRET_TOKEN"]
+    jwt_secret_token = muesli.config["api"]["JWT_SECRET_TOKEN"]
     jwt_authentication_policy = JWTAuthenticationPolicy(jwt_secret_token, callback=principals_for_user, expiration=datetime.timedelta(days=muesli.config["api"]["key_expiration"]))
     session_authentication_policy = SessionAuthenticationPolicy(callback=principals_for_user)
     authentication_policy = MultiAuthenticationPolicy([session_authentication_policy, jwt_authentication_policy])
@@ -152,7 +152,6 @@ def main(global_config=None, testmode=False, **settings):
             settings=settings,
             )
     config.include('muesli.web.pyramid_jwt')
-    config.add_route('debug_login', '/debug/login')
     config.set_jwt_authentication_policy(jwt_authentication_policy)
     config.add_static_view('static', 'muesli.web:static')
 
@@ -273,6 +272,7 @@ def main(global_config=None, testmode=False, **settings):
     # developed API's.
     config.route_prefix = 'api/v1'
     config.include('cornice')
+    config.add_route('api_login', '/api/v1/login')
 
     if not muesli.PRODUCTION_INSTANCE:
         config.include('pyramid_debugtoolbar')

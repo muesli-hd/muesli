@@ -26,7 +26,7 @@ from ast import literal_eval
 import requests
 
 STATIC_HEADERS = {'Accept': 'application/json'}
-MUESLI_URL = "http://127.0.0.1:8080"
+MUESLI_URL = "http://localhost:8080"
 
 
 def convert_str(dictionary):
@@ -64,7 +64,7 @@ def authenticate(header_name="header.txt") -> dict:
     else:
         with open(header_name, 'w') as header:
             r = requests.post(
-                MUESLI_URL+'/debug/login',
+                MUESLI_URL+'/api/v1/login',
                 data={"email": "test@test.de", "password": "1234"}
             )
             token = r.json().get("token", "")
@@ -77,7 +77,7 @@ def authenticate(header_name="header.txt") -> dict:
 
 def main():
     headers = authenticate()
-    endpoint = MUESLI_URL + "/api/v1/lectures/{lecture_id}"
+    endpoint = MUESLI_URL + "/api/v1/lectures"
     get = requests.get(endpoint, headers=headers)
     print(get.json())
 

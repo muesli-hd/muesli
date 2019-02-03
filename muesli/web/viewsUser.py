@@ -41,7 +41,6 @@ import re
 import os
 import datetime
 import collections
-import binascii
 
 
 @view_config(route_name='user_login', renderer='muesli.web:templates/user/login.pt')
@@ -58,8 +57,8 @@ def login(request):
     return {'form': form, 'user': security.authenticated_userid(request)}
 
 
-@view_config(route_name='debug_login', renderer='json', request_method='POST')
-def debug_login(request):
+@view_config(route_name='api_login', renderer='json', request_method='POST')
+def api_login(request):
     user = request.db.query(models.User).filter_by(email=request.POST['email'].strip(), password=sha1(request.POST['password'].encode('utf-8')).hexdigest()).first()
     exp = datetime.timedelta(days=muesli.config["api"]["key_expiration"])
     token = models.BearerToken(client="Personal Token",
@@ -81,7 +80,7 @@ def debug_login(request):
             'result': 'error'
         }
 
-@view_config(route_name='debug_login', renderer='json', request_method='GET')
+@view_config(route_name='api_login', renderer='json', request_method='GET')
 def refresh(request):
     user = request.db.query(models.User).get(request.authenticated_userid)
     if user:
