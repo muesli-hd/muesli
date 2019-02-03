@@ -18,63 +18,84 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""Collection of various attributes for the MarshmellowSchemas."""
 
 
 def user():
-        attributes = ['id', 'first_name', 'last_name', 'email']
-        return attributes
+    """ Allowed attributes for the UserSchema, used in various functions.
+    Args:
+    Returns:
+        attributes: A list of unlocked attributes for the user.
+    Raises:
+    """
+    attributes = ['id', 'first_name', 'last_name', 'email']
+    return attributes
 
 
 def collection_lecture():
-        attributes = [
-            'id',
-            'name',
-            'lecturer',
-            'assistants',
-            'term',
-        ]
-        return attributes
+    """ Allowed attributes for the lectureEndpoint.
+    Args:
+    Returns:
+        attributes: A list of unlocked attributes for Lecture.collection_get().
+    Raises:
+    """
+    attributes = [
+        'id',
+        'name',
+        'lecturer',
+        'assistants',
+        'term',
+    ]
+    return attributes
 
 
 def lecture():
-        attributes = [
-            'id',
-            'name',
-            'lecturer',
-            'assistants',
-            'term',
-            'url',
-            'tutorials',
-        ]
-        return attributes
+    """ Allowed attributes for the lectureEndpoint.
+    Args:
+    Returns:
+        attributes: A list of unlocked attributes for Lecture.get().
+    Raises:
+    """
+    attributes = [
+        'id',
+        'name',
+        'lecturer',
+        'assistants',
+        'term',
+        'url',
+        'tutorials',
+    ]
+    return attributes
 
 
 def collection_tutorial():
-        attributes = [
-            'comment',
-            'place',
-            'tutor',
-            'max_students',
-            'time',
-            'student_count',
-            'id',
-        ]
-        return attributes
+    """ Allowed attributes for the tutorialEndpoint.
+    Args:
+    Returns:
+        attributes: A list of unlocked attributes for Tutorial.collection_get().
+    Raises:
+    """
+    attributes = [
+        'comment',
+        'place',
+        'tutor',
+        'max_students',
+        'time',
+        'student_count',
+        'id',
+    ]
+    return attributes
 
 
 def tutorial():
-        attributes = [
-            'comment',
-            'place',
-            'tutor',
-            'max_students',
-            'time',
-            'student_count',
-            'id',
-            'time',
-            'students',
-            'exams'
-        ]
-        return attributes
-
-
+    """ Allowed attributes for the tutorialEndpoint.
+    Args:
+    Returns:
+        attributes: A list of unlocked attributes for Tutorial.get().
+    Raises:
+    """
+    attributes = [
+        'comment', 'place', 'tutor', 'max_students', 'time', 'student_count',
+        'id', 'time', 'students', 'exams'
+    ]
+    return attributes
