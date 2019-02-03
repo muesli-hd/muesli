@@ -31,17 +31,17 @@ import muesli.mail
 muesli.mail.server = config['contact']['server']
 
 databaseName = config['database']['connection']
-productive = False
+PRODUCTION_INSTANCE = False
 
 def engine():
-    if not productive:
+    if not PRODUCTION_INSTANCE:
         return create_engine(databaseName, max_overflow=-1)
     else:
         return create_engine(databaseName)
 
 
 def testengine():
-    if not productive:
+    if not PRODUCTION_INSTANCE:
         return create_engine(databaseName + "test", max_overflow=-1)
     else:
         return create_engine(databaseName + "test")

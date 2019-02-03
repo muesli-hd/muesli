@@ -110,15 +110,15 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
         return request.jwt_claims.get('sub')
 
     def remember(self, request, principal, **kw):
-        warnings.warn(
-            'JWT tokens need to be returned by an API. Using remember() '
-            'has no effect.',
-            stacklevel=3)
+        # warnings.warn(
+        #     'JWT tokens need to be returned by an API. Using remember() '
+        #     'has no effect.',
+        #     stacklevel=3)
         return []
 
     def forget(self, request):
-        warnings.warn(
-            'JWT tokens are managed by API (users) manually. Using forget() '
-            'has no effect.',
-            stacklevel=3)
+        # warnings.warn(
+        #     'JWT tokens are managed by API (users) manually. Using forget() '
+        #     'has no effect.',
+        #     stacklevel=3)
         return []

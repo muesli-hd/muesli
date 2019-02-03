@@ -134,10 +134,10 @@ def main(global_config=None, testmode=False, **settings):
             'beaker.session.data_dir': tempfile.mkdtemp(),
             'beaker.session.timeout': 7200,
     })
-    # DEBUG
-    # settings.update({
-    #     'debugtoolbar.hosts': '0.0.0.0/0',
-    # })
+    if not muesli.PRODUCTION_INSTANCE:
+        settings.update({
+            'debugtoolbar.hosts': '0.0.0.0/0',
+        })
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
     jwt_secret_token = os.environ["JWT_SECRET_TOKEN"]
     jwt_authentication_policy = JWTAuthenticationPolicy(jwt_secret_token, callback=principals_for_user, expiration=datetime.timedelta(days=muesli.config["api"]["key_expiration"]))
@@ -274,8 +274,8 @@ def main(global_config=None, testmode=False, **settings):
     config.route_prefix = 'api/v1'
     config.include('cornice')
 
-    # DEBUG
-    # config.include('pyramid_debugtoolbar')
+    if not muesli.PRODUCTION_INSTANCE:
+        config.include('pyramid_debugtoolbar')
 
     config.scan()
 

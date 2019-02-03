@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 #
 # muesli/tests/apiTests.py
@@ -21,23 +20,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import unittest
 from muesli.tests import functionalTests
 
-accept_header = {'Accept': 'application/json'}
+ACCEPT_HEADER = {'Accept': 'application/json'}
+URL = "/api/v1"
+
 
 class BaseTests(functionalTests.BaseTests):
     def test_collection_lecture_get(self):
-        res = self.testapp.get('/api/lectures', accept_header, status=403)
+        res = self.testapp.get(URL+'/lectures', ACCEPT_HEADER, status=403)
 
     def test_lecture_get(self):
-        res = self.testapp.get('/api/lectures/20110', accept_header, status=403)
+        res = self.testapp.get(
+            URL+'/lectures/20110', ACCEPT_HEADER, status=403)
 
     # TODO: add a valid PUT request
     def test_lecture_put(self):
-        res = self.testapp.put('/api/lectures', {}, accept_header, status=403)
+        res = self.testapp.put(URL+'/lectures', {}, ACCEPT_HEADER, status=403)
 
     def test_lecture_post(self):
-        lecture = {"term": 20182, "name": "Informatik", "assistants": [{"email": "test@test.de"}]}
-        res = self.testapp.post('/api/lectures', lecture, accept_header, status=403)
-
+        lecture = {
+            "term": 20182,
+            "name": "Informatik",
+            "assistants": [{
+                "email": "test@test.de"
+            }]
+        }
+        res = self.testapp.post(URL+'/lectures', lecture, ACCEPT_HEADER, status=403)
