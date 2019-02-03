@@ -11,6 +11,8 @@ contact:
     name: MÜSLI-Team
     server: localhost
 
+production: True
+
 subjects:
     - Mathematik (BSc)
     - Mathematik (MSc)
