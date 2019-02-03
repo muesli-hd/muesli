@@ -2,7 +2,7 @@
 database:
     connection: postgresql:///muesli
 
-listen: 
+listen:
   host: localhost
   port: 8080
 

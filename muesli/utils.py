@@ -57,8 +57,16 @@ class Configuration(object):
     def __init__(self, filename):
         with open(filename, 'r') as config_file:
             self.data = yaml.safe_load(config_file.read())
+
     def __getitem__(self, key):
         return self.data[key]
+
+    def get(self, key, default):
+        try:
+            return self.data[key]
+        except KeyError:
+            return default
+
 
 #TutorRights:
 editAllTutorials = 'editAllTutorials'
