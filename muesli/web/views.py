@@ -193,18 +193,14 @@ def forbidden(exc, request):
         response.status = 403
         response.content_type = "application/json"
         return response
-    response = render('muesli.web:templates/forbidden.pt',
+    response = render('muesli.web:templates/HTTPForbidden.pt',
                       {},
                       request=request)
     response.status = 403
     return response
 
-
-###################################
-###################################
-###################################
-@view_config(context=Exception)
-def internalServerError(exc, request):
+@view_config(context=pyramid.exceptions.HTTPBadRequest)
+def badRequest(e, request):
     if not muesli.PRODUCTION_INSTANCE:
         print("TRYING TO RECONSTRUCT EXCEPTION")
         traceback.print_exc()
@@ -219,18 +215,50 @@ def internalServerError(exc, request):
             {
                 'time': now, 'user': email,
                 'contact': request.config['contact']['email'],
-                'error': "Bei der Beabeitung ist ein interner Fehler aufgetreten!",
+                'error': e.detail(),
                 'route': request.path,
-                'code': 500,
+                'code': e.code,
             },
         )
         response.content_type = "application/json"
-        response.status = 500
+        response.status = e.code
         return response
-    response = render('muesli.web:templates/error.pt',
+    response = render(
+        'muesli.web:templates/HTTPBadRequest.pt',
+        {'now': now, 'email': email, 'error': e.detail},
+        request=request
+    )
+    response.status = e.code
+    return response
+
+@view_config(context=Exception)
+def internalServerError(e, request):
+    if not muesli.PRODUCTION_INSTANCE:
+        print("TRYING TO RECONSTRUCT EXCEPTION")
+        traceback.print_exc()
+        print("RAISING ANYHOW")
+        raise e
+    now = datetime.datetime.now().strftime("%d. %B %Y, %H:%M Uhr")
+    traceback.print_exc()
+    email = request.user.email if request.user else '<nobody>'
+    if "application/json" in request.headers.environ.get("HTTP_ACCEPT", ""):
+        response = render(
+            "json",
+            {
+                'time': now, 'user': email,
+                'contact': request.config['contact']['email'],
+                'error': "Bei der Beabeitung ist ein interner Fehler aufgetreten!",
+                'route': request.path,
+                'code': e.code,
+            },
+        )
+        response.content_type = "application/json"
+        response.status = e.code
+        return response
+    response = render('muesli.web:templates/HTTPInternalServerError.pt',
                       {'now': now, 'email': email},
                       request=request)
-    response.status = 500
+    response.status = e.code
     return response
 
 
