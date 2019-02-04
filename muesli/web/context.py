@@ -223,3 +223,9 @@ class LectureEndpointContext(object):
             self.lecture = request.db.query(Lecture).get(lecture_id)
             if self.lecture is not None:
                 self.__acl__ += [(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in self.lecture.assistants]
+
+
+class TutorialEndpointContext(object):
+    def __init__(self, request):
+        self.__acl__ = [(Allow, Authenticated, ('viewOverview')),
+                (Allow, 'group:administrators', ALL_PERMISSIONS)]

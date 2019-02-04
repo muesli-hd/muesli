@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from cornice.resource import resource
+from cornice.resource import resource, view
 
 from muesli import models
 from muesli.web import context
@@ -29,17 +29,20 @@ from muesli.web.api.v1 import allowed_attributes
 from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
 
+from muesli.types import TutorialTime
+from marshmallow.exceptions import ValidationError
+
 
 @resource(collection_path='/tutorials',
           path='/tutorials/{tutorial_id}',
-          factory=context.TutorialContext,
-          permission='viewOverview')  # TODO Api specific permission
+          factory=context.TutorialEndpointContext,)
 class Tutorial(object):
     def __init__(self, request, context=None):
         self.request = request
         self.db = request.db
 
-    def collection_get(self):  # Done
+    @view(permission='viewOverview')
+    def collection_get(self):  # TODO nur authenticated
         """
         ---
         get:
@@ -89,3 +92,15 @@ class Tutorial(object):
         result.update({"exams": exam_schema.dump(exa)})
         return result
 
+    def collection_post(self):
+        schema = models.TutorialSchema()
+        schema.context['session'] = self.request.db
+        try:
+            result = schema.load(self.request.json_body)
+        except ValidationError as e:
+            self.request.errors.add('body', 'fail', e.messages)
+        else:
+            tutorial = models.Tutorial(**result)
+            self.db.add(tutorial)
+            self.db.commit()
+            return {'result': 'ok', 'created': schema.dump(tutorial)}

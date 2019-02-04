@@ -89,8 +89,15 @@ class Lecture(object):
         lecture_id = self.request.matchdict['lecture_id']
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'), joinedload(models.Lecture.assistants), joinedload(models.Lecture.tutorials)).get(lecture_id)
         subscribed = self.request.user.id in [s.id for s in lecture.students]
-        schema = models.LectureSchema(only=allowed_attributes.lecture())
-        return {'lecture': schema.dump(lecture),
+        allowed_attr = allowed_attributes.lecture()
+        if lecture.mode == 'off':
+            allowed_attr = allowed_attributes.lecture()
+            allowed_attr.remove('tutorials')
+        schema = models.LectureSchema(only=allowed_attr)
+        response = schema.dump(lecture)
+        if lecture.mode == 'off':
+            response.update({'tutorials': []})
+        return {'lecture': response,
                 'subscribed': subscribed}
 
     @view(permission='edit')

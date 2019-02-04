@@ -680,20 +680,25 @@ class ExamSchema(Schema):
 
 class TutorialSchema(Schema):
     id = fields.Integer(dump_only=True)
-    place = fields.String()
-    time = fields.Method("get_time")
-    max_students = fields.Integer()
-    tutor = fields.Nested( UserSchema, only=allowed_attributes.user())
+    lecture_id = fields.Integer(required=True)
+    place = fields.String(required=True)
+    time = fields.Method("get_time", deserialize="load_time")
+    max_students = fields.Integer(required=True)
+    tutor = fields.Nested(
+        UserSchema, only=allowed_attributes.user())
     comment = fields.String()
     students = fields.Nested(UserSchema, many=True, only=allowed_attributes.user())
 
     # CORRECT ?! TODO
     exams = fields.Nested(ExamSchema, many=True, only=["id", "name"])
-    
+
     student_count = fields.Method("get_student_num")
 
     def get_time(self, obj):
         return obj.time.__html__()
+
+    def load_time(self, value):
+        return TutorialTime(str(value))
 
     def get_student_num(self, obj):
         return obj.students.count()
