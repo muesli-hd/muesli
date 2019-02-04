@@ -83,6 +83,11 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
       Neue <a tal:attributes="href request.route_path('tutorial_add', lecture_id = lecture.id)">${names['tutorial']} hinzufügen</a>
     </td>
   </tr>
+    <tr>
+    <td colspan="3">
+      <a tal:attributes="href request.route_path('lecture_switch_students', lecture_id = lecture.id)">Übungsgruppen von Studenten tauschen</a>
+    </td>
+  </tr>
 </table>
 
 <h3>${names['tutors']}</h3>

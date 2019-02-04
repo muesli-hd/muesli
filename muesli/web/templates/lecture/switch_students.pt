@@ -2,7 +2,7 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<h2>Studenten in diese Vorlesung eintragen</h2>
+<h2>Übungsgruppen von Studenten tauschen</h2>
 
 <p>
 Vorlesung: <a tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">${lecture.name}</a>
@@ -36,7 +36,11 @@ jQuery(document).ready(function() {
     </tr>
   </table>
 </form>
-
+  <tr>
+    <td colspan="3">
+      <a tal:attributes="href request.route_path('lecture_edit', lecture_id = lecture.id)">Zurück zur Vorlesung</a>
+    </td>
+  </tr>
 
   </metal:main>
 </metal:main>
