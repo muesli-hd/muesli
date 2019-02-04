@@ -21,32 +21,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
-from os import path
+from os import path, stat
 from ast import literal_eval
 import requests
 
 STATIC_HEADERS = {'Accept': 'application/json'}
 MUESLI_URL = "http://localhost:8080"
-
-
-def convert_str(dictionary):
-    """TODO: Docstring for convert_str.
-
-    :arg1: TODO
-    :returns: TODO
-
-    """
-    str_dict = {}
-    for key, value in dictionary.items():
-        if isinstance(key, bytes):
-            if isinstance(value, bytes):
-                str_dict[key.decode('ASCII')] = value.decode('ASCII')
-            else:
-                str_dict[key.decode('ASCII')] = value
-        else:
-            if isinstance(value, bytes):
-                str_dict[key.decode('ASCII')] = value.decode('ASCII')
-    return dictionary
 
 
 def authenticate(header_name="header.txt") -> dict:
@@ -56,11 +36,11 @@ def authenticate(header_name="header.txt") -> dict:
     :returns: TODO
 
     """
-    if path.isfile(header_name):
+    if path.isfile(header_name) and stat(header_name).st_size != 0:
         with open(header_name, 'r') as header:
             header_content = literal_eval(header.read())
             print('Read header from {}!'.format(header_name))
-            return convert_str(header_content)
+            return header_content
     else:
         with open(header_name, 'w') as header:
             r = requests.post(
@@ -68,18 +48,21 @@ def authenticate(header_name="header.txt") -> dict:
                 data={"email": "test@test.de", "password": "1234"}
             )
             token = r.json().get("token", "")
-            header_content = {str('Authorization'): str('JWT '+token)}
+            header_content = {'Authorization': 'JWT '+token}
             header_content.update(STATIC_HEADERS)
             header.write(json.dumps(header_content))
             print('Created {}!'.format(header_name))
-            return convert_str(header_content)
+            return header_content
 
 
 def main():
     headers = authenticate()
-    endpoint = MUESLI_URL + "/api/v1/lectures"
-    get = requests.get(endpoint, headers=headers)
-    print(get.json())
+    endpoint = MUESLI_URL + "/api/v1/lectures/20109"
+    lecture = '{"term": 20181, "name": "Irgendwas", "lecturer": "Ich auch"}'
+    r = requests.put(endpoint, data=lecture, headers=headers)
+    # r = requests.get(endpoint, headers=headers)
+    print(r, r.text)
+    # print(r.json())
 
 
 if __name__ == "__main__":

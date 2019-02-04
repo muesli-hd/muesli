@@ -267,12 +267,13 @@ def main(global_config=None, testmode=False, **settings):
     config.pyramid_apispec_add_explorer(spec_route_name='openapi_spec')
     # End: config for the API-Browser
 
+    config.add_route('api_login', '/api/v1/login')
     config.include('pyramid_chameleon')
     # TODO: move the prefix addition into a seperate function for later
     # developed API's.
     config.route_prefix = 'api/v1'
     config.include('cornice')
-    config.add_route('api_login', '/api/v1/login')
+    config.route_prefix = ""
 
     if not muesli.PRODUCTION_INSTANCE:
         config.include('pyramid_debugtoolbar')

@@ -249,11 +249,11 @@ def internalServerError(e, request):
                 'contact': request.config['contact']['email'],
                 'error': "Bei der Beabeitung ist ein interner Fehler aufgetreten!",
                 'route': request.path,
-                'code': e.code,
+                'code': 500,
             },
         )
         response.content_type = "application/json"
-        response.status = e.code
+        response.status = 500
         return response
     response = render('muesli.web:templates/HTTPInternalServerError.pt',
                       {'now': now, 'email': email},

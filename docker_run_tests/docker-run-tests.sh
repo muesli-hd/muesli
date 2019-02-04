@@ -6,4 +6,4 @@ sed -i '/^sqlalchemy.url = postgres:\/\/postgres@postgres\/muesli/ d' alembic.in
 sed -i 's/^\#sqlalchemy.url = postgres:\/\/postgres@postgres\/muesli/sqlalchemy.url = postgres:\/\/postgres@postgres\/muesli/' alembic.ini
 alembic upgrade head
 python3 -m smtpd -n -c DebuggingServer localhost:25 &
-MUESLI_PATH=$(pwd) py.test --cov=muesli muesli/tests && exit
+MUESLI_PATH=$(pwd) py.test --cov=muesli muesli/tests/* && exit

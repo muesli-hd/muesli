@@ -22,21 +22,19 @@
 
 from muesli.tests import functionalTests
 
-ACCEPT_HEADER = {'Accept': 'application/json'}
-URL = "/api/v1"
-
+from muesli.tests.api import v1
 
 class BaseTests(functionalTests.BaseTests):
     def test_collection_lecture_get(self):
-        res = self.testapp.get(URL+'/lectures', ACCEPT_HEADER, status=403)
+        res = self.testapp.get(v1.URL+'/lectures', v1.ACCEPT_HEADER, status=403)
 
     def test_lecture_get(self):
         res = self.testapp.get(
-            URL+'/lectures/20110', ACCEPT_HEADER, status=403)
+            v1.URL+'/lectures/20110', v1.ACCEPT_HEADER, status=403)
 
-    # TODO: add a valid PUT request
     def test_lecture_put(self):
-        res = self.testapp.put(URL+'/lectures', {}, ACCEPT_HEADER, status=403)
+        lecture = '{"term": 20181, "name": "Irgendwas", "lecturer": "Ich auch"}'
+        res = self.testapp.put(v1.URL+'/lectures/20109', lecture, v1.ACCEPT_HEADER, status=403)
 
     def test_lecture_post(self):
         lecture = {
@@ -46,4 +44,4 @@ class BaseTests(functionalTests.BaseTests):
                 "email": "test@test.de"
             }]
         }
-        res = self.testapp.post(URL+'/lectures', lecture, ACCEPT_HEADER, status=403)
+        res = self.testapp.post(v1.URL+'/lectures', lecture, v1.ACCEPT_HEADER, status=403)
