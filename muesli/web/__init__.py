@@ -273,7 +273,6 @@ def main(global_config=None, testmode=False, **settings):
     # developed API's.
     config.route_prefix = 'api/v1'
     config.include('cornice')
-    config.route_prefix = ""
 
     if not muesli.PRODUCTION_INSTANCE:
         config.include('pyramid_debugtoolbar')
