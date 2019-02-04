@@ -29,4 +29,4 @@ before_script:
   - sudo python -m smtpd -n -c DebuggingServer localhost:25 &
 
 # command to run tests
-script: MUESLI_PATH=$(pwd) py.test --cov=muesli muesli/tests && codecov
+script: MUESLI_PATH=$(pwd) py.test --cov=muesli muesli/tests/* && codecov
