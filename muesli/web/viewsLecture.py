@@ -224,6 +224,7 @@ class SwitchStudents(object):
                 tmp = ls1.tutorial
                 ls1.tutorial = ls2.tutorial
                 ls2.tutorial = tmp
+                self.request.db.commit()
                 self.request.session.flash('Sie haben die Tutorien von {} und {} vertauscht'.format(student1.name(),student2.name()), queue='messages')
 
         return {'lecture': lecture,
