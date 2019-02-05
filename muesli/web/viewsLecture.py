@@ -26,6 +26,8 @@ from muesli.web.forms import *
 from muesli.allocation import Allocation
 from muesli.mail import Message, sendMail
 from muesli.web.viewsExam import MatplotlibView
+from muesli.web.tooltips import lecture_edit_tooltips
+from muesli.utils import category_names
 
 from collections import defaultdict
 
@@ -89,25 +91,31 @@ class View(object):
                 'times': times,
                 'prefs': utils.preferences}
 
-@view_config(route_name='lecture_add_exam', renderer='muesli.web:templates/lecture/add_exam.pt', context=LectureContext, permission='edit')
+@view_config(route_name='lecture_add_exam', renderer='muesli.web:templates/lecture/add_exam.pt', context=AddExamContext, permission='edit')
 class AddExam(object):
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
         self.lecture_id = request.matchdict['lecture_id']
+        self.category = request.matchdict['category']
     def __call__(self):
+        category = self.category
         lecture = self.db.query(models.Lecture).get(self.lecture_id)
         form = LectureAddExam(self.request)
+        category_name = category_names[category]
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
             exam = models.Exam()
             exam.lecture = lecture
+            exam.category = self.category
             form.obj = exam
             form.saveValues()
             self.request.db.commit()
             form.message = "Neues Testat angelegt."
             return HTTPFound(location=self.request.route_url('exam_edit', exam_id = exam.id))
         return {'lecture': lecture,
-                'form': form
+                'form': form,
+                'category': category,
+                'category_name': category_name
                }
 
 @view_config(route_name='lecture_add_tutor', context=LectureContext, permission='add_tutor')
@@ -220,7 +228,8 @@ class Edit(object):
                 'categories': utils.categories,
                 'exams': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
                 'assistants': assistants,
-                'form': form}
+                'form': form,
+                'tooltips': lecture_edit_tooltips}
 
 @view_config(route_name='lecture_delete', context=LectureContext, permission='delete_lecture')
 def delete(request):

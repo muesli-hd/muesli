@@ -43,7 +43,7 @@ class BaseTests(functionalTests.BaseTests):
         res = self.testapp.get('/lecture/do_allocation/%s' % 123456, status=404)
 
     def test_lecture_add_exam(self):
-        res = self.testapp.get('/lecture/add_exam/%s' % 123456, status=404)
+        res = self.testapp.get('/lecture/add_exam/exam/%s' % 123456, status=404)
 
     def test_lecture_add_grading(self):
         res = self.testapp.get('/lecture/add_grading/%s' % 123456, status=404)
@@ -109,7 +109,7 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
         res = self.testapp.get('/lecture/do_allocation/%s' % self.prefLecture.id, status=403)
 
     def test_lecture_add_exam(self):
-        res = self.testapp.get('/lecture/add_exam/%s' % self.lecture.id, status=403)
+        res = self.testapp.get('/lecture/add_exam/exam/%s' % self.lecture.id, status=403)
 
     def test_lecture_add_grading(self):
         res = self.testapp.get('/lecture/add_grading/%s' % self.lecture.id, status=403)
@@ -264,7 +264,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
         res = self.testapp.get('/lecture/do_allocation/%s' % self.lecture.id, status=403)
 
     def test_lecture_add_exam(self):
-        res = self.testapp.get('/lecture/add_exam/%s' % self.lecture.id, status=200)
+        res = self.testapp.get('/lecture/add_exam/exam/%s' % self.lecture.id, status=200)
         form =  res.form
         form['name'] = 'Testblatt'
         res = form.submit()

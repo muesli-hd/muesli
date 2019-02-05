@@ -198,3 +198,63 @@ table.colored tr:nth-child(odd) {
 .changelog_description {
   vertical-align: top;
 }
+
+/* Tooltip container */
+.tooltip_questionmark {
+  position: relative;
+  display: inline-block;
+  background-color: lightgrey;
+  border-radius: 100%;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  color: #FFFFFF;
+  font-size: 75%;
+  font-family: sans-serif;
+}
+
+.tooltip_questionmark:before{
+    content:'?';
+    font-weight: bold;
+    color:#fff;
+}
+
+/* Tooltip text */
+.tooltip_questionmark p {
+  visibility: hidden;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 5px 5px;
+  border-radius: 6px;
+  width: 300px;
+
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -150px;
+
+  /* Fade in tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Tooltip arrow */
+.tooltip_questionmark p::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip_questionmark:hover p {
+  visibility: visible;
+  opacity: 1;
+}

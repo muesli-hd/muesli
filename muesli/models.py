@@ -578,6 +578,11 @@ class Grading(Base):
     hispos_date = Column(Text)
     examiner_id = Column(Text)
     exams = relationship(Exam, secondary=grading_exam_table, backref = "gradings", order_by=Exam.id)
+    def getGrades(self):
+        session = Session.object_session(self)
+        grades_query = session.query(StudentGrade).filter(StudentGrade.grading_id == self.id)
+        grades = [instance.grade for instance in grades_query]
+        return grades
 
 class StudentGrade(Base):
     __tablename__ = 'student_grades'

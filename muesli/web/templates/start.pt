@@ -2,13 +2,27 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
 <script>
 /*<![CDATA[*/
   function confirm_unsubscribe() {
     return confirm("Wollen Sie wirklich diese Übungsgruppe verlassen?");
   }
+
+  function hide_help ()
+  {
+    $(".help").hide();
+    $(".nohelp").show();
+  }
+
+  function show_help ()
+  {
+    $(".help").show();
+    $(".nohelp").hide();
+  }
 /*]]>*/
 </script>
+
 
 <h2>Übersicht Ihrer Veranstaltungen in diesem Semester</h2>
 
@@ -88,6 +102,15 @@
 <p tal:condition="request.GET.get('show_all', '0')=='0'">Es werden nur aktuelle Veranstaltungen angezeigt.
   <a tal:attributes="href request.route_path('start', _query= {'show_all': '1'})">Alle anzeigen</a>.</p>
 <p tal:condition="request.GET.get('show_all', '0')=='1'">Es werden alle Veranstaltungen angezeigt. <a tal:attributes="href request.route_path('start')">Nur aktuelle anzeigen</a>.</p>
+
+<a class="nohelp" href="javascript:show_help()">Hilfe</a><a class="help" style="display:none" href="javascript:hide_help()">Hilfe verbergen</a>
+<div class="help" style="display:none">
+<ul>
+    <li>${tooltips.lecture}</li>
+    <li>${tooltips.email}</li>
+    <li>${tooltips.details}</li>
+</ul>
+</div>
 
   </metal:main>
 </metal:main>

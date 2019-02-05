@@ -1,6 +1,7 @@
 from muesli.models import *
 from pyramid.security import Allow, Deny, Everyone, Authenticated, DENY_ALL, ALL_PERMISSIONS
 from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden
+#from muesli.web.tooltips import lecture_add_exam_tooltips
 
 from muesli.utils import editAllTutorials, editOwnTutorials, editNoTutorials
 
@@ -72,11 +73,23 @@ class GradingContext(object):
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in self.grading.lecture.assistants]
 
-
 class LectureContext(object):
     def __init__(self, request):
         lecture_id = request.matchdict['lecture_id']
         self.lecture = request.db.query(Lecture).get(lecture_id)
+        if self.lecture is None:
+            raise HTTPNotFound(detail='Lecture not found')
+        self.__acl__ = [
+                (Allow, Authenticated, ('view', 'view_own_points', 'add_tutor')),
+                (Allow, 'group:administrators', ALL_PERMISSIONS),
+                ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit','change_assistant', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for assistant in self.lecture.assistants
+                ]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for tutor in self.lecture.tutors]
+
+class AddExamContext(object):
+    def __init__(self, request):
+        lecture_id = request.matchdict['lecture_id']
+        self.lecture = request.db.query(Lecture).get(lecture_id)
+        self.category = request.matchdict['category']
         if self.lecture is None:
             raise HTTPNotFound(detail='Lecture not found')
         self.__acl__ = [

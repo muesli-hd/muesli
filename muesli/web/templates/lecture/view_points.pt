@@ -52,9 +52,12 @@
   <h3>Klausuranmeldungen</h3>
 
   <p>
-  Bitte melden Sie sich ggf. für die Klausuren an.
-  <strong>J</strong> bedeutet, daß Sie an der Klausur teilnehmen möchten; <strong>N</strong>, daß Sie <strong>nicht</strong> an der Klausur teilnehmen möchten.
-  Falls Sie sich noch nicht entschieden haben, können Sie <strong>?</strong> angeben.
+      Bitte melden Sie sich ggf. für die Klausuren an.
+      <strong>J</strong> bedeutet, daß Sie an der Klausur teilnehmen möchten; <strong>N</strong>, daß Sie <strong>nicht</strong> an der Klausur teilnehmen möchten.
+      Falls Sie sich noch nicht entschieden haben, können Sie <strong>?</strong> angeben.
+  </p>
+  <p>
+      Sie können Ihre Auswahl während der Anmeldephase mehrmals ändern.
   </p>
 
   <form method="POST">

@@ -8,7 +8,6 @@
 <a tal:attributes="href request.route_path('lecture_edit', lecture_id=exam.lecture.id)">${exam.lecture.name}</a>,
 <a tal:attributes="href request.route_path('exam_edit', exam_id=exam.id)">${exam.name}</a>
 </p>
-
 <ul>
   <li tal:repeat="exercise exam.exercises">
     Aufgabe ${exercise.nr}: ${exercise.maxpoints} Punkte
