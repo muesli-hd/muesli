@@ -20,17 +20,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from marshmallow.exceptions import ValidationError
+from sqlalchemy.orm import joinedload
 from cornice.resource import resource, view
 
 from muesli import models
 from muesli.web import context
 from muesli.web.api.v1 import allowed_attributes
-
-from sqlalchemy.orm import exc, joinedload, undefer
-from sqlalchemy.sql.expression import desc
-
-from muesli.types import TutorialTime
-from marshmallow.exceptions import ValidationError
 
 
 @resource(collection_path='/tutorials',

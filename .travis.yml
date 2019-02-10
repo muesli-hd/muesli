@@ -33,4 +33,4 @@ script: MUESLI_PATH=$(pwd) py.test --cov=muesli muesli/tests/*
 
 after_script:
   - codecov
-  - pylint
+  - pylint --disable=W1401,C0111,C0103,R0801,W0612 muesli.web.api muesli.tests.api

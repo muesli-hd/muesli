@@ -11,7 +11,7 @@ CMD ["/opt/muesli4/docker_run_tests/docker-run-tests.sh"]
 
 RUN useradd muesli
 
-RUN apt-get update && apt-get install -y python3.5 python3.5-dev lp-solve postgresql-server-dev-9.5 wget python3-pip libjs-jquery-fancybox locales && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git python3.5 python3.5-dev lp-solve postgresql-server-dev-9.5 wget python3-pip libjs-jquery-fancybox locales && rm -rf /var/lib/apt/lists/*
 
 RUN locale-gen de_DE.UTF-8
 ENV LANG de_DE.UTF-8
