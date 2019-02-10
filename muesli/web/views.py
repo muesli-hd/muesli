@@ -258,7 +258,7 @@ def internalServerError(e, request):
     response = render('muesli.web:templates/HTTPInternalServerError.pt',
                       {'now': now, 'email': email},
                       request=request)
-    response.status = e.code
+    response.status = 500
     return response
 
 

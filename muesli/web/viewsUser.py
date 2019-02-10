@@ -59,8 +59,11 @@ def login(request):
 
 @view_config(route_name='api_login', renderer='json', request_method='POST')
 def api_login(request):
-    user = request.db.query(models.User).filter_by(email=request.POST['email'].strip(), password=sha1(request.POST['password'].encode('utf-8')).hexdigest()).first()
-    exp = datetime.timedelta(days=muesli.config["api"]["key_expiration"])
+    user = request.db.query(models.User).filter_by(
+        email=request.POST['email'].strip(),
+        password=sha1(request.POST['password'].encode('utf-8')).hexdigest()
+    ).first()
+    exp = datetime.timedelta(days=muesli.config["api"]["KEY_EXPIRATION"])
     token = models.BearerToken(client="Personal Token",
                                user=user,
                                description="Requested from API",
@@ -156,7 +159,7 @@ def edit(request):
     user = request.db.query(models.User).get(user_id)
     lectures = user.lectures_as_assistant.all()
     form = forms.UserEdit(request, user)
-    tokens = ""
+    keys = ""
     if request.method == 'POST' and form.processPostData(request.POST):
         if (form['is_assistant'] != user.is_assistant) and (form['is_assistant'] == 0):
             lectures = user.lectures_as_assistant.all()
@@ -167,15 +170,15 @@ def edit(request):
         form.saveValues()
         request.db.commit()
         request.session.flash('Daten geändert', queue='messages')
-    tokens = list_auth_keys(request)
-    tokens = tokens.get("keys", "")
+    keys = list_auth_keys(request)
+    keys = keys.get("keys", "")
     return {'user': user,
             'form': form,
             'time_preferences': user.prepareTimePreferences(),
             'lectures_as_assistant': user.lectures_as_assistant.all(),
             'tutorials_as_tutor': user.tutorials_as_tutor.all(),
             'penalty_names': utils.penalty_names,
-            'keys': tokens}
+            'keys': keys}
 
 
 @view_config(route_name='user_delete', context=context.UserContext, permission='delete')
@@ -523,13 +526,21 @@ def list_auth_keys(request):
         user_id = request.matchdict.get('user_id', "")
     else:
         user_id = request.user.id
+    tokens = (request.db.query(models.BearerToken)
+              .filter_by(user_id=user_id).filter(models.BearerToken.revoked == False).all())
     if request.method == 'POST' and form.processPostData(request.POST):
-        exp = datetime.timedelta(days=muesli.config["api"]["key_expiration"])
+        exp = datetime.timedelta(days=muesli.config["api"]["KEY_EXPIRATION"])
+        max_keys = muesli.config["api"].get("MAX_KEYS", 0)
+        if len(tokens) >= max_keys and max_keys != -1:
+            raise HTTPBadRequest(
+                "Sie haben das Maximum von {} Keys überschritten!"
+                .format(max_keys)
+            )
         token = models.BearerToken(client="Personal Token",
                                    user=request.user,
                                    description=form['description'],
                                    expires=datetime.datetime.utcnow()+exp
-                                  )
+                                   )
         request.db.add(token)
         request.db.flush()
         jwt_token = request.create_jwt_token(request.user.id,
@@ -538,8 +549,6 @@ def list_auth_keys(request):
                                              expiration=exp)
         request.session.flash("Ihr API Token wurde erstellt!", queue='messages')
         request.db.commit()
-    tokens = (request.db.query(models.BearerToken)
-              .filter_by(user_id=user_id).filter(models.BearerToken.revoked == False).all())
     return {'keys': tokens,
             'form': form,
             'freshtoken': jwt_token}

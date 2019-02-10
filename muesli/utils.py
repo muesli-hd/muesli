@@ -62,10 +62,7 @@ class Configuration(object):
         return self.data[key]
 
     def get(self, key, default):
-        try:
-            return self.data[key]
-        except KeyError:
-            return default
+        return self.data.get(key, default)
 
 
 #TutorRights:

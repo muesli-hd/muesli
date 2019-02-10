@@ -5,7 +5,7 @@
 
     <p>
     Ihre Anfrage scheint nicht richtig zu sein! <br>
-    Bitte <a tal:attributes="href request.route_path('contact')">wenden Sie sich an uns</a> falls Sie denken das diese Anfrage eigentlich zu richtigen Ergebnissen führen sollte.
+    Bitte <a tal:attributes="href request.route_path('contact')">wenden Sie sich an uns</a> falls Sie denken das diese Anfrage eigentlich zu richtigen Ergebnissen führen sollte. <br>
     Geben Sie dann bitte die Informationen unten an.
     </p>
 
