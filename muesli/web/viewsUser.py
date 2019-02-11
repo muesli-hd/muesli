@@ -549,6 +549,7 @@ def list_auth_keys(request):
                                              expiration=exp)
         request.session.flash("Ihr API Token wurde erstellt!", queue='messages')
         request.db.commit()
+        tokens.append(token)
     return {'keys': tokens,
             'form': form,
             'freshtoken': jwt_token}

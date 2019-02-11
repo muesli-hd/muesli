@@ -48,6 +48,13 @@ def api_spec(request):
         title='MÜSLI-API',
         version='0.0.1',
         openapi_version='2.0.0',
+        securityDefinitions={
+            "Bearer": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization",
+            }
+        },
         plugins=[
             MarshmallowPlugin()
         ]

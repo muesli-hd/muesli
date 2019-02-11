@@ -43,6 +43,8 @@ class Lecture(object):
         """
         ---
         get:
+          security:
+            - Bearer: [read]
           tags:
             - "v1"
           summary: "return all lectures"
@@ -73,6 +75,8 @@ class Lecture(object):
         """
         ---
         get:
+          security:
+            - Bearer: [read]
           tags:
             - "v1"
           summary: "return a specific lecture"
@@ -128,6 +132,8 @@ class Lecture(object):
         """
         ---
         post:
+          security:
+            - Bearer: [write]
           tags:
             - "v1"
           summary: "create a lecture"

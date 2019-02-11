@@ -39,6 +39,8 @@ class Exercise(object):
         """
         ---
         get:
+          security:
+            - Bearer: [read]
           tags:
             - "v1"
           summary: "return an exercise for given student"
@@ -67,6 +69,8 @@ class Exercise(object):
         """
         ---
         get:
+          security:
+            - Bearer: [read]
           tags:
             - "v1"
           summary: "return an exercise"

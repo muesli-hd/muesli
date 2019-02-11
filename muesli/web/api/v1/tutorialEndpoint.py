@@ -42,6 +42,8 @@ class Tutorial(object):
         """
         ---
         get:
+          security:
+            - Bearer: [read]
           tags:
             - "v1"
           summary: "return all tutorials"
@@ -63,6 +65,8 @@ class Tutorial(object):
         """
         ---
         get:
+          security:
+            - Bearer: [read]
           tags:
             - "v1"
           summary: "return a specific tutorial"
