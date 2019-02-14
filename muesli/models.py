@@ -586,3 +586,9 @@ class StudentGrade(Base):
     student_id = Column('student', Integer, ForeignKey(User.id), nullable=False, primary_key=True)
     student = relationship(User, backref=backref('student_grades', lazy='dynamic'))
     grade = Column(Numeric(precision=2, scale=1), CheckConstraint('grade >= 1.0 AND grade <= 5.0'))
+
+class EmailPreferences(Base):
+    __tablename__ = 'email_preferences'
+    user_id = Column(Integer, ForeignKey(User.id), nullable=False, primary_key=True)
+    lecture_id = Column(Integer, ForeignKey(Lecture.id), nullable=False, primary_key=True)
+    receive_status_mails = Column(Boolean, nullable=False)
