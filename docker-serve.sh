@@ -2,7 +2,7 @@
 sed 's/\/\/\//\/\/postgres@postgres\//' muesli.yml.example | sed 's/localhost/0.0.0.0/' > muesli.yml
 sed 's/\/\/\//\/\/postgres@postgres\//' alembic.ini.example > alembic.ini
 echo "Sleeping for 3s ..."; sleep 3;
-echo "Generating configs"
+echo "Generating configs ... "
 alembic upgrade head
 python3 -m smtpd -n -c DebuggingServer localhost:25 &
 echo -n "IP-address: "

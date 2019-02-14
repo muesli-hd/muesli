@@ -58,11 +58,11 @@ def authenticate(header_name="header.txt") -> dict:
 def main():
     headers = authenticate()
     endpoint = MUESLI_URL + "/api/v1/lectures/20109"
-    lecture = '{"term": 20181, "name": "Irgendwas", "lecturer": "Ich auch"}'
-    r = requests.put(endpoint, data=lecture, headers=headers)
+    # lecture = '{"term": 20181, "name": "Irgendwas", "lecturer": "Ich auch"}'
+    r = requests.get(endpoint, headers=headers)
     # r = requests.get(endpoint, headers=headers)
-    print(r, r.text)
-    # print(r.json())
+    # print(r, r.text)
+    print(r.json())
 
 
 if __name__ == "__main__":

@@ -21,13 +21,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from cornice.resource import resource
+from pyramid.httpexceptions import HTTPBadRequest
 
 from muesli import models
 from muesli.web import context
-
-from sqlalchemy.orm import exc, joinedload, undefer
-from sqlalchemy.sql.expression import desc
-from pyramid.httpexceptions import HTTPBadRequest
 
 
 @resource(path='/exams/{exam_id}',
@@ -48,5 +45,3 @@ class Exam(object):
         result = exam_schema.dump(exam)
         result.update({"exercises": exer_schema.dump(exam.exercises)})
         return result
-
-
