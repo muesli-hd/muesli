@@ -321,6 +321,27 @@ def sendChangesMail(request, tutor, text):
             body='Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
     muesli.mail.sendMail(message)
 
+@view_config(route_name='tutorial_email_preference', renderer='muesli.web:templates/tutorial/email_preference.pt', context=TutorialContext, permission='viewAll')
+def email_preference(request):
+    db = request.db
+    tutorials = request.context.tutorials
+    lecture = tutorials[0].lecture
+    form = TutorialEmailPreference(request)
+    email_preference = db.query(models.EmailPreferences).get((lecture.id, request.user.id))
+    if email_preference is None:
+        email_preference = models.EmailPreferences(request.user.id, lecture.id, True)
+    print(email_preference)
+    form['recieve_status_mails'] = email_preference.receive_status_mails
+    if request.method == 'POST' and form.processPostData(request.POST):
+        email_preference.receive_status_mails = form['recieve_status_mails']
+        db.commit()
+        request.session.flash('Your preferenves have been updated', queue='messages')
+        return HTTPFound(location=request.route_url('tutorial_view', tutorial_ids=request.context.tutorial_ids_str))
+    return {'tutorials': tutorials,
+            'tutorial_ids': request.context.tutorial_ids_str,
+            'lecture': lecture,
+            'form': form}
+
 @view_config(route_name='tutorial_email', renderer='muesli.web:templates/tutorial/email.pt', context=TutorialContext, permission='sendMail')
 def email(request):
     db = request.db

@@ -592,3 +592,7 @@ class EmailPreferences(Base):
     user_id = Column(Integer, ForeignKey(User.id), nullable=False, primary_key=True)
     lecture_id = Column(Integer, ForeignKey(Lecture.id), nullable=False, primary_key=True)
     receive_status_mails = Column(Boolean, nullable=False)
+    def __init__(self, user_id, lecture_id, receive_status_mails):
+        self.user_id = user_id
+        self.lecture_id = lecture_id
+        self.receive_status_mails = receive_status_mails

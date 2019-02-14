@@ -19,7 +19,7 @@ def upgrade():
     op.create_table('email_preferences',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('lecture_id', sa.Integer(), nullable=False),
-    sa.Column('receive_status_mails_', sa.Boolean(), nullable=False),
+    sa.Column('receive_status_mails', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['lecture_id'], ['lectures.id'], ),
     sa.PrimaryKeyConstraint('user_id', 'lecture_id'),
