@@ -220,12 +220,23 @@ class LectureEndpointContext(object):
                 ]+[(Allow, 'user:{0}'.format(a.id), 'create_lecture') for a in request.db.query(User).filter(User.is_assistant==1).all()]
 
         if lecture_id is not None:
-            self.lecture = request.db.query(Lecture).get(lecture_id)
-            if self.lecture is not None:
-                self.__acl__ += [(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in self.lecture.assistants]
+            lecture = request.db.query(Lecture).get(lecture_id)
+            if lecture is not None:
+                self.__acl__ += [(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in lecture.assistants]
 
 
 class TutorialEndpointContext(object):
     def __init__(self, request):
+        tutorial_id = request.matchdict.get('tutorial_id', None)
         self.__acl__ = [(Allow, Authenticated, ('viewOverview')),
-                (Allow, 'group:administrators', ALL_PERMISSIONS)]
+                        (Allow, 'group:administrators', ALL_PERMISSIONS)]
+        if tutorial_id is not None:
+            tutorial = request.db.query(Tutorial).get(tutorial_id)
+            lecture = tutorial.lecture
+            if tutorial is not None:
+                self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('viewAll', 'edit'))] if request.user in lecture.assistants else []
+                if lecture.tutor_rights == editOwnTutorials:
+                    self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('viewAll'))] if request.user == tutorial.tutor else []
+                elif lecture.tutor_rights == editAllTutorials:
+                    self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('viewAll'))] if request.user in lecture.tutors else []
+

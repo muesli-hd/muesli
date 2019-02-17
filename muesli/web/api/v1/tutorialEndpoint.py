@@ -23,6 +23,7 @@
 from marshmallow.exceptions import ValidationError
 from sqlalchemy.orm import joinedload
 from cornice.resource import resource, view
+from sqlalchemy.orm.exc import NoResultFound
 
 from muesli import models
 from muesli.web import context
@@ -38,7 +39,7 @@ class Tutorial(object):
         self.db = request.db
 
     @view(permission='viewOverview')
-    def collection_get(self):  # TODO nur authenticated
+    def collection_get(self):
         """
         ---
         get:
@@ -57,11 +58,13 @@ class Tutorial(object):
               schema:
                 $ref: "#/definitions/CollectionTutorial"
         """
-        tutorials = self.request.user.tutorials.options(joinedload(models.Tutorial.tutor), joinedload(models.Tutorial.lecture))
+        tutorials = self.request.user.tutorials.options(joinedload(models.Tutorial.tutor), joinedload(models.Tutorial.lecture)).all()
+        tutorials_as_tutor = self.request.user.tutorials_as_tutor.options(joinedload(models.Tutorial.tutor), joinedload(models.Tutorial.lecture)).all()
         schema = models.TutorialSchema(many=True, only=allowed_attributes.collection_tutorial())
-        return schema.dump(tutorials)
+        return schema.dump(tutorials+tutorials_as_tutor)
 
-    def get(self):  # TODO Check if part of tutorial or allowed to view
+    @view(permission='viewOverview')
+    def get(self):
         """
         ---
         get:
@@ -80,18 +83,29 @@ class Tutorial(object):
               schema:
                 $ref: "#/definitions/Tutorial"
         """
-        tutorial = self.request.user.tutorials.options(joinedload(models.Tutorial.tutor), joinedload(models.Tutorial.lecture)).filter(models.Tutorial.id==self.request.matchdict['tutorial_id']).one()
+        tutorial = self.request.db.query(models.Tutorial).options(
+            joinedload(models.Tutorial.tutor),
+            joinedload(models.Tutorial.lecture)).filter(
+                models.Tutorial.id == self.request.matchdict['tutorial_id']
+            ).one()
         exa = tutorial.lecture.exams.filter((models.Exam.results_hidden==False)|(models.Exam.results_hidden==None))
-        if True:  # TODO CHECK IF TUTOR/ASSISTANT
+        if self.request.has_permission('viewAll'):
             tut_schema = models.TutorialSchema()
         else:
             tut_schema = models.TutorialSchema(only=allowed_attributes.tutorial())
         exam_schema = models.ExamSchema(many=True, only=["id", "name"])
 
         result = tut_schema.dump(tutorial)
-        result.update({"exams": exam_schema.dump(exa)})
+        try:
+            lecture_student = tutorial.lecture.lecture_students.filter(models.LectureStudent.student_id == self.request.user.id).one()
+        except NoResultFound:
+            lecture_student = None
+        # If the user is part of the tutorial he is allowed to view the exams
+        if self.request.has_permission('viewAll') or lecture_student:
+            result.update({"exams": exam_schema.dump(exa)})
         return result
 
+    @view(permission='edit')
     def collection_post(self):
         schema = models.TutorialSchema()
         schema.context['session'] = self.request.db

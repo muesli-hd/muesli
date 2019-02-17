@@ -97,6 +97,6 @@ def tutorial():
     """
     attributes = [
         'comment', 'place', 'tutor', 'max_students', 'time', 'student_count',
-        'id', 'time', 'students', 'exams'
+        'id', 'time', 'exams'
     ]
     return attributes
