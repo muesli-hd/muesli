@@ -6,7 +6,7 @@ services:
     environment:
       - POSTGRES_DB=muesli
     volumes:
-      - './api.sql:/docker-entrypoint-initdb.d/travis-muesli-origDb.sql'
+      - './travis-muesli-origDb.sql:/docker-entrypoint-initdb.d/travis-muesli-origDb.sql'
   muesli:
     build: .
     volumes:

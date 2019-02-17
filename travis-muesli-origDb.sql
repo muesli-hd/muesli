@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 11.1 (Debian 11.1-1.pgdg90+1)
--- Dumped by pg_dump version 11.1 (Debian 11.1-1.pgdg90+1)
+-- Dumped from database version 11.0 (Debian 11.0-1.pgdg90+2)
+-- Dumped by pg_dump version 11.0 (Debian 11.0-1.pgdg90+2)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -489,6 +489,7 @@ COPY public.alembic_version (version_num) FROM stdin;
 
 COPY public.beaker_cache (namespace, accessed, created, data) FROM stdin;
 954f49634d9546e0a1a5301968e8dbb0	2017-07-26 19:02:29.53619	2017-07-26 19:02:29.15067	\\x80027d7101550773657373696f6e7d710228550b617574682e75736572696471034a87060100550e5f61636365737365645f74696d6571044741d65e32c960ea57550e5f6372656174696f6e5f74696d6571054741d65e32c948fe8b55075f63737266745f7106582800000036373039386239396162303234623033633831643638623137366132333864373961393462623235710775732e
+d19c7227c473478b99d8e4c2db462e17	2018-12-01 13:20:31.673958	2018-12-01 12:59:49.184813	\\x8004958e000000000000007d948c0773657373696f6e947d94288c0e5f6372656174696f6e5f74696d65944741d700a1714b90fd8c075f63737266745f948c2862633237396233653861656631666632383635656161653333633366626262303862336638623033948c0e5f61636365737365645f74696d65944741d700a2a7e60c208c0b617574682e757365726964944a8806010075732e
 \.
 
 
@@ -659,6 +660,7 @@ COPY public.users (id, email, first_name, last_name, password, matrikel, birth_d
 67204	tutor2@muesli.org	Thor2sten	Tu2tor	e6d751291b25123d4da3794212021582f2704f83	\N	\N	\N	Mathematik (BSc)	\N	\N	0	0
 67205	assistant@muesli.org	Armin	Assistent	8951365cbe9bc4d747c779d342598e29d06615d4	\N	\N	\N	Mathematik (BSc)	\N	\N	0	1
 67206	assistant2@muesli.org	Armin	Assistent2	c8582b7fae27d83a0af8469228d62ad7df7b1996	\N	\N	\N	Mathematik (BSc)	\N	\N	0	1
+67208	test@test.de	Test	Testerson	7110eda4d09e062aa5e4a390b0a572ac0d2c0220	12332	20.09.1998	Heidelbearsch	Mathematik (BSc)	\N	Herr Graf von und zu	1	0
 \.
 
 
@@ -701,7 +703,7 @@ SELECT pg_catalog.setval('public.tutorials_id_seq', 46844, true);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 67207, true);
+SELECT pg_catalog.setval('public.users_id_seq', 67208, true);
 
 
 --
