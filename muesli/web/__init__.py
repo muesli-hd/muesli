@@ -114,8 +114,6 @@ def main(global_config=None, testmode=False, **settings):
     else:
         engine = muesli.engine()
     initializeSession(engine)
-    #settings.update({
-    #})
 
     # XXX: ugly
     import sqlalchemy as sa
@@ -139,9 +137,8 @@ def main(global_config=None, testmode=False, **settings):
             'debugtoolbar.hosts': '0.0.0.0/0',
         })
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
-    jwt_secret_token = muesli.config["api"]["JWT_SECRET_TOKEN"]
     jwt_authentication_policy = JWTAuthenticationPolicy(
-        jwt_secret_token,
+        muesli.config["api"]["JWT_SECRET_TOKEN"],
         callback=principals_for_user,
         expiration=datetime.timedelta(days=muesli.config["api"]["KEY_EXPIRATION"])
     )

@@ -55,6 +55,13 @@ class ConfirmationContext:
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]
 
+class NonLoginContext:
+    def __init__(self, request):
+        self.__acl__ = [
+            (Allow, Everyone, ('view')),
+            (Allow, 'group:administrators', ALL_PERMISSIONS)
+        ]
+
 class GeneralContext:
     def __init__(self, request):
         self.__acl__ = [
