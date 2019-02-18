@@ -33,7 +33,7 @@ from marshmallow.exceptions import ValidationError
 @resource(collection_path='/lectures',
           path='/lectures/{lecture_id}',
           factory=context.LectureEndpointContext)
-class Lecture(object):
+class Lecture:
     def __init__(self, request, context=None):
         self.request = request
         self.db = request.db

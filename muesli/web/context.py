@@ -34,7 +34,7 @@ def getTutorForTutorials(tutorials):
     else:
         return []
 
-class UserContext(object):
+class UserContext:
     def __init__(self, request):
         user_id = request.matchdict['user_id']
         self.user = request.db.query(User).get(user_id)
@@ -45,7 +45,7 @@ class UserContext(object):
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]
 
-class ConfirmationContext(object):
+class ConfirmationContext:
     def __init__(self, request):
         confirmation_hash = request.matchdict['confirmation']
         self.confirmation = request.db.query(Confirmation).get(confirmation_hash)
@@ -55,14 +55,14 @@ class ConfirmationContext(object):
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]
 
-class GeneralContext(object):
+class GeneralContext:
     def __init__(self, request):
         self.__acl__ = [
                 (Allow, Authenticated, ('update', 'change_email', 'change_password','view_keys','remove_keys')),
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]+[(Allow, 'user:{0}'.format(a.id), 'create_lecture') for a in request.db.query(User).filter(User.is_assistant==1).all()]
 
-class GradingContext(object):
+class GradingContext:
     def __init__(self, request):
         grading_id = request.matchdict['grading_id']
         self.grading = request.db.query(Grading).get(grading_id)
@@ -73,7 +73,7 @@ class GradingContext(object):
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in self.grading.lecture.assistants]
 
 
-class LectureContext(object):
+class LectureContext:
     def __init__(self, request):
         lecture_id = request.matchdict['lecture_id']
         self.lecture = request.db.query(Lecture).get(lecture_id)
@@ -85,7 +85,7 @@ class LectureContext(object):
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit','change_assistant', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for assistant in self.lecture.assistants
                 ]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for tutor in self.lecture.tutors]
 
-class TutorialContext(object):
+class TutorialContext:
     def __init__(self, request):
         self.tutorial_ids_str = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', ''))
         self.tutorials, self.tutorial_ids = getTutorials(request)
@@ -119,7 +119,7 @@ class TutorialContext(object):
             if self.tutorials[0].lecture.mode in ['direct', 'off']:
                 self.__acl__.append((Allow, Authenticated, ('unsubscribe')))
 
-class AssignStudentContext(object):
+class AssignStudentContext:
     def __init__(self, request):
         student_id = request.POST['student']
         tutorial_id = request.POST['new_tutorial']
@@ -136,7 +136,7 @@ class AssignStudentContext(object):
                 ]
 
 
-class ExamContext(object):
+class ExamContext:
     def __init__(self, request):
         exam_id = request.matchdict['exam_id']
         self.exam = request.db.query(Exam).get(exam_id)
@@ -162,7 +162,7 @@ class ExamContext(object):
                     self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points')) for tutor in self.exam.lecture.tutors]
                 else: raise ValueError('Tutorrights %s not known' % self.exam.lecture.tutor_rights)
 
-class ExerciseContext(object):
+class ExerciseContext:
     def __init__(self, request):
         exercise_id = request.matchdict['exercise_id']
         self.exercise = request.db.query(Exercise).get(exercise_id)
@@ -183,7 +183,7 @@ class ExerciseContext(object):
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('statistics')) for assistant in self.exam.lecture.assistants
                 ]
 
-class CorrelationContext(object):
+class CorrelationContext:
     def __init__(self, request):
         source1 = request.GET['source1']
         source2 = request.GET['source2']
@@ -211,7 +211,7 @@ class CorrelationContext(object):
             raise ValueError('Sourcetype not known: %s' % source_type)
 
 
-class LectureEndpointContext(object):
+class LectureEndpointContext:
     def __init__(self, request):
         lecture_id = request.matchdict.get('lecture_id', None)
         self.__acl__ = [
@@ -225,7 +225,7 @@ class LectureEndpointContext(object):
                 self.__acl__ += [(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in lecture.assistants]
 
 
-class TutorialEndpointContext(object):
+class TutorialEndpointContext:
     def __init__(self, request):
         tutorial_id = request.matchdict.get('tutorial_id', None)
         self.__acl__ = [(Allow, Authenticated, ('viewOverview')),

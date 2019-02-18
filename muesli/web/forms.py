@@ -64,7 +64,7 @@ class DateString(formencode.FancyValidator):
             raise formencode.Invalid('Ungültiges Jahr!', value, state)
         return string
 
-class FormField(object):
+class FormField:
     def __init__(self, name, label="", type="text", options=None,
             value=None, size=40, comment=None,
             validator=None, required=False,
@@ -100,7 +100,7 @@ class HiddenField(FormField):
         kwargs['type'] = 'hidden'
         FormField.__init__(self, name, **kwargs)
 
-class Form(object):
+class Form:
     def __init__(self, formfields, send="Senden", chained_validators=[]):
         self.formfields = formfields
         self.updateNames()
@@ -154,7 +154,7 @@ class Form(object):
     def __setitem__(self, key, value):
         self.named_fields[key].value=value
 
-class FormValidator(object):
+class FormValidator:
     def __init__(self, schema, obj=None, fields=[]):
         self.schema = schema
         self.value = {}

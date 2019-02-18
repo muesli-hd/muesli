@@ -53,7 +53,7 @@ categories = [{'id': 'assignment', 'name': 'Übungszettel'},
         {'id': 'presence_assignment', 'name': 'Präsenzübung'},
         {'id': 'mock_exam', 'name': 'Probeklausur'}]
 
-class Configuration(object):
+class Configuration:
     def __init__(self, filename):
         with open(filename, 'r') as config_file:
             self.data = yaml.safe_load(config_file.read())
@@ -146,7 +146,7 @@ def listStrings(strings):
         part2 = strings[-1]
         return ', '.join(part1)+' und '+part2
 
-class DictOfObjects(object):
+class DictOfObjects:
     def __init__(self, createFunction):
         self.d = {}
         self.createFunction=createFunction

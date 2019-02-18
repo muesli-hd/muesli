@@ -67,7 +67,7 @@ def createAttachment(filename, data):
     msg.add_header('Content-Disposition', 'attachment', filename=filename)
     return msg
 
-class Message(object):
+class Message:
     def __init__(self, subject=None, sender=None, to=None, cc=None, bcc=None, body=None):
         COMMASPACE = ', '
         self.subject = subject

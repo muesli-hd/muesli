@@ -33,7 +33,7 @@ from muesli.web.api.v1 import allowed_attributes
 @resource(collection_path='/tutorials',
           path='/tutorials/{tutorial_id}',
           factory=context.TutorialEndpointContext,)
-class Tutorial(object):
+class Tutorial:
     def __init__(self, request, context=None):
         self.request = request
         self.db = request.db

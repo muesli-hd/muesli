@@ -30,7 +30,7 @@ from muesli.web import context
 @resource(path='/exams/{exam_id}',
           factory=context.GeneralContext,
           permission='view')  # TODO Api specific permission
-class Exam(object):
+class Exam:
     def __init__(self, request, context=None):
         self.request = request
         self.db = request.db
