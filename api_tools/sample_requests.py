@@ -58,17 +58,22 @@ def authenticate(username, password, header_name="") -> dict:
             print('Created {}!'.format(header_name))
             return header_content
 
+def get(endpoint, header):
+    endpoint = MUESLI_URL + endpoint
+    r = requests.get(endpoint, headers=header)
+    print(r.json())
+
+def put(endpoint, header):
+    endpoint = MUESLI_URL + endpoint
+    lecture = '{"term": 20181, "name": "Irgendwas", "lecturer": "Ich auch"}'
+    r = requests.get(endpoint, lecture, headers=header)
+    print(r.json())
 
 def main():
     headers = authenticate('admin@muesli.org', 'adminpassword')
     # headers = authenticate('test@test.de', '1234')
-    # endpoint = MUESLI_URL + '/api/v1/whoami'
-    endpoint = MUESLI_URL + '/api/v1/lectures/20109'
-    lecture = '{"term": 20181, "name": "Irgendwas", "lecturer": "Ich auch"}'
-    r = requests.get(endpoint, headers=headers)
-    r = requests.put(endpoint, lecture, headers=headers)
-    # print(r, r.text)
-    print(r.json())
+    endpoint = "/api/v1/whoami"
+    get(endpoint, headers)
 
 
 if __name__ == "__main__":
