@@ -294,7 +294,8 @@ def removeStudent(request):
         return HTTPFound(location=request.route_url('start'))
 
 def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
-    if not tutorial.tutor:
+    mail_preference = request.db.query(models.EmailPreferences).get((tutorial.lecture.id, request.user.id))
+    if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'In Ihre Übungsgruppe zur Vorlesung %s am %s hat sich %s eingetragen'\
             % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
@@ -304,7 +305,8 @@ def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
         text += '.'
     sendChangesMail(request, tutorial.tutor, text)
 def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
-    if not tutorial.tutor:
+    mail_preference = request.db.query(models.EmailPreferences).get((tutorial.lecture.id, request.user.id))
+    if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'Aus Ihrer Übungsgruppe zur Vorlesung %s am %s hat sich %s ausgetragen'\
                     % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
@@ -327,20 +329,26 @@ def email_preference(request):
     tutorials = request.context.tutorials
     lecture = tutorials[0].lecture
     form = TutorialEmailPreference(request)
-    email_preference = db.query(models.EmailPreferences).get((lecture.id, request.user.id))
-    if email_preference is None:
-        email_preference = models.EmailPreferences(request.user.id, lecture.id, True)
-    print(email_preference)
-    form['recieve_status_mails'] = email_preference.receive_status_mails
+    mail_preference = db.query(models.EmailPreferences).get((request.user.id, lecture.id))
+    print(mail_preference.receive_status_mails)
+    if mail_preference is None:
+        mail_preference =models.EmailPreferences(request.user.id, lecture.id, True)
+    print(mail_preference.receive_status_mails)
+    form['receive_status_mails'] = mail_preference.receive_status_mails
     if request.method == 'POST' and form.processPostData(request.POST):
-        email_preference.receive_status_mails = form['recieve_status_mails']
-        db.commit()
-        request.session.flash('Your preferenves have been updated', queue='messages')
-        return HTTPFound(location=request.route_url('tutorial_view', tutorial_ids=request.context.tutorial_ids_str))
+        if form['receive_status_mails'] == 1:
+            mail_preference.receive_status_mails = True
+        else:
+            mail_preference.receive_status_mails = False
+        if not mail_preference in request.db:
+            db.add(mail_preference)
+        request.db.commit()
+        request.session.flash('Your preferences have been updated', queue='messages')
     return {'tutorials': tutorials,
             'tutorial_ids': request.context.tutorial_ids_str,
             'lecture': lecture,
             'form': form}
+
 
 @view_config(route_name='tutorial_email', renderer='muesli.web:templates/tutorial/email.pt', context=TutorialContext, permission='sendMail')
 def email(request):

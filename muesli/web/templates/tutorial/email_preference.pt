@@ -15,6 +15,7 @@ oder verlässt.</p>
 <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
 
+<a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial_ids)">Zurück zum Tutorium</a>
 
   </metal:main>
 </metal:main>
