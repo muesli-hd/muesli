@@ -209,6 +209,7 @@ def main(global_config=None, **settings):
     config.add_route('tutorial_view', '/tutorial/view/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_results', '/tutorial/results/{lecture_id}/{tutorial_ids:[^/]*}', factory = TutorialContext)
     config.add_route('tutorial_email', '/tutorial/email/{tutorial_ids}', factory = TutorialContext)
+    config.add_route('tutorial_email_preference', '/tutorial/email_preference/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_resign_as_tutor', '/tutorial/resign_as_tutor/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_assign_student', '/tutorial/assign_student', factory = AssignStudentContext)
 
