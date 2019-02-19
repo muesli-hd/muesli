@@ -330,10 +330,8 @@ def email_preference(request):
     lecture = tutorials[0].lecture
     form = TutorialEmailPreference(request)
     mail_preference = db.query(models.EmailPreferences).get((request.user.id, lecture.id))
-    print(mail_preference.receive_status_mails)
     if mail_preference is None:
         mail_preference =models.EmailPreferences(request.user.id, lecture.id, True)
-    print(mail_preference.receive_status_mails)
     form['receive_status_mails'] = mail_preference.receive_status_mails
     if request.method == 'POST' and form.processPostData(request.POST):
         if form['receive_status_mails'] == 1:
