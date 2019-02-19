@@ -97,7 +97,6 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
         try:
             claims = jwt.decode(token, self.public_key, algorithms=[self.algorithm],
                                 leeway=self.leeway, audience=self.audience)
-            print(claims)
             if request.db.query(models.BearerToken).get(claims["jti"]).revoked:
                 return {}
             else:

@@ -140,6 +140,7 @@ def main(global_config=None, testmode=False, **settings):
     jwt_authentication_policy = JWTAuthenticationPolicy(
         muesli.config["api"]["JWT_SECRET_TOKEN"],
         callback=principals_for_user,
+        auth_type="Bearer",
         expiration=datetime.timedelta(days=muesli.config["api"]["KEY_EXPIRATION"])
     )
     session_authentication_policy = SessionAuthenticationPolicy(callback=principals_for_user)
