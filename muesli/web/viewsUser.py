@@ -203,6 +203,22 @@ def update(request):
         request.session.flash('Angaben geändert', queue='messages')
     return {'form': form}
 
+@view_config(route_name='user_check', renderer='muesli.web:templates/user/check.pt', context=GeneralContext, permission='update')
+def update(request):
+    form = UserUpdate(request, request.user)
+    if request.method == 'POST' and form.processPostData(request.POST):
+        has_updated = request.db.query(models.UserHasUpdated).get(request.user.id)
+        if has_updated is None:
+            has_updated = models.UserHasUpdated(request.user.id, '0')
+        has_updated.has_updated_info = muesli.utils.getSemesterLimit()
+        if not has_updated in request.db:
+            request.db.add(has_updated)
+        request.db.commit()
+        form.saveValues()
+        request.db.commit()
+        request.session.flash('Angaben geändert', queue='messages')
+    return {'form': form}
+
 @view_config(route_name='user_register', renderer='muesli.web:templates/user/register.pt', context=GeneralContext)
 def register(request):
     form = UserRegister(request)

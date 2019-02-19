@@ -596,3 +596,11 @@ class EmailPreferences(Base):
         self.user_id = user_id
         self.lecture_id = lecture_id
         self.receive_status_mails = receive_status_mails
+
+class UserHasUpdated(Base):
+    __tablename__ = 'user_has_updated'
+    user_id = Column(Integer, ForeignKey(User.id), nullable=False, primary_key=True)
+    has_updated_info = Column(String, nullable=False)
+    def __init__(self, user_id, user_has_updated):
+        self.user_id = user_id
+        self.has_updated_info = user_has_updated
