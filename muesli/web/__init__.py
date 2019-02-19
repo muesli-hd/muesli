@@ -33,6 +33,7 @@ from muesli.models import *
 from muesli.web.views import *
 from muesli.web.viewsLecture import *
 from muesli.web.viewsUser import *
+from muesli.web.viewsTutorial import *
 from muesli import utils
 import muesli
 
