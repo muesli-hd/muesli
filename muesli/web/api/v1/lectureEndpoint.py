@@ -106,6 +106,50 @@ class Lecture:
 
     @view(permission='edit')
     def put(self):
+        """
+        ---
+        put:
+          security:
+            - Bearer: [write]
+          tags:
+            - "v1"
+          summary: "update a lecture object"
+          description: "test123"
+          operationId: "lecture_put"
+          produces:
+            - "application/json"
+          consumes:
+            - "application/json"
+          parameters:
+          - in: "body"
+            name: "body"
+            description: ""
+            required: true
+            schema:
+              $ref: "#/definitions/Lecture"
+          responses:
+            200:
+              description: successfull update of a lecture
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: ok
+                  updated:
+                    $ref: "#/definitions/CollectionLecture"
+            400:
+              description: HTTPBadRequest (Example uses A bad attribute)
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: error
+                  error:
+                    type: array
+                    example: [{'description': {'name': ['Missing data for required field.'], 'test123': ['Unknown field.']}, 'name': 'fail', 'location': 'body'}]
+        """
         lecture_id = self.request.matchdict['lecture_id']
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'), joinedload(models.Lecture.assistants)).get(lecture_id)
         schema = models.LectureSchema()

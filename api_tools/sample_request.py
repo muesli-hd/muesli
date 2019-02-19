@@ -62,10 +62,11 @@ def authenticate(username, password, header_name="") -> dict:
 def main():
     headers = authenticate('admin@muesli.org', 'adminpassword')
     # headers = authenticate('test@test.de', '1234')
-    endpoint = MUESLI_URL + '/api/v1/whoami'
-    # lecture = '{"term": 20181, "name": "Irgendwas", "lecturer": "Ich auch"}'
+    # endpoint = MUESLI_URL + '/api/v1/whoami'
+    endpoint = MUESLI_URL + '/api/v1/lectures/20109'
+    lecture = '{"term": 20181, "name": "Irgendwas", "lecturer": "Ich auch"}'
     r = requests.get(endpoint, headers=headers)
-    # r = requests.get(endpoint, headers=headers)
+    r = requests.put(endpoint, lecture, headers=headers)
     # print(r, r.text)
     print(r.json())
 

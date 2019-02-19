@@ -53,6 +53,11 @@ def api_spec(request):
                 "type": "apiKey",
                 "in": "header",
                 "name": "Authorization",
+                "description": "JWT Tokens"
+            },
+            "Basic": {
+                "type": "basic",
+                "description": "Die regulären Zugangsdaten zum Müsli :)"
             }
         },
         plugins=[
