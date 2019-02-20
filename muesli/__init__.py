@@ -18,20 +18,31 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 from sqlalchemy import create_engine
 
 from .utils import Configuration
 
-import os
-
-
-config = Configuration(os.getenv('MUESLI_PATH','/opt/muesli4') + '/muesli.yml')
+config = Configuration(
+    os.getenv('MUESLI_PATH', '/opt/muesli4') + '/muesli.yml')
 
 import muesli.mail
 muesli.mail.server = config['contact']['server']
 
 databaseName = config['database']['connection']
-productive=True
+PRODUCTION_INSTANCE = config.get("production", True)
+
 
 def engine():
-    return create_engine(databaseName)
+    if not PRODUCTION_INSTANCE:
+        return create_engine(databaseName, max_overflow=-1)
+    else:
+        return create_engine(databaseName)
+
+
+def testengine():
+    if not PRODUCTION_INSTANCE:
+        return create_engine(databaseName + "test", max_overflow=-1)
+    else:
+        return create_engine(databaseName + "test")

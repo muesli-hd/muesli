@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# muesli/tests/__init__.py
+# muesli/web/api/v1/helloEndpoint.py
 #
 # This file is part of MUESLI.
 #
@@ -19,3 +19,22 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from cornice.resource import resource, view
+
+from muesli.web import context
+
+@resource(path='/whoami',
+          factory=context.NonLoginContext)
+class Whoami:
+    def __init__(self, request, context=None):
+        self.request = request
+        self.db = request.db
+
+    @view(permission='view')
+    def get(self):
+        if self.request.user:
+            user = str(self.request.user)
+        else:
+            user = None
+        return {"user": user}

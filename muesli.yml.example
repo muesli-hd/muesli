@@ -2,7 +2,7 @@
 database:
     connection: postgresql:///muesli
 
-listen: 
+listen:
   host: localhost
   port: 8080
 
@@ -10,6 +10,8 @@ contact:
     email: muesli@mathi.uni-heidelberg.de
     name: MÜSLI-Team
     server: localhost
+
+production: True
 
 subjects:
     - Mathematik (BSc)
@@ -100,3 +102,7 @@ default_language: de
 View::Email:
   envelope_from: "no-reply@mathi.uni-heidelberg.de"
 
+api:
+  KEY_EXPIRATION: 30
+  JWT_SECRET_TOKEN: "secret"
+  MAX_KEYS: 10

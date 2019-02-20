@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# muesli/tests/__init__.py
+# muesli/tests/api/webTests.py
 #
 # This file is part of MUESLI.
 #
@@ -19,3 +19,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from muesli.tests import functionalTests
+
+
+class BaseTests(functionalTests.BaseTests):
+    def test_api_explorer(self):
+        res = self.testapp.get('/api-explorer', status=200)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# muesli/tests/__init__.py
+# muesli/tests/api/v1/__init__.py
 #
 # This file is part of MUESLI.
 #
@@ -19,3 +19,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ACCEPT_HEADER = {'Accept': 'application/json'}
+URL = "/api/v1"

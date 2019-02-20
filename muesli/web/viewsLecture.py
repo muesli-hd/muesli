@@ -51,7 +51,7 @@ import os
 import yaml
 
 @view_config(route_name='lecture_list', renderer='muesli.web:templates/lecture/list.pt')
-class List(object):
+class List:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -75,7 +75,7 @@ class List(object):
                 'sticky_lectures': sticky_lectures}
 
 @view_config(route_name='lecture_view', renderer='muesli.web:templates/lecture/view.pt', context=LectureContext, permission='view')
-class View(object):
+class View:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -90,7 +90,7 @@ class View(object):
                 'prefs': utils.preferences}
 
 @view_config(route_name='lecture_add_exam', renderer='muesli.web:templates/lecture/add_exam.pt', context=LectureContext, permission='edit')
-class AddExam(object):
+class AddExam:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -129,7 +129,7 @@ def addTutor(request):
     return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))
 
 @view_config(route_name='lecture_add_grading', renderer='muesli.web:templates/lecture/add_grading.pt', context=LectureContext, permission='edit')
-class AddGrading(object):
+class AddGrading:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -149,7 +149,7 @@ class AddGrading(object):
                }
 
 @view_config(route_name='lecture_add_student', renderer='muesli.web:templates/lecture/add_student.pt', context=LectureContext, permission='edit')
-class AddStudent(object):
+class AddStudent:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -195,7 +195,7 @@ class AddStudent(object):
 
 
 @view_config(route_name='lecture_edit', renderer='muesli.web:templates/lecture/edit.pt', context=LectureContext, permission='edit')
-class Edit(object):
+class Edit:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -275,7 +275,7 @@ def change_assistants(request):
     return HTTPFound(location=request.route_url('lecture_edit', lecture_id = lecture.id))
 
 @view_config(route_name='lecture_preferences', renderer='muesli.web:templates/lecture/preferences.pt', context=LectureContext, permission='edit')
-class Preferences(object):
+class Preferences:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -327,7 +327,7 @@ class PrefHistogram(MatplotlibView):
         return self.createResponse()
 
 @view_config(route_name='lecture_add', renderer='muesli.web:templates/lecture/add.pt', context=GeneralContext, permission='create_lecture')
-class Add(object):
+class Add:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -344,7 +344,7 @@ class Add(object):
         return {'form': form}
 
 @view_config(route_name='lecture_remove_tutor', context=LectureContext, permission='edit')
-class RemoveTutor(object):
+class RemoveTutor:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -366,7 +366,7 @@ class RemoveTutor(object):
         return HTTPFound(location=self.request.route_url('lecture_edit', lecture_id=lecture.id))
 
 @view_config(route_name='lecture_export_students_html', renderer='muesli.web:templates/lecture/export_students_html.pt', context=LectureContext, permission='edit')
-class ExportStudentsHtml(object):
+class ExportStudentsHtml:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -641,7 +641,7 @@ def exportYaml_details(request):
     return response
 
 
-class ExcelExport(object):
+class ExcelExport:
     def __init__(self, request):
         self.request = request
         self.w = Workbook()

@@ -50,7 +50,7 @@ import os
 import math
 
 @view_config(route_name='exam_edit', renderer='muesli.web:templates/exam/edit.pt', context=ExamContext, permission='edit')
-class Edit(object):
+class Edit:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -88,7 +88,7 @@ def delete(request):
     return HTTPFound(location=request.route_url('lecture_edit', lecture_id = exam.lecture.id))
 
 @view_config(route_name='exam_add_or_edit_exercise', renderer='muesli.web:templates/exam/add_or_edit_exercise.pt', context=ExamContext, permission='edit')
-class AddOrEditExercise(object):
+class AddOrEditExercise:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -114,7 +114,7 @@ class AddOrEditExercise(object):
                 'exam': exam}
 
 @view_config(route_name='exam_delete_exercise', context=ExamContext, permission='edit')
-class DeleteExercise(object):
+class DeleteExercise:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -134,7 +134,7 @@ class DeleteExercise(object):
             self.request.session.flash('Aufgabe gelöscht', queue='messages')
         return HTTPFound(location=self.request.route_url('exam_edit', exam_id = exam.id))
 
-class EnterPointsBasic(object):
+class EnterPointsBasic:
     def __init__(self, request, raw=False):
         self.request = request
         self.db = self.request.db
@@ -216,7 +216,7 @@ class EnterPointsRaw(EnterPointsBasic):
         super(EnterPointsRaw, self).__init__(request, raw=True)
 
 @view_config(route_name='exam_admission', renderer='muesli.web:templates/exam/admission.pt', context=ExamContext, permission='view_points')
-class Admission(object):
+class Admission:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -271,7 +271,7 @@ class Admission(object):
                 }
 
 @view_config(route_name='exam_export', renderer='muesli.web:templates/exam/export.pt', context=ExamContext, permission='view_points')
-class Export(object):
+class Export:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -388,7 +388,7 @@ def statistics(request):
                     'statistics_by_subject': statistics_by_subject}
 
 @view_config(route_name='exam_statistics_bar')
-class ExamStatisticsBar(object):
+class ExamStatisticsBar:
     def __init__(self, request):
         self.request = request
         self.width = 60
@@ -418,7 +418,7 @@ class ExamStatisticsBar(object):
         output.close()
         return response
 
-class MatplotlibView(object):
+class MatplotlibView:
     def __init__(self):
         self.fig = pyplot.figure()
     def createResponse(self):

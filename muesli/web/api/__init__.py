@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# muesli/tests/__init__.py
+# muesli/web/api/__init__.py
 #
 # This file is part of MUESLI.
 #

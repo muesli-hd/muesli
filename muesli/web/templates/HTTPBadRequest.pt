@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+    <h2>HTTPBadRequest (400)</h2>
+
+    <p>
+    Ihre Anfrage scheint nicht richtig zu sein! <br>
+    Bitte <a tal:attributes="href request.route_path('contact')">wenden Sie sich an uns</a> falls Sie denken das diese Anfrage eigentlich zu richtigen Ergebnissen führen sollte. <br>
+    Geben Sie dann bitte die Informationen unten an.
+    </p>
+
+    <table>
+      <tr>
+        <td><strong>URI</strong></td>
+        <td>${request.path}</td>
+      </tr>
+      <tr>
+        <td><strong>Zeit:</strong></td>
+        <td>${now}</td>
+      </tr>
+      <tr>
+        <td><strong>Nutzer:</strong></td>
+        <td>${email}</td>
+      </tr>
+      <tr>
+        <td><strong>Fehlermeldung:</strong></td>
+        <td>${error}</td>
+      </tr>
+    </table>
+
+  </metal:main>
+</metal:main>

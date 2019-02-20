@@ -26,7 +26,7 @@ from muesli import utils, models
 import tempfile
 import subprocess
 
-class Node(object):
+class Node:
     def __init__(self, type=type, id=-1, time=None, extra=None, tutorials=None):
         self.type = type
         self.id = id
@@ -42,7 +42,7 @@ class StudentNode(Node):
         self.type='student'
         self.student = student
 
-class Arc(object):
+class Arc:
     def __init__(self, src, dest, priority=None, type=None, extra=None):
         self.src=src
         self.dest=dest
@@ -53,7 +53,7 @@ class Arc(object):
 """
  solves the minimum-cost network flow problems
 """
-class Allocation(object):
+class Allocation:
     def __init__(self, lecture):
         self.lecture = lecture
         self.session = models.Session.object_session(self.lecture)

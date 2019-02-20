@@ -24,6 +24,8 @@ from pyramid.events import subscriber, BeforeRender, NewRequest
 from pyramid.renderers import get_renderer
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
+from muesli.web.pyramid_jwt import JWTAuthenticationPolicy
+from pyramid_multiauth import MultiAuthenticationPolicy
 import pyramid_beaker
 import beaker.ext.sqla
 import tempfile
@@ -33,6 +35,8 @@ from muesli.models import *
 from muesli.web.views import *
 from muesli.web.viewsLecture import *
 from muesli.web.viewsUser import *
+from muesli.web.viewsApi import *
+from muesli.web.api.v1 import *
 from muesli import utils
 import muesli
 
@@ -40,10 +44,10 @@ import time
 import datetime
 import numbers
 
-#import objgraph
-#import inspect
-#import random
-#mport gc
+# import objgraph
+# import inspect
+# import random
+# mport gc
 
 import weakref
 
@@ -104,11 +108,12 @@ def principals_for_user(user_id, request):
     return principals
 
 
-def main(global_config=None, **settings):
-    engine = muesli.engine()
+def main(global_config=None, testmode=False, **settings):
+    if testmode:
+        engine = muesli.testengine()
+    else:
+        engine = muesli.engine()
     initializeSession(engine)
-    #settings.update({
-    #})
 
     # XXX: ugly
     import sqlalchemy as sa
@@ -127,9 +132,19 @@ def main(global_config=None, **settings):
             'beaker.session.data_dir': tempfile.mkdtemp(),
             'beaker.session.timeout': 7200,
     })
+    if not muesli.PRODUCTION_INSTANCE:
+        settings.update({
+            'debugtoolbar.hosts': '0.0.0.0/0',
+        })
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
-
-    authentication_policy = SessionAuthenticationPolicy(callback=principals_for_user)
+    jwt_authentication_policy = JWTAuthenticationPolicy(
+        muesli.config["api"]["JWT_SECRET_TOKEN"],
+        callback=principals_for_user,
+        auth_type="Bearer",
+        expiration=datetime.timedelta(days=muesli.config["api"]["KEY_EXPIRATION"])
+    )
+    session_authentication_policy = SessionAuthenticationPolicy(callback=principals_for_user)
+    authentication_policy = MultiAuthenticationPolicy([session_authentication_policy, jwt_authentication_policy])
 
     authorization_policy = ACLAuthorizationPolicy()
     config = Configurator(
@@ -138,7 +153,8 @@ def main(global_config=None, **settings):
             session_factory=session_factory,
             settings=settings,
             )
-
+    config.include('muesli.web.pyramid_jwt')
+    config.set_jwt_authentication_policy(jwt_authentication_policy)
     config.add_static_view('static', 'muesli.web:static')
 
     config.add_route('start', '/start', factory = GeneralContext)
@@ -170,8 +186,11 @@ def main(global_config=None, **settings):
     config.add_route('user_reset_password', '/user/reset_password', factory=GeneralContext)
     config.add_route('user_reset_password2', '/user/reset_password2', factory=GeneralContext)
     config.add_route('user_reset_password3', '/user/reset_password3/{confirmation}', factory=ConfirmationContext)
-    config.add_route('user_ajax_complete', '/user/ajax_complete/{lecture_id}/{tutorial_ids:[^/]*}', factory = TutorialContext)
 
+    config.add_route('user_api_keys', '/user/api_keys', factory=GeneralContext)
+    config.add_route('remove_api_key', '/user/remove_api_key/{key_id}',factory=GeneralContext)
+
+    config.add_route('user_ajax_complete', '/user/ajax_complete/{lecture_id}/{tutorial_ids:[^/]*}', factory = TutorialContext)
     config.add_route('overview', '/')
     config.add_route('lecture_add', '/lecture/add', factory = GeneralContext)
     config.add_route('lecture_list', '/lecture/list', factory = GeneralContext)
@@ -244,7 +263,21 @@ def main(global_config=None, **settings):
     config.add_route('grading_enter_grades', '/grading/enter_grades/{grading_id}', factory=GradingContext)
     config.add_route('grading_get_row', '/grading/get_row/{grading_id}', factory=GradingContext)
 
-    config.include('pyramid_chameleon');
+    # Begin: config for the API-Browser
+    config.include('pyramid_apispec.views')
+    config.add_route("openapi_spec", "/openapi.json")
+    config.pyramid_apispec_add_explorer(spec_route_name='openapi_spec')
+    # End: config for the API-Browser
+
+    config.add_route('api_login', '/api/v1/login')
+    config.include('pyramid_chameleon')
+    # TODO: move the prefix addition into a seperate function for later
+    # developed API's.
+    config.route_prefix = 'api/v1'
+    config.include('cornice')
+
+    if not muesli.PRODUCTION_INSTANCE:
+        config.include('pyramid_debugtoolbar')
 
     config.scan()
 

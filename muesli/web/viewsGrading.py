@@ -43,7 +43,7 @@ import io
 import datetime
 
 @view_config(route_name='grading_edit', renderer='muesli.web:templates/grading/edit.pt', context=GradingContext, permission='edit')
-class Edit(object):
+class Edit:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -59,7 +59,7 @@ class Edit(object):
                }
 
 @view_config(route_name='grading_associate_exam', context=GradingContext, permission='edit')
-class AssociateExam(object):
+class AssociateExam:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -73,7 +73,7 @@ class AssociateExam(object):
         return HTTPFound(location=self.request.route_url('grading_edit', grading_id=grading.id))
 
 @view_config(route_name='grading_delete_exam_association', context=GradingContext, permission='edit')
-class DeleteExamAssociation(object):
+class DeleteExamAssociation:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -86,7 +86,7 @@ class DeleteExamAssociation(object):
             self.db.commit()
         return HTTPFound(location=self.request.route_url('grading_edit', grading_id=grading.id))
 
-class EnterGradesBasic(object):
+class EnterGradesBasic:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -233,7 +233,7 @@ class GetRow(EnterGradesBasic):
         return {'grades': grades,
                 'error_msg': result['error_msg']}
 
-class ExcelView(object):
+class ExcelView:
     def __init__(self, request):
         self.request = request
         self.w = Workbook()

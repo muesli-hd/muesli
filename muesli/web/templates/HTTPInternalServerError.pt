@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Interner Fehler</h2>
+
+<p>
+Bei der Bearbeitung Ihrer Anfrage ist ein interner Fehler aufgetreten.
+Bitte <a tal:attributes="href request.route_path('contact')">wenden Sie sich an uns</a> falls das Problem in einigen Minuten weiter auftritt.
+Geben Sie dann bitte die Informationen unten an.
+</p>
+
+<table>
+  <tr>
+    <td>URI</td>
+    <td>${request.path}</td>
+  </tr>
+  <tr>
+    <td>Zeit</td>
+    <td>${now}</td>
+  </tr>
+  <tr>
+    <td>Nutzer</td>
+    <td>${email}</td>
+  </tr>
+</table>
+
+
+  </metal:main>
+</metal:main>

@@ -41,7 +41,7 @@ import PIL.ImageDraw
 import io
 
 @view_config(route_name='tutorial_view', renderer='muesli.web:templates/tutorial/view.pt', context=TutorialContext, permission='viewOverview')
-class View(object):
+class View:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -64,7 +64,7 @@ class View(object):
                 }
 
 @view_config(route_name='tutorial_occupancy_bar')
-class OccupancyBar(object):
+class OccupancyBar:
     def __init__(self, request):
         self.request = request
         self.count = int(request.matchdict['count'])
@@ -92,7 +92,7 @@ class OccupancyBar(object):
         return response
 
 @view_config(route_name='tutorial_add', renderer='muesli.web:templates/tutorial/add.pt', context=LectureContext, permission='edit')
-class Add(object):
+class Add:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -127,7 +127,7 @@ def delete(request):
     return HTTPFound(location=request.route_url('lecture_edit', lecture_id = request.context.lecture.id))
 
 @view_config(route_name='tutorial_edit', renderer='muesli.web:templates/tutorial/edit.pt', context=TutorialContext, permission='edit')
-class Edit(object):
+class Edit:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db

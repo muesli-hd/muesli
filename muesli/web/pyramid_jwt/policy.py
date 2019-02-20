@@ -1,0 +1,123 @@
+# Copyright 2015, Wichert Akkerman <wichert@wiggy.net>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# MODIFIED VERSION OF https://github.com/wichert/pyramid_jwt
+
+import datetime
+import logging
+import warnings
+import jwt
+from zope.interface import implementer
+from pyramid.authentication import CallbackAuthenticationPolicy
+from pyramid.interfaces import IAuthenticationPolicy
+from muesli import models
+
+log = logging.getLogger('pyramid_jwt')
+marker = []
+
+@implementer(IAuthenticationPolicy)
+class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
+    def __init__(self, private_key, public_key=None, algorithm='HS512',
+            leeway=0, expiration=None, default_claims=None,
+            http_header='Authorization', auth_type='JWT',
+            callback=None, json_encoder=None, audience=None,):
+        self.private_key = private_key
+        self.public_key = public_key if public_key is not None else private_key
+        self.algorithm = algorithm
+        self.leeway = leeway
+        self.default_claims = default_claims if default_claims else {}
+        self.http_header = http_header
+        self.auth_type = auth_type
+        if expiration:
+            if not isinstance(expiration, datetime.timedelta):
+                    expiration = datetime.timedelta(seconds=expiration)
+            self.expiration = expiration
+        else:
+            self.expiration = None
+        if audience:
+            self.audience = audience
+        else:
+            self.audience = None
+        self.callback = callback
+        self.json_encoder = json_encoder
+
+    def create_token(self, principal, expiration=None, audience=None, **claims):
+        payload = self.default_claims.copy()
+        payload.update(claims)
+        payload['sub'] = principal
+        payload['iat'] = iat = datetime.datetime.utcnow()
+        expiration = expiration or self.expiration
+        audience = audience or self.audience
+        if expiration:
+            if not isinstance(expiration, datetime.timedelta):
+                    expiration = datetime.timedelta(seconds=expiration)
+            payload['exp'] = iat + expiration
+        if audience:
+            payload['aud'] = audience
+        token = jwt.encode(payload, self.private_key, algorithm=self.algorithm, json_encoder=self.json_encoder)
+        if not isinstance(token, str):  # Python3 unicode madness
+            token = token.decode('ascii')
+        return token
+
+    def get_claims(self, request):
+        if self.http_header == 'Authorization':
+            try:
+                if request.authorization is None:
+                    return {}
+            except ValueError:  # Invalid Authorization header
+                return {}
+            (auth_type, token) = request.authorization
+            if auth_type != self.auth_type:
+                return {}
+        else:
+            token = request.headers.get(self.http_header)
+        if not token:
+            return {}
+        try:
+            claims = jwt.decode(token, self.public_key, algorithms=[self.algorithm],
+                                leeway=self.leeway, audience=self.audience)
+            if request.db.query(models.BearerToken).get(claims["jti"]).revoked:
+                return {}
+            else:
+                return claims
+        except jwt.InvalidTokenError as e:
+            log.warning('Invalid JWT token from %s: %s', request.remote_addr, e)
+            return {}
+
+    def unauthenticated_userid(self, request):
+        return request.jwt_claims.get('sub')
+
+    def remember(self, request, principal, **kw):
+        # warnings.warn(
+        #     'JWT tokens need to be returned by an API. Using remember() '
+        #     'has no effect.',
+        #     stacklevel=3)
+        return []
+
+    def forget(self, request):
+        # warnings.warn(
+        #     'JWT tokens are managed by API (users) manually. Using forget() '
+        #     'has no effect.',
+        #     stacklevel=3)
+        return []
