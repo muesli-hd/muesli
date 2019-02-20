@@ -19,6 +19,7 @@
   <h2>Mathematisches Übungsgruppen- und Scheinlisten-Interface</h2>
 </div>
 <metal:main metal:use-macro="templates('Fragments/menu.pt').macros['menu']" />
+<metal:main metal:use-macro="templates('Fragments/navigation.pt').macros['navigation']" />
 
 <script>
 /* <![CDATA[ */
