@@ -295,6 +295,10 @@ def removeStudent(request):
 
 def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
     mail_preference = request.db.query(models.EmailPreferences).get((tutorial.tutor_id, tutorial.lecture.id))
+    if mail_preference is None:
+        mail_preference = models.EmailPreferences(tutorial.tutor_id, tutorial.lecture_id, False)
+        request.db.add(mail_preference)
+        request.db.commit()
     if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'In Ihre Übungsgruppe zur Vorlesung %s am %s hat sich %s eingetragen'\
@@ -304,8 +308,13 @@ def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
     else:
         text += '.'
     sendChangesMail(request, tutorial.tutor, text)
+
 def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
     mail_preference = request.db.query(models.EmailPreferences).get((tutorial.tutor_id, tutorial.lecture.id))
+    if mail_preference is None:
+        mail_preference = models.EmailPreferences(tutorial.tutor_id, tutorial.lecture_id, False)
+        request.db.add(mail_preference)
+        request.db.commit()
     if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'Aus Ihrer Übungsgruppe zur Vorlesung %s am %s hat sich %s ausgetragen'\

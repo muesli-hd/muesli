@@ -251,7 +251,7 @@ def doublets(request):
 
 
 @view_config(route_name='user_update', renderer='muesli.web:templates/user/update.pt', context=context.GeneralContext, permission='update')
-def update(request):
+def user_update(request):
     form = forms.UserUpdate(request, request.user)
     if request.method == 'POST' and form.processPostData(request.POST):
         form.saveValues()
@@ -260,7 +260,7 @@ def update(request):
     return {'form': form}
 
 @view_config(route_name='user_check', renderer='muesli.web:templates/user/check.pt', context=context.GeneralContext, permission='update')
-def update(request):
+def user_check(request):
     form = UserUpdate(request, request.user)
     if request.method == 'POST' and form.processPostData(request.POST):
         has_updated = request.db.query(models.UserHasUpdated).get(request.user.id)
