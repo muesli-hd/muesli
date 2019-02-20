@@ -1,3 +1,4 @@
+from muesli.web.navigation_tree import *
 from muesli.models import *
 from pyramid.security import Allow, Deny, Everyone, Authenticated, DENY_ALL, ALL_PERMISSIONS
 from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden
@@ -44,6 +45,7 @@ class UserContext(object):
                 (Allow, 'user:{0}'.format(user_id), ('view')),
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]
+        request.navigationTree.append(NavigationTree(type(self).__name__))
 
 class ConfirmationContext(object):
     def __init__(self, request):
@@ -54,6 +56,7 @@ class ConfirmationContext(object):
         self.__acl__ = [
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]
+        request.navigationTree.append(NavigationTree(type(self).__name__))
 
 class GeneralContext(object):
     def __init__(self, request):
@@ -61,6 +64,7 @@ class GeneralContext(object):
                 (Allow, Authenticated, ('update', 'change_email', 'change_password')),
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]+[(Allow, 'user:{0}'.format(a.id), 'create_lecture') for a in request.db.query(User).filter(User.is_assistant==1).all()]
+        request.navigationTree.append(NavigationTree(type(self).__name__))
 
 class GradingContext(object):
     def __init__(self, request):
@@ -71,6 +75,7 @@ class GradingContext(object):
         self.__acl__ = [
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in self.grading.lecture.assistants]
+        request.navigationTree.append(NavigationTree(type(self).__name__))
 
 
 class LectureContext(object):
@@ -84,6 +89,14 @@ class LectureContext(object):
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit','change_assistant', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for assistant in self.lecture.assistants
                 ]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for tutor in self.lecture.tutors]
+
+        # add lecture specific links
+        lecture_root = NavigationTree(self.lecture.name, request.route_url('lecture_edit', lecture_id=self.lecture.id))
+        nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
+        for node in nodes:
+            lecture_root.append(node)
+
+        request.navigationTree.prepend(lecture_root)
 
 class TutorialContext(object):
     def __init__(self, request):
@@ -119,6 +132,20 @@ class TutorialContext(object):
             if self.tutorials[0].lecture.mode in ['direct', 'off']:
                 self.__acl__.append((Allow, Authenticated, ('unsubscribe')))
 
+        lecture_root = NavigationTree(self.lecture.name, request.route_url('lecture_view', lecture_id=self.lecture.id))
+        nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
+        for node in nodes:
+            lecture_root.append(node)
+
+        for tutorial in self.tutorials:
+            tutorial_root = NavigationTree("{} ({})".format(str(tutorial.time), tutorial.place), request.route_url('tutorial_view', tutorial_ids=tutorial.id))
+            nodes = get_tutorial_specific_nodes(request, self, tutorial.id)
+            for node in nodes:
+                tutorial_root.append(node)
+            lecture_root.append(tutorial_root)
+
+        request.navigationTree.prepend(lecture_root)
+
 class AssignStudentContext(object):
     def __init__(self, request):
         student_id = request.POST['student']
@@ -134,6 +161,7 @@ class AssignStudentContext(object):
                 ]+[
                         (Allow, 'user:{0}'.format(assistant.id), ('move')) for assistant in self.tutorial.lecture.assistants
                 ]
+        request.navigationTree.append(NavigationTree(type(self).__name__))
 
 
 class ExamContext(object):
@@ -162,6 +190,13 @@ class ExamContext(object):
                     self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points')) for tutor in self.exam.lecture.tutors]
                 else: raise ValueError('Tutorrights %s not known' % self.exam.lecture.tutor_rights)
 
+        lecture_root = NavigationTree(self.exam.lecture.name, request.route_url('lecture_view', lecture_id=self.exam.lecture.id))
+        nodes = get_lecture_specific_nodes(request, self, self.exam.lecture.id)
+        for node in nodes:
+            lecture_root.append(node)
+
+        request.navigationTree.prepend(lecture_root)
+
 class ExerciseContext(object):
     def __init__(self, request):
         exercise_id = request.matchdict['exercise_id']
@@ -182,6 +217,7 @@ class ExerciseContext(object):
                 ]+[(Allow, 'user:{0}'.format(tutor.id), ('statistics')) for tutor in self.exam.lecture.tutors
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('statistics')) for assistant in self.exam.lecture.assistants
                 ]
+        request.navigationTree.append(NavigationTree(type(self).__name__))
 
 class CorrelationContext(object):
     def __init__(self, request):
@@ -193,6 +229,7 @@ class CorrelationContext(object):
         self.__acl__ = [
                 (Allow, 'group:administrators', ALL_PERMISSIONS)
                 ] + [(Allow, 'user:{0}'.format(id), ('correlation')) for id in ids]
+        request.navigationTree.append(NavigationTree(type(self).__name__))
     def get_allowed_ids(self, source, request):
         source_type, source_id = source.split('_',1)
         if source_type == 'exam':

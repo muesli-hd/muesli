@@ -12,6 +12,9 @@ class NavigationTree(object):
         self.label = label
         self.url = url
 
+    def prepend(self, node):
+        self.children.insert(0, node)
+
     def append(self, node):
         self.children.append(node)
 
@@ -58,3 +61,35 @@ def create_navigation_tree(request, user):
         root.append(tutor_node)
 
     return root
+
+def get_lecture_specific_nodes(request, context, lecture_id):
+        nodes = []
+
+        data = [
+            ("E-Mail an alle Übungsleiter schreiben", "lecture_email_tutors"),
+            ("E-Mail an alle Studenten schreiben", "lecture_email_students"),
+            ("Liste aller Teilnehmer", "lecture_export_students_html"),
+            ("Student als Teilnehmer eintragen", "lecture_add_student"),
+            ("Liste der abgemeldeten/entfernten Teilnehmer", "lecture_view_removed_students"),
+            ("Punkzahlen exportieren", "lecture_export_totals"),
+        ]
+
+
+        for label, route in data:
+            if request.has_permission(route, context):
+                nodes.append(NavigationTree(label, request.route_path(route, lecture_id=lecture_id)))
+
+        if request.has_permission('tutorial_results', context):
+            NavigationTree("Liste der Ergebnisse", request.route_path('tutorial_results', lecture_id=lecture_id, tutorial_ids='')),
+
+        return nodes
+
+def get_tutorial_specific_nodes(request, context, tutorial_id):
+        nodes = []
+
+        if request.has_permission('tutorial_edit', context):
+            nodes.append(NavigationTree("Tutorial editieren", request.route_path('tutorial_edit', tutorial_id=tutorial_id)))
+
+
+
+        return nodes
