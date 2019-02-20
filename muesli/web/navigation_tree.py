@@ -23,6 +23,10 @@ class NavigationTree(object):
 
 def create_navigation_tree(request, user):
     root = NavigationTree("Übersicht", request.route_url('start'))
+
+    if user is None:
+        return root
+
     session = Session.object_session(user)
 
     # add tutorials the user subsrcibed to
@@ -33,7 +37,7 @@ def create_navigation_tree(request, user):
     for t in tutorials:
         lecture_node = NavigationTree(t.lecture.name, request.route_url('lecture_view', lecture_id=t.lecture.id))
         root.append(lecture_node)
-        tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name, str(t.time), t.tutortutor__name), request.route_url('tutorial_view', tutorial_ids=t.id))
+        tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name, str(t.time), t.tutor_name), request.route_url('tutorial_view', tutorial_ids=t.id))
         lecture_node.append(tutorial_node)
 
 
@@ -50,6 +54,7 @@ def create_navigation_tree(request, user):
             request.route_url('tutorial_view', tutorial_ids=t.id))
         tutor_node.append(tutorial_node)
 
-    root.append(tutor_node)
+    if tutor_node.children:
+        root.append(tutor_node)
 
     return root
