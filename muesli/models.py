@@ -646,7 +646,8 @@ class StudentGrade(Base):
     student = relationship(User, backref=backref('student_grades', lazy='dynamic'))
     grade = Column(Numeric(precision=2, scale=1), CheckConstraint('grade >= 1.0 AND grade <= 5.0'))
 
-# Schemas
+# Marshmallow Schemas for Serializing and Deserializing Models
+# Only relevant for the Api
 
 
 class UserSchema(Schema):
@@ -710,7 +711,7 @@ class LectureSchema(Schema):
     id = fields.Integer(dump_only=True)
     assistants = fields.Nested(UserSchema, required=True, many=True, only=allowed_attributes.user())
     name = fields.String(required=True)
-    type = fields.String()  # per default lecture
+    type = fields.String()
     term = fields.Method("get_term", deserialize="load_term")
     lsf_id = fields.String()
     lecturer = fields.String()
@@ -719,10 +720,12 @@ class LectureSchema(Schema):
     is_visible = fields.Boolean()
     tutorials = fields.Nested(TutorialSchema, many=True, only=allowed_attributes.tutorial())
     tutors = fields.Nested(UserSchema, many=True)
-
+    
+    # Converts the Muesli defined type Term to it's string representation
     def get_term(self, obj):
         return obj.term.__html__()
-
+    
+    # Constructs a Term from input like 20181
     def load_term(self, value):
         term = [Term(str(value)), Term(str(value))]
         if term in getTerms():

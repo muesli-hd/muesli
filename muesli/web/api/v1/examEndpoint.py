@@ -36,10 +36,11 @@ class Exam:
         self.db = request.db
 
     def get(self):  # TODO Check if Lecture Student maybe list all lecturestudents
-        exam_id = self.request.matchdict["exam_id"]
-        exam = self.request.db.query(models.Exam).get(exam_id)
-        if exam is None:
+        exam_id = self.request.matchdict.get("exam_id", None)
+        if exam_id is None:
             raise HTTPBadRequest("The exam you want to access does not exist!")
+        else:
+            exam = self.request.db.query(models.Exam).get(exam_id)
         exer_schema = models.ExerciseSchema(many=True)
         exam_schema = models.ExamSchema()
         result = exam_schema.dump(exam)
