@@ -181,7 +181,13 @@ class EnterPointsBasic(object):
             for student in students:
                 certificate_parameter = 'medical_certificate-{0}'.format(student.student_id)
                 if exam.medical_certificate and certificate_parameter in self.request.POST:
-                    admissions[student.student_id].medical_certificate = self.valueToBool(self.request.POST[certificate_parameter])
+                    medical_certificate_value = self.request.POST[certificate_parameter]
+                    if medical_certificate_value == '1':
+                        admissions[student.student_id].medical_certificate = True
+                    elif medical_certificate_value == '0':
+                        admissions[student.student_id].medical_certificate = False
+                    else:
+                        admissions[student.student_id].medical_certificate = None    
                 for e in exam.exercises:
                     param = 'points-%u-%u' % (student.student_id, e.id)
                     if param in self.request.POST:
