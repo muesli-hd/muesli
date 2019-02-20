@@ -96,7 +96,6 @@ def add_config_to_request(event):
 @subscriber(BeforeTraversal)
 def add_navigationTree_to_request(event):
     event.request.navigationTree = create_navigation_tree(event.request, event.request.user)
-    print(event.request.navigationTree)
 
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):

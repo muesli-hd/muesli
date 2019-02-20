@@ -45,7 +45,6 @@ class UserContext(object):
                 (Allow, 'user:{0}'.format(user_id), ('view')),
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]
-        request.navigationTree.append(NavigationTree(type(self).__name__))
 
 class ConfirmationContext(object):
     def __init__(self, request):
@@ -56,7 +55,6 @@ class ConfirmationContext(object):
         self.__acl__ = [
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]
-        request.navigationTree.append(NavigationTree(type(self).__name__))
 
 class GeneralContext(object):
     def __init__(self, request):
@@ -64,7 +62,6 @@ class GeneralContext(object):
                 (Allow, Authenticated, ('update', 'change_email', 'change_password')),
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]+[(Allow, 'user:{0}'.format(a.id), 'create_lecture') for a in request.db.query(User).filter(User.is_assistant==1).all()]
-        request.navigationTree.append(NavigationTree(type(self).__name__))
 
 class GradingContext(object):
     def __init__(self, request):
@@ -75,7 +72,6 @@ class GradingContext(object):
         self.__acl__ = [
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in self.grading.lecture.assistants]
-        request.navigationTree.append(NavigationTree(type(self).__name__))
 
 
 class LectureContext(object):
@@ -161,7 +157,6 @@ class AssignStudentContext(object):
                 ]+[
                         (Allow, 'user:{0}'.format(assistant.id), ('move')) for assistant in self.tutorial.lecture.assistants
                 ]
-        request.navigationTree.append(NavigationTree(type(self).__name__))
 
 
 class ExamContext(object):
@@ -217,7 +212,6 @@ class ExerciseContext(object):
                 ]+[(Allow, 'user:{0}'.format(tutor.id), ('statistics')) for tutor in self.exam.lecture.tutors
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('statistics')) for assistant in self.exam.lecture.assistants
                 ]
-        request.navigationTree.append(NavigationTree(type(self).__name__))
 
 class CorrelationContext(object):
     def __init__(self, request):
@@ -229,7 +223,6 @@ class CorrelationContext(object):
         self.__acl__ = [
                 (Allow, 'group:administrators', ALL_PERMISSIONS)
                 ] + [(Allow, 'user:{0}'.format(id), ('correlation')) for id in ids]
-        request.navigationTree.append(NavigationTree(type(self).__name__))
     def get_allowed_ids(self, source, request):
         source_type, source_id = source.split('_',1)
         if source_type == 'exam':
