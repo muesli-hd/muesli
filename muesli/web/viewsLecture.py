@@ -193,6 +193,59 @@ class AddStudent:
                 'tutorials': tutorials
                 }
 
+def sendMailAfterSwitch(request, student1, student2, lecture):
+    message = Message(subject='MÜSLI: Sie haben ihre Übungsgruppe getauscht',
+            sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])),
+            to=[student1.email],
+            body='Hallo %s!\n\nSie haben erfolgreich das Tutorium mit Ihrem Kommilitonen %s in der Vorlesung %s getauscht.'
+                 '\nWenn dies nicht nach Ihrem Wunsch geschehen ist, bitte wenden Sie sich an Ihren Tutor oder Dozenten.'
+                 '\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % (student1.name, student2.name, lecture.name))
+    muesli.mail.sendMail(message)
+
+@view_config(route_name='lecture_switch_students', renderer='muesli.web:templates/lecture/switch_students.pt', context=LectureContext, permission='edit')
+class SwitchStudents(object):
+    def __init__(self, request):
+        self.request = request
+        self.db = self.request.db
+        self.lecture_id = request.matchdict['lecture_id']
+        request.javascript.append('jquery/jquery.min.js')
+        request.javascript.append('jquery/select2.min.js')
+
+    def __call__(self):
+        lecture = self.db.query(models.Lecture).get(self.lecture_id)
+        tutorials = lecture.tutorials
+        students = lecture.students.all()
+        if self.request.method == 'POST':
+            student1_id = int(self.request.POST['student1'])
+            student2_id = int(self.request.POST['student2'])
+            student1 = self.db.query(models.User).filter(models.User.id==student1_id).one()
+            student2 = self.db.query(models.User).filter(models.User.id == student2_id).one()
+
+            ls1 = self.request.db.query(models.LectureStudent).get((lecture.id, student1.id))
+            ls2 = self.request.db.query(models.LectureStudent).get((lecture.id, student2.id))
+
+            if student1_id == student2_id:
+                self.request.session.flash('Student kann nicht mit sich selbst getauscht werden!', queue='errors')
+            elif ls1.tutorial==ls2.tutorial:
+                self.request.session.flash('Die beiden Studenten sind im gleichen Tutorium!', queue='errors')
+            else:
+                tmp = ls1.tutorial
+                ls1.tutorial = ls2.tutorial
+                ls2.tutorial = tmp
+                self.request.db.commit()
+                sendMailAfterSwitch(self.request, student1, student2, lecture)
+                sendMailAfterSwitch(self.request, student2, student1, lecture)
+                muesli.web.viewsTutorial.sendChangesMailSubscribe(self.request, ls1.tutorial, student1, ls2.tutorial)
+                muesli.web.viewsTutorial.sendChangesMailSubscribe(self.request, ls2.tutorial, student2, ls1.tutorial)
+                muesli.web.viewsTutorial.sendChangesMailUnsubscribe(self.request, ls1.tutorial, student2, ls2.tutorial)
+                muesli.web.viewsTutorial.sendChangesMailUnsubscribe(self.request, ls2.tutorial, student1, ls1.tutorial)
+                self.request.session.flash('Sie haben die Tutorien von {} und {} vertauscht'.format(student1.name(),student2.name()), queue='messages')
+
+        return {'lecture': lecture,
+                'tutorials': tutorials,
+                'students': students
+                }
+
 
 @view_config(route_name='lecture_edit', renderer='muesli.web:templates/lecture/edit.pt', context=LectureContext, permission='edit')
 class Edit:

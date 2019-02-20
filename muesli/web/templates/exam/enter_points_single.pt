@@ -3,6 +3,8 @@
   <metal:main metal:fill-slot="content">
 
 
+<p name="savestatus"></p>
+
 <h2>Punkte eintragen</h2>
 
 <h3>${exam.name} der Vorlesung ${exam.lecture.name}</h3>
@@ -13,9 +15,10 @@
 
 
 <script>/* <![CDATA[ */
-  function update_total(row)
+jQuery.noConflict();
+  function update_total()
   {
-    var objs = $$("#row-" + row + " input.points");
+    var objs = document.getElementsByClassName('points');
     var total = 0;
     var current = 0;
 
@@ -25,78 +28,94 @@
         total += current;
       }
     }
-
-    return $("total-" + row).value = Number(total).toFixed(2);
+    return jQuery("#total")[0].value = Number(total).toFixed(2);
   }
+/* ]]> */
+</script>
+
+<script>/* <![CDATA[ */
+jQuery(document).ready(function() {
+    jQuery('.student_select').select2({
+        width: "16em"
+    });
+});
+
+function getSelectedStudents() {
+    var sel = document.getElementsByClassName("student_select")[0];
+    var opts = [], opt;
+    // loop through options in select list
+    for (var i=0, len=sel.options.length; i<len; i++) {
+        opt = sel.options[i];
+        // check if selected
+        if ( opt.selected ) {
+            // add to array of option elements to return from this function
+            opts.push(opt);
+        }
+    }
+    // return array containing references to selected option elements
+    return opts;
+}
+
+function submit_all_points() {
+    var selectedStudents = getSelectedStudents();
+    var savestatus = document.getElementsByName('savestatus')[0];
+
+    if ( selectedStudents.length == 0 ) {
+        return true;
+    }
+
+    var i = 0;
+    for(i = 0; i < selectedStudents.length; i++){
+        if(submit_points(selectedStudents[i].value)){
+            savestatus.innerHTML = "Fehler beim Speichern!";
+            savestatus.className = "error";
+            return false;
+        }
+        console.log(1);
+    }
+    savestatus.innerHTML = "Punkte erfolgreich abgespeichert!";
+    savestatus.className = "message";
+
+    var inputPunkte = document.getElementsByClassName('points');
+    for(i = 0; i < inputPunkte.length; i++){
+        inputPunkte[i].value = "";
+    }
+
+    //deselect all students
+    jQuery(".student_select").val(null).trigger('change');;
+
+    return true;
+}
 /* ]]> */
 </script>
 
 <script>
 ${code}
 </script>
-
-<style type="text/css">/* <![CDATA[ */
-div.autocomplete {
-  position:absolute;
-  width:250px;
-  background-color:white;
-  border:1px solid #888;
-  margin:0;
-  padding:0;
-}
-div.autocomplete ul {
-  list-style-type:none;
-  margin:0;
-  padding:0;
-}
-div.autocomplete ul li.selected { background-color: #ffb;}
-div.autocomplete ul li {
-  list-style-type:none;
-  display:block;
-  margin:0;
-  padding:2px;
-  height:32px;
-  cursor:pointer;
-}
-/* ]]> */
-</style>
-
-<form id="enter_points_form" onsubmit="{submit_points(currentrow);return false;}" onkeypressss="{if(event.keycode==1300)this.form.submit();}">
+<form id="enter_points_form" onsubmit="submit_all_points(); return false;">
 <input type="hidden" id="student_id" name="student_id" />
 <table id="enter_points_table">
   <tr>
-    <th tal:condition="show_tutor">Tutor</th>
-    <th tal:condition="show_time">Zeit</th>
-    <th>Name</th>
+    <th>Namen</th>
     <th tal:repeat="e exercises">${e.nr}</th>
     <th>Σ</th>
     <th></th>
     <th></th>
   </tr>
+  <tr id="row-0">
+    <td>
+        <select class="student_select" name="students" multiple="multiple">
+            <option tal:repeat="student students" value="${student.id}">${student.last_name}, ${student.first_name} (${student.matrikel})</option>
+        </select>
+    </td>
+    <td tal:repeat="e exercises"><input type="text" class="points" name="points-${e.nr}" size="3" onchange="update_total() "></td>
+    <td><input id="total" readonly="readonly" size="4" value="0"></td>
+    <td></td>
+    <td></td>
+  </tr>
 </table>
-</form>
-
-<form id="select_student_form" onsubmit="{student_selected(); return false;}">
-Name:
-<input type="text" id="student" name="student" size="40" value="" autocomplete="off" class="autocomplete" />
-
-<input type="hidden" id="student_hidden" name="student_id" />
-
-<div id="autocomplete_choices" class="autocomplete"></div>
-
 <input type="submit" value="Punkte eintragen" />
 </form>
-
-<script>/* <![CDATA[ */
-function getSelectionId(text, li) {
-    $('student_hidden').value = li.id;
-}
-
-new Ajax.Autocompleter("student", "autocomplete_choices", "${request.route_path('user_ajax_complete', lecture_id=exam.lecture_id, tutorial_ids=tutorial_ids)}", {paramName: "name",
-afterUpdateElement : getSelectionId
-});
-/* ]]> */
-</script>
 
 <div tal:omit-tag="">
   <!-- This is a very dirty hack to have always enough space to show the whole list-->

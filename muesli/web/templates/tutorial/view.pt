@@ -17,37 +17,18 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
   ${names['tutor']}: <a tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a>
 </p>
 
+<h3>Administrativa</h3>
 
-<h3>Mitglieder</h3>
-
-<table class="colored">
-
-<thead>
-  <tr>
-    <th>Name (E-Mail)</th>
-    <th>Studiengang</th>
-    <th tal:condition="request.permissionInfo.has_permission('edit')">Verschieben</th>
-    <th>Entfernen</th>
-  </tr>
-</thead>
-
-<tbody>
-  <tr tal:repeat="student students">
-    <td><a tal:attributes="href 'mailto:'+student.email">${student.name()}</a></td>
-    <td>${student.subject}</td>
-    <td tal:condition="request.permissionInfo.has_permission('edit')">
-      <metal:main metal:use-macro="templates('Fragments/HTML/move_student.pt').macros['movestudentmacro']" />
-    </td>
-    <td>
-      <form method="post" tal:attributes="action request.route_path('tutorial_remove_student', tutorial_ids=tutorial_ids, student_id=student.id)">
-        <input type="submit" value="Entfernen"/>
-      </form>
-    </td>
-  </tr>
-
-</tbody>
-
-</table>
+<ul>
+  <li><a tal:attributes="href request.route_path('tutorial_results', lecture_id=tutorial.lecture_id, tutorial_ids=tutorial_ids)">Punkteübersicht</a></li>
+  <li><a tal:attributes="href request.route_path('tutorial_email', tutorial_ids=tutorial_ids)">E-Mail an Teilnehmer schreiben</a></li>
+  <li><a tal:attributes="href request.route_path('tutorial_email_preference', tutorial_ids=tutorial_ids)">Status-Emails bestellen/ abbestellen</a></li>
+  <li><a tal:attributes='href request.route_path("lecture_email_tutors", lecture_id=tutorial.lecture.id)'>E-Mail an alle Übungsleiter und Assistenten schreiben</a></li>
+  <li tal:condition="request.permissionInfo.has_permission('edit') and len(tutorials) &lt; 2">
+    <a tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">${names['tutorial']} bearbeiten</a></li>
+  <li tal:condition="request.userInfo.is_tutor_of_tutorials(tutorials)">
+     <a tal:attributes="href request.route_path('tutorial_resign_as_tutor', tutorial_ids=tutorial_ids)">Als ${names['tutor']} zurücktreten</a></li>
+</ul>
 
 <h3>Testate</h3>
 
@@ -82,17 +63,35 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
   <input type="submit" value="Korrelation"/>
 </form>
 
+<h3>Teilnehmer</h3>
 
-<h3>Administrativa</h3>
+<table class="colored">
 
-<ul>
-  <li><a tal:attributes="href request.route_path('tutorial_results', lecture_id=tutorial.lecture_id, tutorial_ids=tutorial_ids)">Punkteübersicht</a></li>
-  <li><a tal:attributes="href request.route_path('tutorial_email', tutorial_ids=tutorial_ids)">E-Mail an Teilnehmer schreiben</a></li>
-  <li><a tal:attributes='href request.route_path("lecture_email_tutors", lecture_id=tutorial.lecture.id)'>E-Mail an alle Übungsleiter und Assistenten schreiben</a></li>
-  <li tal:condition="request.permissionInfo.has_permission('edit') and len(tutorials) &lt; 2">
-    <a tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">${names['tutorial']} bearbeiten</a></li>
-  <li tal:condition="request.userInfo.is_tutor_of_tutorials(tutorials)">
-     <a tal:attributes="href request.route_path('tutorial_resign_as_tutor', tutorial_ids=tutorial_ids)">Als ${names['tutor']} zurücktreten</a></li>
-</ul>
+<thead>
+  <tr>
+    <th>Name (E-Mail)</th>
+    <th>Studiengang</th>
+    <th tal:condition="request.permissionInfo.has_permission('edit')">Verschieben</th>
+    <th>Entfernen</th>
+  </tr>
+</thead>
+
+<tbody>
+  <tr tal:repeat="student students">
+    <td><a tal:attributes="href 'mailto:'+student.email">${student.name()}</a></td>
+    <td>${student.subject}</td>
+    <td tal:condition="request.permissionInfo.has_permission('edit')">
+      <metal:main metal:use-macro="templates('Fragments/HTML/move_student.pt').macros['movestudentmacro']" />
+    </td>
+    <td>
+      <form method="post" tal:attributes="action request.route_path('tutorial_remove_student', tutorial_ids=tutorial_ids, student_id=student.id)">
+        <input type="submit" value="Entfernen"/>
+      </form>
+    </td>
+  </tr>
+
+</tbody>
+
+</table>
   </metal:main>
 </metal:main>

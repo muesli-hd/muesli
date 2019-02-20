@@ -10,6 +10,14 @@
 /*]]>*/
 </script>
 
+
+<div tal:condition="uboo">
+    Bitte nehmen Sie sich die Zeit zu überprüfen, ob noch alle Ihre Angaben korrekt sind. Dies ist insbesondere wichtig,
+    wenn Sie den Studiengang gewechselt haben.<br>
+    Bestätigen/Korrigieren Sie <a tal:attributes="href request.route_path('user_check')">hier</a> Ihre Informationen,
+    um diese Erinnerung für den Rest des Semesters nicht mehr zu sehen.
+</div>
+
 <h2>Übersicht Ihrer Veranstaltungen in diesem Semester</h2>
 
 <div tal:omit-tag="" tal:condition="tutorials_as_tutor">

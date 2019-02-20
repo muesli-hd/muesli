@@ -113,6 +113,36 @@ class Add:
                 'form': form,
                 'error_msg': error_msg}
 
+@view_config(route_name='tutorial_duplicate', renderer='muesli.web:templates/tutorial/add.pt', context=LectureContext, permission='edit')
+class Duplicate(object):
+    def __init__(self, request):
+        self.request = request
+        self.db = self.request.db
+        self.lecture_id = request.matchdict['lecture_id']
+        self.tutorial_id = request.matchdict['tutorial_id']
+    def __call__(self):
+        error_msg = ''
+        orig_tutorial = self.db.query(models.Tutorial).get(self.tutorial_id)
+        lecture = self.db.query(models.Lecture).get(self.lecture_id)
+
+        form = TutorialEdit(self.request, orig_tutorial)
+        if self.request.method == 'POST' and form.processPostData(self.request.POST):
+            tutorial = models.Tutorial()
+            tutorial.lecture = orig_tutorial.lecture
+            tutorial.place=orig_tutorial.place
+            tutorial.time = orig_tutorial.time
+            tutorial.max_students=orig_tutorial.max_students
+            tutorial.comment=orig_tutorial.comment
+            tutorial.is_special=orig_tutorial.is_special
+            form.obj = tutorial
+            form.saveValues()
+            self.request.db.commit()
+            form.message = "Neue Übungsgruppe angelegt."
+        return {'lecture': lecture,
+                'names': self.request.config['lecture_types'][lecture.type],
+                'form': form,
+                'error_msg': error_msg}
+
 @view_config(route_name='tutorial_delete', context=TutorialContext, permission='edit')
 def delete(request):
     for tutorial in request.context.tutorials:
@@ -264,7 +294,8 @@ def removeStudent(request):
         return HTTPFound(location=request.route_url('start'))
 
 def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
-    if not tutorial.tutor:
+    mail_preference = request.db.query(models.EmailPreferences).get((tutorial.tutor_id, tutorial.lecture.id))
+    if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'In Ihre Übungsgruppe zur Vorlesung %s am %s hat sich %s eingetragen'\
             % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
@@ -274,7 +305,8 @@ def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
         text += '.'
     sendChangesMail(request, tutorial.tutor, text)
 def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
-    if not tutorial.tutor:
+    mail_preference = request.db.query(models.EmailPreferences).get((tutorial.tutor_id, tutorial.lecture.id))
+    if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'Aus Ihrer Übungsgruppe zur Vorlesung %s am %s hat sich %s ausgetragen'\
                     % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
@@ -290,6 +322,31 @@ def sendChangesMail(request, tutor, text):
             to = [tutor.email],
             body='Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
     muesli.mail.sendMail(message)
+
+@view_config(route_name='tutorial_email_preference', renderer='muesli.web:templates/tutorial/email_preference.pt', context=TutorialContext, permission='viewAll')
+def email_preference(request):
+    db = request.db
+    tutorials = request.context.tutorials
+    lecture = tutorials[0].lecture
+    form = TutorialEmailPreference(request)
+    mail_preference = db.query(models.EmailPreferences).get((request.user.id, lecture.id))
+    if mail_preference is None:
+        mail_preference =models.EmailPreferences(request.user.id, lecture.id, True)
+    form['receive_status_mails'] = mail_preference.receive_status_mails
+    if request.method == 'POST' and form.processPostData(request.POST):
+        if form['receive_status_mails'] == 1:
+            mail_preference.receive_status_mails = True
+        else:
+            mail_preference.receive_status_mails = False
+        if not mail_preference in request.db:
+            db.add(mail_preference)
+        request.db.commit()
+        request.session.flash('Your preferences have been updated', queue='messages')
+    return {'tutorials': tutorials,
+            'tutorial_ids': request.context.tutorial_ids_str,
+            'lecture': lecture,
+            'form': form}
+
 
 @view_config(route_name='tutorial_email', renderer='muesli.web:templates/tutorial/email.pt', context=TutorialContext, permission='sendMail')
 def email(request):

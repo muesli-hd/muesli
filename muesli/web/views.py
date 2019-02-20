@@ -49,12 +49,25 @@ def start(request):
     tutorials_as_tutor = request.user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
     tutorials = request.user.tutorials.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
     lectures_as_assistant = request.user.lectures_as_assistant
+    has_updated = request.db.query(models.UserHasUpdated).get(request.user.id)
+    if has_updated is None:
+        has_updated = models.UserHasUpdated(request.user.id, '0')
+    uhu = has_updated.has_updated_info
+    limit = muesli.utils.getSemesterLimit()
+    if uhu == limit:
+        uboo = False
+    else:
+        uboo = True
+    if not has_updated in request.db:
+        request.db.add(has_updated)
+    request.db.commit()
     if request.GET.get('show_all', '0')=='0':
         semesterlimit = utils.getSemesterLimit()
         tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
         tutorials = tutorials.filter(Lecture.term >= semesterlimit)
         lectures_as_assistant = lectures_as_assistant.filter(Lecture.term >= semesterlimit)
-    return {'time_preferences': request.user.prepareTimePreferences(),
+    return {'uboo': uboo,
+            'time_preferences': request.user.prepareTimePreferences(),
             'penalty_names': utils.penalty_names,
             'tutorials_as_tutor': tutorials_as_tutor.all(),
             'tutorials': tutorials.all(),

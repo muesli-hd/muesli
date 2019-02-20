@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+<h2>Übungsgruppen von Studenten tauschen</h2>
+
+<p>
+Vorlesung: <a tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">${lecture.name}</a>
+</p>
+
+<script>/* <![CDATA[ */
+jQuery(document).ready(function() {
+    jQuery('.student_select').select2({
+        width: "16em"
+    });
+});
+
+/* ]]> */
+</script>
+
+<form action="/lecture/switch_students" tal:attributes="action request.route_path('lecture_switch_students', lecture_id=lecture.id)" method="POST">
+  <table>
+    <tr>
+      <td><label>Students</label></td>
+      <td>   
+         <select class="student_select1" name="student1">
+             <option tal:repeat="student students" value="${student.id}">${student.last_name}, ${student.first_name} (${student.matrikel})</option>
+         </select>
+         <select class="student_select2" name="student2">
+             <option tal:repeat="student students" value="${student.id}">${student.last_name}, ${student.first_name} (${student.matrikel})</option>
+         </select>
+      </td>
+    </tr>
+    <tr>
+      <td><input type="submit" value="Tauschen"/></td>
+    </tr>
+  </table>
+</form>
+  <tr>
+    <td colspan="3">
+      <a tal:attributes="href request.route_path('lecture_edit', lecture_id = lecture.id)">Zurück zur Vorlesung</a>
+    </td>
+  </tr>
+
+  </metal:main>
+</metal:main>

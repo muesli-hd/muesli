@@ -771,6 +771,18 @@ class TutorialEdit(ObjectForm):
         else:
             ObjectForm.saveField(self, fieldName)
 
+class TutorialEmailPreference(CSRFSecureForm):
+    def __init__(self, request):
+        formfields = [
+                FormField('receive_status_mails',
+                   label='Status-Emails an mich senden',
+                   type='radio',
+                   options=list(enumerate(['Nein', 'Ja'])),
+                   value=0
+                   ),
+                ]
+        CSRFSecureForm.__init__(self, formfields, request, send='Speichern')
+
 class TutorialEmail(CSRFSecureForm):
     def __init__(self, request):
         formfields = [

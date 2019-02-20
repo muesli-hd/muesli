@@ -63,7 +63,7 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
 </p>
 
 <table>
-  <tr><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>${names['tutor']}</th><th>Kommentar</th><th></th><th></th></tr>
+  <tr><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>${names['tutor']}</th><th>Kommentar</th><th></th><th></th><th></th><th></th></tr>
   <tr tal:repeat="tutorial lecture.tutorials">
     <td>${tutorial.time}</td>
     <td>${tutorial.place}</td>
@@ -73,13 +73,19 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
     </td>
     <td>${tutorial.comment}</td>
     <td><a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">Details</a></td>
-    <td><a tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">Bearbeiten</a>
-        <a tal:condition="not tutorial.student_count"
+    <td><a tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">Bearbeiten</a></td>
+    <td><a tal:attributes="href request.route_path('tutorial_duplicate', lecture_id=lecture.id, tutorial_id=tutorial.id)">Duplizieren</a></td>
+    <td><a tal:condition="not tutorial.student_count"
            tal:attributes="href request.route_path('tutorial_delete', tutorial_ids=tutorial.id)"> Löschen</a></td>
   </tr>
   <tr>
     <td colspan="3">
       Neue <a tal:attributes="href request.route_path('tutorial_add', lecture_id = lecture.id)">${names['tutorial']} hinzufügen</a>
+    </td>
+  </tr>
+    <tr>
+    <td colspan="3">
+      <a tal:attributes="href request.route_path('lecture_switch_students', lecture_id = lecture.id)">Übungsgruppen von Studenten tauschen</a>
     </td>
   </tr>
 </table>
