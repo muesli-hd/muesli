@@ -265,13 +265,19 @@ class Edit:
         pref_count = sum([pref[0] for pref in pref_subjects])
         subjects = lecture.subjects()
         student_count = sum([subj[0] for subj in subjects])
+        # Query results are already lexicographically sorted.
+        # Sort again using length as key so we get length lexicographical sorting
+        # https://github.com/muesli-hd/muesli/issues/28
+        exams = dict([[cat['id'], sorted(list(lecture.exams.filter(models.Exam.category==cat['id'])),
+                              key=lambda x:len(x.name))]
+                      for cat in utils.categories])
         return {'lecture': lecture,
                 'names': names,
                 'pref_count': pref_count,
                 'subjects': subjects,
                 'student_count': student_count,
                 'categories': utils.categories,
-                'exams': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
+                'exams': exams,
                 'assistants': assistants,
                 'form': form}
 
