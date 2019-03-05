@@ -1,0 +1,17 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+<h2>Überprüfen Sie bitte Ihre Angaben</h2>
+
+
+<form action="/user/update" tal:attributes="action request.route_path('user_check')" method="POST">
+  <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+</form>
+
+<p>Die deaktivierten Felder können Sie nicht selber ändern. Um diese Daten
+  zu korrigieren, <a tal:attributes="href 'mailto:'+request.config['contact']['email']">schreiben Sie
+  uns bitte eine Mail</a>.
+</p>
+
+  </metal:main>
+</metal:main>

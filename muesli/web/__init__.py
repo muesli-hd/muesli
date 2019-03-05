@@ -34,6 +34,7 @@ from muesli.models import *
 from muesli.web.views import *
 from muesli.web.viewsLecture import *
 from muesli.web.viewsUser import *
+from muesli.web.viewsTutorial import *
 from muesli import utils
 import muesli
 
@@ -155,6 +156,7 @@ def main(global_config=None, **settings):
     config.add_route('email_users', '/email_users', factory = GeneralContext)
     config.add_route('email_all_users','/email_all_users',factory = GeneralContext)
     config.add_route('user_update', '/user/update', factory = GeneralContext)
+    config.add_route('user_check', '/user/check', factory = GeneralContext)
     config.add_route('user_change_email', '/user/change_email', factory = GeneralContext)
     config.add_route('user_change_password', '/user/change_password', factory = GeneralContext)
     config.add_route('user_logout', '/user/logout')
@@ -215,6 +217,7 @@ def main(global_config=None, **settings):
     config.add_route('tutorial_view', '/tutorial/view/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_results', '/tutorial/results/{lecture_id}/{tutorial_ids:[^/]*}', factory = TutorialContext)
     config.add_route('tutorial_email', '/tutorial/email/{tutorial_ids}', factory = TutorialContext)
+    config.add_route('tutorial_email_preference', '/tutorial/email_preference/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_resign_as_tutor', '/tutorial/resign_as_tutor/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_assign_student', '/tutorial/assign_student', factory = AssignStudentContext)
 
