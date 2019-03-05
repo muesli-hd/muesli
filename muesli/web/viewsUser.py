@@ -204,7 +204,7 @@ def update(request):
     return {'form': form}
 
 @view_config(route_name='user_check', renderer='muesli.web:templates/user/check.pt', context=GeneralContext, permission='update')
-def update(request):
+def check(request):
     form = UserUpdate(request, request.user)
     if request.method == 'POST' and form.processPostData(request.POST):
         has_updated = request.db.query(models.UserHasUpdated).get(request.user.id)
