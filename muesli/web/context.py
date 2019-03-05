@@ -247,3 +247,16 @@ class TutorialEndpointContext:
                 elif lecture.tutor_rights == editAllTutorials:
                     self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('viewAll'))] if request.user in lecture.tutors else []
 
+class ExamEndpointContext:
+    def __init__(self, request):
+        exam_id = request.matchdict['exam_id']
+        self.exam = request.db.query(Exam).get(exam_id)
+        if self.exam is None:
+            raise HTTPNotFound(detail='Exam not found')
+        lecture = self.exam.lecture
+        lecture_students = lecture.students
+        self.__acl__ = [(Allow, 'group:administrators', ALL_PERMISSIONS)]
+        if request.user in lecture_students:
+            self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view'))]
+        self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view', 'edit'))] if request.user in lecture.assistants else []
+        self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view'))] if request.user in lecture.tutors else []
