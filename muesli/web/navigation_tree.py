@@ -1,8 +1,9 @@
-from muesli import models
+from muesli import utils
+from muesli.models import Tutorial, Lecture
 
 
 import sqlalchemy
-from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
+from sqlalchemy.orm import relationship, sessionmaker, backref, column_property, joinedload
 
 Session = sessionmaker()
 
@@ -30,13 +31,14 @@ def create_navigation_tree(request, user):
     if user is None:
         return root
 
-    session = Session.object_session(user)
+    semesterlimit = utils.getSemesterLimit()
+
+    tutorials_as_tutor = user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
+    tutorials = user.tutorials.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
+    lectures_as_assistant = user.lectures_as_assistant
 
     # add tutorials the user subsrcibed to
-    tutorials = session.query(models.Tutorial) \
-            .filter(models.Tutorial.lecture_students.any(models.LectureStudent.student_id == user.id)) \
-            .join(models.Tutorial.lecture) \
-            .order_by(models.Lecture.term)
+    tutorials = tutorials.filter(Lecture.term >= semesterlimit)
     for t in tutorials:
         lecture_node = NavigationTree(t.lecture.name, request.route_url('lecture_view', lecture_id=t.lecture.id))
         root.append(lecture_node)
@@ -45,20 +47,28 @@ def create_navigation_tree(request, user):
 
 
     # add tutorials the user tutors
-    tutorials = session.query(models.Tutorial) \
-            .filter(models.Tutorial.tutor_id == user.id) \
-            .join(models.Tutorial.lecture) \
-            .order_by(models.Lecture.term,models.Lecture.name,models.Tutorial.time)
-
+    tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
 
     tutor_node = NavigationTree("Eigene Tutorials")
-    for t in tutorials:
+    for t in tutorials_as_tutor:
         tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name, str(t.time), t.place),
             request.route_url('tutorial_view', tutorial_ids=t.id))
         tutor_node.append(tutorial_node)
 
     if tutor_node.children:
         root.append(tutor_node)
+
+    # add lectures for which the user is assistant
+    lectures_as_assistant = lectures_as_assistant.filter(Lecture.term >= semesterlimit)
+
+    assistant_node = NavigationTree("Eigene Vorlesungen")
+    for l in lectures_as_assistant:
+        lecture_node = NavigationTree(l.name,
+            request.route_url('lecture_view', lecture_id=l.id))
+        assistant_node.append(lecture_node)
+
+    if assistant_node.children:
+        root.append(assistant_node)
 
     return root
 
