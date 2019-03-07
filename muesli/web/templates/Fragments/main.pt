@@ -10,6 +10,7 @@
   <title>MÜSLI</title>
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/muesli.css')"></link>
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/fancybox/jquery.fancybox.css')"></link>
+  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/select2.css')"></link>
   <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
 </head>
 <body>
@@ -42,6 +43,7 @@ function set_navigation(nav) {
 <p tal:condition="request.session.peek_flash('errors')" tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('errors'))" class="error"></p>
 <p tal:condition="request.session.peek_flash('messages')" tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('messages'))" class="message"></p>
 
+<metal:main metal:use-macro="templates('Fragments/navigation.pt').macros['navigation']" />
 <metal:content define-slot="content" />
 </div>
 <div id="debug">

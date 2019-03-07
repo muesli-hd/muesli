@@ -20,7 +20,7 @@
 
 from pyramid import security
 from pyramid.config import Configurator
-from pyramid.events import subscriber, BeforeRender, NewRequest
+from pyramid.events import subscriber, BeforeTraversal, BeforeRender, NewRequest
 from pyramid.renderers import get_renderer
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
@@ -28,11 +28,13 @@ import pyramid_beaker
 import beaker.ext.sqla
 import tempfile
 
+from muesli.web.navigation_tree import *
 from muesli.web.context import *
 from muesli.models import *
 from muesli.web.views import *
 from muesli.web.viewsLecture import *
 from muesli.web.viewsUser import *
+from muesli.web.viewsTutorial import *
 from muesli import utils
 import muesli
 
@@ -83,13 +85,18 @@ def add_session_to_request(event):
     #event.request.inspect = inspect
     #event.request.random = random
     #event.request.gc = gc
+
 @subscriber(NewRequest)
 def add_javascript_to_request(event):
-    event.request.javascript = set()
+    event.request.javascript = list()
 
 @subscriber(NewRequest)
 def add_config_to_request(event):
     event.request.config = muesli.config
+
+@subscriber(BeforeTraversal)
+def add_navigationTree_to_request(event):
+    event.request.navigationTree = create_navigation_tree(event.request, event.request.user)
 
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):
@@ -149,6 +156,7 @@ def main(global_config=None, **settings):
     config.add_route('email_users', '/email_users', factory = GeneralContext)
     config.add_route('email_all_users','/email_all_users',factory = GeneralContext)
     config.add_route('user_update', '/user/update', factory = GeneralContext)
+    config.add_route('user_check', '/user/check', factory = GeneralContext)
     config.add_route('user_change_email', '/user/change_email', factory = GeneralContext)
     config.add_route('user_change_password', '/user/change_password', factory = GeneralContext)
     config.add_route('user_logout', '/user/logout')
@@ -193,6 +201,7 @@ def main(global_config=None, **settings):
     config.add_route('lecture_add_exam', '/lecture/add_exam/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_add_grading', '/lecture/add_grading/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_add_student', '/lecture/add_student/{lecture_id}', factory = LectureContext)
+    config.add_route('lecture_switch_students', '/lecture/switch_students/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_export_students_html', '/lecture/export_students_html/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_export_totals', '/lecture/export_totals/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory = GeneralContext)
@@ -208,6 +217,7 @@ def main(global_config=None, **settings):
     config.add_route('tutorial_view', '/tutorial/view/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_results', '/tutorial/results/{lecture_id}/{tutorial_ids:[^/]*}', factory = TutorialContext)
     config.add_route('tutorial_email', '/tutorial/email/{tutorial_ids}', factory = TutorialContext)
+    config.add_route('tutorial_email_preference', '/tutorial/email_preference/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_resign_as_tutor', '/tutorial/resign_as_tutor/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_assign_student', '/tutorial/assign_student', factory = AssignStudentContext)
 
