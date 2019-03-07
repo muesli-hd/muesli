@@ -1,6 +1,7 @@
 from muesli import utils
 from muesli.models import Tutorial, Lecture
 
+from pyramid import security
 
 import sqlalchemy
 from sqlalchemy.orm import relationship, sessionmaker, backref, column_property, joinedload
@@ -75,21 +76,24 @@ def create_navigation_tree(request, user):
 def get_lecture_specific_nodes(request, context, lecture_id):
         nodes = []
 
+        print(context.__acl__)
+        user_id = security.unauthenticated_userid(request)
+        print(user_id)
+
         data = [
-            ("E-Mail an alle Übungsleiter schreiben", "lecture_email_tutors"),
-            ("E-Mail an alle Studenten schreiben", "lecture_email_students"),
-            ("Liste aller Teilnehmer", "lecture_export_students_html"),
-            ("Student als Teilnehmer eintragen", "lecture_add_student"),
-            ("Liste der abgemeldeten/entfernten Teilnehmer", "lecture_view_removed_students"),
-            ("Punkzahlen exportieren", "lecture_export_totals"),
+            ("E-Mail an alle Übungsleiter schreiben", "lecture_email_tutors", "mail_tutors"),
+            ("E-Mail an alle Studenten schreiben", "lecture_email_students", "edit"),
+            ("Liste aller Teilnehmer", "lecture_export_students_html", "edit"),
+            ("Student als Teilnehmer eintragen", "lecture_add_student", "edit"),
+            ("Liste der abgemeldeten/entfernten Teilnehmer", "lecture_view_removed_students", "edit"),
+            ("Punkzahlen exportieren", "lecture_export_totals", "edit"),
         ]
 
-
-        for label, route in data:
-            if request.has_permission(route, context):
+        for label, route, permission in data:
+            if request.has_permission(permission, context):
                 nodes.append(NavigationTree(label, request.route_path(route, lecture_id=lecture_id)))
 
-        if request.has_permission('tutorial_results', context):
+        if request.has_permission('edit', context):
             NavigationTree("Liste der Ergebnisse", request.route_path('tutorial_results', lecture_id=lecture_id, tutorial_ids='')),
 
         return nodes
@@ -97,9 +101,7 @@ def get_lecture_specific_nodes(request, context, lecture_id):
 def get_tutorial_specific_nodes(request, context, tutorial_id):
         nodes = []
 
-        if request.has_permission('tutorial_edit', context):
+        if request.has_permission('edit', context):
             nodes.append(NavigationTree("Tutorial editieren", request.route_path('tutorial_edit', tutorial_id=tutorial_id)))
-
-
 
         return nodes
