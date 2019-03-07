@@ -1,3 +1,4 @@
+from muesli.web.navigation_tree import *
 from muesli.models import *
 from pyramid.security import Allow, Deny, Everyone, Authenticated, DENY_ALL, ALL_PERMISSIONS
 from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden
@@ -92,6 +93,15 @@ class LectureContext:
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit','change_assistant', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for assistant in self.lecture.assistants
                 ]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for tutor in self.lecture.tutors]
 
+        # add lecture specific links
+        lecture_root = NavigationTree(self.lecture.name, request.route_url('lecture_edit', lecture_id=self.lecture.id))
+        nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
+        for node in nodes:
+            lecture_root.append(node)
+
+        if lecture_root.children:
+            request.navigationTree.prepend(lecture_root)
+
 class TutorialContext:
     def __init__(self, request):
         self.tutorial_ids_str = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', ''))
@@ -126,7 +136,23 @@ class TutorialContext:
             if self.tutorials[0].lecture.mode in ['direct', 'off']:
                 self.__acl__.append((Allow, Authenticated, ('unsubscribe')))
 
-class AssignStudentContext:
+        # add tutorial specific links
+        lecture_root = NavigationTree(self.lecture.name, request.route_url('lecture_view', lecture_id=self.lecture.id))
+        nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
+        for node in nodes:
+            lecture_root.append(node)
+
+        for tutorial in self.tutorials:
+            tutorial_root = NavigationTree("{} ({})".format(str(tutorial.time), tutorial.place), request.route_url('tutorial_view', tutorial_ids=tutorial.id))
+            nodes = get_tutorial_specific_nodes(request, self, tutorial.id)
+            for node in nodes:
+                tutorial_root.append(node)
+            lecture_root.append(tutorial_root)
+
+        if lecture_root.children:
+            request.navigationTree.prepend(lecture_root)
+
+class AssignStudentContext(object):
     def __init__(self, request):
         student_id = request.POST['student']
         tutorial_id = request.POST['new_tutorial']
@@ -168,6 +194,14 @@ class ExamContext:
                 elif self.exam.lecture.tutor_rights == editAllTutorials:
                     self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points')) for tutor in self.exam.lecture.tutors]
                 else: raise ValueError('Tutorrights %s not known' % self.exam.lecture.tutor_rights)
+
+        # add exam specific links
+        lecture_root = NavigationTree(self.exam.lecture.name, request.route_url('lecture_view', lecture_id=self.exam.lecture.id))
+        nodes = get_lecture_specific_nodes(request, self, self.exam.lecture.id)
+        for node in nodes:
+            lecture_root.append(node)
+
+        request.navigationTree.prepend(lecture_root)
 
 class ExerciseContext:
     def __init__(self, request):
