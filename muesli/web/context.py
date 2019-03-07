@@ -92,7 +92,8 @@ class LectureContext(object):
         for node in nodes:
             lecture_root.append(node)
 
-        request.navigationTree.prepend(lecture_root)
+        if lecture_root.children:
+            request.navigationTree.prepend(lecture_root)
 
 class TutorialContext(object):
     def __init__(self, request):
@@ -140,7 +141,8 @@ class TutorialContext(object):
                 tutorial_root.append(node)
             lecture_root.append(tutorial_root)
 
-        request.navigationTree.prepend(lecture_root)
+        if lecture_root.children:
+            request.navigationTree.prepend(lecture_root)
 
 class AssignStudentContext(object):
     def __init__(self, request):

@@ -1,6 +1,6 @@
 <metal:main metal:define-macro="navigation">
 <div id="navigation" tal:condition="request.user is not None">
-    <ul tal:define="nodes request.navigationTree.children">
+    <ul tal:define="nodes request.navigationTree.children" style="padding:3px">
     <a tal:attributes="href request.navigationTree.url">${request.navigationTree.label}</a>
     <div>
         <ul metal:define-macro="tree_view">
