@@ -97,7 +97,12 @@ class LectureContext:
         if self.lecture is None:
             return
 
-        lecture_root = NavigationTree(self.lecture.name, request.route_url('lecture_edit', lecture_id=self.lecture.id))
+        if request.has_permission('edit', self):
+            lecture_root = NavigationTree(self.lecture.name,
+                    request.route_url('lecture_edit', lecture_id=self.lecture.id))
+        else:
+            lecture_root = NavigationTree(self.lecture.name,
+                    request.route_url('lecture_view', lecture_id=self.lecture.id))
         nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
         for node in nodes:
             lecture_root.append(node)
@@ -143,7 +148,12 @@ class TutorialContext:
         if self.lecture is None:
             return
 
-        lecture_root = NavigationTree(self.lecture.name, request.route_url('lecture_view', lecture_id=self.lecture.id))
+        if request.has_permission('edit', self):
+            lecture_root = NavigationTree(self.lecture.name,
+                    request.route_url('lecture_edit', lecture_id=self.lecture.id))
+        else:
+            lecture_root = NavigationTree(self.lecture.name,
+                    request.route_url('lecture_view', lecture_id=self.lecture.id))
         nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
         for node in nodes:
             lecture_root.append(node)
@@ -205,7 +215,12 @@ class ExamContext:
         if self.exam.lecture is None:
             return
 
-        lecture_root = NavigationTree(self.exam.lecture.name, request.route_url('lecture_view', lecture_id=self.exam.lecture.id))
+        if request.has_permission('edit', self):
+            lecture_root = NavigationTree(self.lecture.name,
+                    request.route_url('lecture_edit', lecture_id=self.lecture.id))
+        else:
+            lecture_root = NavigationTree(self.lecture.name,
+                    request.route_url('lecture_view', lecture_id=self.lecture.id))
         nodes = get_lecture_specific_nodes(request, self, self.exam.lecture.id)
         for node in nodes:
             lecture_root.append(node)

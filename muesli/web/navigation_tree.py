@@ -85,10 +85,10 @@ def create_navigation_tree(request, user):
     # add lectures for which the user is assistant
     lectures_as_assistant = lectures_as_assistant.filter(Lecture.term >= semesterlimit)
 
-    assistant_node = NavigationTree("Eigene Vorlesungen")
+    assistant_node = NavigationTree("Eigene Vorlesungen", request.route_url('start'))
     for l in lectures_as_assistant:
         lecture_node = NavigationTree(l.name,
-            request.route_url('lecture_view', lecture_id=l.id))
+            request.route_url('lecture_edit', lecture_id=l.id))
         assistant_node.append(lecture_node)
 
     if assistant_node.children:
