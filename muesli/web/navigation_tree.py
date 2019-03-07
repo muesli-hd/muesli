@@ -65,14 +65,15 @@ def create_navigation_tree(request, user):
             lecture_id=t.lecture.id))
         root.append(lecture_node)
         tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
-            str(t.time), t.tutor_name), request.route_url('tutorial_view', tutorial_ids=t.id))
+            str(t.time), t.tutor_name), request.route_url('lecture_view_points',
+                lecture_id=t.lecture.id))
         lecture_node.append(tutorial_node)
 
 
     # add tutorials the user tutors
     tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
 
-    tutor_node = NavigationTree("Eigene Tutorials")
+    tutor_node = NavigationTree("Eigene Tutorials", "start")
     for t in tutorials_as_tutor:
         tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name, str(t.time), t.place),
             request.route_url('tutorial_view', tutorial_ids=t.id))
