@@ -19,14 +19,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from muesli import utils
-from muesli.models import Tutorial, Lecture
 
 from pyramid import security
 
 import sqlalchemy
 from sqlalchemy.orm import relationship, sessionmaker, backref, column_property, joinedload
-
-Session = sessionmaker()
 
 class NavigationTree(object):
     def __init__(self, label, url=""):
@@ -48,6 +45,8 @@ class NavigationTree(object):
 
 
 def create_navigation_tree(request, user):
+    from muesli.models import Tutorial, Lecture
+
     root = NavigationTree("Übersicht", request.route_url('start'))
 
     if user is None:

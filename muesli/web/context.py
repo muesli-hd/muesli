@@ -94,6 +94,9 @@ class LectureContext:
                 ]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for tutor in self.lecture.tutors]
 
         # add lecture specific links
+        if self.lecture is None:
+            return
+
         lecture_root = NavigationTree(self.lecture.name, request.route_url('lecture_edit', lecture_id=self.lecture.id))
         nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
         for node in nodes:
@@ -137,6 +140,9 @@ class TutorialContext:
                 self.__acl__.append((Allow, Authenticated, ('unsubscribe')))
 
         # add tutorial specific links
+        if self.lecture is None:
+            return
+
         lecture_root = NavigationTree(self.lecture.name, request.route_url('lecture_view', lecture_id=self.lecture.id))
         nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
         for node in nodes:
@@ -196,6 +202,9 @@ class ExamContext:
                 else: raise ValueError('Tutorrights %s not known' % self.exam.lecture.tutor_rights)
 
         # add exam specific links
+        if self.exam.lecture is None:
+            return
+
         lecture_root = NavigationTree(self.exam.lecture.name, request.route_url('lecture_view', lecture_id=self.exam.lecture.id))
         nodes = get_lecture_specific_nodes(request, self, self.exam.lecture.id)
         for node in nodes:
