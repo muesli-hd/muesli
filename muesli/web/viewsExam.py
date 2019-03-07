@@ -174,6 +174,11 @@ class EnterPointsBasic(object):
         admissions={}
         for admission in db_admissions:
             admissions[admission.student_id] = admission
+        for student in students:
+            if not student.student_id in admissions:
+                admission = ExamAdmission(exam, student.student)
+                self.db.add(admission)
+                admissions[student.student_id] = admission
 
         if self.request.method == 'POST':
             if not self.request.permissionInfo.has_permission('enter_points'):

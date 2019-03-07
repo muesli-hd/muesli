@@ -49,7 +49,7 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
   <tr>
     <th tal:condition="not tutorial_ids">Tutor</th>
     <th>Name</th>
-    <th tal:condition="exam.medical_certificate!=True" tal:content="Attest"></th>
+    <th tal:condition="exam.medical_certificate is not None">Attest${exam.medical_certificate}</th>
     <th tal:repeat="e exam.exercises">${e.nr}</th>
     <th>Σ</th>
   </tr>
@@ -59,7 +59,7 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
         <span tal:condition="ls.tutorial.tutor" tal:content="ls.tutorial.tutor.last_name" />
       </td>
     <td>${ls.student.name()}</td>
-    <td tal:condition="exam.medical_certificate!=True"
+    <td tal:condition="exam.medical_certificate is not None"
         tal:on-error="nothing"
         tal:define="name     'medical_certificate-%s' % ls.student.id;
                     value     admissions[ls.student_id].medical_certificate;
@@ -75,7 +75,7 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
   <tfoot>
   <tr>
     <td>Durchschnitt (Gruppe/Gesamt)</td>
-    <th tal:condition="exam.medical_certificate!=True"></th>
+    <th tal:condition="exam.medical_certificate is not None"></th>
     <td tal:condition="not tutorial_ids"></td>
     <td tal:repeat="e exam.exercises">
       <span tal:define="statisticsData statistics[e.id]; statistics_images False" tal:omit-tag="">
