@@ -28,7 +28,7 @@ import pyramid_beaker
 import beaker.ext.sqla
 import tempfile
 
-from muesli.web.navigation_tree import *
+from muesli.web.navigation_tree import create_navigation_tree
 from muesli.web.context import *
 from muesli.models import *
 from muesli.web.views import *
