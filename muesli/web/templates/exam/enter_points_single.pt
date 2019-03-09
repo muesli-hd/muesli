@@ -3,7 +3,7 @@
   <metal:main metal:fill-slot="content">
 
 
-<p name="savestatus"></p>
+<p style="display: flex" name="savestatus"></p>
 
 <h2>Punkte eintragen</h2>
 
