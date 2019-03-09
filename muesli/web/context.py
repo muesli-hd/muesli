@@ -216,11 +216,11 @@ class ExamContext:
             return
 
         if request.has_permission('edit', self):
-            lecture_root = NavigationTree(self.lecture.name,
-                    request.route_url('lecture_edit', lecture_id=self.lecture.id))
+            lecture_root = NavigationTree(self.exam.lecture.name,
+                    request.route_url('lecture_edit', lecture_id=self.exam.lecture.id))
         else:
-            lecture_root = NavigationTree(self.lecture.name,
-                    request.route_url('lecture_view', lecture_id=self.lecture.id))
+            lecture_root = NavigationTree(self.exam.lecture.name,
+                    request.route_url('lecture_view', lecture_id=self.exam.lecture.id))
         nodes = get_lecture_specific_nodes(request, self, self.exam.lecture.id)
         for node in nodes:
             lecture_root.append(node)
