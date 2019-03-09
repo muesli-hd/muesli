@@ -17,7 +17,7 @@
     </script>
     <h2>Dokumentation</h2>
     <p>
-    Die Verschiedenen API-Zugriffe sind mit über eine Swagger-UI dokumentiert.
+    Die Verschiedenen API-Zugriffe sind über eine Swagger-UI dokumentiert.
     <br>
     Diese finden Sie
     <a href="../api-explorer" target="_blank" rel="noopener noreferrer"

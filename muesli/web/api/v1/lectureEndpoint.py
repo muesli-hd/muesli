@@ -64,7 +64,7 @@ class Lecture:
             self.db.query(models.Lecture)
             .order_by(desc(models.Lecture.term), models.Lecture.name)
             .options(joinedload(models.Lecture.assistants))
-            .filter(models.Lecture.is_visible == True) # noqa
+            .filter(models.Lecture.is_visible == True)
             .all()
         )
         schema = models.LectureSchema(many=True, only=allowed_attributes.collection_lecture())

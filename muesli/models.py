@@ -678,12 +678,9 @@ class UserSchema(Schema):
     birth_date = fields.String()
     birth_place = fields.String()
     subject = fields.String()
-    #TODO Rest
 
-#TODO MANY???!?
     @post_load()
     def get_user(self, data):
-        # TODO check also by mail because it's unique
         usr = self.context['session'].query(User).filter(User.email == data["email"]).one()
         if usr is None:
             raise ValidationError("User not found")
@@ -710,10 +707,7 @@ class TutorialSchema(Schema):
         UserSchema, only=allowed_attributes.user())
     comment = fields.String()
     students = fields.Nested(UserSchema, many=True, only=allowed_attributes.user())
-
-    # CORRECT ?! TODO
     exams = fields.Nested(ExamSchema, many=True, only=["id", "name"])
-
     student_count = fields.Method("get_student_num")
 
     def get_time(self, obj):
@@ -739,11 +733,11 @@ class LectureSchema(Schema):
     is_visible = fields.Boolean()
     tutorials = fields.Nested(TutorialSchema, many=True, only=allowed_attributes.tutorial())
     tutors = fields.Nested(UserSchema, many=True)
-    
+
     # Converts the Muesli defined type Term to it's string representation
     def get_term(self, obj):
         return obj.term.__html__()
-    
+
     # Constructs a Term from input like 20181
     def load_term(self, value):
         term = [Term(str(value)), Term(str(value))]
