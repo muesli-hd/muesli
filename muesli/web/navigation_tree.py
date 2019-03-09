@@ -106,7 +106,7 @@ def get_lecture_specific_nodes(request, context, lecture_id):
             ("Liste aller Teilnehmer", "lecture_export_students_html", "edit"),
             ("Student als Teilnehmer eintragen", "lecture_add_student", "edit"),
             ("Liste der abgemeldeten/entfernten Teilnehmer", "lecture_view_removed_students", "edit"),
-            ("Punkzahlen exportieren", "lecture_export_totals", "edit"),
+            ("Punktzahlen exportieren", "lecture_export_totals", "edit"),
         ]
 
         for label, route, permission in data:
