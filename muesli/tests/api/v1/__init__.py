@@ -20,5 +20,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-ACCEPT_HEADER = {'Accept': 'application/json'}
+from api_tools.header import authenticate
+
+STATIC_HEADERS = {'Accept': 'application/json'}
 URL = "/api/v1"
+
+TESTUSERS = [
+    ('admin@muesli.org', 'adminpassword'),
+    ('user@muesli.org', 'userpassword'),
+    ('user2@muesli.org', 'user2password'),
+    ('user_without_lecture@muesli.org', 'user_without_lecturepassword'),
+    ('unicodeuser@muesli.org', 'üüü'),
+    ('tutor@muesli.org', 'tutorpassword'),
+    ('tutor2@muesli.org', 'tutor2password'),
+    ('assistant@muesli.org', 'assistantpassword'),
+    ('assistant2@muesli.org', 'assistant2password'),
+]
+
+API_TOKENS = {}
