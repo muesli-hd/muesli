@@ -24,13 +24,13 @@
 This module provides tooling to authenticate ageinst the Muesli API v1
 """
 
+STATIC_HEADERS = {'Accept': 'application/json'}
+MUESLI_URL = "http://localhost:8080"
+
 import json
 from os import path, stat
 from ast import literal_eval
 import requests
-
-from api_tools import MUESLI_URL, STATIC_HEADERS
-
 
 def authenticate(username, password, save=False, url=MUESLI_URL) -> dict:
     """A function to authenticate as a user and get the valid headers for this

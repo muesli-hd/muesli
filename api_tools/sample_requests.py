@@ -22,8 +22,7 @@
 
 import requests
 
-from api_tools.header import authenticate
-from api_tools import MUESLI_URL
+from header import authenticate, STATIC_HEADERS, MUESLI_URL
 
 def get(endpoint, header):
     endpoint = MUESLI_URL + endpoint
@@ -39,11 +38,11 @@ def post(endpoint, header):
             "email": "admin@muesli.org"
         }]
     }
-    r = requests.post(endpoint, lecture, headers=header)
+    r = requests.post(endpoint, json=lecture, headers=header)
     print(r.json())
 
 def main():
-    headers = authenticate('admin@muesli.org', 'adminpassword', save=True)
+    headers = authenticate('admin@muesli.org', 'adminpassword')
     # headers = authenticate('test@test.de', '1234')
     endpoint = "/api/v1/whoami"
     endpoint = "/api/v1/lectures"
