@@ -83,6 +83,6 @@ class UnloggedTests(functionalTests.PopulatedTests):
         self.API_TOKENS = {user[0]: self.authenticate(user[0], user[1]) for user in TESTUSERS}
 
     def test_lecture_post(self):
-        lecture = '{"term": 20182, "name": "Informatik", "assistants": [{"email": "assistant@muesli.org"}]}'
-        res = self.testapp.post(URL+'/lectures', lecture, self.API_TOKENS["admin@muesli.org"])
+        lecture = {"term": 20182, "name": "Informatik", "assistants": [{"email": "assistant@muesli.org"}]}
+        res = self.testapp.post_json(URL+'/lectures', lecture, headers=self.API_TOKENS["admin@muesli.org"])
 
