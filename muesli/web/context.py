@@ -3,6 +3,8 @@ from muesli.models import *
 from pyramid.security import Allow, Deny, Everyone, Authenticated, DENY_ALL, ALL_PERMISSIONS
 from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden
 
+from sqlalchemy import and_
+
 from muesli.utils import editAllTutorials, editOwnTutorials, editNoTutorials
 
 def getTutorials(request):
@@ -320,3 +322,26 @@ class ExamEndpointContext:
             self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view'))]
         self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view', 'edit'))] if request.user in lecture.assistants else []
         self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view'))] if request.user in lecture.tutors else []
+
+class ExerciseEndpointContext:
+    def __init__(self, request):
+        exercise_id = request.matchdict['exercise_id']
+        exercise_id = exercise_id.strip("/")
+        user_id = request.matchdict.get('user_id', None)
+        user_id = user_id.strip("/")
+        self.exercise = request.db.query(Exercise).get(exercise_id)
+        self.lecture = self.exercise.exam.lecture
+        tutorial = None
+        if user_id is not None:
+            self.user = request.db.query(User).get(user_id)
+            tutorial = request.db.query(LectureStudent).filter(and_(LectureStudent.student_id == self.user.id, LectureStudent.lecture == self.lecture)).one().tutorial
+        self.__acl__ = [(Allow, 'group:administrators', ALL_PERMISSIONS)]
+        self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view', 'viewAll', 'viewOwn'))] if request.user in self.lecture.assistants else []
+        if request.user == self.user:
+            self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view', 'viewOwn'))]
+        if self.lecture.tutor_rights == editAllTutorials:
+            self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view', 'viewAll', 'viewOwn'))] if request.user == self.lecture.tutors else []
+        else:
+            self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view'))] if request.user in self.lecture.tutors else []
+        if tutorial is not None:
+            self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('viewOwn'))] if request.user == tutorial.tutor else []
