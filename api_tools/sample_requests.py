@@ -30,17 +30,24 @@ def get(endpoint, header):
     r = requests.get(endpoint, headers=header)
     print(r.json())
 
-def put(endpoint, header):
+def post(endpoint, header):
     endpoint = MUESLI_URL + endpoint
-    lecture = '{"term": 20181, "name": "Irgendwas", "lecturer": "Ich auch"}'
-    r = requests.get(endpoint, lecture, headers=header)
+    lecture = {
+        "term": 20182,
+        "name": "Informatik",
+        "assistants": [{
+            "email": "admin@muesli.org"
+        }]
+    }
+    r = requests.post(endpoint, lecture, headers=header)
     print(r.json())
 
 def main():
     headers = authenticate('admin@muesli.org', 'adminpassword', save=True)
     # headers = authenticate('test@test.de', '1234')
     endpoint = "/api/v1/whoami"
-    get(endpoint, headers)
+    endpoint = "/api/v1/lectures"
+    post(endpoint, headers)
 
 
 if __name__ == "__main__":

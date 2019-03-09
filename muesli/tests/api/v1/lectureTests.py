@@ -22,7 +22,7 @@
 
 from muesli.tests import functionalTests
 
-from muesli.tests.api.v1 import URL, API_TOKENS, TESTUSERS, STATIC_HEADERS
+from muesli.tests.api.v1 import URL, TESTUSERS, STATIC_HEADERS
 
 class BaseTests(functionalTests.BaseTests):
     def test_collection_lecture_get(self):
@@ -55,6 +55,7 @@ class UnloggedTests(functionalTests.PopulatedTests):
         Args:
             username: A string with the username to authenticate as.
             password: The password for the respective user.
+
         Returns:
             A dictionary with the needed headers for authorization towards the v1
             Muesli API.
@@ -77,26 +78,11 @@ class UnloggedTests(functionalTests.PopulatedTests):
         header_content.update(STATIC_HEADERS)
         return header_content
 
-    # def setUp(self):
-        # from muesli.models import User
-        # from muesli.tests.functionalTests import setUserPassword
-        # self.user2 = User()
-        # self.user2.first_name = 'Sigmund'
-        # self.user2.last_name = 'Student'
-        # self.user2.email = 'user2@muesli.org'
-        # self.user2.subject = "Mathematik (BSc)"
-        # setUserPassword(self.user2, 'user2password')
-        # self.session.add(self.user2)
-        # self.setUser(self.user2)
+    def setUp(self):
+        functionalTests.PopulatedTests.setUp(self)
+        self.API_TOKENS = {user[0]: self.authenticate(user[0], user[1]) for user in TESTUSERS}
 
     def test_lecture_post(self):
-        self.API_TOKENS = {user[0]: self.authenticate(user[0], user[1]) for user in TESTUSERS}
-        lecture = {
-            "term": 20182,
-            "name": "Informatik",
-            "assistants": [{
-                "email": "test@test.de"
-            }]
-        }
-        res = self.testapp.post(URL+'/lectures', lecture, STATIC_HEADERS, status=403)
+        lecture = '{"term": 20182, "name": "Informatik", "assistants": [{"email": "assistant@muesli.org"}]}'
+        res = self.testapp.post(URL+'/lectures', lecture, self.API_TOKENS["admin@muesli.org"])
 
