@@ -691,7 +691,7 @@ class ExamSchema(Schema):
     id = fields.Integer(dump_only=True)
     lecture_id = fields.Integer(dump_only=True)
     name = fields.String()
-    category = fields.String()  # TODO verify
+    category = fields.String()
     admission = fields.Boolean()
     registration = fields.Boolean()
     url = fields.Url()
@@ -754,7 +754,6 @@ class ExerciseSchema(Schema):
 
 
 class ExerciseStudentSchema(Schema):
-    #exercise = fields.Nested(ExerciseSchema)
     student = fields.Nested(UserSchema, only=allowed_attributes.user())
     points = fields.Float()
 
@@ -771,4 +770,3 @@ class BearerToken(Base):
     expires = Column(DateTime)
     description = Column(Text)
     revoked = Column(Boolean, default=False)
-

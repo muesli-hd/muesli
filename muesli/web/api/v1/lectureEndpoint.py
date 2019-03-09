@@ -162,11 +162,9 @@ class Lecture:
         else:
             for k, v in result.items():
                 setattr(lecture, k, v)
-                # TODO do we need to catch this exception?
             try:
                 self.db.commit()
             except exc.SQLAlchemyError:
-                # TODO better exception
                 self.db.rollback()
             else:
                 return {'result': 'ok', 'update': self.get()}

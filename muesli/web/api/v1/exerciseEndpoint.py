@@ -99,4 +99,3 @@ class Exercise:
         exer_student_schema = models.ExerciseStudentSchema(many=True)
         result = exer_student_schema.dump(exer_students)
         return result
-

@@ -78,10 +78,8 @@ def api_login(request):
             'result': 'ok',
             'token': jwt_token
         }
-    else:
-        return {
-            'result': 'error'
-        }
+    return {'result': 'error'}
+
 
 @view_config(route_name='api_login', renderer='json', request_method='GET')
 def refresh(request):
@@ -91,11 +89,7 @@ def refresh(request):
             'result': 'ok',
             'token': request.create_jwt_token(user.id, admin=(user.is_admin))
         }
-    else:
-        return {
-            'result': 'error'
-        }
-
+    return {'result': 'error'}
 
 
 @view_config(route_name='user_logout')
@@ -574,19 +568,17 @@ def list_auth_keys(request):
 @view_config(route_name='remove_api_key', context=context.GeneralContext)
 def removeKey(request):
     code_id = int(request.matchdict['key_id'])
-    #  TODO check if api_key.user_id matches user_id??
     api_key = request.db.query(models.BearerToken).get(code_id)
-    if not api_key:
-        request.session.flash('API Key nicht gefunden', queue='errors')
-    else:
+    if api_key.user == request.user or request.user.is_admin:
         api_key.revoked = True
         request.db.add(api_key)
         request.db.commit()
         request.session.flash('API Key entfernt ', queue='messages')
+    else:
+        request.session.flash('API Key nicht gefunden', queue='errors')
     if request.referrer:
         return HTTPFound(location=request.referrer)
-    else:
-        return HTTPFound(location=request.route_url('start'))
+    return HTTPFound(location=request.route_url('start'))
 
 
 @view_config(route_name='user_ajax_complete', renderer='muesli.web:templates/user/ajax_complete.pt', context=context.TutorialContext, permission='viewOverview')
