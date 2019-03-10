@@ -86,8 +86,16 @@ def checkTooltips():
     #Check if tooltip exists and check text
     tooltipGrading = driver.find_element_by_xpath("//p[contains(text(), 'Hier können Noten anhand von einer oder "
                                                   "mehreren Klausuren/Testaten berechnet und eingetragen werden.')]")
-
     tooltipTutor = driver.find_element_by_xpath("//p[contains(text(), 'Klicken Sie auf den Namen eines Tutors, um ihm/ihr eine Email zu schicken.')]")
+
+    #Check excel tooltip
+    gradings = driver.find_element_by_xpath("//a[@href='/grading/edit/6692']")
+    gradings.click()
+    grades = driver.find_element_by_xpath("//a[@href='/grading/enter_grades/6692']")
+    grades.click()
+
+    excelTooltip = driver.find_element_by_xpath("//p[contains(text(), 'Hier können Sie die Klausurergebnisse "
+                                                "als Exceldatei (.xlsx) erstellen und herunterladen.')]")
 
 
     time.sleep(3)
