@@ -45,6 +45,13 @@ class NavigationTree(object):
 
 
 def create_navigation_tree(request, user):
+    """Create the default navigation tree containing all current tutorials and
+    lectures the user is participating in.
+
+    Returns:
+        The root of the new navigation tree
+    """
+    # import inside function to prevent cyclic import
     from muesli.models import Tutorial, Lecture
 
     root = NavigationTree("Übersicht", request.route_url('start'))
@@ -98,6 +105,12 @@ def create_navigation_tree(request, user):
 
 
 def get_lecture_specific_nodes(request, context, lecture_id):
+    """Create navigation tree, to append to the main navigation tree containing
+    the default lecture specific links
+
+    Returns:
+        A list of subtrees
+    """
         nodes = []
 
         data = [
@@ -120,6 +133,12 @@ def get_lecture_specific_nodes(request, context, lecture_id):
         return nodes
 
 def get_tutorial_specific_nodes(request, context, tutorial_id):
+    """Create navigation tree, to append to the main navigation tree containing
+    the default tutorial specific links
+
+    Returns:
+        A list of subtrees
+    """
         nodes = []
 
         if request.has_permission('edit', context):
