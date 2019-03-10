@@ -306,6 +306,7 @@ class ExcelView(object):
         self.request = request
         self.w = Workbook()
     def createResponse(self):
+        #Receive excel file in xlsx format
         response = Response(content_type='application/vnd.ms-excel')
         response.body = save_virtual_workbook(self.w)
         return response
@@ -317,9 +318,12 @@ class Export(ExcelView):
         lecture = grading.lecture
         w = self.w
 
-        # sheet Pruefung
+        #Get grades by going through database
+        grades = grading.student_grades.options(sqlalchemy.orm.joinedload(models.StudentGrade.student)).all()
+
+        #Add sheet Pruefung ID as first excel page containing Semester, Datum, PrüferID etc.
         worksheet_exams = w.active
-        worksheet_exams.title = 'Pruefung'
+        worksheet_exams.title = 'Pruefung' + str(grading.id)
         date_style = 'dd.mm.yyyy'
         header = ['Tabellenname', 'Veranstaltungsnummer', 'Titel', 'Semester', 'Termin', 'Datum', 'PrueferId', 'Pruefername']
         worksheet_exams.append(header)
@@ -345,32 +349,12 @@ class Export(ExcelView):
             max_length = max(len(str(cell.value)) for cell in column_cells)
             worksheet_exams.column_dimensions[column_cells[0].column].width = max_length*1.2
 
-        # sheet Pruefungsteilnehmer
-        worksheet_grades = self.w.create_sheet('Pruefungsteilnehmer')
-        header = ['mtknr', 'name', 'stg', 'stg_txt', 'accnr', 'pnr', 'pnote', 'pstatus', 'ppunkte', 'pbonus']
-        worksheet_grades.append(header)
-        worksheet_grades.row_dimensions[1].font = Font(bold=True)
-        grades = grading.student_grades.options(sqlalchemy.orm.joinedload(models.StudentGrade.student)).all()
-        for i, grade in enumerate(grades, 1):
-            if grade.grade is not None:
-                g = float(grade.grade*100)
-            else:
-                g = ''
-            data = [grade.student.matrikel,
-                    grade.student.last_name, '',
-                    grade.student.formatCompleteSubject(), '', '', g, '']
-            for j, d in enumerate(data, 1):
-                worksheet_grades.cell(row=1+i, column=j, value=d)
-        # set column width
-        for column_cells in worksheet_grades.columns:
-            max_length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet_grades.column_dimensions[column_cells[0].column].width = max_length*1.2
-
-        # sheet Daten
+        #Second excel page Student Daten sheet, containing things like Names, Age, Course of studies
         worksheet_data = self.w.create_sheet('Daten')
-        header = ['Matrikel', 'Nachname', 'Vorname', 'Geburtsort', 'Geburtsdatum', 'Note', 'Vortragstitel', 'Studiengang']
+        header = ['Matrikelnummer', 'Nachname', 'Vorname', 'Geburtsort', 'Geburtsdatum', 'Note', 'Vortragstitel', 'Studiengang']
         worksheet_data.append(header)
         worksheet_data.row_dimensions[1].font = Font(bold=True)
+        #Iterate over all students and extract data
         for i, grade in enumerate(grades, 1):
             m = date_p.match(grade.student.birth_date or '')
             date = datetime.datetime(year=int(m.group(3)), month=int(m.group(2)), day=int(m.group(1))) if m else ''
@@ -391,4 +375,24 @@ class Export(ExcelView):
         for column_cells in worksheet_data.columns:
             max_length = max(len(str(cell.value)) for cell in column_cells)
             worksheet_data.column_dimensions[column_cells[0].column].width = max_length*1.2
+
+        #Third sheet Pruefungsteilnehmer containing matrikel, grade etc. for hispos 
+        worksheet_grades = self.w.create_sheet('Pruefungsteilnehmer')
+        header = ['mtknr', 'name', 'stg', 'stg_txt', 'accnr', 'pnr', 'pnote', 'pstatus', 'ppunkte', 'pbonus']
+        worksheet_grades.append(header)
+        worksheet_grades.row_dimensions[1].font = Font(bold=True)
+        for i, grade in enumerate(grades, 1):
+            if grade.grade is not None:
+                g = float(grade.grade*100)
+            else:
+                g = ''
+            data = [grade.student.matrikel,
+                    grade.student.last_name, '',
+                    grade.student.formatCompleteSubject(), '', '', g, '']
+            for j, d in enumerate(data, 1):
+                worksheet_grades.cell(row=1+i, column=j, value=d)
+        # set column width
+        for column_cells in worksheet_grades.columns:
+            max_length = max(len(str(cell.value)) for cell in column_cells)
+            worksheet_grades.column_dimensions[column_cells[0].column].width = max_length*1.2
         return self.createResponse()

@@ -83,7 +83,7 @@
 <p tal:condition="error_msg" class="error">${error_msg}</p>
 
 
-<a tal:attributes="href request.route_path('grading_export', grading_id=grading.id)">Als Excel für HISPOS exportieren</a>
+<a tal:attributes="href request.route_path('grading_export', grading_id=grading.id)">Als Excel für die Prüfungsverwaltung (HIS-POS) exportieren</a>
 
 
 <form method="get">
