@@ -42,6 +42,7 @@ from collections import Counter
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from openpyxl.writer.excel import save_virtual_workbook
+from muesli.web.tooltips import grading_edit_tooltips
 
 import re
 import os
@@ -61,7 +62,7 @@ class Edit(object):
             self.request.db.commit()
             form.message = "Änderungen gespeichert."
         return {'grading': grading,
-                'form': form,
+                'form': form
                }
 
 @view_config(route_name='grading_associate_exam', context=GradingContext, permission='edit')
@@ -277,7 +278,8 @@ class EnterGradesBasic(object):
                 'varsForExam': varsForExam,
                 'lecture_students': lecture_students,
                 'img': encoded_diagram,
-                'percentage_message': percentage_message}
+                'percentage_message': percentage_message,
+                'tooltips': grading_edit_tooltips}
 
 @view_config(route_name='grading_enter_grades', renderer='muesli.web:templates/grading/enter_grades.pt', context=GradingContext, permission='edit')
 class EnterGrades(EnterGradesBasic):
