@@ -23,6 +23,7 @@
 from muesli.tests import functionalTests
 
 from muesli.tests.api.v1 import URL, TESTUSERS, STATIC_HEADERS
+from muesli.tests.api.v1.utilities import authenticate_testapp
 
 class BaseTests(functionalTests.BaseTests):
     def test_collection_lecture_get(self):
@@ -48,39 +49,9 @@ class BaseTests(functionalTests.BaseTests):
 
 
 class UnloggedTests(functionalTests.PopulatedTests):
-    def authenticate(self, username, password) -> dict:
-        """A function to authenticate as a user and get the valid headers for this
-        user.
-
-        Args:
-            username: A string with the username to authenticate as.
-            password: The password for the respective user.
-
-        Returns:
-            A dictionary with the needed headers for authorization towards the v1
-            Muesli API.
-
-            example: (<TOKEN> is the corresponding JWT token)
-                {
-                    'Authorization': 'Bearer <TOKEN>',
-                    'Accept': 'application/json'
-                }
-
-        """
-
-        r = self.testapp.post(
-            URL+'/login',
-            {"email": username, "password": password},
-            STATIC_HEADERS,
-        )
-        token = r.json.get("token", "")
-        header_content = {'Authorization': 'Bearer '+token}
-        header_content.update(STATIC_HEADERS)
-        return header_content
-
     def setUp(self):
         functionalTests.PopulatedTests.setUp(self)
-        self.API_TOKENS = {user[0]: self.authenticate(user[0], user[1]) for user in TESTUSERS}
+        self.API_TOKENS = {user[0]: authenticate_testapp(self.testapp, user[0], user[1]) for user in TESTUSERS}
 
     def test_lecture_post(self):
         lecture = {"term": 20182, "name": "Informatik", "assistants": [{"email": "assistant@muesli.org"}]}

@@ -324,7 +324,6 @@ class AssistantLoggedInTests(TutorLoggedInTests):
         self.assertResContains(res, 'bereits eingetragen')
 
 
-
 class AdminLoggedInTests(AssistantLoggedInTests):
     def setUp(self):
         AssistantLoggedInTests.setUp(self)
