@@ -2,7 +2,7 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+
 
 <script>/* <![CDATA[ */
   function hide_help ()
@@ -10,7 +10,6 @@
     $(".help").hide();
     $(".nohelp").show();
   }
-
   function show_help ()
   {
     $(".help").show();
@@ -39,7 +38,6 @@
           }
       });
     }
-
     function createFancyBoxes(){
         $("a.fancybox").each(function(index) {
           $(this).fancybox({
@@ -54,7 +52,6 @@
           });
        });
     }
-
     function saveRow(event,id){
       var url = $('#gradingsform').attr('action').replace(/enter_grades/, 'get_row');
       var value= $('#grade-'+id).val()
@@ -75,7 +72,6 @@
           }
       });
     }
-
     $(document).ready(function() {
         createFancyBoxes();
     });

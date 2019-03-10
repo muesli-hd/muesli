@@ -1,7 +1,6 @@
 from muesli.models import *
 from pyramid.security import Allow, Deny, Everyone, Authenticated, DENY_ALL, ALL_PERMISSIONS
 from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden
-#from muesli.web.tooltips import lecture_add_exam_tooltips
 
 from muesli.utils import editAllTutorials, editOwnTutorials, editNoTutorials
 

@@ -27,7 +27,7 @@ from muesli.allocation import Allocation
 from muesli.mail import Message, sendMail
 from muesli.web.viewsExam import MatplotlibView
 from muesli.web.tooltips import lecture_edit_tooltips
-from muesli.utils import category_names
+from muesli.utils import categories
 
 from collections import defaultdict
 
@@ -102,7 +102,11 @@ class AddExam(object):
         category = self.category
         lecture = self.db.query(models.Lecture).get(self.lecture_id)
         form = LectureAddExam(self.request)
-        category_name = category_names[category]
+        category_name = ''
+        for c in categories:
+            if c['id'] == category:
+                category_name = c['name']
+                break
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
             exam = models.Exam()
             exam.lecture = lecture
