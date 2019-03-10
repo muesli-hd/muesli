@@ -10,3 +10,6 @@ start_tooltips = {
     "details": "Klicken Sie auf [Details], um Bewertungen von Übungsblättern und Klausuren zu einzusehen."
 }
 
+grading_edit_tooltips = {
+    "excel": "Hier können Sie die Klausurergebnisse als Exceldatei (.xlsx) erstellen und herunterladen."
+}
