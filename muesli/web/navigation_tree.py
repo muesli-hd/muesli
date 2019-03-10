@@ -54,6 +54,7 @@ def create_navigation_tree(request, user):
     # import inside function to prevent cyclic import
     from muesli.models import Tutorial, Lecture
 
+    # create tree-root, this item is currently not shown
     root = NavigationTree("Übersicht", request.route_url('start'))
 
     if user is None:
