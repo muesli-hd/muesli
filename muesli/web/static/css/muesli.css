@@ -209,7 +209,6 @@ table.colored tr:nth-child(odd) {
   height: 16px;
   text-align: center;
   color: #FFFFFF;
-  font-size: 75%;
   font-family: sans-serif;
 }
 
