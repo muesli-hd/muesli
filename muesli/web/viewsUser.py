@@ -80,16 +80,17 @@ def api_login(request):
         }
     return {'result': 'error'}
 
-
-@view_config(route_name='api_login', renderer='json', request_method='GET')
-def refresh(request):
-    user = request.db.query(models.User).get(request.authenticated_userid)
-    if user:
-        return {
-            'result': 'ok',
-            'token': request.create_jwt_token(user.id, admin=(user.is_admin))
-        }
-    return {'result': 'error'}
+# Only for testing purposes. If it is decided that this should be implemented
+# the function needs to be changed to work similar to api_login
+#@view_config(route_name='api_login', renderer='json', request_method='GET')
+#def refresh(request):
+#    user = request.db.query(models.User).get(request.authenticated_userid)
+#    if user:
+#        return {
+#            'result': 'ok',
+#            'token': request.create_jwt_token(user.id, admin=(user.is_admin))
+#        }
+#    return {'result': 'error'}
 
 
 @view_config(route_name='user_logout')
