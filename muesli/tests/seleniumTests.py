@@ -19,7 +19,7 @@ def excelTest():
 
     email.send_keys("dennis.pfleger@web.de")
     pw.send_keys("a")
-    ĺogin = driver.find_element_by_xpath("//input[@type='submit']").click()
+    login = driver.find_element_by_xpath("//input[@type='submit']").click()
 
     #wait for page to load
     time.sleep(2)
@@ -133,6 +133,6 @@ def histogramTest():
     time.sleep(3)
 
 if __name__== "__main__":
-    #excelTest()
-    #checkTooltips()
+    excelTest()
+    checkTooltips()
     histogramTest()

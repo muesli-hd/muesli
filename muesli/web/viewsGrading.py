@@ -376,7 +376,7 @@ class Export(ExcelView):
             max_length = max(len(str(cell.value)) for cell in column_cells)
             worksheet_data.column_dimensions[column_cells[0].column].width = max_length*1.2
 
-        #Third sheet Pruefungsteilnehmer containing matrikel, grade etc. for hispos 
+        #Third sheet Pruefungsteilnehmer containing matrikel, grade etc. for hispos
         worksheet_grades = self.w.create_sheet('Pruefungsteilnehmer')
         header = ['mtknr', 'name', 'stg', 'stg_txt', 'accnr', 'pnr', 'pnote', 'pstatus', 'ppunkte', 'pbonus']
         worksheet_grades.append(header)
