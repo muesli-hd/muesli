@@ -3,13 +3,12 @@ import time
 
 def initDriver():
     driver = webdriver.Chrome("SeleniumDriver/chromedriver")
-    driver.get("https://localhost:8080")
+    driver.get("localhost:8080")
 
     return driver
 
 def excelTest():
     driver = initDriver()
-    driver.get("localhost:8080")
 
     loginBut = driver.find_element_by_xpath("//a[@href='/user/login']")
     loginBut.click()
@@ -56,7 +55,6 @@ def excelTest():
 
 def checkTooltips():
     driver = initDriver()
-    driver.get("localhost:8080")
 
     loginBut = driver.find_element_by_xpath("//a[@href='/user/login']")
     loginBut.click()
@@ -103,7 +101,6 @@ def checkTooltips():
 
 def histogramTest():
     driver = initDriver()
-    driver.get("localhost:8080")
 
     loginBut = driver.find_element_by_xpath("//a[@href='/user/login']")
     loginBut.click()
