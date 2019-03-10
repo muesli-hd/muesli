@@ -126,7 +126,7 @@ class TutorialContext:
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]
         if self.lecture:
-            self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewOverview', 'take_tutorial')) for tutor in self.lecture.tutors]
+            self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewOverview', 'take_tutorial', 'mail_tutors')) for tutor in self.lecture.tutors]
             self.__acl__ += [((Allow, 'user:{0}'.format(assistant.id), ('viewOverview', 'viewAll', 'sendMail', 'edit', 'remove_student'))) for assistant in self.lecture.assistants]
         if self.tutorials:
             if self.lecture.tutor_rights == editOwnTutorials:

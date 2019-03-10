@@ -159,8 +159,4 @@ def get_tutorial_specific_nodes(request, context, tutorial_id, lecture_id):
         nodes.append(NavigationTree("Status-Emails bestellen/ abbestellen",
             request.route_path('tutorial_email_preference', tutorial_ids=tutorial_id)))
 
-    if request.has_permission('mail_tutors', context):
-        nodes.append(NavigationTree("E-Mail an alle Übungsleiter und Assistenten schreiben",
-            request.route_path('lecture_email_tutors', lecture_id=lecture_id)))
-
     return nodes
