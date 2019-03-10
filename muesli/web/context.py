@@ -328,11 +328,12 @@ class ExerciseEndpointContext:
         exercise_id = request.matchdict['exercise_id']
         exercise_id = exercise_id.strip("/")
         user_id = request.matchdict.get('user_id', None)
-        user_id = user_id.strip("/")
         self.exercise = request.db.query(Exercise).get(exercise_id)
         self.lecture = self.exercise.exam.lecture
         tutorial = None
+        self.user = None
         if user_id is not None:
+            user_id = user_id.strip("/")
             self.user = request.db.query(User).get(user_id)
             tutorial = request.db.query(LectureStudent).filter(and_(LectureStudent.student_id == self.user.id, LectureStudent.lecture == self.lecture)).one().tutorial
         self.__acl__ = [(Allow, 'group:administrators', ALL_PERMISSIONS)]

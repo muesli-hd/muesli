@@ -60,13 +60,13 @@ class Exercise:
         exer_student_schema = models.ExerciseStudentSchema(many=True, exclude=["points"])
         tutorials = [tut for tut in self.request.context.lecture.tutorials if tut.tutor == self.request.user]  # It is possible to be tutor of more than 1 tutorial
         if self.request.has_permission('viewAll'):
-            exer_students = self.request.db.query(models.ExerciseStudent).filter(models.ExerciseStudent.exercise_id == exercise_id).all()
+            exer_students = self.request.db.query(models.ExerciseStudent).filter(models.ExerciseStudent.exercise == exercise).all()
             result = exer_schema.dump(exercise)
             result.update({"exercise_students": exer_student_schema.dump(exer_students)})
         elif tutorials:
             exer_students = []
             for tutorial in tutorials:
-                exer_students += self.request.db.query(models.ExerciseStudent).join(models.ExerciseStudent.student).filter(and_(models.ExerciseStudent.exercise_id == exercise_id,
+                exer_students += self.request.db.query(models.ExerciseStudent).join(models.ExerciseStudent.student).filter(and_(models.ExerciseStudent.exercise == exercise,
                                                                                                                                 models.User.id.in_([stud.id for stud in tutorial.students]))).all()
             result = exer_schema.dump(exercise)
             result.update({"exercise_students": exer_student_schema.dump(exer_students)})
