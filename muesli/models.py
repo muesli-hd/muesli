@@ -687,6 +687,24 @@ class UserSchema(Schema):
         return usr
 
 
+class AssistantSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    email = fields.Email()
+    first_name = fields.String()
+    last_name = fields.String()
+    matrikel = fields.String()
+    birth_date = fields.String()
+    birth_place = fields.String()
+    subject = fields.String()
+
+    @post_load()
+    def get_user(self, data):
+        usr = self.context['session'].query(User).filter(User.email == data["email"]).one()
+        if usr is None or not usr.is_assistant:
+            raise ValidationError("User not found or is not assistant")
+        return usr
+
+
 class ExamSchema(Schema):
     id = fields.Integer(dump_only=True)
     lecture_id = fields.Integer(dump_only=True)
@@ -722,7 +740,7 @@ class TutorialSchema(Schema):
 
 class LectureSchema(Schema):
     id = fields.Integer(dump_only=True)
-    assistants = fields.Nested(UserSchema, required=True, many=True, only=allowed_attributes.user())
+    assistants = fields.Nested(AssistantSchema, required=True, many=True, only=allowed_attributes.user())
     name = fields.String(required=True)
     type = fields.String()
     term = fields.Method("get_term", deserialize="load_term")
@@ -732,7 +750,7 @@ class LectureSchema(Schema):
     password = fields.String()
     is_visible = fields.Boolean()
     tutorials = fields.Nested(TutorialSchema, many=True, only=allowed_attributes.tutorial())
-    tutors = fields.Nested(UserSchema, many=True)
+    tutors = fields.Nested(UserSchema, many=True, dump_only=True)
 
     # Converts the Muesli defined type Term to it's string representation
     def get_term(self, obj):
