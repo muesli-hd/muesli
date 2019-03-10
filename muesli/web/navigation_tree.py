@@ -67,14 +67,13 @@ def create_navigation_tree(request, user):
 
     # add tutorials the user subsrcibed to
     tutorials = tutorials.filter(Lecture.term >= semesterlimit)
+    tutorial_root_node = NavigationTree("Belegte Tutorials", request.route_url('start'))
+    root.append(tutorial_root_node)
     for t in tutorials:
-        lecture_node = NavigationTree(t.lecture.name, request.route_url('lecture_view',
-            lecture_id=t.lecture.id))
-        root.append(lecture_node)
         tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
-            str(t.time), t.tutor_name), request.route_url('lecture_view_points',
+            t.time.__html__(), t.tutor_name), request.route_url('lecture_view_points',
                 lecture_id=t.lecture.id))
-        lecture_node.append(tutorial_node)
+        tutorial_root_node.append(tutorial_node)
 
 
     # add tutorials the user tutors
@@ -82,7 +81,8 @@ def create_navigation_tree(request, user):
 
     tutor_node = NavigationTree("Eigene Tutorials", request.route_url('start'))
     for t in tutorials_as_tutor:
-        tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name, str(t.time), t.place),
+        tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
+            t.time.__html__(), t.place),
             request.route_url('tutorial_view', tutorial_ids=t.id))
         tutor_node.append(tutorial_node)
 
@@ -111,38 +111,55 @@ def get_lecture_specific_nodes(request, context, lecture_id):
     Returns:
         A list of subtrees
     """
-        nodes = []
+    nodes = []
 
-        data = [
-            ("E-Mail an alle Übungsleiter schreiben", "lecture_email_tutors", "mail_tutors"),
-            ("E-Mail an alle Studenten schreiben", "lecture_email_students", "edit"),
-            ("Liste aller Teilnehmer", "lecture_export_students_html", "edit"),
-            ("Student als Teilnehmer eintragen", "lecture_add_student", "edit"),
-            ("Liste der abgemeldeten/entfernten Teilnehmer", "lecture_view_removed_students", "edit"),
-            ("Punktzahlen exportieren", "lecture_export_totals", "edit"),
-        ]
+    data = [
+        ("E-Mail an alle Übungsleiter schreiben", "lecture_email_tutors", "mail_tutors"),
+        ("E-Mail an alle Studenten schreiben", "lecture_email_students", "edit"),
+        ("Liste aller Teilnehmer", "lecture_export_students_html", "edit"),
+        ("Student als Teilnehmer eintragen", "lecture_add_student", "edit"),
+        ("Liste der abgemeldeten/entfernten Teilnehmer", "lecture_view_removed_students", "edit"),
+        ("Punktzahlen exportieren", "lecture_export_totals", "edit"),
+    ]
 
-        for label, route, permission in data:
-            if request.has_permission(permission, context):
-                nodes.append(NavigationTree(label, request.route_path(route, lecture_id=lecture_id)))
+    for label, route, permission in data:
+        if request.has_permission(permission, context):
+            nodes.append(NavigationTree(label, request.route_path(route, lecture_id=lecture_id)))
 
-        if request.has_permission('edit', context):
-            NavigationTree("Liste der Ergebnisse", request.route_path('tutorial_results',
-                lecture_id=lecture_id, tutorial_ids='')),
+    if request.has_permission('edit', context):
+        NavigationTree("Liste der Ergebnisse", request.route_path('tutorial_results',
+            lecture_id=lecture_id, tutorial_ids='')),
 
-        return nodes
+    return nodes
 
-def get_tutorial_specific_nodes(request, context, tutorial_id):
+def get_tutorial_specific_nodes(request, context, tutorial_id, lecture_id):
     """Create navigation tree, to append to the main navigation tree containing
     the default tutorial specific links
 
     Returns:
         A list of subtrees
     """
-        nodes = []
+    nodes = []
 
-        if request.has_permission('edit', context):
-            nodes.append(NavigationTree("Tutorial editieren",
-                request.route_path('tutorial_edit', tutorial_id=tutorial_id)))
+    if request.has_permission('edit', context):
+        nodes.append(NavigationTree("Tutorial editieren",
+            request.route_path('tutorial_edit', tutorial_id=tutorial_id)))
 
-        return nodes
+    if request.has_permission('viewAll', context):
+        nodes.append(NavigationTree("Punkteübersicht",
+            request.route_path('tutorial_results', lecture_id=lecture_id,
+                tutorial_ids=tutorial_id)))
+
+    if request.has_permission('sendMail', context):
+        nodes.append(NavigationTree("E-Mail an Teilnehmer schreiben",
+            request.route_path('tutorial_email', tutorial_ids=tutorial_id)))
+
+    if request.has_permission('viewAll', context):
+        nodes.append(NavigationTree("Status-Emails bestellen/ abbestellen",
+            request.route_path('tutorial_email_preference', tutorial_ids=tutorial_id)))
+
+    if request.has_permission('mail_tutors', context):
+        nodes.append(NavigationTree("E-Mail an alle Übungsleiter und Assistenten schreiben",
+            request.route_path('lecture_email_tutors', lecture_id=lecture_id)))
+
+    return nodes

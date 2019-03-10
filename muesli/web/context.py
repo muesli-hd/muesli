@@ -98,10 +98,10 @@ class LectureContext:
             return
 
         if request.has_permission('edit', self):
-            lecture_root = NavigationTree(self.lecture.name,
+            lecture_root = NavigationTree("Aktuelle Vorlesung",
                     request.route_url('lecture_edit', lecture_id=self.lecture.id))
         else:
-            lecture_root = NavigationTree(self.lecture.name,
+            lecture_root = NavigationTree("Aktuelle Vorlesung",
                     request.route_url('lecture_view', lecture_id=self.lecture.id))
         nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
         for node in nodes:
@@ -149,21 +149,22 @@ class TutorialContext:
             return
 
         if request.has_permission('edit', self):
-            lecture_root = NavigationTree(self.lecture.name,
+            lecture_root = NavigationTree("Aktuelle Vorlesung",
                     request.route_url('lecture_edit', lecture_id=self.lecture.id))
         else:
-            lecture_root = NavigationTree(self.lecture.name,
+            lecture_root = NavigationTree("Aktuelle Vorlesung",
                     request.route_url('lecture_view', lecture_id=self.lecture.id))
         nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
         for node in nodes:
             lecture_root.append(node)
 
         for tutorial in self.tutorials:
-            tutorial_root = NavigationTree("{} ({})".format(str(tutorial.time), tutorial.place), request.route_url('tutorial_view', tutorial_ids=tutorial.id))
-            nodes = get_tutorial_specific_nodes(request, self, tutorial.id)
+            tutorial_root = NavigationTree("Aktuelles Tutorial", request.route_url('tutorial_view', tutorial_ids=tutorial.id))
+            nodes = get_tutorial_specific_nodes(request, self, tutorial.id,
+                    self.lecture.id)
             for node in nodes:
                 tutorial_root.append(node)
-            lecture_root.append(tutorial_root)
+            request.navigationTree.prepend(tutorial_root)
 
         if lecture_root.children:
             request.navigationTree.prepend(lecture_root)
