@@ -164,7 +164,8 @@ class TutorialContext:
                     self.lecture.id)
             for node in nodes:
                 tutorial_root.append(node)
-            request.navigationTree.prepend(tutorial_root)
+            if tutorial_root.children:
+                request.navigationTree.prepend(tutorial_root)
 
         if lecture_root.children:
             request.navigationTree.prepend(lecture_root)
