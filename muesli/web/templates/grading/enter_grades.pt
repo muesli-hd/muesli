@@ -2,8 +2,6 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-
-
 <script>/* <![CDATA[ */
   function hide_help ()
   {

@@ -12,11 +12,5 @@ Vorlesung: <a tal:attributes="href request.route_path('lecture_edit', lecture_id
 <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
 
-<script>
-
-    console.log(document.getElementById("form").getAttribute("action"));
-    document.getElementById("form").getAttribute("action", "request.route_path('lecture_add_exam', lecture_id=lecture.id, category='assignment')");
-</script>
-
   </metal:main>
 </metal:main>
