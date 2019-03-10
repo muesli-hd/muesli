@@ -93,7 +93,14 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
       (<a tal:attributes="href request.route_path('lecture_remove_tutor', lecture_id=lecture.id, tutor_id=tutor.id)">entfernen</a>)</td>
   </tr>
 </table>
-<h3>Übungsaufgaben und Klausuren hinzufügen (Testate)</h3>
+<h3>
+    Übungsaufgaben und Klausuren hinzufügen (Testate)
+    <div class="tooltip_questionmark">
+        <p>
+            ${tooltips['statistics']}
+        </p>
+    </div>
+</h3>
 
 <p><a tal:attributes="href request.route_path('lecture_add_exam', lecture_id=lecture.id, category='assignment')">Übungszettel hinzufügen</a></p>
 <p><a tal:attributes="href request.route_path('lecture_add_exam', lecture_id=lecture.id, category='practical_assignment')">Praktische Übung hinzufügen</a></p>

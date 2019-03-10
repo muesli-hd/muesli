@@ -1,6 +1,7 @@
 lecture_edit_tooltips = {
     "grading": "Hier können Noten anhand von einer oder mehreren Klausuren/Testaten berechnet und eingetragen werden.",
-    "mail_tutor": "Klicken Sie auf den Namen eines Tutors, um ihm/ihr eine Email zu schicken."
+    "mail_tutor": "Klicken Sie auf den Namen eines Tutors, um ihm/ihr eine Email zu schicken.",
+    "statistics": "Klicken Sie auf 'Statistiken', um sich beispielsweise Histogramme anzeigen zu lassen."
 }
 
 start_tooltips = {
@@ -8,3 +9,4 @@ start_tooltips = {
     "email": "Klicken Sie auf den Namen eines Tutors, um ihm/ihr eine Email zu schicken.",
     "details": "Klicken Sie auf [Details], um Bewertungen von Übungsblättern und Klausuren zu einzusehen."
 }
+
