@@ -12,5 +12,4 @@ venv
 .idea
 .pytest_cache
 maintainance_scripts
-**/Session.vim
 **/header.txt
