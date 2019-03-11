@@ -570,6 +570,8 @@ def list_auth_keys(request):
 def removeKey(request):
     code_id = int(request.matchdict['key_id'])
     api_key = request.db.query(models.BearerToken).get(code_id)
+    if api_key is None:
+        raise HTTPBadRequest("API Key nicht gefunden")
     if api_key.user == request.user or request.user.is_admin:
         api_key.revoked = True
         request.db.add(api_key)

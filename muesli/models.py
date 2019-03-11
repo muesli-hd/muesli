@@ -687,16 +687,7 @@ class UserSchema(Schema):
         return usr
 
 
-class AssistantSchema(Schema):
-    id = fields.Integer(dump_only=True)
-    email = fields.Email()
-    first_name = fields.String()
-    last_name = fields.String()
-    matrikel = fields.String()
-    birth_date = fields.String()
-    birth_place = fields.String()
-    subject = fields.String()
-
+class AssistantSchema(UserSchema):
     @post_load()
     def get_user(self, data):
         usr = self.context['session'].query(User).filter(User.email == data["email"]).one()
