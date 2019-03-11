@@ -24,10 +24,12 @@ import requests
 
 from header import authenticate, STATIC_HEADERS, MUESLI_URL
 
+
 def get(endpoint, header):
     endpoint = MUESLI_URL + endpoint
     r = requests.get(endpoint, headers=header)
     print(r.json())
+
 
 def post(endpoint, header):
     endpoint = MUESLI_URL + endpoint
@@ -41,12 +43,23 @@ def post(endpoint, header):
     r = requests.post(endpoint, json=lecture, headers=header)
     print(r.json())
 
+
+def put(endpoint, header):
+    endpoint = MUESLI_URL + endpoint
+    import string
+    import random
+    teststring = ''.join(random.choice(string.ascii_uppercase) for _ in range(10))
+    lecture = {"term": 20181, "name": teststring, "lecturer": "Ich auch"}
+    r = requests.put(endpoint, json=lecture, headers=header)
+    print(r.json())
+
+
 def main():
     headers = authenticate('admin@muesli.org', 'adminpassword')
     # headers = authenticate('test@test.de', '1234')
     endpoint = "/api/v1/whoami"
-    endpoint = "/api/v1/lectures"
-    post(endpoint, headers)
+    endpoint = "/api/v1/lectures/20109"
+    put(endpoint, headers)
 
 
 if __name__ == "__main__":
