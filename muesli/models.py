@@ -722,10 +722,10 @@ class TutorialSchema(Schema):
     time = fields.Method("get_time", deserialize="load_time")
     max_students = fields.Integer(required=True)
     tutor = fields.Nested(
-        UserSchema, only=allowed_attributes.user())
+        UserSchema, only=allowed_attributes.user(), dump_only=True)
     comment = fields.String()
-    students = fields.Nested(UserSchema, many=True, only=allowed_attributes.user())
-    exams = fields.Nested(ExamSchema, many=True, only=["id", "name"])
+    students = fields.Nested(UserSchema, many=True, only=allowed_attributes.user(),dump_only=True)
+    exams = fields.Nested(ExamSchema, many=True, only=["id", "name"], dump_only=True)
     student_count = fields.Method("get_student_num")
 
     def get_time(self, obj):
