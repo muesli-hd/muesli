@@ -5,6 +5,11 @@ from selenium import webdriver
 
 def initiate_driver(user, key):
     """Initiate Chrome Webdriver with path to chromedriver and address localhost:8080
+
+    Args:
+        user: E-mail address of muesli user
+        key: Pasword of muesli user
+
     Returns:
         Chrome Webdriver with a logged in (admin) user for the muesli page
     """
