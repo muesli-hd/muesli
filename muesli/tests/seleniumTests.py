@@ -84,7 +84,7 @@ def export_test():
     grades.click()
 
     # Excel export
-    excel_export = driver.find_element_by_xpath("//a[@href='/grading/export/Pruefung%206692.xlsx']")
+    excel_export = driver.find_element_by_xpath("//a[@href='/grading/export/6692.xlsx']")
     excel_export.click()
 
     time.sleep(3)
