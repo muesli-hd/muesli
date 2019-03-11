@@ -265,13 +265,19 @@ class Edit:
         pref_count = sum([pref[0] for pref in pref_subjects])
         subjects = lecture.subjects()
         student_count = sum([subj[0] for subj in subjects])
+        # Query results are already lexicographically sorted.
+        # Sort again using length as key so we get length lexicographical sorting
+        # https://github.com/muesli-hd/muesli/issues/28
+        exams = dict([[cat['id'], sorted(list(lecture.exams.filter(models.Exam.category==cat['id'])),
+                              key=lambda x:len(x.name))]
+                      for cat in utils.categories])
         return {'lecture': lecture,
                 'names': names,
                 'pref_count': pref_count,
                 'subjects': subjects,
                 'student_count': student_count,
                 'categories': utils.categories,
-                'exams': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
+                'exams': exams,
                 'assistants': assistants,
                 'form': form}
 
@@ -599,8 +605,12 @@ def viewPoints(request):
         return HTTPForbidden()
     visible_exams = lecture.exams.filter((models.Exam.results_hidden==False)|(models.Exam.results_hidden==None))
     exams = visible_exams.all()
+    # Query results are already lexicographically sorted.
+    # Sort again using length as key so we get length lexicographical sorting
+    # https://github.com/muesli-hd/muesli/issues/28
     exams_by_category = [
-            {'id':cat['id'], 'name': cat['name'], 'exams': visible_exams.filter(models.Exam.category==cat['id']).all()} for cat in utils.categories]
+            {'id':cat['id'], 'name': cat['name'], 'exams': sorted(list(visible_exams.filter(models.Exam.category==cat['id']).all()),
+             key=lambda x:len(x.name))} for cat in utils.categories]
     exams_by_category = [cat for cat in exams_by_category if cat['exams']]
     results = {}
     for exam in exams:

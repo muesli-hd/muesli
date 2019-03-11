@@ -33,7 +33,7 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
 <h3>Testate</h3>
 
 <div tal:repeat="category categories" tal:omit-tag="">
-  <h4 tal:condition="exams[category['id']].count()!=0">${category['name']}</h4>
+  <h4 tal:condition="exams[category['id']]">${category['name']}</h4>
 
   <ul>
     <li tal:repeat="exam exams[category['id']]">
