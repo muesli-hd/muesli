@@ -25,7 +25,7 @@ This module provides tooling to authenticate ageinst the Muesli API v1
 """
 
 STATIC_HEADERS = {'Accept': 'application/json'}
-MUESLI_URL = "http://localhost:8080"
+MUESLI_URL = "http://127.0.0.1:8080"
 
 import json
 from os import path, stat
@@ -35,26 +35,21 @@ import requests
 def authenticate(username, password, save=False, url=MUESLI_URL) -> dict:
     """A function to authenticate as a user and get the valid headers for this
     user.
-
     Args:
         username: A string with the username to authenticate as.
         password: The password for the respective user.
-
         save:
             A bool that lets you decide whether you want to save the created
             header to a file. This is recommended if you plan to do many requests
             since the number of api tokens is limited.
-
     Returns:
         A dictionary with the needed headers for authorization towards the v1
         Muesli API.
-
         example: (<TOKEN> is the corresponding JWT token)
             {
                 'Authorization': 'Bearer <TOKEN>',
                 'Accept': 'application/json'
             }
-
     """
     header_name = username
     if path.isfile(header_name) and stat(header_name).st_size != 0:
@@ -67,7 +62,7 @@ def authenticate(username, password, save=False, url=MUESLI_URL) -> dict:
             data={"email": username, "password": password}
         )
         token = r.json().get("token", "")
-        print(r.json())
+        print(json.dumps(r.json()))
         header_content = {'Authorization': 'Bearer '+token}
         header_content.update(STATIC_HEADERS)
         if save:
