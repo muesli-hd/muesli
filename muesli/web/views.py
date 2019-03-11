@@ -228,7 +228,7 @@ def badRequest(e, request):
             {
                 'time': now, 'user': email,
                 'contact': request.config['contact']['email'],
-                'error': e.detail(),
+                'error': e.detail,
                 'route': request.path,
                 'code': e.code,
             },

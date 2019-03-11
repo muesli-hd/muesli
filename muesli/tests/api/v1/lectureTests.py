@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# muesli/tests/apiTests.py
+# muesli/tests/api/v1/lectureTests.py
 #
 # This file is part of MUESLI.
 #

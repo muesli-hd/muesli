@@ -24,6 +24,8 @@ from marshmallow.exceptions import ValidationError
 from sqlalchemy.orm import joinedload
 from cornice.resource import resource, view
 from sqlalchemy.orm.exc import NoResultFound
+from pyramid.httpexceptions import HTTPBadRequest
+from sqlalchemy.orm.exc import NoResultFound
 
 from muesli import models
 from muesli.web import context
@@ -83,11 +85,14 @@ class Tutorial:
               schema:
                 $ref: "#/definitions/Tutorial"
         """
-        tutorial = self.request.db.query(models.Tutorial).options(
-            joinedload(models.Tutorial.tutor),
-            joinedload(models.Tutorial.lecture)).filter(
-                models.Tutorial.id == self.request.matchdict['tutorial_id']
-            ).one()
+        try:
+            tutorial = self.request.db.query(models.Tutorial).options(
+                joinedload(models.Tutorial.tutor),
+                joinedload(models.Tutorial.lecture)).filter(
+                    models.Tutorial.id == self.request.matchdict['tutorial_id']
+                ).one()
+        except NoResultFound as e:
+            raise HTTPBadRequest("Ungueltige Tutorial ID!")
         exa = tutorial.lecture.exams.filter((models.Exam.results_hidden==False)|(models.Exam.results_hidden==None))
         if self.request.has_permission('viewAll'):
             tut_schema = models.TutorialSchema()

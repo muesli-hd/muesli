@@ -301,8 +301,8 @@ class TutorialEndpointContext:
                         (Allow, 'group:administrators', ALL_PERMISSIONS)]
         if tutorial_id is not None:
             tutorial = request.db.query(Tutorial).get(tutorial_id)
-            lecture = tutorial.lecture
             if tutorial is not None:
+                lecture = tutorial.lecture
                 self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('viewAll', 'edit'))] if request.user in lecture.assistants else []
                 if lecture.tutor_rights == editOwnTutorials:
                     self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('viewAll'))] if request.user == tutorial.tutor else []

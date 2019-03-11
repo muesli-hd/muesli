@@ -10,7 +10,7 @@ alembic upgrade head
 python3 -m smtpd -n -c DebuggingServer localhost:25 &
 echo "Starting the tests ..."
 # MUESLI_PATH=$(pwd) py.test --cov=muesli muesli/tests/*
-MUESLI_PATH=$(pwd) py.test --cov=muesli muesli/tests/api/v1/lectureTests.py
+MUESLI_PATH=$(pwd) py.test --cov=muesli muesli/tests/api/v1/*
 # codecov
 # pylint --disable=R,C0301,W1401 muesli.web.api
 exit
