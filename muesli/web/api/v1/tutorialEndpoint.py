@@ -47,6 +47,7 @@ class Tutorial:
         get:
           security:
             - Bearer: [read]
+            - Basic: [read]
           tags:
             - "v1"
           summary: "return all tutorials"
@@ -72,6 +73,7 @@ class Tutorial:
         get:
           security:
             - Bearer: [read]
+            - Basic: [read]
           tags:
             - "v1"
           summary: "return a specific tutorial"
@@ -112,6 +114,50 @@ class Tutorial:
 
     @view(permission='edit')
     def collection_post(self):
+        """
+        ---
+        post:
+          security:
+            - Bearer: [write]
+            - Basic: [write]
+          tags:
+            - "v1"
+          summary: "create a tutorial"
+          operationId: "tutorial_collection_post"
+          produces:
+            - "application/json"
+          consumes:
+            - "application/json"
+          parameters:
+          - in: "body"
+            name: "body"
+            description: ""
+            required: true
+            schema:
+              $ref: "#/definitions/Tutorial"
+          responses:
+            200:
+              description: successfull creation of a tutorial
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: ok
+                  created:
+                    $ref: "#/definitions/CollectionTutorial"
+            400:
+              description: HTTPBadRequest (Example uses A bad attribute)
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: error
+                  error:
+                    type: array
+                    example: [{'description': {'name': ['Missing data for required field.'], 'test123': ['Unknown field.']}, 'name': 'fail', 'location': 'body'}]
+        """
         schema = models.TutorialSchema()
         schema.context['session'] = self.request.db
         try:

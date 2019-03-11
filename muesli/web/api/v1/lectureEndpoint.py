@@ -45,11 +45,12 @@ class Lecture:
         get:
           security:
             - Bearer: [read]
+            - Basic: [read]
           tags:
             - "v1"
           summary: "return all lectures"
           description: ""
-          operationId: "lecture_get"
+          operationId: "lecture_collection_get"
           consumes:
             - "application/json"
           produces:
@@ -77,11 +78,12 @@ class Lecture:
         get:
           security:
             - Bearer: [read]
+            - Basic: [read]
           tags:
             - "v1"
           summary: "return a specific lecture"
           description: ""
-          operationId: "lecture_collection_get"
+          operationId: "lecture_get"
           produces:
             - "application/json"
           responses:
@@ -111,10 +113,10 @@ class Lecture:
         put:
           security:
             - Bearer: [write]
+            - Basic: [write]
           tags:
             - "v1"
           summary: "update a lecture object"
-          description: "test123"
           operationId: "lecture_put"
           produces:
             - "application/json"
@@ -176,10 +178,10 @@ class Lecture:
         post:
           security:
             - Bearer: [write]
+            - Basic: [write]
           tags:
             - "v1"
           summary: "create a lecture"
-          description: "test123"
           operationId: "lecture_collection_post"
           produces:
             - "application/json"

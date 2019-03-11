@@ -74,6 +74,8 @@ def api_spec(request):
     add_pyramid_paths(spec, 'collection_exercise', request=request)
     add_pyramid_paths(spec, 'exercise', request=request)
 
+    add_pyramid_paths(spec, 'exam', request=request)
+
     add_pyramid_paths(spec, 'openapi_spec', request=request)
 
     # Be careful how the schemes are defined:

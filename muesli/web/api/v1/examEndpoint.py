@@ -37,6 +37,27 @@ class Exam:
 
     @view(permission='view')
     def get(self):
+        """
+        ---
+        get:
+          security:
+            - Bearer: [read]
+            - Basic: [read]
+          tags:
+            - "v1"
+          summary: "return all lectures"
+          description: ""
+          operationId: "exam_get"
+          consumes:
+            - "application/json"
+          produces:
+            - "application/json"
+          responses:
+            200:
+              description: "response for 200 code"
+              schema:
+                $ref: "#/definitions/Exam"
+        """
         exam = self.request.context.exam
         exer_schema = models.ExerciseSchema(many=True)
         exam_schema = models.ExamSchema()

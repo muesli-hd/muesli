@@ -84,6 +84,7 @@ def collection_tutorial():
         'time',
         'student_count',
         'id',
+        'lecture_id'
     ]
     return attributes
 
@@ -97,6 +98,6 @@ def tutorial():
     """
     attributes = [
         'comment', 'place', 'tutor', 'max_students', 'time', 'student_count',
-        'id', 'time', 'exams'
+        'id', 'time', 'exams', 'lecture_id'
     ]
     return attributes

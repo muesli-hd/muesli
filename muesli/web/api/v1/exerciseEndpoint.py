@@ -42,6 +42,7 @@ class Exercise:
         get:
           security:
             - Bearer: [read]
+            - Basic: [read]
           tags:
             - "v1"
           summary: "return an exercise"
@@ -80,6 +81,7 @@ class Exercise:
         get:
           security:
             - Bearer: [read]
+            - Basic: [read]
           tags:
             - "v1"
           summary: "return an exercise for given student"
