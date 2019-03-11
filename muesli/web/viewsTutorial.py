@@ -295,6 +295,8 @@ def removeStudent(request):
 
 def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
     mail_preference = request.db.query(models.EmailPreferences).get((tutorial.tutor_id, tutorial.lecture.id))
+    if mail_preference is None:
+        mail_preference = models.EmailPreferences(tutorial.tutor_id, tutorial.lecture.id, True)
     if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'In Ihre Übungsgruppe zur Vorlesung %s am %s hat sich %s eingetragen'\
@@ -306,6 +308,8 @@ def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
     sendChangesMail(request, tutorial.tutor, text)
 def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
     mail_preference = request.db.query(models.EmailPreferences).get((tutorial.tutor_id, tutorial.lecture.id))
+    if mail_preference is None:
+        mail_preference = models.EmailPreferences(tutorial.tutor_id, tutorial.lecture.id, True)
     if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'Aus Ihrer Übungsgruppe zur Vorlesung %s am %s hat sich %s ausgetragen'\
@@ -331,7 +335,7 @@ def email_preference(request):
     form = TutorialEmailPreference(request)
     mail_preference = db.query(models.EmailPreferences).get((request.user.id, lecture.id))
     if mail_preference is None:
-        mail_preference =models.EmailPreferences(request.user.id, lecture.id, True)
+        mail_preference = models.EmailPreferences(request.user.id, lecture.id, True)
     form['receive_status_mails'] = mail_preference.receive_status_mails
     if request.method == 'POST' and form.processPostData(request.POST):
         if form['receive_status_mails'] == 1:
