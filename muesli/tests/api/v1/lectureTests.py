@@ -65,7 +65,8 @@ class AdminLoggedInTests(functionalTests.PopulatedTests):
         self.testapp.get(URL+'/lectures', headers=self.api_tokens["admin@muesli.org"], status=200)
 
     def test_lecture_get(self):
-        self.testapp.get(URL+'/lectures/20109', headers=self.api_tokens["admin@muesli.org"], status=200)
+        lecture_id = self.testapp.get(URL+'/lectures', headers=self.api_tokens["admin@muesli.org"]).json_body[0]["id"]
+        res = self.testapp.get(URL+'/lectures/'+str(lecture_id), headers=self.api_tokens["admin@muesli.org"], status=200)
 
     def test_lecture_post(self):
         pre_count = self.session.query(muesli.models.Lecture).count()
@@ -87,6 +88,3 @@ class AdminLoggedInTests(functionalTests.PopulatedTests):
 
     def test_collection_lecture_get(self):
         self.testapp.get(URL+'/lectures', headers=self.api_tokens["admin@muesli.org"], status=200)
-
-    def test_lecture_get(self):
-        self.testapp.get(URL+'/lectures/20110', STATIC_HEADERS, status=403)
