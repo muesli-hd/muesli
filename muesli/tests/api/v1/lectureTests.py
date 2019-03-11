@@ -56,9 +56,8 @@ class AssistantLoggedInTests(functionalTests.PopulatedTests):
         functionalTests.PopulatedTests.setUp(self)
         self.api_tokens = {
             user[0]: authenticate_testapp(
-                    self.testapp, user[0], user[1]
-                )
-            for user in TESTUSERS
+                self.testapp, user[0], user[1]
+            ) for user in TESTUSERS
         }
 
     def test_collection_lecture_get(self):
@@ -66,7 +65,7 @@ class AssistantLoggedInTests(functionalTests.PopulatedTests):
 
     def test_lecture_get(self):
         lecture_id = self.testapp.get(URL+'/lectures', headers=self.api_tokens["assistant@muesli.org"]).json_body[0]["id"]
-        res = self.testapp.get(URL+'/lectures/'+str(lecture_id), headers=self.api_tokens["assistant@muesli.org"], status=200)
+        self.testapp.get(URL+'/lectures/'+str(lecture_id), headers=self.api_tokens["assistant@muesli.org"], status=200)
 
     def test_lecture_post(self):
         pre_count = self.session.query(muesli.models.Lecture).count()
@@ -91,9 +90,8 @@ class AdminLoggedInTests(functionalTests.PopulatedTests):
         functionalTests.PopulatedTests.setUp(self)
         self.api_tokens = {
             user[0]: authenticate_testapp(
-                    self.testapp, user[0], user[1]
-                )
-            for user in TESTUSERS
+                self.testapp, user[0], user[1]
+            ) for user in TESTUSERS
         }
 
     def test_collection_lecture_get(self):
@@ -101,7 +99,7 @@ class AdminLoggedInTests(functionalTests.PopulatedTests):
 
     def test_lecture_get(self):
         lecture_id = self.testapp.get(URL+'/lectures', headers=self.api_tokens["admin@muesli.org"]).json_body[0]["id"]
-        res = self.testapp.get(URL+'/lectures/'+str(lecture_id), headers=self.api_tokens["admin@muesli.org"], status=200)
+        self.testapp.get(URL+'/lectures/'+str(lecture_id), headers=self.api_tokens["admin@muesli.org"], status=200)
 
     def test_lecture_post(self):
         pre_count = self.session.query(muesli.models.Lecture).count()

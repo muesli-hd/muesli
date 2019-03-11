@@ -21,14 +21,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from cornice.resource import resource, view
-from muesli import models
-from muesli.web import context
-from muesli.web.api.v1 import allowed_attributes
-
-from sqlalchemy.orm import exc, joinedload, undefer
+from sqlalchemy.orm import joinedload, undefer
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.expression import desc
 from marshmallow.exceptions import ValidationError
 
+
+from muesli import models
+from muesli.web import context
+from muesli.web.api.v1 import allowed_attributes
 
 @resource(collection_path='/lectures',
           path='/lectures/{lecture_id}',
@@ -65,7 +66,7 @@ class Lecture:
             self.db.query(models.Lecture)
             .order_by(desc(models.Lecture.term), models.Lecture.name)
             .options(joinedload(models.Lecture.assistants))
-            .filter(models.Lecture.is_visible == True)
+            .filter(models.Lecture.is_visible == True) # pylint: disable=C0121
             .all()
         )
         schema = models.LectureSchema(many=True, only=allowed_attributes.collection_lecture())
@@ -166,7 +167,7 @@ class Lecture:
                 setattr(lecture, k, v)
             try:
                 self.db.commit()
-            except exc.SQLAlchemyError:
+            except SQLAlchemyError:
                 self.db.rollback()
             else:
                 return {'result': 'ok', 'update': self.get()}

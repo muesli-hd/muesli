@@ -21,14 +21,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from cornice.resource import resource, view
+from sqlalchemy import and_
 
 from muesli import models
 from muesli.web import context
 
-from sqlalchemy import and_
 
-@resource(collection_path='/exercises/{exercise_id:(\d+)+\/?}',
-          path='/exercises/{exercise_id:\d+}/{user_id:(\d+)+\/?}',
+@resource(collection_path=r'/exercises/{exercise_id:(\d+)+\/?}',
+          path=r'/exercises/{exercise_id:\d+}/{user_id:(\d+)+\/?}',
           factory=context.ExerciseEndpointContext,
           permission='view')
 class Exercise:

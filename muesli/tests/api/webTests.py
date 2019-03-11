@@ -25,4 +25,4 @@ from muesli.tests import functionalTests
 
 class BaseTests(functionalTests.BaseTests):
     def test_api_explorer(self):
-        res = self.testapp.get('/api-explorer', status=200)
+        self.testapp.get('/api-explorer', status=200)

@@ -21,11 +21,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from marshmallow.exceptions import ValidationError
-from sqlalchemy.orm import joinedload
 from cornice.resource import resource, view
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import joinedload
 from pyramid.httpexceptions import HTTPBadRequest
-from sqlalchemy.orm.exc import NoResultFound
 
 from muesli import models
 from muesli.web import context
@@ -91,11 +90,11 @@ class Tutorial:
             tutorial = self.request.db.query(models.Tutorial).options(
                 joinedload(models.Tutorial.tutor),
                 joinedload(models.Tutorial.lecture)).filter(
-                    models.Tutorial.id == self.request.matchdict['tutorial_id']
+                    models.Tutorial.id == self.request.matchdict['tutorial_id'] # pylint: disable=C0121
                 ).one()
-        except NoResultFound as e:
+        except NoResultFound:
             raise HTTPBadRequest("Ungueltige Tutorial ID!")
-        exa = tutorial.lecture.exams.filter((models.Exam.results_hidden==False)|(models.Exam.results_hidden==None))
+        exa = tutorial.lecture.exams.filter((models.Exam.results_hidden == False)|(models.Exam.results_hidden == None)) # pylint: disable=C0121
         if self.request.has_permission('viewAll'):
             tut_schema = models.TutorialSchema()
         else:

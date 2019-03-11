@@ -20,14 +20,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import random
-import string
-
 from muesli.tests import functionalTests
 from muesli.tests.api.v1 import URL, TESTUSERS, STATIC_HEADERS
 from muesli.tests.api.v1.utilities import authenticate_testapp
 
-import muesli.models
 
 class BaseTests(functionalTests.BaseTests):
     def test_collection_tutorial_get(self):
@@ -51,9 +47,8 @@ class StudentLoggedInTests(functionalTests.PopulatedTests):
         functionalTests.PopulatedTests.setUp(self)
         self.api_tokens = {
             user[0]: authenticate_testapp(
-                    self.testapp, user[0], user[1]
-                )
-            for user in TESTUSERS
+                self.testapp, user[0], user[1]
+            ) for user in TESTUSERS
         }
         self.api_token = authenticate_testapp(self.testapp, "user@muesli.org", "userpassword")
 

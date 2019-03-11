@@ -21,7 +21,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from cornice.resource import resource, view
-from pyramid.httpexceptions import HTTPBadRequest
 
 from muesli import models
 from muesli.web import context
