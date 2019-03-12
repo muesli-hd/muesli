@@ -44,6 +44,7 @@ pytz==2018.3
 PyYAML==4.2b1
 repoze.lru==0.7
 requests==2.20.0
+selenium==3.141.0
 six==1.11.0
 SQLAlchemy==1.2.5
 translationstring==1.3

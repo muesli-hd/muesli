@@ -18,6 +18,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import base64
+
+import numpy
+from matplotlib import pyplot
 
 from muesli import models
 from muesli import utils
@@ -32,10 +36,13 @@ from pyramid.url import route_url
 from sqlalchemy.orm import exc
 from sqlalchemy.sql import func
 import sqlalchemy
+from matplotlib.ticker import MaxNLocator
+from collections import Counter
 
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from openpyxl.writer.excel import save_virtual_workbook
+from muesli.web.tooltips import grading_edit_tooltips
 
 import re
 import os
@@ -55,7 +62,7 @@ class Edit:
             self.request.db.commit()
             form.message = "Änderungen gespeichert."
         return {'grading': grading,
-                'form': form,
+                'form': form
                }
 
 @view_config(route_name='grading_associate_exam', context=GradingContext, permission='edit')
@@ -201,6 +208,66 @@ class EnterGradesBasic:
         self.request.javascript.append('jquery/jquery.fancybox.min.js')
         #grades = {key: value for key,value in grades.items()}
 
+        #create the diagram using pyplot
+
+        #get a list of calculated grades
+        #if no grade is calculated yet then grades[student_id]['calc'] contains an empty string and would cause an exception when converted to a float
+        grades_list = [float(grades[student_id]['calc']) for student_id in grades.keys() if not grades[student_id]['calc'] == '']
+
+        if len(grades_list) > 0:
+
+            #count occurences of grades and save it in a list as tuple (grade, count)
+            tuple_list = list(Counter(grades_list).items())
+
+            #sort the list by grades
+            tuple_list = sorted(tuple_list, key=lambda x: x[0])
+
+            labels = [x[0] for x in tuple_list]
+            values = [x[1] for x in tuple_list]
+
+            indexes = numpy.arange(len(labels))
+            width = 1
+
+            pyplot.rcParams.update({'font.size': 20})
+
+            fig = pyplot.figure(figsize=(12, 9))
+
+            ax = fig.add_subplot(111)
+
+            pyplot.sca(ax)
+            pyplot.bar(indexes, values, width, edgecolor='black', color='red')
+            pyplot.xticks(indexes + width - 1, labels)
+            pyplot.xlabel('Note')
+            pyplot.ylabel('Anzahl')
+
+            yint = range(min(values), math.ceil(max(values)) + 1, math.ceil(max(values)/10))
+            pyplot.yticks(yint)
+
+            output = io.BytesIO()
+            fig.savefig(output, format='png', dpi=50, bbox_inches='tight')
+            pyplot.close(fig)
+            #encode image as base64 so it can be displayed using html
+            encoded_diagram = base64.b64encode(output.getvalue())
+            output.close()
+
+            percentage_message = []
+
+            grades_count = len(grades_list)
+            percentage_list = []
+            for x in range(1, 5):
+                percentage_list.append(100*sum(grade <= x for grade in grades_list)/grades_count)
+
+            percentage_message.append(str(percentage_list[0]) + '% haben die Note 1.0\n')
+            percentage_message.append(str(percentage_list[1]) + '% haben die Note 2.0 oder besser\n')
+            percentage_message.append(str(percentage_list[2]) + '% haben die Note 3.0 oder besser\n')
+            percentage_message.append(str(percentage_list[3]) + '% haben die Note 4.0 oder besser\n')
+            percentage_message.append(str(100-percentage_list[3]) + '% haben die Note 5.0\n')
+
+        else:
+            #empty png image encoded in base64
+            encoded_diagram = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='
+            percentage_message = ''
+
         return {'grading': grading,
                 'error_msg': '\n'.join(error_msgs),
                 'formula': formula,
@@ -209,7 +276,10 @@ class EnterGradesBasic:
                 'grades': grades,
                 'examvars': examvars,
                 'varsForExam': varsForExam,
-                'lecture_students': lecture_students}
+                'lecture_students': lecture_students,
+                'img': encoded_diagram,
+                'percentage_message': percentage_message,
+                'tooltips': grading_edit_tooltips}
 
 @view_config(route_name='grading_enter_grades', renderer='muesli.web:templates/grading/enter_grades.pt', context=GradingContext, permission='edit')
 class EnterGrades(EnterGradesBasic):
@@ -238,6 +308,7 @@ class ExcelView:
         self.request = request
         self.w = Workbook()
     def createResponse(self):
+        #Receive excel file in xlsx format
         response = Response(content_type='application/vnd.ms-excel')
         response.body = save_virtual_workbook(self.w)
         return response
@@ -249,9 +320,12 @@ class Export(ExcelView):
         lecture = grading.lecture
         w = self.w
 
-        # sheet Pruefung
+        #Get grades by going through database
+        grades = grading.student_grades.options(sqlalchemy.orm.joinedload(models.StudentGrade.student)).all()
+
+        #Add sheet Pruefung ID as first excel page containing Semester, Datum, PrüferID etc.
         worksheet_exams = w.active
-        worksheet_exams.title = 'Pruefung'
+        worksheet_exams.title = 'Pruefung' + str(grading.id)
         date_style = 'dd.mm.yyyy'
         header = ['Tabellenname', 'Veranstaltungsnummer', 'Titel', 'Semester', 'Termin', 'Datum', 'PrueferId', 'Pruefername']
         worksheet_exams.append(header)
@@ -277,32 +351,12 @@ class Export(ExcelView):
             max_length = max(len(str(cell.value)) for cell in column_cells)
             worksheet_exams.column_dimensions[column_cells[0].column].width = max_length*1.2
 
-        # sheet Pruefungsteilnehmer
-        worksheet_grades = self.w.create_sheet('Pruefungsteilnehmer')
-        header = ['mtknr', 'name', 'stg', 'stg_txt', 'accnr', 'pnr', 'pnote', 'pstatus', 'ppunkte', 'pbonus']
-        worksheet_grades.append(header)
-        worksheet_grades.row_dimensions[1].font = Font(bold=True)
-        grades = grading.student_grades.options(sqlalchemy.orm.joinedload(models.StudentGrade.student)).all()
-        for i, grade in enumerate(grades, 1):
-            if grade.grade is not None:
-                g = float(grade.grade*100)
-            else:
-                g = ''
-            data = [grade.student.matrikel,
-                    grade.student.last_name, '',
-                    grade.student.formatCompleteSubject(), '', '', g, '']
-            for j, d in enumerate(data, 1):
-                worksheet_grades.cell(row=1+i, column=j, value=d)
-        # set column width
-        for column_cells in worksheet_grades.columns:
-            max_length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet_grades.column_dimensions[column_cells[0].column].width = max_length*1.2
-
-        # sheet Daten
+        #Second excel page Student Daten sheet, containing things like Names, Age, Course of studies
         worksheet_data = self.w.create_sheet('Daten')
-        header = ['Matrikel', 'Nachname', 'Vorname', 'Geburtsort', 'Geburtsdatum', 'Note', 'Vortragstitel', 'Studiengang']
+        header = ['Matrikelnummer', 'Nachname', 'Vorname', 'Geburtsort', 'Geburtsdatum', 'Note', 'Vortragstitel', 'Studiengang']
         worksheet_data.append(header)
         worksheet_data.row_dimensions[1].font = Font(bold=True)
+        #Iterate over all students and extract data
         for i, grade in enumerate(grades, 1):
             m = date_p.match(grade.student.birth_date or '')
             date = datetime.datetime(year=int(m.group(3)), month=int(m.group(2)), day=int(m.group(1))) if m else ''
@@ -323,4 +377,24 @@ class Export(ExcelView):
         for column_cells in worksheet_data.columns:
             max_length = max(len(str(cell.value)) for cell in column_cells)
             worksheet_data.column_dimensions[column_cells[0].column].width = max_length*1.2
+
+        #Third sheet Pruefungsteilnehmer containing matrikel, grade etc. for hispos
+        worksheet_grades = self.w.create_sheet('Pruefungsteilnehmer')
+        header = ['mtknr', 'name', 'stg', 'stg_txt', 'accnr', 'pnr', 'pnote', 'pstatus', 'ppunkte', 'pbonus']
+        worksheet_grades.append(header)
+        worksheet_grades.row_dimensions[1].font = Font(bold=True)
+        for i, grade in enumerate(grades, 1):
+            if grade.grade is not None:
+                g = float(grade.grade*100)
+            else:
+                g = ''
+            data = [grade.student.matrikel,
+                    grade.student.last_name, '',
+                    grade.student.formatCompleteSubject(), '', '', g, '']
+            for j, d in enumerate(data, 1):
+                worksheet_grades.cell(row=1+i, column=j, value=d)
+        # set column width
+        for column_cells in worksheet_grades.columns:
+            max_length = max(len(str(cell.value)) for cell in column_cells)
+            worksheet_grades.column_dimensions[column_cells[0].column].width = max_length*1.2
         return self.createResponse()

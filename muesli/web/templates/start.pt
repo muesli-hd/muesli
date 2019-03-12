@@ -18,6 +18,7 @@
     um diese Erinnerung für den Rest des Semesters nicht mehr zu sehen.
 </div>
 
+
 <h2>Übersicht Ihrer Veranstaltungen in diesem Semester</h2>
 
 <div tal:omit-tag="" tal:condition="tutorials_as_tutor">

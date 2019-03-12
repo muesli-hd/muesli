@@ -73,7 +73,7 @@ class GeneralContext:
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]+[(Allow, 'user:{0}'.format(a.id), 'create_lecture') for a in request.db.query(User).filter(User.is_assistant==1).all()]
 
-class GradingContext:
+class GradingContext(object):
     def __init__(self, request):
         grading_id = request.matchdict['grading_id']
         self.grading = request.db.query(Grading).get(grading_id)
@@ -82,7 +82,6 @@ class GradingContext:
         self.__acl__ = [
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in self.grading.lecture.assistants]
-
 
 class LectureContext:
     def __init__(self, request):
@@ -113,7 +112,20 @@ class LectureContext:
         if lecture_root.children:
             request.navigationTree.prepend(lecture_root)
 
-class TutorialContext:
+class AddExamContext(object):
+    def __init__(self, request):
+        lecture_id = request.matchdict['lecture_id']
+        self.lecture = request.db.query(Lecture).get(lecture_id)
+        self.category = request.matchdict['category']
+        if self.lecture is None:
+            raise HTTPNotFound(detail='Lecture not found')
+        self.__acl__ = [
+                (Allow, Authenticated, ('view', 'view_own_points', 'add_tutor')),
+                (Allow, 'group:administrators', ALL_PERMISSIONS),
+                ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit','change_assistant', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for assistant in self.lecture.assistants
+                ]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for tutor in self.lecture.tutors]
+
+class TutorialContext(object):
     def __init__(self, request):
         self.tutorial_ids_str = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', ''))
         self.tutorials, self.tutorial_ids = getTutorials(request)
@@ -253,7 +265,7 @@ class ExerciseContext:
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('statistics')) for assistant in self.exam.lecture.assistants
                 ]
 
-class CorrelationContext:
+class CorrelationContext(object):
     def __init__(self, request):
         source1 = request.GET['source1']
         source2 = request.GET['source2']

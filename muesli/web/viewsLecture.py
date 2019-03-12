@@ -89,8 +89,8 @@ class View:
                 'times': times,
                 'prefs': utils.preferences}
 
-@view_config(route_name='lecture_add_exam', renderer='muesli.web:templates/lecture/add_exam.pt', context=LectureContext, permission='edit')
-class AddExam:
+@view_config(route_name='lecture_add_exam', renderer='muesli.web:templates/lecture/add_exam.pt', context=AddExamContext, permission='edit')
+class AddExam(object):
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -129,7 +129,7 @@ def addTutor(request):
     return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))
 
 @view_config(route_name='lecture_add_grading', renderer='muesli.web:templates/lecture/add_grading.pt', context=LectureContext, permission='edit')
-class AddGrading:
+class AddGrading(object):
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -149,7 +149,7 @@ class AddGrading:
                }
 
 @view_config(route_name='lecture_add_student', renderer='muesli.web:templates/lecture/add_student.pt', context=LectureContext, permission='edit')
-class AddStudent:
+class AddStudent(object):
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -193,62 +193,9 @@ class AddStudent:
                 'tutorials': tutorials
                 }
 
-def sendMailAfterSwitch(request, student1, student2, lecture):
-    message = Message(subject='MÜSLI: Sie haben ihre Übungsgruppe getauscht',
-            sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])),
-            to=[student1.email],
-            body='Hallo %s!\n\nSie haben erfolgreich das Tutorium mit Ihrem Kommilitonen %s in der Vorlesung %s getauscht.'
-                 '\nWenn dies nicht nach Ihrem Wunsch geschehen ist, bitte wenden Sie sich an Ihren Tutor oder Dozenten.'
-                 '\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % (student1.name, student2.name, lecture.name))
-    muesli.mail.sendMail(message)
-
-@view_config(route_name='lecture_switch_students', renderer='muesli.web:templates/lecture/switch_students.pt', context=LectureContext, permission='edit')
-class SwitchStudents(object):
-    def __init__(self, request):
-        self.request = request
-        self.db = self.request.db
-        self.lecture_id = request.matchdict['lecture_id']
-        request.javascript.append('jquery/jquery.min.js')
-        request.javascript.append('jquery/select2.min.js')
-
-    def __call__(self):
-        lecture = self.db.query(models.Lecture).get(self.lecture_id)
-        tutorials = lecture.tutorials
-        students = lecture.students.all()
-        if self.request.method == 'POST':
-            student1_id = int(self.request.POST['student1'])
-            student2_id = int(self.request.POST['student2'])
-            student1 = self.db.query(models.User).filter(models.User.id==student1_id).one()
-            student2 = self.db.query(models.User).filter(models.User.id == student2_id).one()
-
-            ls1 = self.request.db.query(models.LectureStudent).get((lecture.id, student1.id))
-            ls2 = self.request.db.query(models.LectureStudent).get((lecture.id, student2.id))
-
-            if student1_id == student2_id:
-                self.request.session.flash('Student kann nicht mit sich selbst getauscht werden!', queue='errors')
-            elif ls1.tutorial==ls2.tutorial:
-                self.request.session.flash('Die beiden Studenten sind im gleichen Tutorium!', queue='errors')
-            else:
-                tmp = ls1.tutorial
-                ls1.tutorial = ls2.tutorial
-                ls2.tutorial = tmp
-                self.request.db.commit()
-                sendMailAfterSwitch(self.request, student1, student2, lecture)
-                sendMailAfterSwitch(self.request, student2, student1, lecture)
-                muesli.web.viewsTutorial.sendChangesMailSubscribe(self.request, ls1.tutorial, student1, ls2.tutorial)
-                muesli.web.viewsTutorial.sendChangesMailSubscribe(self.request, ls2.tutorial, student2, ls1.tutorial)
-                muesli.web.viewsTutorial.sendChangesMailUnsubscribe(self.request, ls1.tutorial, student2, ls2.tutorial)
-                muesli.web.viewsTutorial.sendChangesMailUnsubscribe(self.request, ls2.tutorial, student1, ls1.tutorial)
-                self.request.session.flash('Sie haben die Tutorien von {} und {} vertauscht'.format(student1.name(),student2.name()), queue='messages')
-
-        return {'lecture': lecture,
-                'tutorials': tutorials,
-                'students': students
-                }
-
 
 @view_config(route_name='lecture_edit', renderer='muesli.web:templates/lecture/edit.pt', context=LectureContext, permission='edit')
-class Edit:
+class Edit(object):
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -328,7 +275,7 @@ def change_assistants(request):
     return HTTPFound(location=request.route_url('lecture_edit', lecture_id = lecture.id))
 
 @view_config(route_name='lecture_preferences', renderer='muesli.web:templates/lecture/preferences.pt', context=LectureContext, permission='edit')
-class Preferences:
+class Preferences(object):
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -380,7 +327,7 @@ class PrefHistogram(MatplotlibView):
         return self.createResponse()
 
 @view_config(route_name='lecture_add', renderer='muesli.web:templates/lecture/add.pt', context=GeneralContext, permission='create_lecture')
-class Add:
+class Add(object):
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -397,7 +344,7 @@ class Add:
         return {'form': form}
 
 @view_config(route_name='lecture_remove_tutor', context=LectureContext, permission='edit')
-class RemoveTutor:
+class RemoveTutor(object):
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -419,7 +366,7 @@ class RemoveTutor:
         return HTTPFound(location=self.request.route_url('lecture_edit', lecture_id=lecture.id))
 
 @view_config(route_name='lecture_export_students_html', renderer='muesli.web:templates/lecture/export_students_html.pt', context=LectureContext, permission='edit')
-class ExportStudentsHtml:
+class ExportStudentsHtml(object):
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -694,7 +641,7 @@ def exportYaml_details(request):
     return response
 
 
-class ExcelExport:
+class ExcelExport(object):
     def __init__(self, request):
         self.request = request
         self.w = Workbook()
