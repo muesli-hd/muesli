@@ -6,11 +6,25 @@ from selenium.webdriver.common.by import By
 
 
 def explicit_wait_visibility(driver, element):
+    """
+    | Waits for the visibility of the given element until the element is visible or the time limit is reached
+
+    :param selenium driver: Webdriver instance for Selenium
+    :param str element: String for the XPATH of the element
+    :return: webdriver element
+    """
     x = WebDriverWait(driver, 10).until(ec.visibility_of_element_located((By.XPATH, element)))
     return x
 
 
 def explicit_wait_clickable(driver, element):
+    """
+    | Waits for the element to be clickable until the element is clickable or the time limit is reached
+
+    :param selenium driver: Webdriver instance for Selenium
+    :param str element: String for the XPATH of the element
+    :return: webdriver element
+    """
     x = WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.XPATH, element)))
     return x
 
