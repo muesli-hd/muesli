@@ -45,12 +45,7 @@ class BaseTests(functionalTests.BaseTests):
 class StudentLoggedInTests(functionalTests.PopulatedTests):
     def setUp(self):
         functionalTests.PopulatedTests.setUp(self)
-        self.api_tokens = {
-            user[0]: authenticate_testapp(
-                self.testapp, user[0], user[1]
-            ) for user in TESTUSERS
-        }
-        self.api_token = authenticate_testapp(self.testapp, "user@muesli.org", "userpassword")
+        self.api_token = authenticate_testapp(self.testapp, TESTUSERS["user@muesli.org"])
 
     def test_collection_tutorials_get(self):
         self.testapp.get(URL+'/tutorials', headers=self.api_token, status=200)

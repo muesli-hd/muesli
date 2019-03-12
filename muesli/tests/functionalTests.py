@@ -69,11 +69,16 @@ class BaseTests(unittest.TestCase):
         from webtest import TestApp
         self.testapp = TestApp(self.app)
         self.session = muesli.models.Session()
+
+        # TODO: This makes it incredibly hard to setup new testcases.
+        # Since you cant just modify the sql image but have to change the
+        # values in the PopulatedTests.populate() function -.-
+
         for table in reversed(muesli.models.Base.metadata.sorted_tables):
             self.session.execute(table.delete())
+        self.populate()
         self.session.commit()
 
-        self.populate()
 
     def tearDown(self):
         self.session.close()

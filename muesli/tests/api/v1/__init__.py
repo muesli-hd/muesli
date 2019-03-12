@@ -23,14 +23,15 @@
 STATIC_HEADERS = {'Accept': 'application/json'}
 URL = "/api/v1"
 
-TESTUSERS = [
-    ('admin@muesli.org', 'adminpassword'),
-    ('user@muesli.org', 'userpassword'),
-    ('user2@muesli.org', 'user2password'),
-    ('user_without_lecture@muesli.org', 'user_without_lecturepassword'),
-    ('unicodeuser@muesli.org', 'üüü'),
-    ('tutor@muesli.org', 'tutorpassword'),
-    ('tutor2@muesli.org', 'tutor2password'),
-    ('assistant@muesli.org', 'assistantpassword'),
-    ('assistant2@muesli.org', 'assistant2password'),
-]
+TESTUSERS = {
+    'user@muesli.org': ('user@muesli.org', 'userpassword'),
+    'admin@muesli.org': ('admin@muesli.org', 'adminpassword'),
+    'user2@muesli.org': ('user2@muesli.org', 'user2password'),
+    'tutor@muesli.org': ('tutor@muesli.org', 'tutorpassword'),
+    'unicodeuser@muesli.org': ('unicodeuser@muesli.org', 'üüü'),
+    'tutor2@muesli.org': ('tutor2@muesli.org', 'tutor2password'),
+    'assistant@muesli.org': ('assistant@muesli.org', 'assistantpassword'),
+    'assistant2@muesli.org': ('assistant2@muesli.org', 'assistant2password'),
+    'user_with_exercise@muesli.org': ('user_with_exercise@muesli.org', 'user_with_exercisepassword'),
+    'user_without_lecture@muesli.org': ('user_without_lecture@muesli.org', 'user_without_lecturepassword'),
+}

@@ -22,13 +22,14 @@
 from muesli.tests.api.v1 import URL, STATIC_HEADERS
 
 
-def authenticate_testapp(testapp, username, password) -> dict:
+def authenticate_testapp(testapp, username_password) -> dict:
     """A function to authenticate as a user and get the valid headers for this
     user.
 
     Args:
-        username: A string with the username to authenticate as.
-        password: The password for the respective user.
+        username_password: A tuple containing (username, password)
+            username: A string with the username to authenticate as.
+            password: The password for the respective user.
 
     Returns:
         A dictionary with the needed headers for authorization towards the v1
@@ -41,7 +42,7 @@ def authenticate_testapp(testapp, username, password) -> dict:
             }
 
     """
-
+    username, password = username_password
     response = testapp.post(
         URL+'/login',
         {"email": username, "password": password},
