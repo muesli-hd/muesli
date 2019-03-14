@@ -20,6 +20,10 @@ For database-upgrade, the following packages is needed in addition:
 
     alembic
 
+Contributing
+============
+Read more about contributing to this project in the [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+
 General Information:
 ====================
 
@@ -77,6 +81,9 @@ then you can run the tests from the Müsli directory via
 
     pytest
 
+Alternatively you can run them in a docker container:
+
+    cd docker_run_tests && docker-compose up --build --abort-on-exit
 
 
 Productive:
