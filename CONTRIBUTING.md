@@ -1,9 +1,4 @@
 # Workflow
-Vorschläge zum GitHub Workflow: (wir sollen ja auch ein wenig SoftwareEngineering verwenden :wink: )
-Die bereits definierten Userstories werden als Milestone realisiert, der dann die jeweils zugehörigen Issues bündelt und so in Logische einheiten gliedert.
-Die Gruppenzugehörigkeit eines Issues wird über Labels markiert, ansonsten Labels wie  gehabt.
-Pro in sich abgeschlossene Feature wird ein Featurebranch erstellt, der dann nach erfolgreicher Implementation gegen das "echte" Müsli gemerged wird.
-Passt das? :smiley:
 * Set up your system as described in the [`README.md`](./README.md).
 * if you plan on contributing to muesli fork the repository and clone it:
 ```bash
@@ -105,4 +100,11 @@ The navigation\_tee is a tree-structure saved in the request object used for the
 navigation the the right site. When editing this tree make sure not to create
 any cycles, since these will crash the template-engine.
 
-Happy Hacking and Godspeed!
+### The API
+#### How it works
+#### Expanding the API
+#### Contact
+Just tag @TheEbolaDoc or @Philipp-g in an issue or PR.
+
+
+## Happy Hacking and Godspeed!
