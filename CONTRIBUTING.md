@@ -79,7 +79,14 @@ Remember to add tests for all new pages!
 For each class or function belonging to a page you need a decorator like this
 one:
 
-`@view_config(route_name='admin', renderer='muesli.web:templates/admin.pt', context=GeneralContext, permission='admin')`
+```python
+@view_config(
+    route_name='admin',
+    renderer='muesli.web:templates/admin.pt',
+    context=GeneralContext,
+    permission='admin'
+)
+```
 
 You set a name matching the name given in `__init__.py`, the renderer is used
 to set the corresponding template file. The context is important to control the
@@ -101,8 +108,21 @@ navigation the the right site. When editing this tree make sure not to create
 any cycles, since these will crash the template-engine.
 
 ### The API
+
 #### How it works
+For every endpoint in the API there is its on file under `./muesli/web/api/v1/`.
+
 #### Expanding the API
+If you want to add another endpoint, have a look at the code in
+[`./muesli/web/api/v1/helloEndpoint.py`](./muesli/web/api/v1/helloEndpoint.py)
+as it is a very simple enpoint to experiment with it. 
+Add a method for `POST` oder something else to get familiar on how things work.
+It can also make sense to change the following value in `./muesli.yml.example` 
+since it provides some toolint to analyze the framework.
+```yaml
+production: True
+```
+
 #### Contact
 Just tag @TheEbolaDoc or @Philipp-g in an issue or PR.
 
