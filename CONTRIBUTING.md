@@ -17,7 +17,7 @@ $ git push --set-upstream origin <your_very_special_branchname>
 # General Information about the Project
 
 ## Used programs & frameworks
-Muesli uses the thie following frameworks and programs:
+Muesli uses the the following frameworks and programs:
 
 | Program                                                               | Used for                                       |
 |-----------------------------------------------------------------------|------------------------------------------------|
@@ -43,7 +43,7 @@ Muesli uses the thie following frameworks and programs:
 | muesli/web/static                      | contains JS and CSS                                               |
 | muesli/web/templates                   | contains the templates which define the appearance of the Website |
 | muesli/web/templates/Fragments/main.pt | Is the main template used for elements to appear on all pages     |
-| muesli/web/\_\_init\_\_.py             | Here Requests are prepared and routs defined                      |
+| muesli/web/\_\_init\_\_.py             | Here Requests are prepared and routes defined                      |
 | muesli/web/navigation\_tree.py         | Definition and creation of the navigation tree                    |
 | muesli/web/views\*.py                  | Contains the code to fill in the templates                        |
 | muesli/web/api/\*                      | Contains the module which serves the API                          |
@@ -115,8 +115,8 @@ For every endpoint in the API there is its on file under `./muesli/web/api/v1/`.
 #### Expanding the API
 If you want to add another endpoint, have a look at the code in
 [`./muesli/web/api/v1/helloEndpoint.py`](./muesli/web/api/v1/helloEndpoint.py)
-as it is a very simple enpoint to experiment with it. 
-Add a method for `POST` oder something else to get familiar on how things work.
+as it is a very simple endpoint to experiment with it. 
+Add a method for `POST` or something else to get familiar with how things work.
 It can also make sense to change the following value in `./muesli.yml.example` 
 since it provides some toolint to analyze the framework.
 ```yaml
