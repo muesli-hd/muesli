@@ -1,6 +1,6 @@
 # Workflow
 * Set up your system as described in the [`README.md`](./README.md).
-* if you plan on contributing to muesli fork the repository and clone it:
+* if you plan on contributing to muesli, fork the repository and clone it:
 ```bash
 $ git clone git@github.com:<your_username>/muesli.git
 ```
@@ -110,7 +110,7 @@ any cycles, since these will crash the template-engine.
 ### The API
 
 #### How it works
-For every endpoint in the API there is its on file under `./muesli/web/api/v1/`.
+For every API endpoint there is a file in `./muesli/web/api/v1/`.
 
 #### Expanding the API
 If you want to add another endpoint, have a look at the code in
