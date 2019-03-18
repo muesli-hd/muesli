@@ -1,4 +1,5 @@
 # Workflow
+
 * Set up your system as described in the [`README.md`](./README.md).
 * if you plan on contributing to muesli, fork the repository and clone it:
 ```bash
@@ -13,6 +14,7 @@ $ git checkout -b <your_very_special_branchname>
 $ git push --set-upstream origin <your_very_special_branchname>
 ```
 * create a pull request: [https://github.com/muesli-hd/muesli/new/pull](https://github.com/muesli-hd/muesli/new/pull)
+* try to use the correct styling / formatting for your code ([Google Stylguidelines](https://github.com/google/styleguide/blob/gh-pages/pyguide.md)([Summary](https://github.com/TheEbolaDoc/google_python_styleguidelines/blob/master/README.md)))
 
 # General Information about the Project
 
@@ -43,14 +45,14 @@ Muesli uses the the following frameworks and programs:
 | muesli/web/static                      | contains JS and CSS                                               |
 | muesli/web/templates                   | contains the templates which define the appearance of the Website |
 | muesli/web/templates/Fragments/main.pt | Is the main template used for elements to appear on all pages     |
-| muesli/web/\_\_init\_\_.py             | Here Requests are prepared and routes defined                      |
+| muesli/web/\_\_init\_\_.py             | Here Requests are prepared and routes defined                     |
 | muesli/web/navigation\_tree.py         | Definition and creation of the navigation tree                    |
 | muesli/web/views\*.py                  | Contains the code to fill in the templates                        |
 | muesli/web/api/\*                      | Contains the module which serves the API                          |
 
 ### Tests
 At the moment tests are minimal, most pages of this site are only tested for
-access-rights.
+access-rights. Contributions is therefore very much welcome.
 
 ### Database changes
 If you want to change the database use follow the instruction for `alembic`. Make
@@ -61,7 +63,7 @@ $ alemic upgrade head
 ```
 To create new revisions use:
 ```bash
-$ alembic revision -m "Add a column"
+$ alembic revision -m "Added a column"
 ```
 
 ### Static web-content
@@ -111,20 +113,39 @@ any cycles, since these will crash the template-engine.
 
 #### How it works
 For every API endpoint there is a file in `./muesli/web/api/v1/`.
+This file contains a class which represents the resource and behavior for the API.
+To ensure the class recognized by `cornice` it has the following decorator:
+
+```python
+@resource(collection_path='/lectures',
+          path='/lectures/{lecture_id}',
+          factory=context.LectureEndpointContext)
+class Lecture:
+    def __init__(self, request, context=None):
+    [...]
+```
+
+The classes are then added to the pyramid views in `./muesli/web/__init__.py`:
+```python
+def main(global_config=None, testmode=False, **settings):
+    [...]
+    config.include('cornice')
+    [...]
+```
 
 #### Expanding the API
 If you want to add another endpoint, have a look at the code in
 [`./muesli/web/api/v1/helloEndpoint.py`](./muesli/web/api/v1/helloEndpoint.py)
-as it is a very simple endpoint to experiment with it. 
+as it is a very simple endpoint to experiment with it.
 Add a method for `POST` or something else to get familiar with how things work.
 It can also make sense to change the following value in `./muesli.yml.example` 
-since it provides some toolint to analyze the framework.
+since it provides some tooling to analyze the framework.
 ```yaml
 production: True
 ```
 
-#### Contact
-Just tag @TheEbolaDoc or @Philipp-g in an issue or PR.
+#### Contact (for API related stuff)
+Just tag [@TheEbolaDoc](https://github.com/TheEbolaDoc) or [`@Philipp-g`](https://github.com/Philipp-g) in your corresponding issue or PR. :smile:
 
 
-## Happy Hacking and Godspeed!
+### --> Happy Hacking and Godspeed! <--
