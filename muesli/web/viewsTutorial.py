@@ -52,13 +52,19 @@ class View:
         students = [ls.student for ls in lecture_students] #self.db.query(models.User).filter(filterClause)
         tutorial = tutorials[0]
         other_tutorials = tutorial.lecture.tutorials
+        # Query results are already lexicographically sorted.
+        # Sort again using length as key so we get length lexicographical sorting
+        # https://github.com/muesli-hd/muesli/issues/28
+        exams = dict([[cat['id'], sorted(list(tutorial.lecture.exams.filter(models.Exam.category==cat['id'])),
+                                         key=lambda x: len(x.name))]
+                      for cat in utils.categories])
         return {'tutorial': tutorial,
                 'tutorials': tutorials,
                 'tutorial_ids': self.tutorial_ids,
                 'other_tutorials': other_tutorials,
                 'students': students,
                 'categories': utils.categories,
-                'exams': dict([[cat['id'], tutorial.lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
+                'exams': exams,
                 'names': self.request.config['lecture_types'][tutorial.lecture.type],
                 'old_tutorial_id': None  #see move_student
                 }
