@@ -47,7 +47,7 @@ class UserLoggedInTests(functionalTests.PopulatedTests):
 
     def test_key_generation(self):
         res = self.testapp.get('/user/api_keys', status=200)
-        tokens = self.session.query(BearerToken).filter_by(user_id=self.user.id).filter(BearerToken.revoked == False)
+        tokens = self.session.query(BearerToken).filter_by(user_id=self.user.id).filter(BearerToken.revoked == False)  # pylint: disable=E0712,C0121
         tokens_pre = len(tokens.all())
         teststring = ''.join(random.choice(string.ascii_uppercase) for _ in range(10))
         form = res.form
@@ -59,7 +59,7 @@ class UserLoggedInTests(functionalTests.PopulatedTests):
         # Assumes token_id's < 1000
         token_id = int(res_post_submit.text[start: start+3])
         self.assertTrue(res.status.startswith('200'))
-        created_token = self.session.query(BearerToken).filter_by(user_id=self.user.id).filter(BearerToken.revoked == False).first()
+        created_token = self.session.query(BearerToken).filter_by(user_id=self.user.id).filter(BearerToken.revoked == False).first()  # pylint: disable=E0712,C0121
         tokens_post = len(tokens.all())
         self.assertResContains(res_post_submit, teststring)
         self.assertTrue(created_token.description == teststring)

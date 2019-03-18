@@ -24,12 +24,20 @@ from muesli.tests import functionalTests
 from muesli.tests.api.v1 import URL, TESTUSERS, STATIC_HEADERS
 from muesli.tests.api.v1.utilities import authenticate_testapp
 
-import muesli.models
-
-
 class BaseTests(functionalTests.BaseTests):
     def test_exam_get(self):
-        self.testapp.get(URL+'/exams/13415', headers=STATIC_HEADERS, status=403)
+        self.testapp.get(URL+'/exams/12345', headers=STATIC_HEADERS, status=404)
+
+class UnLoggedTests(functionalTests.PopulatedTests):
+    def setUp(self):
+        functionalTests.PopulatedTests.setUp(self)
+
+    def test_tutorial_get(self):
+        self.testapp.get(
+            URL+'/exams/{}'.format(self.exam.id),
+            headers=STATIC_HEADERS,
+            status=403
+        )
 
 class UserLoggedInTests(functionalTests.PopulatedTests):
     def setUp(self):
@@ -39,4 +47,4 @@ class UserLoggedInTests(functionalTests.PopulatedTests):
         )
 
     def test_tutorial_get(self):
-        self.testapp.get(URL+'/exams/13415', headers=self.api_token, status=200)
+        self.testapp.get(URL+'/exams/{}'.format(self.exam.id), headers=self.api_token, status=200)

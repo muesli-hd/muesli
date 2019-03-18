@@ -1,7 +1,7 @@
 from muesli.web.navigation_tree import *
 from muesli.models import *
 from pyramid.security import Allow, Deny, Everyone, Authenticated, DENY_ALL, ALL_PERMISSIONS
-from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden
+from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden, HTTPBadRequest
 
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
@@ -330,6 +330,8 @@ class ExerciseEndpointContext:
         exercise_id = exercise_id.strip("/")
         user_id = request.matchdict.get('user_id', None)
         self.exercise = request.db.query(Exercise).get(exercise_id)
+        if self.exercise is None:
+            raise HTTPBadRequest("Die Angeforderte Übung existiert nicht!")
         self.lecture = self.exercise.exam.lecture
         student = None
         self.user = None

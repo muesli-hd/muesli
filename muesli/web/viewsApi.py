@@ -100,7 +100,7 @@ def api_spec(request):
 
 
 def remove_regex(openapi_json: dict) -> dict:
-    """Docstring for remove_regex.
+    r"""Docstring for remove_regex.
 
     :openapi_json: OpenAPI-Spec with version 2.0
     :returns: cleared up Spec

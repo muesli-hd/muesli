@@ -27,18 +27,29 @@ from muesli.tests.api.v1.utilities import authenticate_testapp
 
 class BaseTests(functionalTests.BaseTests):
     def test_collection_exercise_get(self):
-        self.testapp.get(URL+'/exercises/6723', headers=STATIC_HEADERS, status=403)
+        self.testapp.get(URL+'/exercises/6723', headers=STATIC_HEADERS, status=400)
 
     def test_exercise_get(self):
-        self.testapp.get(URL+'/exercises/6723/67209', headers=STATIC_HEADERS, status=403)
+        self.testapp.get(URL+'/exercises/6723/67209', headers=STATIC_HEADERS, status=400)
 
 class StudentLoggedInTests(functionalTests.PopulatedTests):
     def setUp(self):
         functionalTests.PopulatedTests.setUp(self)
-        self.api_token = authenticate_testapp( self.testapp, TESTUSERS["tutor@muesli.org"])
+        self.api_token = authenticate_testapp(self.testapp, TESTUSERS["tutor@muesli.org"])
 
     def test_collection_exercise_get(self):
-        self.testapp.get(URL+'/exercises/6723', headers=self.api_token, status=200)
+        self.testapp.get(
+            URL+'/exercises/'+str(self.exercise.id),
+            headers=self.api_token,
+            status=200
+        )
 
     def test_exercise_get(self):
-        self.testapp.get(URL+'/exercises/6723/67209', headers=self.api_token, status=200)
+        self.testapp.get(
+            URL+'/exercises/{}/{}/'.format(
+                self.exerciseStudent.exercise.id,
+                self.exerciseStudent.student.id
+            ),
+            headers=self.api_token,
+            status=200
+        )

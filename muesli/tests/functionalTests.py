@@ -193,7 +193,7 @@ class PopulatedTests(BaseTests):
         self.assistant2.email = 'assistant2@muesli.org'
         self.assistant2.subject = self.config['subjects'][0]
         setUserPassword(self.assistant2, 'assistant2password')
-        self.assistant2.is_assistant=1
+        self.assistant2.is_assistant = 1
         self.session.add(self.assistant2)
         #self.session.commit()
 
@@ -206,6 +206,13 @@ class PopulatedTests(BaseTests):
         setUserPassword(self.admin, 'adminpassword')
         self.session.add(self.admin)
         #self.session.commit()
+
+        # # Setup a student with an exercise
+        # self.user_with_exercise = muesli.models.User()
+        # self.user_with_exercise.first_name = "User"
+        # self.user_with_exercise.last_name = "With Exercise"
+        # self.user_with_exercise.email = "user_with_exercise@muesli.org"
+        # setUserPassword(self.admin, 'user_with_exercisepassword')
 
         self.lecture = muesli.models.Lecture()
         self.lecture.name = "Irgendwas"
@@ -327,6 +334,12 @@ class PopulatedTests(BaseTests):
         self.prefTutorial2.max_students = 42
         self.prefTutorial2.time = muesli.types.TutorialTime('0 16:00')
         self.session.add(self.prefTutorial2)
+
+        self.exerciseStudent = muesli.models.ExerciseStudent()
+        self.exerciseStudent.exercise = self.exercise
+        self.exerciseStudent.points = 1
+        self.exerciseStudent.student = self.user
+        self.exerciseStudent.student_id = self.user.id
 
         self.timePreference = muesli.models.TimePreference(self.prefLecture, self.user, self.prefTutorial.time, 1)
         self.session.add(self.timePreference)
