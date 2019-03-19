@@ -16,6 +16,7 @@ idna==2.6
 jdcal==1.3
 jwt==0.5.4
 kiwisolver==1.0.1
+markdown==3.0.1
 marshmallow==3.0.0rc1
 matplotlib==2.2.0
 numpy==1.14.1

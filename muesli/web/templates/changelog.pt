@@ -3,25 +3,7 @@
   <metal:main metal:fill-slot="content">
 <h2>Neuigkeiten bei MÜSLI</h2>
 
-<table>
-  <tr tal:repeat="entry entries">
-    <td class="changelog_date">
-      ${entry['date']}
-    </td>
-    <td class="changelog_description">
-      <div tal:repeat="subpart entry['content']">
-        <ul tal:condition="type(subpart) is dict">
-          <li tal:condition="subpart.get('listitems','')" tal:repeat="item subpart['listitems']">
-            ${item}
-          </li>
-        </ul>
-        <div tal:condition="type(subpart) is not dict">
-          ${subpart} <br>
-        </div>
-      </div>
-    </td>
-  </tr>
-</table>
+    ${structure: CHANGELOG_HTML}
 
   </metal:main>
 </metal:main>
