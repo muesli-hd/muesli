@@ -53,15 +53,10 @@ class UserLoggedInTests(functionalTests.PopulatedTests):
         form = res.form
         form["description"] = teststring
         res_post_submit = form.submit("submit")
-        search_str = '/user/remove_api_key/'
-        start = res_post_submit.text.find(search_str)
-        start += len(search_str)
-        # Assumes token_id's < 1000
-        token_id = int(res_post_submit.text[start: start+3])
         self.assertTrue(res.status.startswith('200'))
-        created_token = self.session.query(BearerToken).filter_by(user_id=self.user.id).filter(BearerToken.revoked == False).first()  # pylint: disable=E0712,C0121
+        # Only works if there is one key in the db!
+        created_token = self.session.query(BearerToken).filter(BearerToken.revoked == False).first()  # pylint: disable=E0712,C0121
         tokens_post = len(tokens.all())
         self.assertResContains(res_post_submit, teststring)
         self.assertTrue(created_token.description == teststring)
-        self.assertTrue(created_token.id == token_id)
         self.assertTrue((tokens_pre+1) == tokens_post)
