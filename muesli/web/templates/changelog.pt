@@ -3,7 +3,7 @@
   <metal:main metal:fill-slot="content">
 <h2>Neuigkeiten bei MÜSLI</h2>
 
-    ${structure: html}
+    ${structure: CHANGELOG_HTML}
 
   </metal:main>
 </metal:main>

@@ -177,7 +177,7 @@ def emailUsers(request):
 
 @view_config(route_name='changelog', renderer='muesli.web:templates/changelog.pt')
 def changelog(request):
-    return {"html": CHANGELOG_HTML}
+    return {'CHANGELOG_HTML': CHANGELOG_HTML}
 
 
 @view_config(context=pyramid.exceptions.HTTPForbidden)
@@ -272,4 +272,4 @@ def favicon_view(request):
 
 @view_config(name='datenschutzerklaerung.html', renderer='muesli.web:templates/dataprotection.pt')
 def datenschutzerklaerung_view(request):
-    return {'dataprotection': DATAPROTECTION_HTML}
+    return {'DATAPROTECTION_HTML': DATAPROTECTION_HTML}
