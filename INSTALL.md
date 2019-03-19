@@ -1,7 +1,7 @@
-branch     | build status                                                                       | codecoverage 
------------|------------------------------------------------------------------------------------|--------------
-master     | [![travis master](https://travis-ci.org/muesli-hd/muesli.svg?branch=master)](https://travis-ci.org/muesli-hd/muesli)         | [![codecov master](https://codecov.io/gh/muesli-hd/muesli/branch/master/graph/badge.svg)](https://codecov.io/gh/muesli-hd/muesli/branch/master)
-production | [![travis production](https://travis-ci.org/muesli-hd/muesli.svg?branch=production)](https://travis-ci.org/muesli-hd/muesli) | [![codecov production](https://codecov.io/gh/muesli-hd/muesli/branch/production/graph/badge.svg)](https://codecov.io/gh/muesli-hd/muesli/branch/production)
+branch     | build status                                                                                                                 | codecoverage                                                                                                                                                |
+-----------|------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+master     | [![travis master](https://travis-ci.org/muesli-hd/muesli.svg?branch=master)](https://travis-ci.org/muesli-hd/muesli)         | [![codecov master](https://codecov.io/gh/muesli-hd/muesli/branch/master/graph/badge.svg)](https://codecov.io/gh/muesli-hd/muesli/branch/master)             |
+production | [![travis production](https://travis-ci.org/muesli-hd/muesli.svg?branch=production)](https://travis-ci.org/muesli-hd/muesli) | [![codecov production](https://codecov.io/gh/muesli-hd/muesli/branch/production/graph/badge.svg)](https://codecov.io/gh/muesli-hd/muesli/branch/production) |
 
 Needed Packages:
 ================
@@ -23,6 +23,10 @@ For database-upgrade, the following packages is needed in addition:
 Contributing
 ============
 Read more about contributing to this project in the [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+
+Changes
+=======
+Read more about the changes in this project in the [`CHANGELOG.md`](./CHANGELOG.md).
 
 General Information:
 ====================
@@ -104,13 +108,13 @@ the command
 In the Apache config, you can enable Müsli with the following snippet:
 
     Alias /muesli/static/ /opt/muesli4/muesli/web/static/
-    
+
     <Directory /opt/muesli/muesli/web/static>
       AllowOverride None
       Order allow,deny
       Allow from all
     </Directory>
-    
+
     WSGIApplicationGroup muesli
     WSGIDaemonProcess muesli user=muesli processes=8 threads=1 python-path=/opt/muesli4 display-name="wsgi: muesli4"
     WSGIProcessGroup muesli
