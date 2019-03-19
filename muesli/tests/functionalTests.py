@@ -335,12 +335,6 @@ class PopulatedTests(BaseTests):
         self.prefTutorial2.time = muesli.types.TutorialTime('0 16:00')
         self.session.add(self.prefTutorial2)
 
-        self.exerciseStudent = muesli.models.ExerciseStudent()
-        self.exerciseStudent.exercise = self.exercise
-        self.exerciseStudent.points = 1
-        self.exerciseStudent.student = self.user
-        self.exerciseStudent.student_id = self.user.id
-
         self.timePreference = muesli.models.TimePreference(self.prefLecture, self.user, self.prefTutorial.time, 1)
         self.session.add(self.timePreference)
 

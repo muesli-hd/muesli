@@ -23,6 +23,7 @@
 from muesli.tests import functionalTests
 from muesli.tests.api.v1 import URL, TESTUSERS, STATIC_HEADERS
 from muesli.tests.api.v1.utilities import authenticate_testapp
+from muesli.models import ExerciseStudent
 
 
 class BaseTests(functionalTests.BaseTests):
@@ -36,6 +37,13 @@ class StudentLoggedInTests(functionalTests.PopulatedTests):
     def setUp(self):
         functionalTests.PopulatedTests.setUp(self)
         self.api_token = authenticate_testapp(self.testapp, TESTUSERS["tutor@muesli.org"])
+
+        # TODO: Integrate this into functionalTests.PopulatedTests.populate()
+        self.exerciseStudent = ExerciseStudent()
+        self.exerciseStudent.exercise = self.exercise
+        self.exerciseStudent.points = 1
+        self.exerciseStudent.student = self.user
+        self.exerciseStudent.student_id = self.user.id
 
     def test_collection_exercise_get(self):
         self.testapp.get(
