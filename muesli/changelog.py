@@ -19,7 +19,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-changelog="""
+CHANGELOG_STR="""
+====2019-03-12
+concerns:users,assistants,tutors
+Durch das Softwareprakikum bei Prof. Andrzejak haben verschiedenen Gruppen neue
+Features dem Müsli hinzugefügt.
+----
+----
+REST-API
+----
+* Enpoints für verschiedene Funktionen des Müsli erstellt
+* Rechtesystem für die API erstellt
+* Dokumentation für die API
+----
+Für weitere Informationen: <link-zum-finalen-pr>
+
 ====2018-09-05
 concerns:users,assistants,tutors
 Das MÜSLI läuft ab sofort mit Python Version 3 und nutzt teilweise neuere
