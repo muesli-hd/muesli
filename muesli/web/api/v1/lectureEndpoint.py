@@ -21,14 +21,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from cornice.resource import resource, view
-from muesli import models
-from muesli.web import context
-from muesli.web.api.v1 import allowed_attributes
-
-from sqlalchemy.orm import exc, joinedload, undefer
+from sqlalchemy.orm import joinedload, undefer
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.expression import desc
 from marshmallow.exceptions import ValidationError
 
+
+from muesli import models
+from muesli.web import context
+from muesli.web.api.v1 import allowed_attributes
 
 @resource(collection_path='/lectures',
           path='/lectures/{lecture_id}',
@@ -45,11 +46,12 @@ class Lecture:
         get:
           security:
             - Bearer: [read]
+            - Basic: [read]
           tags:
             - "v1"
           summary: "return all lectures"
           description: ""
-          operationId: "lecture_get"
+          operationId: "lecture_collection_get"
           consumes:
             - "application/json"
           produces:
@@ -64,7 +66,7 @@ class Lecture:
             self.db.query(models.Lecture)
             .order_by(desc(models.Lecture.term), models.Lecture.name)
             .options(joinedload(models.Lecture.assistants))
-            .filter(models.Lecture.is_visible == True) # noqa
+            .filter(models.Lecture.is_visible == True) # pylint: disable=C0121
             .all()
         )
         schema = models.LectureSchema(many=True, only=allowed_attributes.collection_lecture())
@@ -77,11 +79,12 @@ class Lecture:
         get:
           security:
             - Bearer: [read]
+            - Basic: [read]
           tags:
             - "v1"
           summary: "return a specific lecture"
           description: ""
-          operationId: "lecture_collection_get"
+          operationId: "lecture_get"
           produces:
             - "application/json"
           responses:
@@ -111,10 +114,10 @@ class Lecture:
         put:
           security:
             - Bearer: [write]
+            - Basic: [write]
           tags:
             - "v1"
           summary: "update a lecture object"
-          description: "test123"
           operationId: "lecture_put"
           produces:
             - "application/json"
@@ -162,11 +165,9 @@ class Lecture:
         else:
             for k, v in result.items():
                 setattr(lecture, k, v)
-                # TODO do we need to catch this exception?
             try:
                 self.db.commit()
-            except exc.SQLAlchemyError:
-                # TODO better exception
+            except SQLAlchemyError:
                 self.db.rollback()
             else:
                 return {'result': 'ok', 'update': self.get()}
@@ -178,10 +179,10 @@ class Lecture:
         post:
           security:
             - Bearer: [write]
+            - Basic: [write]
           tags:
             - "v1"
           summary: "create a lecture"
-          description: "test123"
           operationId: "lecture_collection_post"
           produces:
             - "application/json"

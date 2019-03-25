@@ -20,11 +20,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from muesli import models, utils
+from muesli import models, utils, DATAPROTECTION_HTML, CHANGELOG_HTML
 from muesli.web.forms import *
 from muesli.web.context import *
 from muesli.mail import Message, sendMail
-from muesli.changelog import changelog as changelog_str
 
 from pyramid import security
 from pyramid.view import view_config
@@ -35,6 +34,7 @@ import pyramid.exceptions
 from pyramid.url import route_url
 from sqlalchemy.orm import exc, joinedload
 from hashlib import sha1
+from markdown import markdown
 
 import re
 import os
@@ -177,19 +177,7 @@ def emailUsers(request):
 
 @view_config(route_name='changelog', renderer='muesli.web:templates/changelog.pt')
 def changelog(request):
-    entries = []
-    for part in changelog_str.split('====')[1:]:
-        date = part.split('\n',1)[0]
-        text = []
-        for line in part.split('\n')[1:]:
-            if line.startswith('topic:'):
-                pass
-            elif line.startswith('concerns:'):
-                pass
-            else: text.append(line)
-        text = '\n'.join(text)
-        entries.append({'date': date, 'description': text})
-    return {'entries': entries}
+    return {'CHANGELOG_HTML': CHANGELOG_HTML}
 
 
 @view_config(context=pyramid.exceptions.HTTPForbidden)
@@ -228,7 +216,7 @@ def badRequest(e, request):
             {
                 'time': now, 'user': email,
                 'contact': request.config['contact']['email'],
-                'error': e.detail(),
+                'error': e.detail,
                 'route': request.path,
                 'code': e.code,
             },
@@ -284,7 +272,4 @@ def favicon_view(request):
 
 @view_config(name='datenschutzerklaerung.html', renderer='muesli.web:templates/dataprotection.pt')
 def datenschutzerklaerung_view(request):
-    here = os.path.dirname(__file__)
-    dataprotection_path = os.path.join(here, "static", "datenschutzerklaerung.html")
-    dataprotection = open(dataprotection_path, mode='r')
-    return {'dataprotection': dataprotection.read()}
+    return {'DATAPROTECTION_HTML': DATAPROTECTION_HTML}

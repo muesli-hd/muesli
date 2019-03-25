@@ -74,6 +74,8 @@ def api_spec(request):
     add_pyramid_paths(spec, 'collection_exercise', request=request)
     add_pyramid_paths(spec, 'exercise', request=request)
 
+    add_pyramid_paths(spec, 'exam', request=request)
+
     add_pyramid_paths(spec, 'openapi_spec', request=request)
 
     # Be careful how the schemes are defined:
@@ -98,7 +100,7 @@ def api_spec(request):
 
 
 def remove_regex(openapi_json: dict) -> dict:
-    """Docstring for remove_regex.
+    r"""Docstring for remove_regex.
 
     :openapi_json: OpenAPI-Spec with version 2.0
     :returns: cleared up Spec

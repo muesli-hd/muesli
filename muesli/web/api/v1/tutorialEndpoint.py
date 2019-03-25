@@ -21,9 +21,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from marshmallow.exceptions import ValidationError
-from sqlalchemy.orm import joinedload
 from cornice.resource import resource, view
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import joinedload
+from pyramid.httpexceptions import HTTPBadRequest
 
 from muesli import models
 from muesli.web import context
@@ -45,6 +46,7 @@ class Tutorial:
         get:
           security:
             - Bearer: [read]
+            - Basic: [read]
           tags:
             - "v1"
           summary: "return all tutorials"
@@ -70,6 +72,7 @@ class Tutorial:
         get:
           security:
             - Bearer: [read]
+            - Basic: [read]
           tags:
             - "v1"
           summary: "return a specific tutorial"
@@ -83,12 +86,15 @@ class Tutorial:
               schema:
                 $ref: "#/definitions/Tutorial"
         """
-        tutorial = self.request.db.query(models.Tutorial).options(
-            joinedload(models.Tutorial.tutor),
-            joinedload(models.Tutorial.lecture)).filter(
-                models.Tutorial.id == self.request.matchdict['tutorial_id']
-            ).one()
-        exa = tutorial.lecture.exams.filter((models.Exam.results_hidden==False)|(models.Exam.results_hidden==None))
+        try:
+            tutorial = self.request.db.query(models.Tutorial).options(
+                joinedload(models.Tutorial.tutor),
+                joinedload(models.Tutorial.lecture)).filter(
+                    models.Tutorial.id == self.request.matchdict['tutorial_id'] # pylint: disable=C0121
+                ).one()
+        except NoResultFound:
+            raise HTTPBadRequest("Ungueltige Tutorial ID!")
+        exa = tutorial.lecture.exams.filter((models.Exam.results_hidden == False)|(models.Exam.results_hidden == None)) # pylint: disable=C0121
         if self.request.has_permission('viewAll'):
             tut_schema = models.TutorialSchema()
         else:
@@ -107,6 +113,50 @@ class Tutorial:
 
     @view(permission='edit')
     def collection_post(self):
+        """
+        ---
+        post:
+          security:
+            - Bearer: [write]
+            - Basic: [write]
+          tags:
+            - "v1"
+          summary: "create a tutorial"
+          operationId: "tutorial_collection_post"
+          produces:
+            - "application/json"
+          consumes:
+            - "application/json"
+          parameters:
+          - in: "body"
+            name: "body"
+            description: ""
+            required: true
+            schema:
+              $ref: "#/definitions/Tutorial"
+          responses:
+            200:
+              description: successfull creation of a tutorial
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: ok
+                  created:
+                    $ref: "#/definitions/CollectionTutorial"
+            400:
+              description: HTTPBadRequest (Example uses A bad attribute)
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: error
+                  error:
+                    type: array
+                    example: [{'description': {'name': ['Missing data for required field.'], 'test123': ['Unknown field.']}, 'name': 'fail', 'location': 'body'}]
+        """
         schema = models.TutorialSchema()
         schema.context['session'] = self.request.db
         try:

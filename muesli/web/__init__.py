@@ -20,7 +20,7 @@
 
 from pyramid import security
 from pyramid.config import Configurator
-from pyramid.events import subscriber, BeforeRender, NewRequest
+from pyramid.events import subscriber, BeforeTraversal, BeforeRender, NewRequest
 from pyramid.renderers import get_renderer
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
@@ -30,6 +30,7 @@ import pyramid_beaker
 import beaker.ext.sqla
 import tempfile
 
+from muesli.web.navigation_tree import create_navigation_tree
 from muesli.web.context import *
 from muesli.models import *
 from muesli.web.views import *
@@ -88,6 +89,7 @@ def add_session_to_request(event):
     #event.request.inspect = inspect
     #event.request.random = random
     #event.request.gc = gc
+
 @subscriber(NewRequest)
 def add_javascript_to_request(event):
     event.request.javascript = list()
@@ -95,6 +97,10 @@ def add_javascript_to_request(event):
 @subscriber(NewRequest)
 def add_config_to_request(event):
     event.request.config = muesli.config
+
+@subscriber(BeforeTraversal)
+def add_navigationTree_to_request(event):
+    event.request.navigationTree = create_navigation_tree(event.request, event.request.user)
 
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):

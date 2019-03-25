@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# muesli/web/viewsApi.py
+# api_tools/sample_requests.py
 #
 # This file is part of MUESLI.
 #
@@ -20,41 +20,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import json
-from os import path, stat
-from ast import literal_eval
 import requests
-
-from header import authenticate
-
-STATIC_HEADERS = {'Accept': 'application/json'}
-MUESLI_URL = "http://localhost:8080"
+import json
+from header import authenticate, STATIC_HEADERS, MUESLI_URL
 
 
-def get(endpoint, header):
+def post(endpoint, header):
     endpoint = MUESLI_URL + endpoint
-    r = requests.get(endpoint, headers=header)
-    print(r.json())
-
-
-def put(endpoint, header):
-    endpoint = MUESLI_URL + endpoint
-    lecture = '{"term": 20181, "name": "Irgendwas", "lecturer": "Ich auch"}'
-    r = requests.get(endpoint, lecture, headers=header)
-    print(r.json())
+    tutorial = {"lecture_id": "20109", "place": "Mathematikon", "time": "0 12:00", "max_students": "5"}
+    r = requests.post(endpoint, json=tutorial, headers=header)
+    print(json.dumps(r.json()))
 
 
 def main():
-    headers = authenticate('admin@muesli.org', 'adminpassword')
-
-    api_token = authenticate(
-        "user_with_exercise@muesli.org",
-        "user_with_exercisepassword",
-    )
-    print(api_token)
-    # headers = authenticate('test@test.de', '1234')
-    endpoint = "/api/v1/whoami"
-    get(endpoint, headers)
+    headers = authenticate('test@test.de', '1234')
+    endpoint = "/api/v1/tutorials"
+    post(endpoint, headers)
 
 
 if __name__ == "__main__":

@@ -678,15 +678,21 @@ class UserSchema(Schema):
     birth_date = fields.String()
     birth_place = fields.String()
     subject = fields.String()
-    #TODO Rest
 
-#TODO MANY???!?
     @post_load()
     def get_user(self, data):
-        # TODO check also by mail because it's unique
         usr = self.context['session'].query(User).filter(User.email == data["email"]).one()
         if usr is None:
             raise ValidationError("User not found")
+        return usr
+
+
+class AssistantSchema(UserSchema):
+    @post_load()
+    def get_user(self, data):
+        usr = self.context['session'].query(User).filter(User.email == data["email"]).one()
+        if usr is None or not usr.is_assistant:
+            raise ValidationError("User not found or is not assistant")
         return usr
 
 
@@ -694,7 +700,7 @@ class ExamSchema(Schema):
     id = fields.Integer(dump_only=True)
     lecture_id = fields.Integer(dump_only=True)
     name = fields.String()
-    category = fields.String()  # TODO verify
+    category = fields.String()
     admission = fields.Boolean()
     registration = fields.Boolean()
     url = fields.Url()
@@ -707,13 +713,10 @@ class TutorialSchema(Schema):
     time = fields.Method("get_time", deserialize="load_time")
     max_students = fields.Integer(required=True)
     tutor = fields.Nested(
-        UserSchema, only=allowed_attributes.user())
+        UserSchema, only=allowed_attributes.user(), dump_only=True)
     comment = fields.String()
-    students = fields.Nested(UserSchema, many=True, only=allowed_attributes.user())
-
-    # CORRECT ?! TODO
-    exams = fields.Nested(ExamSchema, many=True, only=["id", "name"])
-
+    students = fields.Nested(UserSchema, many=True, only=allowed_attributes.user(),dump_only=True)
+    exams = fields.Nested(ExamSchema, many=True, only=["id", "name"], dump_only=True)
     student_count = fields.Method("get_student_num")
 
     def get_time(self, obj):
@@ -728,7 +731,7 @@ class TutorialSchema(Schema):
 
 class LectureSchema(Schema):
     id = fields.Integer(dump_only=True)
-    assistants = fields.Nested(UserSchema, required=True, many=True, only=allowed_attributes.user())
+    assistants = fields.Nested(AssistantSchema, required=True, many=True, only=allowed_attributes.user())
     name = fields.String(required=True)
     type = fields.String()
     term = fields.Method("get_term", deserialize="load_term")
@@ -738,12 +741,12 @@ class LectureSchema(Schema):
     password = fields.String()
     is_visible = fields.Boolean()
     tutorials = fields.Nested(TutorialSchema, many=True, only=allowed_attributes.tutorial())
-    tutors = fields.Nested(UserSchema, many=True)
-    
+    tutors = fields.Nested(UserSchema, many=True, dump_only=True)
+
     # Converts the Muesli defined type Term to it's string representation
     def get_term(self, obj):
         return obj.term.__html__()
-    
+
     # Constructs a Term from input like 20181
     def load_term(self, value):
         term = [Term(str(value)), Term(str(value))]
@@ -760,7 +763,6 @@ class ExerciseSchema(Schema):
 
 
 class ExerciseStudentSchema(Schema):
-    #exercise = fields.Nested(ExerciseSchema)
     student = fields.Nested(UserSchema, only=allowed_attributes.user())
     points = fields.Float()
 
@@ -777,4 +779,3 @@ class BearerToken(Base):
     expires = Column(DateTime)
     description = Column(Text)
     revoked = Column(Boolean, default=False)
-

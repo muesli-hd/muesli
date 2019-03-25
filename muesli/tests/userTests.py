@@ -43,6 +43,9 @@ class BaseTests(functionalTests.BaseTests):
     def test_user_update(self):
         res = self.testapp.get('/user/update', status=403)
 
+    def test_user_check(self):
+        res = self.testapp.get('/user/check', status=403)
+
     def test_user_register(self):
         res = self.testapp.get('/user/register', status=200)
         form = res.form
@@ -213,6 +216,9 @@ class UserLoggedInTests(UnloggedTests):
     def test_user_update(self):
         res = self.testapp.get('/user/update', status=200)
         self.assertForm(res, 'matrikel', '2613945')
+
+    def test_user_check(self):
+        res = self.testapp.get('/user/check', status=200)
 
     def test_user_change_email(self):
         res = self.testapp.get('/user/change_email', status=200)

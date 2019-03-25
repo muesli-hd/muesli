@@ -20,27 +20,44 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from cornice.resource import resource
-from pyramid.httpexceptions import HTTPBadRequest
+from cornice.resource import resource, view
 
 from muesli import models
 from muesli.web import context
 
 
 @resource(path='/exams/{exam_id}',
-          factory=context.GeneralContext,
-          permission='view')  # TODO Api specific permission
+          factory=context.ExamEndpointContext,
+          permission='view')
 class Exam:
     def __init__(self, request, context=None):
         self.request = request
         self.db = request.db
 
-    def get(self):  # TODO Check if Lecture Student maybe list all lecturestudents
-        exam_id = self.request.matchdict.get("exam_id", None)
-        if exam_id is None:
-            raise HTTPBadRequest("The exam you want to access does not exist!")
-        else:
-            exam = self.request.db.query(models.Exam).get(exam_id)
+    @view(permission='view')
+    def get(self):
+        """
+        ---
+        get:
+          security:
+            - Bearer: [read]
+            - Basic: [read]
+          tags:
+            - "v1"
+          summary: "return all lectures"
+          description: ""
+          operationId: "exam_get"
+          consumes:
+            - "application/json"
+          produces:
+            - "application/json"
+          responses:
+            200:
+              description: "response for 200 code"
+              schema:
+                $ref: "#/definitions/Exam"
+        """
+        exam = self.request.context.exam
         exer_schema = models.ExerciseSchema(many=True)
         exam_schema = models.ExamSchema()
         result = exam_schema.dump(exam)

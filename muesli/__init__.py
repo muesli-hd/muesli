@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+from markdown import markdown
 
 from sqlalchemy import create_engine
 
@@ -33,6 +34,16 @@ muesli.mail.server = config['contact']['server']
 databaseName = config['database']['connection']
 PRODUCTION_INSTANCE = config.get("production", True)
 
+# Read in the dataprotection and changelog so they are static to the instance
+dataprotection_path = os.path.join(os.path.dirname(__file__), "web", "static", "datenschutzerklaerung.md")
+with open(dataprotection_path) as f:
+    dataprotection = f.read()
+DATAPROTECTION_HTML = markdown(dataprotection)
+
+changelog_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "CHANGELOG.md"))
+with open(changelog_path) as f:
+    changelog = f.read()
+CHANGELOG_HTML = markdown(changelog)
 
 def engine():
     if not PRODUCTION_INSTANCE:

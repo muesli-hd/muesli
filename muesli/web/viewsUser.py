@@ -78,24 +78,19 @@ def api_login(request):
             'result': 'ok',
             'token': jwt_token
         }
-    else:
-        return {
-            'result': 'error'
-        }
+    return {'result': 'error'}
 
-@view_config(route_name='api_login', renderer='json', request_method='GET')
-def refresh(request):
-    user = request.db.query(models.User).get(request.authenticated_userid)
-    if user:
-        return {
-            'result': 'ok',
-            'token': request.create_jwt_token(user.id, admin=(user.is_admin))
-        }
-    else:
-        return {
-            'result': 'error'
-        }
-
+# Only for testing purposes. If it is decided that this should be implemented
+# the function needs to be changed to work similar to api_login
+#@view_config(route_name='api_login', renderer='json', request_method='GET')
+#def refresh(request):
+#    user = request.db.query(models.User).get(request.authenticated_userid)
+#    if user:
+#        return {
+#            'result': 'ok',
+#            'token': request.create_jwt_token(user.id, admin=(user.is_admin))
+#        }
+#    return {'result': 'error'}
 
 
 @view_config(route_name='user_logout')
@@ -574,19 +569,19 @@ def list_auth_keys(request):
 @view_config(route_name='remove_api_key', context=context.GeneralContext)
 def removeKey(request):
     code_id = int(request.matchdict['key_id'])
-    #  TODO check if api_key.user_id matches user_id??
     api_key = request.db.query(models.BearerToken).get(code_id)
-    if not api_key:
-        request.session.flash('API Key nicht gefunden', queue='errors')
-    else:
+    if api_key is None:
+        raise HTTPBadRequest("API Key nicht gefunden")
+    if api_key.user == request.user or request.user.is_admin:
         api_key.revoked = True
         request.db.add(api_key)
         request.db.commit()
         request.session.flash('API Key entfernt ', queue='messages')
+    else:
+        request.session.flash('API Key nicht gefunden', queue='errors')
     if request.referrer:
         return HTTPFound(location=request.referrer)
-    else:
-        return HTTPFound(location=request.route_url('start'))
+    return HTTPFound(location=request.route_url('start'))
 
 
 @view_config(route_name='user_ajax_complete', renderer='muesli.web:templates/user/ajax_complete.pt', context=context.TutorialContext, permission='viewOverview')

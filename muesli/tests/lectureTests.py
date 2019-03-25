@@ -84,6 +84,9 @@ class BaseTests(functionalTests.BaseTests):
     def test_lecture_add_student(self):
         res = self.testapp.get('/lecture/add_student/%s' % 123456, status=404)
 
+    def test_lecture_switch_students(self):
+        res = self.testapp.get('/lecture/switch_students/%s' % 123456, status=404)
+
     def test_lecture_export_yaml(self):
         res = self.testapp.get('/lecture/export_yaml', status=403)
 
@@ -149,6 +152,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
     def test_lecture_add_student(self):
         res = self.testapp.get('/lecture/add_student/%s' % self.lecture.id, status=403)
+
+    def test_lecture_switch_students(self):
+        res = self.testapp.get('/lecture/switch_students/%s' % self.lecture.id, status=403)
 
     def test_all_lecture_export_excel(self):
         res = self.testapp.get('/lecture/export_excel/downloadDetailTutorials.xlsx', status=403)
@@ -291,6 +297,9 @@ class AssistantLoggedInTests(TutorLoggedInTests):
     def test_lecture_export_totals(self):
         res = self.testapp.get('/lecture/export_totals/%s' % self.lecture.id, status=200)
 
+    def test_lecture_switch_students(self):
+        res = self.testapp.get('/lecture/switch_students/%s' % self.lecture.id, status=200)
+
     def test_lecture_add_student(self):
         self.assertNotIn(self.user_without_lecture, self.lecture.students)
         res = self.testapp.get('/lecture/add_student/%s' % self.lecture.id, status=200)
@@ -322,7 +331,6 @@ class AssistantLoggedInTests(TutorLoggedInTests):
         form['new_tutorial']  = self.lecture.tutorials[0].id
         res = form.submit()
         self.assertResContains(res, 'bereits eingetragen')
-
 
 
 class AdminLoggedInTests(AssistantLoggedInTests):
