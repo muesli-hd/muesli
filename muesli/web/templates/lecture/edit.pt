@@ -90,7 +90,11 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   </tr>
 </table>
 
-<h3>${names['tutors']}</h3>
+<h3>${names['tutors']}
+     <div class="tooltip_questionmark"><p>
+        ${tooltips['mail_tutor']}
+    </p></div>
+</h3>
 
 <table>
   <tr tal:repeat="tutor lecture.tutors">
@@ -135,7 +139,11 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   <input type="submit" value="Korrelation"/>
 </form>
 
-<h3>Benotungen</h3>
+<h3>Benotungen
+    <div class="tooltip_questionmark"><p>
+        ${tooltips['grading']}
+    </p></div>
+</h3>
 
 <p><a tal:attributes="href request.route_path('lecture_add_grading', lecture_id=lecture.id)">Benotung hinzufügen</a></p>
 
