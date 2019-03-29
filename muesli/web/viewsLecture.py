@@ -44,6 +44,7 @@ from openpyxl.writer.excel import save_virtual_workbook
 import io
 #
 from muesli import types
+from muesli.web.tooltips import lecture_edit_tooltips
 
 import re
 import os
@@ -279,7 +280,8 @@ class Edit:
                 'categories': utils.categories,
                 'exams': exams,
                 'assistants': assistants,
-                'form': form}
+                'form': form,
+                'tooltips': lecture_edit_tooltips}
 
 @view_config(route_name='lecture_delete', context=LectureContext, permission='delete_lecture')
 def delete(request):
