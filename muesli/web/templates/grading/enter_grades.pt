@@ -172,5 +172,14 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
 <input type="submit" value="Speichern"/>
 </form>
 
+<h3 tal:condition="percentage_message">Notenvorschau</h3>
+
+<!-- image is encoded in base64 -->
+<img src="data:image/png;base64, ${img}"/>
+
+<ul>
+    <li tal:repeat="msg percentage_message">${msg}</li>
+</ul>
+
   </metal:main>
 </metal:main>

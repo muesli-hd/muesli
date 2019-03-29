@@ -19,6 +19,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import base64
+
+import numpy
+from matplotlib import pyplot
+
 from muesli import models
 from muesli import utils
 from muesli.parser import Parser
@@ -33,6 +38,7 @@ from pyramid.url import route_url
 from sqlalchemy.orm import exc
 from sqlalchemy.sql import func
 import sqlalchemy
+from collections import Counter
 
 from openpyxl import Workbook
 from openpyxl.styles import Font
@@ -202,6 +208,66 @@ class EnterGradesBasic:
         self.request.javascript.append('jquery/jquery.fancybox.min.js')
         #grades = {key: value for key,value in grades.items()}
 
+        #create the diagram using pyplot
+
+        #get a list of calculated grades
+        #if no grade is calculated yet then grades[student_id]['calc'] contains an empty string and would cause an exception when converted to a float
+        grades_list = [float(grades[student_id]['calc']) for student_id in grades.keys() if not grades[student_id]['calc'] == '']
+
+        if len(grades_list) > 0:
+
+            #count occurences of grades and save it in a list as tuple (grade, count)
+            tuple_list = list(Counter(grades_list).items())
+
+            #sort the list by grades
+            tuple_list = sorted(tuple_list, key=lambda x: x[0])
+
+            labels = [x[0] for x in tuple_list]
+            values = [x[1] for x in tuple_list]
+
+            indexes = numpy.arange(len(labels))
+            width = 1
+
+            pyplot.rcParams.update({'font.size': 20})
+
+            fig = pyplot.figure(figsize=(12, 9))
+
+            ax = fig.add_subplot(111)
+
+            pyplot.sca(ax)
+            pyplot.bar(indexes, values, width, edgecolor='black', color='red')
+            pyplot.xticks(indexes + width - 1, labels)
+            pyplot.xlabel('Note')
+            pyplot.ylabel('Anzahl')
+
+            yint = range(min(values), math.ceil(max(values)) + 1, math.ceil(max(values)/10))
+            pyplot.yticks(yint)
+
+            output = io.BytesIO()
+            fig.savefig(output, format='png', dpi=50, bbox_inches='tight')
+            pyplot.close(fig)
+            #encode image as base64 so it can be displayed using html
+            encoded_diagram = base64.b64encode(output.getvalue())
+            output.close()
+
+            percentage_message = []
+
+            grades_count = len(grades_list)
+            percentage_list = []
+            for x in range(1, 5):
+                percentage_list.append(100*sum(grade <= x for grade in grades_list)/grades_count)
+
+            percentage_message.append(str(percentage_list[0]) + '% haben die Note 1.0\n')
+            percentage_message.append(str(percentage_list[1]) + '% haben die Note 2.0 oder besser\n')
+            percentage_message.append(str(percentage_list[2]) + '% haben die Note 3.0 oder besser\n')
+            percentage_message.append(str(percentage_list[3]) + '% haben die Note 4.0 oder besser\n')
+            percentage_message.append(str(100-percentage_list[3]) + '% haben die Note 5.0\n')
+
+        else:
+            #empty png image encoded in base64
+            encoded_diagram = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='
+            percentage_message = ''
+
         return {'grading': grading,
                 'error_msg': '\n'.join(error_msgs),
                 'formula': formula,
@@ -211,6 +277,8 @@ class EnterGradesBasic:
                 'examvars': examvars,
                 'varsForExam': varsForExam,
                 'lecture_students': lecture_students,
+                'img': encoded_diagram,
+                'percentage_message': percentage_message,
                 'tooltips': grading_edit_tooltips}
 
 @view_config(route_name='grading_enter_grades', renderer='muesli.web:templates/grading/enter_grades.pt', context=GradingContext, permission='edit')
@@ -240,6 +308,7 @@ class ExcelView:
         self.request = request
         self.w = Workbook()
     def createResponse(self):
+        #Excel file in xlsx format
         response = Response(content_type='application/vnd.ms-excel')
         response.body = save_virtual_workbook(self.w)
         return response
