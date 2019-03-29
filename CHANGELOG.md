@@ -10,6 +10,16 @@ Features dem Müsli hinzugefügt.
 * Dokumentation für die API
 Für weitere Informationen: <link-zum-finalen-pr>
 
+##### GUI-1 Gruppe
+
+* Tooltips implementiert, welche dem Benutzer Aktionen erklären
+* Histogramme für Klausurergebnisse implementiert, sowie ist es möglich 
+durch Änderung der Bewertungsformel direkt zu sehen wie die neuen Ergebnisse aussehen
+und wie die Notenverteilung sich verändert
+* Selenium Tests implementiert 
+* Workflow verbessert und benutzerfreundlicher gestaltet 
+(Testate erstellen, Excelexport etc.)
+
 ### 2018-09-05
 Das MÜSLI läuft ab sofort mit Python Version 3 und nutzt teilweise neuere
 Python Module.
