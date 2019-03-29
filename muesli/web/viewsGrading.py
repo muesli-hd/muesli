@@ -24,6 +24,7 @@ from muesli import utils
 from muesli.parser import Parser
 from muesli.web.context import *
 from muesli.web.forms import *
+from muesli.web.tooltips import grading_edit_tooltips
 
 from pyramid.view import view_config
 from pyramid.response import Response
@@ -36,7 +37,6 @@ import sqlalchemy
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from openpyxl.writer.excel import save_virtual_workbook
-from muesli.web.tooltips import grading_edit_tooltips
 
 import re
 import os

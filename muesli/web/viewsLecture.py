@@ -693,7 +693,7 @@ def exportYaml_details(request):
             vemail = 'email: ' + tutorial.tutor.email  if tutorial.tutor!=None else 'email: '
             vplace = 'place: ' + tutorial.place
             vtime = 'time: '+ tutorial.time.__html__()
-            vcomment = 'comment: ' + tutorial.comment
+            vcomment = 'comment: ' + tutorial.comment if tutorial.comment!= None else 'comment: '
             tutorialItem = (vtutor.replace("'",""),vemail, vplace.replace("'",""), vtime.replace("'",""),vcomment.replace("'",""))
             lecture_dict['tutorials'].append(tutorialItem)
         lecture_dict['name'] = lecture.name
@@ -702,7 +702,7 @@ def exportYaml_details(request):
         lecture_dict['term'] = lecture.term.__html__()
         out.append(lecture_dict)
         response = Response(content_type='application/x-yaml')
-    response.body = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
+    response.text = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
     return response
 
 
