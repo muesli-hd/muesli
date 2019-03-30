@@ -9,7 +9,6 @@
     $(".help").hide();
     $(".nohelp").show();
   }
-
   function show_help ()
   {
     $(".help").show();
@@ -38,7 +37,6 @@
           }
       });
     }
-
     function createFancyBoxes(){
         $("a.fancybox").each(function(index) {
           $(this).fancybox({
@@ -53,7 +51,6 @@
           });
        });
     }
-
     function saveRow(event,id){
       var url = $('#gradingsform').attr('action').replace(/enter_grades/, 'get_row');
       var value= $('#grade-'+id).val()
@@ -74,7 +71,6 @@
           }
       });
     }
-
     $(document).ready(function() {
         createFancyBoxes();
     });
@@ -91,12 +87,11 @@
 <a tal:attributes="href request.route_path('grading_export', grading_id=grading.id)">
     Als Excel für die Prüfungsverwaltung (HIS-POS) exportieren
     <div class="tooltip_questionmark">
-       <p>
+        <p>
             ${tooltips['excel']}
-       </p>
+        </p>
     </div>
 </a>
-
 
 
 <form method="get">
@@ -161,7 +156,7 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
       </td>
     <td>${ls.student.name()}</td>
     <td><span id="calc-${ls.student_id}">${grades[ls.student_id]['calc']}</span></td>
-     
+
     <td><input tal:attributes="class 'invalid' if grades[ls.student_id]['invalid'] else 'points';
              name 'grade-%i' % ls.student_id;
              value grades[ls.student_id]['gradestr'];
@@ -172,14 +167,9 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
 <input type="submit" value="Speichern"/>
 </form>
 
-<h3 tal:condition="percentage_message">Notenvorschau</h3>
+<h3 tal:condition="grades">Notenvorschau</h3>
 
-<!-- image is encoded in base64 -->
-<img src="data:image/png;base64, ${img}"/>
-
-<ul>
-    <li tal:repeat="msg percentage_message">${msg}</li>
-</ul>
+<img tal:condition="grades" tal:attributes="src request.route_path('grading_formula_histogram', grading_id=grading.id)"/>
 
   </metal:main>
 </metal:main>

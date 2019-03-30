@@ -218,7 +218,6 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('lecture_set_preferences', '/lecture/set_preferences/{lecture_id}', factory=LectureContext)
     config.add_route('lecture_remove_preferences', '/lecture/remove_preferences/{lecture_id}', factory=LectureContext)
     config.add_route('lecture_add_exam', '/lecture/add_exam/{category}/{lecture_id}', factory = AddExamContext)
-    #config.add_route('lecture_add_exam', '/lecture/add_exam/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_add_grading', '/lecture/add_grading/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_add_student', '/lecture/add_student/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_switch_students', '/lecture/switch_students/{lecture_id}', factory = LectureContext)
@@ -273,6 +272,7 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('grading_associate_exam', '/grading/associate_exam/{grading_id}', factory=GradingContext)
     config.add_route('grading_delete_exam_association', '/grading/delete_exam_association/{grading_id}/{exam_id}', factory=GradingContext)
     config.add_route('grading_enter_grades', '/grading/enter_grades/{grading_id}', factory=GradingContext)
+    config.add_route('grading_formula_histogram', '/grading/enter_grades/{grading_id}/formula_histogram', factory=GradingContext)
     config.add_route('grading_get_row', '/grading/get_row/{grading_id}', factory=GradingContext)
 
     # Begin: config for the API-Browser

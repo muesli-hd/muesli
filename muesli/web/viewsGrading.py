@@ -18,7 +18,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 import base64
 
 import numpy
@@ -29,7 +28,6 @@ from muesli import utils
 from muesli.parser import Parser
 from muesli.web.context import *
 from muesli.web.forms import *
-from muesli.web.tooltips import grading_edit_tooltips
 
 from pyramid.view import view_config
 from pyramid.response import Response
@@ -38,11 +36,13 @@ from pyramid.url import route_url
 from sqlalchemy.orm import exc
 from sqlalchemy.sql import func
 import sqlalchemy
+from matplotlib.ticker import MaxNLocator
 from collections import Counter
 
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from openpyxl.writer.excel import save_virtual_workbook
+from muesli.web.tooltips import grading_edit_tooltips
 
 import re
 import os
@@ -62,7 +62,7 @@ class Edit:
             self.request.db.commit()
             form.message = "Änderungen gespeichert."
         return {'grading': grading,
-                'form': form,
+                'form': form
                }
 
 @view_config(route_name='grading_associate_exam', context=GradingContext, permission='edit')
@@ -98,7 +98,8 @@ class EnterGradesBasic:
         self.request = request
         self.db = self.request.db
         self.return_json = False
-    def __call__(self):
+
+    def update_grading_formula(self):
         grading = self.request.context.grading
         formula = self.request.GET.get('formula', None)
         if formula:
@@ -106,27 +107,35 @@ class EnterGradesBasic:
             self.db.commit()
         else:
             formula = grading.formula
+        return grading, formula
+
+    def get_lecture_students(self, grading):
         exam_id = self.request.GET.get('students', None)
         if exam_id:
             exam = self.request.db.query(models.Exam).get(exam_id)
         else: exam=None
         student_id = self.request.GET.get('student', None)
-        lecture_students = grading.lecture.lecture_students_for_tutorials([])\
-                .options(sqlalchemy.orm.joinedload(models.LectureStudent.student))
+        lecture_students = grading.lecture.lecture_students_for_tutorials([]) \
+            .options(sqlalchemy.orm.joinedload(models.LectureStudent.student))
         if student_id:
             lecture_students = lecture_students.filter(models.LectureStudent.student_id == student_id)
         if exam:
-            lecture_students = lecture_students\
-                    .join(models.ExerciseStudent, models.LectureStudent.student_id==models.ExerciseStudent.student_id)\
-                    .join(models.Exercise)\
-                    .join(models.Exam)\
-                    .filter(models.Exam.id==exam_id)
-        lecture_students = lecture_students.all()
-        gradesQuery = grading.student_grades.filter(models.StudentGrade.student_id.in_([ls.student_id for ls in lecture_students]))
-        grades = utils.autovivify()
+            lecture_students = lecture_students \
+                .join(models.ExerciseStudent, models.LectureStudent.student_id==models.ExerciseStudent.student_id) \
+                .join(models.Exercise) \
+                .join(models.Exam) \
+                .filter(models.Exam.id==exam_id)
+        return lecture_students.all()
+
+    def get_exam_vars(self, grading):
         exam_ids = [e.id for e in grading.exams]
         examvars = dict([['$%i' % i, e.id] for i,e in enumerate(grading.exams)])
         varsForExam = dict([[examvars[var], var] for var in examvars ])
+        return exam_ids, examvars, varsForExam
+
+    def get_current_grades(self, grading, lecture_students, exam_ids):
+        grades = utils.autovivify()
+        gradesQuery = grading.student_grades.filter(models.StudentGrade.student_id.in_([ls.student_id for ls in lecture_students]))
         for ls in lecture_students:
             grades[ls.student_id]['grade'] = ''
             grades[ls.student_id]['gradestr'] = ''
@@ -136,13 +145,9 @@ class EnterGradesBasic:
         for grade in gradesQuery:
             grades[grade.student_id]['grade'] = grade
             grades[grade.student_id]['gradestr'] = grade.grade
-        #for ls in lecture_students:
-        #       if not grades[ls.student_id]['grade']:
-        #               studentGrade = models.StudentGrade()
-        #               studentGrade.student = ls.student
-        #               studentGrade.grading = grading
-        #               grades[ls.student_id]['grade'] = studentGrade
-        #               self.db.add(studentGrade)
+        return grades
+
+    def update_grades_with_post_params(self, grades, lecture_students, grading, error_msgs):
         if self.request.method == 'POST':
             for ls in lecture_students:
                 param = 'grade-%u' % (ls.student_id)
@@ -167,28 +172,32 @@ class EnterGradesBasic:
                             error_msgs.append('Could not convert "%s" (%s)'%(value, ls.student.name()))
         if self.db.new or self.db.dirty or self.db.deleted:
             self.db.commit()
+        return grades, error_msgs
+
+    def populate_with_exam_results(self, grades, lecture_students, grading):
         for exam in grading.exams:
-            results = exam.getResults(students = lecture_students)
+            results = exam.getResults(students=lecture_students)
             for result in results:
                 grades[result.student_id]['exams'][exam.id]['points'] = result.points
-            if exam.admission!=None or exam.registration!=None or exam.medical_certificate!=None:
+            if exam.admission is not None or exam.registration is not None or exam.medical_certificate is not None:
                 student_ids = [ls.student_id for ls in lecture_students]
                 admissions = exam.exam_admissions
                 for a in admissions:
                     if a.student_id in student_ids:
-                        if exam.admission!=None:
+                        if exam.admission is not None:
                             grades[a.student_id]['exams'][exam.id]['admission'] = a.admission
-                        if exam.registration!=None:
+                        if exam.registration is not None:
                             grades[a.student_id]['exams'][exam.id]['registration'] = a.registration
-                        if exam.medical_certificate!=None:
+                        if exam.medical_certificate is not None:
                             grades[a.student_id]['exams'][exam.id]['medical_certificate'] = a.medical_certificate
-        error_msgs = []
+        return grades
+
+    def apply_formula(self, grades, formula, lecture_students, grading, varsForExam, error_msgs):
         if formula:
             parser = Parser()
             try:
                 parser.parseString(formula)
                 for ls in lecture_students:
-                #print(student)
                     d = {}
                     for exam in grading.exams:
                         result = grades[ls.student_id]['exams'][exam.id]['points']
@@ -203,70 +212,24 @@ class EnterGradesBasic:
                 error_msgs.append(str(err))
         if 'fill' in self.request.GET:
             self.request.session.flash('Achtung, die Noten sind noch nicht abgespeichert!', queue='errors')
+        return grades, error_msgs
+
+    def __call__(self):
+        exam_id = self.request.GET.get('students', None)
+        grading, formula = self.update_grading_formula()
+        lecture_students = self.get_lecture_students(grading)
+        exam_ids, examvars, varsForExam = self.get_exam_vars(grading)
+        grades = self.get_current_grades(grading, lecture_students, exam_ids)
+
+        error_msgs = []
+        grades, error_msgs = self.update_grades_with_post_params(grades, lecture_students, grading, error_msgs)
+        grades = self.populate_with_exam_results(grades, lecture_students, grading)
+        grades, error_msgs = self.apply_formula(grades, formula, lecture_students, grading, varsForExam, error_msgs)
+
         #self.request.javascript.append('prototype.js')
         self.request.javascript.append('jquery/jquery.min.js')
         self.request.javascript.append('jquery/jquery.fancybox.min.js')
         #grades = {key: value for key,value in grades.items()}
-
-        #create the diagram using pyplot
-
-        #get a list of calculated grades
-        #if no grade is calculated yet then grades[student_id]['calc'] contains an empty string and would cause an exception when converted to a float
-        grades_list = [float(grades[student_id]['calc']) for student_id in grades.keys() if not grades[student_id]['calc'] == '']
-
-        if len(grades_list) > 0:
-
-            #count occurences of grades and save it in a list as tuple (grade, count)
-            tuple_list = list(Counter(grades_list).items())
-
-            #sort the list by grades
-            tuple_list = sorted(tuple_list, key=lambda x: x[0])
-
-            labels = [x[0] for x in tuple_list]
-            values = [x[1] for x in tuple_list]
-
-            indexes = numpy.arange(len(labels))
-            width = 1
-
-            pyplot.rcParams.update({'font.size': 20})
-
-            fig = pyplot.figure(figsize=(12, 9))
-
-            ax = fig.add_subplot(111)
-
-            pyplot.sca(ax)
-            pyplot.bar(indexes, values, width, edgecolor='black', color='red')
-            pyplot.xticks(indexes + width - 1, labels)
-            pyplot.xlabel('Note')
-            pyplot.ylabel('Anzahl')
-
-            yint = range(min(values), math.ceil(max(values)) + 1, math.ceil(max(values)/10))
-            pyplot.yticks(yint)
-
-            output = io.BytesIO()
-            fig.savefig(output, format='png', dpi=50, bbox_inches='tight')
-            pyplot.close(fig)
-            #encode image as base64 so it can be displayed using html
-            encoded_diagram = base64.b64encode(output.getvalue())
-            output.close()
-
-            percentage_message = []
-
-            grades_count = len(grades_list)
-            percentage_list = []
-            for x in range(1, 5):
-                percentage_list.append(100*sum(grade <= x for grade in grades_list)/grades_count)
-
-            percentage_message.append(str(percentage_list[0]) + '% haben die Note 1.0\n')
-            percentage_message.append(str(percentage_list[1]) + '% haben die Note 2.0 oder besser\n')
-            percentage_message.append(str(percentage_list[2]) + '% haben die Note 3.0 oder besser\n')
-            percentage_message.append(str(percentage_list[3]) + '% haben die Note 4.0 oder besser\n')
-            percentage_message.append(str(100-percentage_list[3]) + '% haben die Note 5.0\n')
-
-        else:
-            #empty png image encoded in base64
-            encoded_diagram = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='
-            percentage_message = ''
 
         return {'grading': grading,
                 'error_msg': '\n'.join(error_msgs),
@@ -277,8 +240,6 @@ class EnterGradesBasic:
                 'examvars': examvars,
                 'varsForExam': varsForExam,
                 'lecture_students': lecture_students,
-                'img': encoded_diagram,
-                'percentage_message': percentage_message,
                 'tooltips': grading_edit_tooltips}
 
 @view_config(route_name='grading_enter_grades', renderer='muesli.web:templates/grading/enter_grades.pt', context=GradingContext, permission='edit')
@@ -303,12 +264,83 @@ class GetRow(EnterGradesBasic):
         return {'grades': grades,
                 'error_msg': result['error_msg']}
 
+@view_config(route_name='grading_formula_histogram', context=GradingContext, permission='edit')
+class FormulaHistogram(EnterGradesBasic):
+    def generate_histogram(self):
+        grading = self.request.context.grading
+        formula = self.request.GET.get('formula', grading.formula)
+        lecture_students = self.get_lecture_students(grading)
+        exam_ids, examvars, varsForExam = self.get_exam_vars(grading)
+        grades = self.get_current_grades(grading, lecture_students, exam_ids)
+
+        error_msgs = []
+        grades = self.populate_with_exam_results(grades, lecture_students, grading)
+        grades, error_msgs = self.apply_formula(grades, formula, lecture_students, grading, varsForExam, error_msgs)
+        grades_list = [float(grades[student_id]['calc']) for student_id in grades.keys() if not grades[student_id]['calc'] == '']
+
+        if not grades_list:
+            raise HTTPBadRequest("Es sind existieren keine Noten für diese Benotung.")
+
+        # count occurences of grades and save it in a list as tuple (grade, count)
+        tuple_list = list(Counter(grades_list).items())
+
+        # sort the list by grades
+        tuple_list = sorted(tuple_list, key=lambda x: x[0])
+
+        labels = [x[0] for x in tuple_list]
+        values = [x[1] for x in tuple_list]
+
+        indexes = numpy.arange(len(labels))
+        width = 1
+
+        pyplot.rcParams.update({'font.size': 20})
+
+        fig = pyplot.figure(figsize=(12, 9))
+
+        ax = fig.add_subplot(111)
+
+        pyplot.sca(ax)
+        pyplot.bar(indexes, values, width, edgecolor='black', color='red')
+        pyplot.xticks(indexes + width - 1, labels)
+        pyplot.xlabel('Note')
+        pyplot.ylabel('Anzahl')
+
+        yint = range(min(values), math.ceil(max(values)) + 1, math.ceil(max(values)/10))
+        pyplot.yticks(yint)
+
+        percentage_message = []
+
+        grades_count = len(grades_list)
+        percentage_list = []
+        for x in range(1, 5):
+            percentage_list.append(100*sum(grade <= x for grade in grades_list)/grades_count)
+
+        percentage_message.append('• ' + str(percentage_list[0]) + '% haben die Note 1.0\n')
+        percentage_message.append('• ' + str(percentage_list[1]) + '% haben die Note 2.0 oder besser\n')
+        percentage_message.append('• ' + str(percentage_list[2]) + '% haben die Note 3.0 oder besser\n')
+        percentage_message.append('• ' + str(percentage_list[3]) + '% haben die Note 4.0 oder besser\n')
+        percentage_message.append('• ' + str(100-percentage_list[3]) + '% haben die Note 5.0\n')
+
+        pyplot.text(-0.5, -1.2, "".join(percentage_message), verticalalignment='bottom')
+
+        return fig
+
+    def __call__(self):
+        output = io.BytesIO()
+        fig = self.generate_histogram()
+        fig.savefig(output, format='png', dpi=50, bbox_inches='tight')
+        pyplot.close(fig)
+        response = Response()
+        response.content_type = 'image/png'
+        response.body = output.getvalue()
+        output.close()
+        return response
+
 class ExcelView:
     def __init__(self, request):
         self.request = request
         self.w = Workbook()
     def createResponse(self):
-        #Excel file in xlsx format
         response = Response(content_type='application/vnd.ms-excel')
         response.body = save_virtual_workbook(self.w)
         return response
