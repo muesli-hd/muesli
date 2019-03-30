@@ -57,7 +57,6 @@
 
 <h3>${names['tutorials']}</h3>
 
-
 <p>
 Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
 </p>
@@ -90,11 +89,9 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   </tr>
 </table>
 
-<h3>${names['tutors']}
-     <div class="tooltip_questionmark"><p>
+<h3>${names['tutors']} <div class="tooltip_questionmark"><p>
         ${tooltips['mail_tutor']}
-    </p></div>
-</h3>
+    </p></div></h3>
 
 <table>
   <tr tal:repeat="tutor lecture.tutors">
@@ -102,15 +99,27 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
       (<a tal:attributes="href request.route_path('lecture_remove_tutor', lecture_id=lecture.id, tutor_id=tutor.id)">entfernen</a>)</td>
   </tr>
 </table>
-<h3>Testate</h3>
+<h3>
+    Übungsaufgaben und Klausuren hinzufügen (Testate)
+    <div class="tooltip_questionmark">
+        <p>
+            ${tooltips['statistics']}
+        </p>
+    </div>
+</h3>
 
-<p><a tal:attributes="href request.route_path('lecture_add_exam', lecture_id=lecture.id)">Testat hinzufügen</a></p>
+<p><a tal:attributes="href request.route_path('lecture_add_exam', lecture_id=lecture.id, category='assignment')">Übungszettel hinzufügen</a></p>
+<p><a tal:attributes="href request.route_path('lecture_add_exam', lecture_id=lecture.id, category='practical_assignment')">Praktische Übung hinzufügen</a></p>
+<p><a tal:attributes="href request.route_path('lecture_add_exam', lecture_id=lecture.id, category='presence_assignment')">Präsenzübung hinzufügen</a></p>
+<p><a tal:attributes="href request.route_path('lecture_add_exam', lecture_id=lecture.id, category='exam')">Klausur hinzufügen</a></p>
+<p><a tal:attributes="href request.route_path('lecture_add_exam', lecture_id=lecture.id, category='mock_exam')">Probeklausur hinzufügen</a></p>
 
 <div tal:repeat="category categories" tal:omit-tag="">
   <h4 tal:condition="exams[category['id']]">${category['name']}</h4>
   <ul>
     <li tal:repeat="exam exams[category['id']]">
-        <a tal:attributes="href request.route_path('exam_edit', exam_id=exam.id)">${exam.name}</a> (<a tal:attributes="href request.route_path('exam_statistics', exam_id=exam.id, tutorial_ids='')">Statistiken</a>,
+        <a tal:attributes="href request.route_path('exam_edit', exam_id=exam.id)">${exam.name}</a>
+        (<a tal:attributes="href request.route_path('exam_statistics', exam_id=exam.id, tutorial_ids='')">Statistiken</a>,
         <a tal:attributes="href request.route_path('exam_enter_points', exam_id=exam.id, tutorial_ids='')">Eintragen</a>
         <a tal:attributes="href request.route_path('exam_enter_points_single', exam_id=exam.id, tutorial_ids='')">(Interaktiv)</a>,
         <a tal:attributes="href request.route_path('exam_export', exam_id=exam.id, tutorial_ids='')">Exportieren</a>,
@@ -139,7 +148,8 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   <input type="submit" value="Korrelation"/>
 </form>
 
-<h3>Benotungen
+<h3>
+  Benotungen
     <div class="tooltip_questionmark"><p>
         ${tooltips['grading']}
     </p></div>

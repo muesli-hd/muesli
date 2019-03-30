@@ -617,10 +617,6 @@ class LectureAddExam(ObjectForm):
                 FormField('name',
                    label='Name', size=100,
                    required=True),
-                FormField('category',
-                   label='Kategorie',
-                   type='select',
-                   options=[[cat['id'], cat['name']] for cat in utils.categories]),
                 FormField('url',
                    label='URL', size=100)
                 ]
