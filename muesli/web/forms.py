@@ -622,6 +622,17 @@ class LectureAddExam(ObjectForm):
                 ]
         ObjectForm.__init__(self, None, formfields, request, send='Anlegen')
 
+class LectureAddAssignment(ObjectForm):
+    def __init__(self, request):
+        formfields = [
+                FormField('name',
+                   label='Name', size=100,
+                   required=True),
+                FormField('url',
+                   label='URL', size=100)
+                ]
+        ObjectForm.__init__(self, None, formfields, request, send='Anlegen')
+
 class UserChangePassword(ObjectForm):
     def __init__(self, request):
         formfields = [
