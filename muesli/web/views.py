@@ -24,6 +24,7 @@ from muesli import models, utils, DATAPROTECTION_HTML, CHANGELOG_HTML
 from muesli.web.forms import *
 from muesli.web.context import *
 from muesli.mail import Message, sendMail
+from muesli.web.tooltips import start_tooltips
 
 from pyramid import security
 from pyramid.view import view_config
@@ -71,7 +72,8 @@ def start(request):
             'penalty_names': utils.penalty_names,
             'tutorials_as_tutor': tutorials_as_tutor.all(),
             'tutorials': tutorials.all(),
-            'lectures_as_assistant': lectures_as_assistant.all()}
+            'lectures_as_assistant': lectures_as_assistant.all(),
+            'tooltips': start_tooltips}
 
 @view_config(route_name='admin', renderer='muesli.web:templates/admin.pt', context=GeneralContext, permission='admin')
 def admin(request):

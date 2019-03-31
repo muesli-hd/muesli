@@ -97,5 +97,15 @@
   <a tal:attributes="href request.route_path('start', _query= {'show_all': '1'})">Alle anzeigen</a>.</p>
 <p tal:condition="request.GET.get('show_all', '0')=='1'">Es werden alle Veranstaltungen angezeigt. <a tal:attributes="href request.route_path('start')">Nur aktuelle anzeigen</a>.</p>
 
+<a tal:condition="request.GET.get('help', '0')=='0'" tal:attributes="href request.route_path('start', _query= {'help': '1'})">Hilfe</a>
+<div tal:condition="request.GET.get('help', '0')=='1'">
+<a tal:attributes="href request.route_path('start')">Hilfe verbergen</a>
+<ul>
+    <li>${tooltips.lecture}</li>
+    <li>${tooltips.email}</li>
+    <li>${tooltips.details}</li>
+</ul>
+</div>
+
   </metal:main>
 </metal:main>
