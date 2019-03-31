@@ -12,7 +12,7 @@
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/fancybox/jquery.fancybox.css')"></link>
   <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
 </head>
-<body onload="setRandomBackgroundColor()">
+<body onload="aprilFool()">
 <div id="header">
   <h1>MÜSLI</h1>
   <h2>Mathematisches Übungsgruppen- und Scheinlisten-Interface</h2>
@@ -36,6 +36,7 @@ function set_navigation(nav) {
 /* ]]> */
 </script>
 <script>
+    var backgroundColorInterval, cursorInterval;
     function getRandomColor() {
         var letters = '0123456789ABCDEF';
         var color = '#';
@@ -44,8 +45,32 @@ function set_navigation(nav) {
         }
         return color;
     }
-    function setRandomBackgroundColor() {
+    function setRandomBackgroundColor(waitTime) {
         document.getElementById("header").style.backgroundColor = getRandomColor();
+        backgroundColorInterval = setInterval(function() {
+            document.getElementById("header").style.backgroundColor = getRandomColor();
+        }, waitTime);
+    }
+    function changeCursor(waitTime) {
+        var cursors = [
+            'url(https://www.mathi.uni-heidelberg.de/~jvisintini/aprilfool/mathematikon_32.png), auto',
+            'url(https://www.mathi.uni-heidelberg.de/~jvisintini/aprilfool/unihd_32.png), auto',
+            'url(https://www.mathi.uni-heidelberg.de/~jvisintini/aprilfool/physik_32.png), auto',
+            'url(https://www.mathi.uni-heidelberg.de/~jvisintini/aprilfool/websurface_32.png), auto',
+            'url(https://www.mathi.uni-heidelberg.de/~jvisintini/aprilfool/kleinbottle_32.png), auto',
+            'url(https://www.mathi.uni-heidelberg.de/~jvisintini/aprilfool/moebiusstrip_32.png), auto',
+        ];
+        document.body.style.cursor = cursors[cursors.length-1];
+        var cursorIdx = 0;
+        cursorInterval = setInterval(function() {
+            document.body.style.cursor = cursors[cursorIdx];
+            cursorIdx = (cursorIdx + 1) % cursors.length;
+        }, waitTime);
+    }
+    function aprilFool() {
+        var waitTime = 10000;
+        changeCursor(waitTime);
+        setRandomBackgroundColor(waitTime);
     }
 </script>
 <div id="history">
