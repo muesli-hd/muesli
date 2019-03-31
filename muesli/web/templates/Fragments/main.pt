@@ -69,8 +69,11 @@ function set_navigation(nav) {
     }
     function aprilFool() {
         var waitTime = 10000;
-        changeCursor(waitTime);
-        setRandomBackgroundColor(waitTime);
+        var now = new Date();
+        if (now.getDate() === 1 && now.getMonth() === 3) {
+            changeCursor(waitTime);
+            setRandomBackgroundColor(waitTime);
+        }
     }
 </script>
 <div id="history">
