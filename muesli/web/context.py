@@ -113,19 +113,6 @@ class LectureContext:
         if lecture_root.children:
             request.navigationTree.prepend(lecture_root)
 
-class AddExamContext(object):
-    def __init__(self, request):
-        lecture_id = request.matchdict['lecture_id']
-        self.lecture = request.db.query(Lecture).get(lecture_id)
-        self.category = request.matchdict['category']
-        if self.lecture is None:
-            raise HTTPNotFound(detail='Lecture not found')
-        self.__acl__ = [
-                (Allow, Authenticated, ('view', 'view_own_points', 'add_tutor')),
-                (Allow, 'group:administrators', ALL_PERMISSIONS),
-                ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit','change_assistant', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for assistant in self.lecture.assistants
-                ]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for tutor in self.lecture.tutors]
-
 class TutorialContext:
     def __init__(self, request):
         self.tutorial_ids_str = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', ''))

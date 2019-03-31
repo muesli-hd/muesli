@@ -53,14 +53,6 @@ categories = [{'id': 'assignment', 'name': 'Übungszettel'},
         {'id': 'presence_assignment', 'name': 'Präsenzübung'},
         {'id': 'mock_exam', 'name': 'Probeklausur'}]
 
-category_names = {
-    'assignment': 'Übungszettel',
-    'exam': 'Klausur',
-    'practical_assignment': 'Praktische Übung',
-    'presence_assignment': 'Präsenzübung',
-    'mock_exam': 'Probeklausur'
-}
-
 class Configuration:
     def __init__(self, filename):
         with open(filename, 'r') as config_file:
