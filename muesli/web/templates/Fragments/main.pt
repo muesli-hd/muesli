@@ -12,7 +12,7 @@
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/fancybox/jquery.fancybox.css')"></link>
   <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
 </head>
-<body>
+<body onload="setRandomBackgroundColor()">
 <div id="header">
   <h1>MÜSLI</h1>
   <h2>Mathematisches Übungsgruppen- und Scheinlisten-Interface</h2>
@@ -34,6 +34,19 @@ function set_navigation(nav) {
   document.getElementById('history').innerHTML = str;
 }
 /* ]]> */
+</script>
+<script>
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+    function setRandomBackgroundColor() {
+        document.getElementById("header").style.backgroundColor = getRandomColor();
+    }
 </script>
 <div id="history">
 </div>
