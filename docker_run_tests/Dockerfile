@@ -14,6 +14,7 @@ RUN apt-get update && \
 apt-get install -y python3.5 python3.5-dev lp-solve \
 postgresql-server-dev-9.5 wget python3-pip libjs-prototype \
 libjs-select2.js libjs-jquery-fancybox locales && \
+apt-get install -y --no-install-recommends chromium-chromedriver && \
 rm -rf /var/lib/apt/lists/*
 
 RUN wget https://www.mathi.uni-heidelberg.de/~jvisintini/lp_solve -O /usr/bin/lp_solve
