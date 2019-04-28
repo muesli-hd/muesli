@@ -2,7 +2,7 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-  <h2>E-Mail an Übungsgruppe schreiben <br> ${', '.join(['%s (%s)' %  (ctut.time.__html__(), ctut.place) for ctut in tutorials])})</h2>
+  <h2>E-Mail an Übungsgruppe schreiben <br> (${', '.join(['%s (%s)' %  (ctut.time.__html__(), ctut.place) for ctut in tutorials])})</h2>
 
     <p>
       Auf dieser Seite können Sie eine Nachricht an alle Studenten in Ihrer Übungsgruppe schicken.
