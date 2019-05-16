@@ -378,6 +378,8 @@ def confirm(request):
         user = request.context.confirmation.user
         user.password = sha1(form['password'].encode('utf-8')).hexdigest()
         request.db.delete(request.context.confirmation)
+        data_updated = models.UserHasUpdated(user.id, muesli.utils.getSemesterLimit())
+        request.db.add(data_updated)
         request.db.commit()
         return HTTPFound(location=request.route_url('user_login'))
     #       registerCommon(request, form)
