@@ -68,7 +68,7 @@ def create_navigation_tree(request, user):
 
     # add tutorials the user subsrcibed to
     tutorials = tutorials.filter(Lecture.term >= semesterlimit)
-    tutorial_root_node = NavigationTree("Belegte Tutorials", request.route_url('start'))
+    tutorial_root_node = NavigationTree("Belegte Übungsgruppen", request.route_url('start'))
     root.append(tutorial_root_node)
     for t in tutorials:
         tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
@@ -80,7 +80,7 @@ def create_navigation_tree(request, user):
     # add tutorials the user tutors
     tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
 
-    tutor_node = NavigationTree("Eigene Tutorials", request.route_url('start'))
+    tutor_node = NavigationTree("Eigene Übungsgruppen", request.route_url('start'))
     for t in tutorials_as_tutor:
         tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
             t.time.__html__(), t.place),
