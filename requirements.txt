@@ -19,6 +19,7 @@ kiwisolver==1.0.1
 markdown==3.0.1
 marshmallow==3.0.0rc1
 matplotlib==2.2.0
+natsort==6.0.0
 numpy==1.14.1
 openpyxl==2.5.0
 Paste==2.0.3

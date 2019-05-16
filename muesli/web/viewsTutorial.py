@@ -39,6 +39,7 @@ import os
 import PIL.Image
 import PIL.ImageDraw
 import io
+from natsort import natsorted
 
 @view_config(route_name='tutorial_view', renderer='muesli.web:templates/tutorial/view.pt', context=TutorialContext, permission='viewOverview')
 class View:
@@ -55,8 +56,8 @@ class View:
         # Query results are already lexicographically sorted.
         # Sort again using length as key so we get length lexicographical sorting
         # https://github.com/muesli-hd/muesli/issues/28
-        exams = dict([[cat['id'], sorted(list(tutorial.lecture.exams.filter(models.Exam.category==cat['id'])),
-                                         key=lambda x: len(x.name))]
+        exams = dict([[cat['id'], natsorted(list(tutorial.lecture.exams.filter(models.Exam.category==cat['id'])),
+                                         key=lambda x: x.name)]
                       for cat in utils.categories])
         return {'tutorial': tutorial,
                 'tutorials': tutorials,
