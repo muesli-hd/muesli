@@ -82,7 +82,9 @@ function submit_all_points() {
     }
 
     //deselect all students
-    jQuery(".student_select").val(null).trigger('change');;
+    jQuery(".student_select").val(null).trigger('change');
+    update_total();
+    jQuery(".select2-search__field").focus().select();
 
     return true;
 }
@@ -94,7 +96,7 @@ ${code}
 </script>
 <form id="enter_points_form" onsubmit="submit_all_points(); return false;">
 <input type="hidden" id="student_id" name="student_id" />
-<table id="enter_points_table">
+<table class="points_table" id="enter_points_table">
   <tr>
     <th>Namen</th>
     <th tal:repeat="e exercises">${e.nr}</th>
