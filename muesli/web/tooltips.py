@@ -8,7 +8,7 @@ start_tooltips = {
     "lecture": "Klicken Sie auf den Namen einer Vorlesung, um eine Liste der verfügbaren Übungsgruppen und weitere Informationen zu dieser Vorlesung zu erhalten.",
     "email": "Klicken Sie auf den Namen eines Tutors, um ihm/ihr eine Email zu schicken.",
     "details": "Klicken Sie auf [Details], um Bewertungen von Übungsblättern und Klausuren zu einzusehen.",
-    "tutor": "Klicken Sie auf [+], um Details aller eigenen Übungsgruppen zu dieser Vorlesung anzuzeigen."
+    "tutor": "Klicken Sie auf [+], um gleichzeitig alle eigenen Übungsgruppen zu dieser Vorlesung zu verwalten."
 }
 
 grading_edit_tooltips = {
