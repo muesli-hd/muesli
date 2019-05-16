@@ -104,6 +104,7 @@
     <li>${tooltips.lecture}</li>
     <li>${tooltips.email}</li>
     <li>${tooltips.details}</li>
+    <li tal:condition="tutorials_as_tutor">${tooltips.tutor}</li>
 </ul>
 </div>
 
