@@ -101,10 +101,10 @@ class LectureContext:
             return
 
         if request.has_permission('edit', self):
-            lecture_root = NavigationTree("Aktuelle Vorlesung",
+            lecture_root = NavigationTree('Vorlesung: {}'.format(self.lecture.name),
                     request.route_url('lecture_edit', lecture_id=self.lecture.id))
         else:
-            lecture_root = NavigationTree("Aktuelle Vorlesung",
+            lecture_root = NavigationTree('Vorlesung: {}'.format(self.lecture.name),
                     request.route_url('lecture_view', lecture_id=self.lecture.id))
         nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
         for node in nodes:
@@ -152,10 +152,10 @@ class TutorialContext:
             return
 
         if request.has_permission('edit', self):
-            lecture_root = NavigationTree("Aktuelle Vorlesung",
+            lecture_root = NavigationTree('Vorlesung: {}'.format(self.lecture.name),
                     request.route_url('lecture_edit', lecture_id=self.lecture.id))
         else:
-            lecture_root = NavigationTree("Aktuelle Vorlesung",
+            lecture_root = NavigationTree('Vorlesung: {}'.format(self.lecture.name),
                     request.route_url('lecture_view', lecture_id=self.lecture.id))
         nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
         for node in nodes:
