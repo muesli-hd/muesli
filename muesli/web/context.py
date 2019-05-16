@@ -162,7 +162,8 @@ class TutorialContext:
             lecture_root.append(node)
 
         for tutorial in self.tutorials:
-            tutorial_root = NavigationTree("Aktuelles Tutorial", request.route_url('tutorial_view', tutorial_ids=tutorial.id))
+            tutorial_root = NavigationTree("{} ({})".format(tutorial.lecture.name, tutorial.time.__html__()),
+                                           request.route_url('tutorial_view', tutorial_ids=tutorial.id))
             nodes = get_tutorial_specific_nodes(request, self, tutorial.id,
                     self.lecture.id)
             for node in nodes:
