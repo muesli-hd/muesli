@@ -599,7 +599,7 @@ def enterPointsSingle(request):
         stud_result = exam.getResultsForStudent(stud)
         # read exercise ids from exercise_ids, since they will always have the correct order
         current_points = [str(stud_result[exercise_id]['points']) for _, exercise_id in exercise_ids]
-        student_results.append([stud.id, current_points])
+        student_results.append([str(stud.id), current_points])
     student_results_json = json.dumps(student_results)
 
     return {

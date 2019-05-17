@@ -6,6 +6,8 @@ services:
     image: 'postgres:latest'
     environment:
       - POSTGRES_DB=muesli
+    ports:
+      - '127.0.0.1:5433:5432'
     volumes:
       - './travis-muesli-origDb.sql:/docker-entrypoint-initdb.d/travis-muesli-origDb.sql'
   muesli:
@@ -13,6 +15,6 @@ services:
     volumes:
       - './:/opt/muesli4'
     ports:
-      - '127.0.0.1:8080:8080'
+      - '8080:8080'
     depends_on:
       - postgres
