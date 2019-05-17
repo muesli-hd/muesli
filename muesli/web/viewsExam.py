@@ -646,15 +646,14 @@ def ajaxSavePoints(request):
         student = lecture_students.filter(models.LectureStudent.student_id == student_id).one().student
         exercise_points = exam.exercise_points.filter(models.ExerciseStudent.student_id==student.id)
 
-        ep_found = False
         for exercise_id in submitted_points:
+            ep_found = False
             for ep in exercise_points:
                 if ep.exercise.id == exercise_id:
                     ep_found = True
                     if submitted_points[exercise_id] is None:
                         try:
-                            request.db.delete(d_points[exercise.id])
-                            #print("deleted")
+                            request.db.delete(ep)
                         except sqlalchemy.exc.InvalidRequestError:
                             # Object not really added
                             # Seems not to work really
@@ -662,12 +661,14 @@ def ajaxSavePoints(request):
                             pass
                     else:
                         ep.points = submitted_points[exercise_id]
-        if not ep_found:
-            ep = models.ExerciseStudent()
-            ep.student = student
-            ep.exercise = exercise
-            ep.points = submitted_points[exercise_id]
-            request.db.add(ep)
+            if not ep_found:
+                for exercise in exam.exercises:
+                    if exercise.id == exercise_id:
+                        ep = models.ExerciseStudent()
+                        ep.student = student
+                        ep.exercise = exercise
+                        ep.points = submitted_points[exercise_id]
+                        request.db.add(ep)
 
     request.db.commit()
     return json_data
