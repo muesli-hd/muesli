@@ -42,17 +42,21 @@ jQuery(document).ready(function() {
         var student_results_json = '${student_results}';
         var student_results = JSON.parse(student_results_json);
 
+        var points_captions = Array(${len(exercises) + 1}).fill('');
         for(i = 0; i < selectedStudents.length; i++) {
-            for (j = 0; j < student_results.length; j++) {
-                if (selectedStudents[i].value == student_results[j][0]){
-                    jQuery('.current-points').each(function(k, obj) {
-                        obj.textContent = student_results[j][1][k];
-                    })
+            for(j = 0; j < points_captions.length; j++) {
+                var caption = student_results[selectedStudents[i].value][j];
+                if (caption === 'None'){
+                    caption = '-';
                 }
+                points_captions[j] += caption + '<br/>';
             }
         }
 
-    });
+        jQuery('.current-points').each(function(i, obj) {
+            obj.innerHTML = (points_captions[i]);
+        });
+    }).trigger('change');
 });
 
 function getSelectedStudents() {
@@ -150,7 +154,7 @@ function submit_points(student_id) {
         </select>
     </td>
     <td tal:repeat="e exercises"><p style="text-align: center" class="current-points"></p><input type="text" class="points" name="points-${e.nr}" size="3" onchange="update_total() "></td>
-    <td><p style="text-align: center">b</p><input id="total" readonly="readonly" size="4" value="0"></td>
+    <td><p style="text-align: center" class="current-points"></p><input id="total" readonly="readonly" size="4" value="0"></td>
     <td></td>
     <td></td>
   </tr>
