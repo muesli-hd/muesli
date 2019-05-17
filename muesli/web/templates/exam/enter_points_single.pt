@@ -34,14 +34,18 @@ jQuery.noConflict();
 </script>
 
 <script>/* <![CDATA[ */
+var student_results_json = '${student_results}';
+var student_results;
+var exercise_ids_json = '${exercise_ids}';
+
 jQuery(document).ready(function() {
+    student_results = JSON.parse(student_results_json);
+    exercise_ids = JSON.parse(exercise_ids_json);
+
     jQuery('.student_select').select2({
         width: "16em"
     }).on('change', function (e) {
         var selectedStudents = getSelectedStudents();
-        var student_results_json = '${student_results}';
-        var student_results = JSON.parse(student_results_json);
-
         var points_captions = Array(${len(exercises) + 1}).fill('');
         for(i = 0; i < selectedStudents.length; i++) {
             for(j = 0; j < points_captions.length; j++) {
@@ -57,6 +61,7 @@ jQuery(document).ready(function() {
             obj.innerHTML = (points_captions[i]);
         });
     }).trigger('change');
+    jQuery(".select2-search__field").focus().select();
 });
 
 function getSelectedStudents() {
@@ -83,23 +88,45 @@ function submit_all_points() {
         return true;
     }
 
-    for(i = 0; i < selectedStudents.length; i++){
-        if(submit_points(selectedStudents[i].value)){
-            savestatus.innerHTML = "Fehler beim Speichern!";
-            savestatus.className = "error";
-            return false;
-        }
-        console.log(1);
-    }
-    savestatus.innerHTML = "Punkte erfolgreich abgespeichert!";
-    savestatus.className = "message";
 
+    var parameterHash = new Hash();
+
+    var studentlist = [];
+    for(i = 0; i < selectedStudents.length; i++){
+        studentlist.push(selectedStudents[i].value);
+    }
+    parameterHash.set('student_id', studentlist.join(','));
+
+    for (i = 0; i < exercise_ids.length; i++){
+        var current_input = document.getElementsByName('points-' + exercise_ids[i][0])[0];
+        parameterHash.set('points-' + exercise_ids[i][1], current_input.value);
+    }
+
+    new Ajax.Request('${request.route_path('exam_ajax_save_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)}', {
+                parameters: parameterHash,
+                onSuccess:function(response){
+                    var status = response.responseText.evalJSON();
+                    if (status['format_error']) {
+                        savestatus.innerHTML = status['msg'];
+                        savestatus.className = "error";
+                    } else {
+                        savestatus.innerHTML = "Punkte erfolgreich abgespeichert!";
+                        savestatus.className = "message";
+                    }
+                },
+                onFailure:function(response){
+                    savestatus.innerHTML = "Fehler beim Speichern!";
+                    savestatus.className = "error";
+                }
+            }
+    );
+
+    //deselect all students
     var inputPunkte = document.getElementsByClassName('points');
     for(i = 0; i < inputPunkte.length; i++){
         inputPunkte[i].value = "";
     }
 
-    //deselect all students
     jQuery(".student_select").val(null).trigger('change');
     update_total();
     jQuery(".select2-search__field").focus().select();
@@ -109,34 +136,6 @@ function submit_all_points() {
 /* ]]> */
 </script>
 
-<script>
-function submit_points(student_id) {
-    var parameterHash = new Hash();
-    parameterHash.set('student_id', student_id);
-    var exercise_ids_json = '${exercise_ids}';
-    var exercise_ids = JSON.parse(exercise_ids_json);
-
-    var current_input;
-
-    for (i = 0; i < exercise_ids.length; i++){
-        current_input = document.getElementsByName('points-' + exercise_ids[i][0])[0];
-        parameterHash.set('points-' + exercise_ids[i][1], current_input.value);
-    }
-
-    var status = 0;
-    new Ajax.Request('${request.route_path('exam_ajax_save_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)}', {
-                parameters: parameterHash,
-                onSuccess:function(transport){
-                    status = 0;
-                },
-                onFailure:function(transport){
-                    status = 1;
-                }
-            }
-    );
-    return status;
-}
-</script>
 <form id="enter_points_form" onsubmit="submit_all_points(); return false;">
 <input type="hidden" id="student_id" name="student_id" />
 <table class="points_table" id="enter_points_table">
