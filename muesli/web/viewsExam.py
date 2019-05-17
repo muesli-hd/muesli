@@ -35,6 +35,7 @@ import sqlalchemy
 import PIL.Image
 import PIL.ImageDraw
 import io
+import json
 
 from collections import Counter
 
@@ -591,39 +592,22 @@ def enterPointsSingle(request):
 
     lecture_students = exam.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)
     students = [ls.student for ls in lecture_students]
-
-    code = """
-function submit_points(student_id) {
-    var parameterHash = new Hash();
-    parameterHash.set('student_id', student_id);
-    var current_input;
-    """
-    for e in exercises:
-        code += """
-    current_input = document.getElementsByName('points-%s')[0];
-    parameterHash.set('points-%s', current_input.value);
-    """ %(e.nr, e.id)
-    code += """
-    var status = 0;
-    new Ajax.Request('%s', {
-        parameters: parameterHash,
-        onSuccess:function(transport){
-        status = 0;
-        },
-        onFailure:function(transport){
-        status = 1;
-        }
-    }
-    );
-    return status;
-}
-    """  % request.route_path('exam_ajax_save_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)
+    exercise_ids = [[e.nr, e.id] for e in exercises]
+    exercise_ids_json = json.dumps(exercise_ids)
+    student_results = []
+    for stud in students:
+        stud_result = exam.getResultsForStudent(stud)
+        # read exercise ids from exercise_ids, since they will always have the correct order
+        current_points = [str(stud_result[exercise_id]['points']) for _, exercise_id in exercise_ids]
+        student_results.append([stud.id, current_points])
+    student_results_json = json.dumps(student_results)
 
     return {
-            'code': code,
             'students': students,
             'exam': exam,
             'exercises': exercises,
+            'exercise_ids': exercise_ids_json,
+            'student_results': student_results_json,
             'tutorial_ids': request.context.tutorial_ids_str,
             'show_tutor': show_tutor,
             'show_time': show_time
