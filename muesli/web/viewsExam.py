@@ -614,58 +614,62 @@ def enterPointsSingle(request):
             'show_time': show_time
             }
 
-@view_config(route_name='exam_ajax_save_points', renderer='json', context=ExamContext, permission='enter_points')
-def ajaxSavePoints(request):
-    exam = request.context.exam
-    lecture_students = exam.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)
-    student_id = request.POST['student_id']
-    student = lecture_students.filter(models.LectureStudent.student_id == student_id).one().student
-    exercise_points = exam.exercise_points.filter(models.ExerciseStudent.student_id==student.id)
-    d_points = {}
+
+def parse_points(post_data, exercises):
+    e_points = {}
     json_data = {'msg': '', 'format_error_cells': []}
-    for ep in exercise_points:
-        d_points[ep.exercise_id] = ep
-    for exercise in exam.exercises:
-        if not exercise.id in d_points:
-            ep = models.ExerciseStudent()
-            ep.student = student
-            ep.exercise = exercise
-            request.db.add(ep)
-            d_points[exercise.id] = ep
+    for exercise in exercises:
         get_param = 'points-%s' % exercise.id
-        if get_param in request.POST:
-            p = request.POST[get_param].replace(',','.')
+        if get_param in post_data:
+            p = post_data[get_param].replace(',','.')
             if p:
                 try:
                     p = float(p)
-                    d_points[exercise.id].points = p
+                    e_points[exercise.id] = p
                 except ValueError:
                     json_data['format_error'] = 1
                     json_data['msg'] += "Invalid value '%s' for exercise '%s'. " % (p, exercise.id)
                     json_data['format_error_cells'].append(exercise.id)
             else:
-                if d_points[exercise.id] in request.db:
-                    #obj = d_points[exercise.id]
-                    #from sqlalchemy.orm import object_session
-                    #from sqlalchemy.orm.util import has_identity
-                    #if object_session(obj) is None and not has_identity(obj):
-                        #print("transient")
-                    #if object_session(obj) is not None and not has_identity(obj):
-                        #print("pending")
-                    #if object_session(obj) is None and has_identity(obj):
-                        #print("detached")
-                    #if object_session(obj) is not None and has_identity(obj):
-                        #print("persistent")
-                    try:
-                        request.db.delete(d_points[exercise.id])
-                        #print("deleted")
-                    except sqlalchemy.exc.InvalidRequestError:
-                        # Object not really added
-                        # Seems not to work really
-                        #print("not deleted")
-                        pass
-    request.db.commit()
+                e_points[exercise.id] = None
     json_data['msg'] = json_data['msg'] or 'sucessfull'
+    return e_points, json_data
+
+
+@view_config(route_name='exam_ajax_save_points', renderer='json', context=ExamContext, permission='enter_points')
+def ajaxSavePoints(request):
+    exam = request.context.exam
+    submitted_points, json_data = parse_points(request.POST, exam.exercises)
+
+    lecture_students = exam.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)
+    for student_id in request.POST['student_id'].split(','):
+        student = lecture_students.filter(models.LectureStudent.student_id == student_id).one().student
+        exercise_points = exam.exercise_points.filter(models.ExerciseStudent.student_id==student.id)
+
+        ep_found = False
+        for exercise_id in submitted_points:
+            for ep in exercise_points:
+                if ep.exercise.id == exercise_id:
+                    ep_found = True
+                    if submitted_points[exercise_id] is None:
+                        try:
+                            request.db.delete(d_points[exercise.id])
+                            #print("deleted")
+                        except sqlalchemy.exc.InvalidRequestError:
+                            # Object not really added
+                            # Seems not to work really
+                            #print("not deleted")
+                            pass
+                    else:
+                        ep.points = submitted_points[exercise_id]
+        if not ep_found:
+            ep = models.ExerciseStudent()
+            ep.student = student
+            ep.exercise = exercise
+            ep.points = submitted_points[exercise_id]
+            request.db.add(ep)
+
+    request.db.commit()
     return json_data
 
 @view_config(route_name='exam_ajax_get_points', renderer='json', context=ExamContext, permission='view_points')
