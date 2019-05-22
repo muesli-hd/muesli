@@ -600,7 +600,9 @@ def enterPointsSingle(request):
         # read exercise ids from exercise_ids, since they will always have the correct order
         current_points = [str(stud_result[exercise_id]['points']) for _, exercise_id in exercise_ids]
         current_points.append(str(stud_result['sum']))
-        student_results[str(stud.id)] = current_points
+        student_results[str(stud.id)] = {}
+        student_results[str(stud.id)]['points'] = current_points
+        student_results[str(stud.id)]['name'] = stud.name()
     student_results_json = json.dumps(student_results)
 
     return {
@@ -633,6 +635,7 @@ def parse_points(post_data, exercises):
             else:
                 e_points[exercise.id] = None
     json_data['msg'] = json_data['msg'] or 'sucessfull'
+    json_data['submitted_points'] = e_points
     return e_points, json_data
 
 
@@ -642,9 +645,12 @@ def ajaxSavePoints(request):
     submitted_points, json_data = parse_points(request.POST, exam.exercises)
 
     lecture_students = exam.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)
+    json_data['students'] = []
     for student_id in request.POST['student_id'].split(','):
         student = lecture_students.filter(models.LectureStudent.student_id == student_id).one().student
         exercise_points = exam.exercise_points.filter(models.ExerciseStudent.student_id==student.id)
+
+        json_data['students'].append(student.id)
 
         for exercise_id in submitted_points:
             ep_found = False
