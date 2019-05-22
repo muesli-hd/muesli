@@ -16,24 +16,32 @@
 
 <script>
 jQuery.noConflict();
-var student_results_json = '${student_results}';
-var student_results;
-var exercise_ids_json = '${exercise_ids}';
-var latest_row_id = 0;
+window.student_results_json = '${student_results}';
+window.exercise_ids_json = '${exercise_ids}';
+window.latest_row_id = 0;
 
 jQuery(document).ready(function() {
-    student_results = JSON.parse(student_results_json);
-    exercise_ids = JSON.parse(exercise_ids_json);
+    window.student_results = JSON.parse(student_results_json);
+    window.exercise_ids = JSON.parse(exercise_ids_json);
 
     jQuery('.student_select').select2({
         width: "16em"
     }).on('change', function (e) {
         var selectedStudents = getSelectedStudents(0);
         var points_captions = Array(${len(exercises) + 1}).fill('');
-        var preselected_points = Array(${len(exercises) + 1}).fill('');
+        var preselected_points = Array(${len(exercises) + 1});
         for(i = 0; i < selectedStudents.length; i++) {
             for(j = 0; j < points_captions.length; j++) {
                 var points = student_results[selectedStudents[i]]['points'][j];
+                if (typeof(preselected_points[j]) === 'undefined') {
+                    preselected_points[j] = {};
+                    preselected_points[j].value = points;
+                    preselected_points[j].alert = false;
+                }
+                if (preselected_points[j].value !== points) {
+                    preselected_points[j].value = points;
+                    preselected_points[j].alert = true;
+                }
                 var caption = points;
                 if (points === 'None'){
                     caption = '-';
@@ -42,9 +50,28 @@ jQuery(document).ready(function() {
             }
         }
 
-        jQuery('.current-points').each(function(i, obj) {
+        jQuery('.current-points').each(function (i, obj) {
             obj.innerHTML = (points_captions[i]);
+            if (selectedStudents.length > 0) {
+                if (i < preselected_points.length - 1 && preselected_points[i].alert) {
+                    obj.style.color = 'red';
+                } else {
+                    obj.style.color = null;
+                }
+            }
         });
+        jQuery('.points').each(function (i, obj) {
+            if (selectedStudents.length > 0) {
+                if (obj.value === '') {
+                    if (preselected_points[i].value !== 'None') {
+                        obj.value = (preselected_points[i].value);
+                    }
+                }
+            } else {
+                obj.value = '';
+            }
+        });
+        update_total(0);
     }).trigger('change');
 
     jQuery(document).on('keydown', 'form', function(event) {
@@ -204,13 +231,17 @@ function submit_all_points(row_id) {
                     insert_data += '<td id=\'student-names\'></td>';
 
                     var pointsum = 0;
-                    for (i=0; i < exercise_ids.length; i++) {
+                    for (var i=0; i < exercise_ids.length; i++) {
                         var p = status['submitted_points'][exercise_ids[i][1]];
                         pointsum += p;
+                        for (var j = 0; j < status['students'].length; j++) {
+                            window.student_results[status['students'][j]]['points'][i] = p.toFixed(1);
+                            student_results[status['students'][j]]['points'][exercise_ids.length] = pointsum.toFixed(1);
+                        }
                         if (p === null) {
                             p = '-';
                         } else {
-                            p = p
+                            p = p.toFixed(1)
                         }
                         insert_data += '<td style="text-align: center" data-exercise="' + exercise_ids[i][1] +'">' + p + '</td>';
                     }
