@@ -648,36 +648,23 @@ def ajaxSavePoints(request):
     json_data['students'] = []
     for student_id in request.POST['student_id'].split(','):
         student = lecture_students.filter(models.LectureStudent.student_id == student_id).one().student
-        exercise_points = exam.exercise_points.filter(models.ExerciseStudent.student_id==student.id)
 
         json_data['students'].append(student.id)
 
         for exercise_id in submitted_points:
-            ep_found = False
-            for ep in exercise_points:
-                if ep.exercise.id == exercise_id:
-                    ep_found = True
-                    if submitted_points[exercise_id] is None:
-                        try:
-                            request.db.delete(ep)
-                        except sqlalchemy.exc.InvalidRequestError:
-                            # Object not really added
-                            # Seems not to work really
-                            #print("not deleted")
-                            pass
-                    else:
-                        ep.points = submitted_points[exercise_id]
-            if not ep_found:
-                for exercise in exam.exercises:
-                    if exercise.id == exercise_id:
-                        ep = models.ExerciseStudent()
-                        ep.student = student
-                        ep.exercise = exercise
-                        ep.points = submitted_points[exercise_id]
-                        request.db.add(ep)
+            if submitted_points[exercise_id] is None:
+                request.db.query(ExerciseStudent).filter(models.ExerciseStudent.student_id == student_id)\
+                    .filter(models.ExerciseStudent.exercise_id == exercise_id).delete()
+            else:
+                ep = models.ExerciseStudent()
+                ep.student_id = student_id
+                ep.exercise_id = exercise_id
+                ep.points = submitted_points[exercise_id]
+                request.db.merge(ep)
 
     request.db.commit()
     return json_data
+
 
 @view_config(route_name='exam_ajax_get_points', renderer='json', context=ExamContext, permission='view_points')
 def ajaxGetPoints(request):
