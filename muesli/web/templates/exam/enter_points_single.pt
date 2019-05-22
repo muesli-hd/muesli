@@ -46,6 +46,20 @@ jQuery(document).ready(function() {
             obj.innerHTML = (points_captions[i]);
         });
     }).trigger('change');
+
+    jQuery(document).on('keydown', 'form', function(event) {
+        var row_id;
+        row_id = Number(jQuery(document.activeElement).closest('tr').attr('id').replace('row-', ''));
+        if (event.key === "Enter") {
+            if (row_id === 0) {
+                return submit_all_points(row_id);
+            } else {
+                save_corrected_row(row_id)
+            }
+        }
+        return true;
+    });
+
     jQuery(".select2-search__field").focus().select();
 });
 
@@ -73,7 +87,7 @@ function getSelectedStudents(row_id) {
         });
         return selectedStudents;
     } else {
-        return jQuery('#row-' + row_id + ' button').data('students').split(',')
+        return jQuery('#row-' + row_id + ' button').attr('data-students').split(',')
     }
 }
 
@@ -175,15 +189,18 @@ function submit_all_points(row_id) {
     );
 
     //deselect all students if a new row is submitted
+    var student_select;
+    student_select = jQuery(".student_select");
     if (row_id === 0) {
         var inputPunkte = document.getElementsByClassName('points');
         for (i = 0; i < inputPunkte.length; i++) {
             inputPunkte[i].value = "";
         }
+        student_select.val(null);
+        update_total(0);
     }
 
-    jQuery(".student_select").val(null).trigger('change');
-    update_total(0);
+    student_select.trigger('change');
     jQuery(".select2-search__field").focus().select();
 
     return true;
