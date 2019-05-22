@@ -93,7 +93,14 @@ function getSelectedStudents(row_id) {
 
 function update_student_names(row_id) {
     var row = jQuery('#row-' + row_id);
-    var students = row.find('button').attr('data-students').split(',');
+    var students_str = row.find('button').attr('data-students');
+
+    if (students_str === '') {
+        row.remove();
+        return true;
+    }
+
+    var students = students_str.split(',');
     var student_names = [];
     var student_names_field = row.find('#student-names');
 
@@ -127,6 +134,37 @@ function correct_row(row_id) {
 function save_corrected_row(row_id) {
     submit_all_points(row_id);
     jQuery('#row-' + row_id).remove();
+}
+
+function remove_students_from_previous_submittions(students) {
+    var row_id;
+    for (row_id = 1; row_id < latest_row_id; row_id++) {
+        var button;
+        var row_students;
+        var new_row_students;
+        var is_in_row;
+        new_row_students = [];
+
+        button = jQuery('#row-' + row_id + ' button');
+        if (button.length === 0) {
+            continue;
+        }
+        row_students = button.attr('data-students').split(',');
+        row_students.forEach(function(row_student) {
+            is_in_row = false;
+            students.forEach(function(student) {
+                if (row_student === String(student)) {
+                    is_in_row = true;
+                }
+            });
+            if (!is_in_row) {
+                new_row_students.push(row_student)
+            }
+        });
+        button.attr('data-students', new_row_students.join(','));
+        update_student_names(row_id)
+    }
+
 }
 
 function submit_all_points(row_id) {
@@ -178,8 +216,9 @@ function submit_all_points(row_id) {
                     }
                     insert_data += '<td style="text-align: center" id="totalcol">' + pointsum.toFixed(2) + '</td>';
                     insert_data += '<td><button data-students="' + status['students'].join(',') + '" onclick="correct_row(' + new_row_id +')" type="button">Korrigieren</button></td>';
-                    jQuery('#row-0').before(insert_data)
-                    update_student_names(new_row_id)
+                    remove_students_from_previous_submittions(status['students']);
+                    jQuery('#row-0').before(insert_data);
+                    update_student_names(new_row_id);
                 },
                 onFailure:function(response){
                     savestatus.innerHTML = "Fehler beim Speichern!";
