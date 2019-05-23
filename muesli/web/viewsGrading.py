@@ -315,13 +315,13 @@ class FormulaHistogram(EnterGradesBasic):
         for x in range(1, 5):
             percentage_list.append(100*sum(grade <= x for grade in grades_list)/grades_count)
 
-        percentage_message.append('• ' + str(percentage_list[0]) + '% haben die Note 1.0\n')
-        percentage_message.append('• ' + str(percentage_list[1]) + '% haben die Note 2.0 oder besser\n')
-        percentage_message.append('• ' + str(percentage_list[2]) + '% haben die Note 3.0 oder besser\n')
-        percentage_message.append('• ' + str(percentage_list[3]) + '% haben die Note 4.0 oder besser\n')
-        percentage_message.append('• ' + str(100-percentage_list[3]) + '% haben die Note 5.0\n')
+        percentage_message.append('• {:.1f}% haben die Note 1.0\n'.format(percentage_list[0]))
+        percentage_message.append('• {:.1f}% haben die Note 2.0 oder besser\n'.format(percentage_list[1]))
+        percentage_message.append('• {:.1f}% haben die Note 3.0 oder besser\n'.format(percentage_list[2]))
+        percentage_message.append('• {:.1f}% haben die Note 4.0 oder besser\n'.format(percentage_list[3]))
+        percentage_message.append('• {:.1f}% haben die Note 5.0\n'.format(100-percentage_list[3]))
 
-        pyplot.text(-0.5, -1.2, "".join(percentage_message), verticalalignment='bottom')
+        pyplot.text(-0.5, -3, "".join(percentage_message), verticalalignment='top')
 
         return fig
 
