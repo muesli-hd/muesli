@@ -1,15 +1,15 @@
 ---
 language: python
-dist: xenial
+dist: bionic
 python:
-  - "3.5.2"
+  - "3.6.7"
 
 addons:
-  postgresql: "9.6"
+  postgresql: "10"
   apt:
     packages:
       - lp-solve
-      - postgresql-server-dev-9.6
+      - postgresql-server-dev-10
 
 cache: pip
 

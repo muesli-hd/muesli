@@ -12,8 +12,8 @@ CMD ["/opt/muesli4/docker-serve.sh"]
 RUN useradd muesli
 
 RUN apt-get update && \
-apt-get install -y python3.5 python3.5-dev lp-solve \
-postgresql-server-dev-9.5 wget python3-pip libjs-prototype \
+apt-get install -y python3.6 python3.6-dev lp-solve \
+postgresql-server-dev-10 wget python3-pip libjs-prototype \
 libjs-select2.js libjs-jquery-fancybox locales && \
 rm -rf /var/lib/apt/lists/*
 
