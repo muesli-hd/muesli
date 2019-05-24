@@ -24,11 +24,7 @@ import sys
 
 import muesli.web
 from waitress import serve
-import logging
-from paste.translogger import TransLogger
 import subprocess
-
-import yaml
 
 if '--reload' in sys.argv:
     files = subprocess.Popen(['find', '.', '-iname', '*.pt'],
@@ -39,9 +35,7 @@ if '--reload' in sys.argv:
     paste.reloader.install()
 
 app = muesli.web.main()
-logger = logging.getLogger('waitress')
-logger.setLevel(logging.INFO)
-
-serve(TransLogger(app), host=muesli.config['listen']['host'], port=muesli.config['listen']['port'],
-      threads=muesli.config['listen']['threads'], trusted_proxy='*',
+serve(app, host=muesli.config['listen']['host'], port=muesli.config['listen']['port'],
+      threads=50, connection_limit=1000, channel_timeout=10, cleanup_interval=30,
+      backlog=2048, trusted_proxy='*',
       trusted_proxy_headers="x-forwarded-for x-forwarded-host x-forwarded-proto x-forwarded-port")
