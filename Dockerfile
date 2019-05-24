@@ -29,3 +29,4 @@ RUN wget https://www.mathi.uni-heidelberg.de/~jvisintini/libxli_DIMACS.so -O /us
 RUN pip3 install --upgrade pip
 COPY --chown=muesli:muesli ./requirements.txt /opt/muesli4/
 RUN pip3 install -r requirements.txt
+COPY --chown=muesli:muesli . /opt/muesli4/
