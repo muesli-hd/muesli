@@ -22,6 +22,7 @@ import os
 from markdown import markdown
 
 from sqlalchemy import create_engine
+from sqlalchemy.pool import NullPool
 
 from .utils import Configuration
 
@@ -49,7 +50,7 @@ def engine():
     if not PRODUCTION_INSTANCE:
         return create_engine(databaseName, max_overflow=-1)
     else:
-        return create_engine(databaseName)
+        return create_engine(databaseName, poolclass=NullPool)
 
 
 def testengine():
