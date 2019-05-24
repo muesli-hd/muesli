@@ -12,3 +12,4 @@ venv
 .idea
 .pytest_cache
 maintainance_scripts
+**/header.txt

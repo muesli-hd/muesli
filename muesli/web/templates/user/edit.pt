@@ -61,6 +61,41 @@
 </ul>
 </div>
 
+    <h2 tal:condition="keys">API Keys</h2>
+    <table tal:condition="keys" class="colored">
+    <thead>
+      <tr>
+        <th> ID </th>
+        <th> Ablaufdatum </th>
+        <th> Beschreibung </th>
+        <th> Entfernen </th>
+      </tr>
+    <tbody>
+      <tr tal:condition="keys" tal:repeat="key keys">
+        <td style="font-family:monospace;font-size:1.1em;">
+            ${key.id}
+        </td>
+        <td>
+            ${key.expires.strftime("%d. %B %Y, %H:%M Uhr")}
+        </td>
+
+        <td tal:define="italic 'font-style: italic !important;;font-size: 0.9em;;'" tal:attributes="style italic" tal:condition="not key.description">
+            Keine Beschreibung
+        </td>
+
+        <td tal:condition="key.description">
+            ${key.description}
+        </td>
+        <td>
+          <form method="post" tal:attributes="action request.route_path('remove_api_key',key_id=key.id)">
+            <input type="submit" value="Entfernen"/>
+          </form>
+        </td>
+      </tr>
+    </tbody>
+    </thead>
+    </table>
+<br>
 <a tal:attributes="href request.route_path('user_delete', user_id=user.id)">Benutzer löschen</a>
 
 

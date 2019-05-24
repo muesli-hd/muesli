@@ -1,0 +1,21 @@
+---
+version: '3.6'
+
+services:
+  postgres:
+    container_name: muesli_postgres_testrunner
+    image: 'postgres:latest'
+    environment:
+      - POSTGRES_DB=mueslitest
+    volumes:
+      - '../travis-muesli-origDb.sql:/docker-entrypoint-initdb.d/travis-muesli-origDb.sql'
+  muesli:
+    image: "muesli:tests"
+    container_name: muesli_testrunner
+    build:
+      context: ..
+      dockerfile: ./docker_run_tests/Dockerfile
+    volumes:
+      - '../:/opt/muesli4'
+    depends_on:
+      - postgres

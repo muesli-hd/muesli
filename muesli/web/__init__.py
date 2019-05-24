@@ -20,19 +20,25 @@
 
 from pyramid import security
 from pyramid.config import Configurator
-from pyramid.events import subscriber, BeforeRender, NewRequest
+from pyramid.events import subscriber, BeforeTraversal, BeforeRender, NewRequest
 from pyramid.renderers import get_renderer
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
+from muesli.web.pyramid_jwt import JWTAuthenticationPolicy
+from pyramid_multiauth import MultiAuthenticationPolicy
 import pyramid_beaker
 import beaker.ext.sqla
 import tempfile
 
+from muesli.web.navigation_tree import create_navigation_tree
 from muesli.web.context import *
 from muesli.models import *
 from muesli.web.views import *
 from muesli.web.viewsLecture import *
 from muesli.web.viewsUser import *
+from muesli.web.viewsTutorial import *
+from muesli.web.viewsApi import *
+from muesli.web.api.v1 import *
 from muesli import utils
 import muesli
 
@@ -40,10 +46,10 @@ import time
 import datetime
 import numbers
 
-#import objgraph
-#import inspect
-#import random
-#mport gc
+# import objgraph
+# import inspect
+# import random
+# mport gc
 
 import weakref
 
@@ -83,6 +89,7 @@ def add_session_to_request(event):
     #event.request.inspect = inspect
     #event.request.random = random
     #event.request.gc = gc
+
 @subscriber(NewRequest)
 def add_javascript_to_request(event):
     event.request.javascript = list()
@@ -90,6 +97,10 @@ def add_javascript_to_request(event):
 @subscriber(NewRequest)
 def add_config_to_request(event):
     event.request.config = muesli.config
+
+@subscriber(BeforeTraversal)
+def add_navigationTree_to_request(event):
+    event.request.navigationTree = create_navigation_tree(event.request, event.request.user)
 
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):
@@ -104,11 +115,12 @@ def principals_for_user(user_id, request):
     return principals
 
 
-def main(global_config=None, **settings):
-    engine = muesli.engine()
+def main(global_config=None, testmode=False, **settings):
+    if testmode:
+        engine = muesli.testengine()
+    else:
+        engine = muesli.engine()
     initializeSession(engine)
-    #settings.update({
-    #})
 
     # XXX: ugly
     import sqlalchemy as sa
@@ -127,9 +139,19 @@ def main(global_config=None, **settings):
             'beaker.session.data_dir': tempfile.mkdtemp(),
             'beaker.session.timeout': 7200,
     })
+    if not muesli.PRODUCTION_INSTANCE:
+        settings.update({
+            'debugtoolbar.hosts': '0.0.0.0/0',
+        })
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
-
-    authentication_policy = SessionAuthenticationPolicy(callback=principals_for_user)
+    jwt_authentication_policy = JWTAuthenticationPolicy(
+        muesli.config["api"]["JWT_SECRET_TOKEN"],
+        callback=principals_for_user,
+        auth_type="Bearer",
+        expiration=datetime.timedelta(days=muesli.config["api"]["KEY_EXPIRATION"])
+    )
+    session_authentication_policy = SessionAuthenticationPolicy(callback=principals_for_user)
+    authentication_policy = MultiAuthenticationPolicy([session_authentication_policy, jwt_authentication_policy])
 
     authorization_policy = ACLAuthorizationPolicy()
     config = Configurator(
@@ -138,7 +160,8 @@ def main(global_config=None, **settings):
             session_factory=session_factory,
             settings=settings,
             )
-
+    config.include('muesli.web.pyramid_jwt')
+    config.set_jwt_authentication_policy(jwt_authentication_policy)
     config.add_static_view('static', 'muesli.web:static')
 
     config.add_route('start', '/start', factory = GeneralContext)
@@ -149,6 +172,7 @@ def main(global_config=None, **settings):
     config.add_route('email_users', '/email_users', factory = GeneralContext)
     config.add_route('email_all_users','/email_all_users',factory = GeneralContext)
     config.add_route('user_update', '/user/update', factory = GeneralContext)
+    config.add_route('user_check', '/user/check', factory = GeneralContext)
     config.add_route('user_change_email', '/user/change_email', factory = GeneralContext)
     config.add_route('user_change_password', '/user/change_password', factory = GeneralContext)
     config.add_route('user_logout', '/user/logout')
@@ -170,8 +194,11 @@ def main(global_config=None, **settings):
     config.add_route('user_reset_password', '/user/reset_password', factory=GeneralContext)
     config.add_route('user_reset_password2', '/user/reset_password2', factory=GeneralContext)
     config.add_route('user_reset_password3', '/user/reset_password3/{confirmation}', factory=ConfirmationContext)
-    config.add_route('user_ajax_complete', '/user/ajax_complete/{lecture_id}/{tutorial_ids:[^/]*}', factory = TutorialContext)
 
+    config.add_route('user_api_keys', '/user/api_keys', factory=GeneralContext)
+    config.add_route('remove_api_key', '/user/remove_api_key/{key_id}',factory=GeneralContext)
+
+    config.add_route('user_ajax_complete', '/user/ajax_complete/{lecture_id}/{tutorial_ids:[^/]*}', factory = TutorialContext)
     config.add_route('overview', '/')
     config.add_route('lecture_add', '/lecture/add', factory = GeneralContext)
     config.add_route('lecture_list', '/lecture/list', factory = GeneralContext)
@@ -193,6 +220,7 @@ def main(global_config=None, **settings):
     config.add_route('lecture_add_exam', '/lecture/add_exam/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_add_grading', '/lecture/add_grading/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_add_student', '/lecture/add_student/{lecture_id}', factory = LectureContext)
+    config.add_route('lecture_switch_students', '/lecture/switch_students/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_export_students_html', '/lecture/export_students_html/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_export_totals', '/lecture/export_totals/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory = GeneralContext)
@@ -203,10 +231,12 @@ def main(global_config=None, **settings):
 
 
     config.add_route('tutorial_add', '/tutorial/add/{lecture_id}', factory=LectureContext)
+    config.add_route('tutorial_duplicate', '/tutorial/duplicate/{lecture_id}/{tutorial_id}', factory=LectureContext)
     config.add_route('tutorial_delete', '/tutorial/delete/{tutorial_ids}', factory=TutorialContext)
     config.add_route('tutorial_view', '/tutorial/view/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_results', '/tutorial/results/{lecture_id}/{tutorial_ids:[^/]*}', factory = TutorialContext)
     config.add_route('tutorial_email', '/tutorial/email/{tutorial_ids}', factory = TutorialContext)
+    config.add_route('tutorial_email_preference', '/tutorial/email_preference/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_resign_as_tutor', '/tutorial/resign_as_tutor/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_assign_student', '/tutorial/assign_student', factory = AssignStudentContext)
 
@@ -242,9 +272,24 @@ def main(global_config=None, **settings):
     config.add_route('grading_associate_exam', '/grading/associate_exam/{grading_id}', factory=GradingContext)
     config.add_route('grading_delete_exam_association', '/grading/delete_exam_association/{grading_id}/{exam_id}', factory=GradingContext)
     config.add_route('grading_enter_grades', '/grading/enter_grades/{grading_id}', factory=GradingContext)
+    config.add_route('grading_formula_histogram', '/grading/enter_grades/{grading_id}/formula_histogram', factory=GradingContext)
     config.add_route('grading_get_row', '/grading/get_row/{grading_id}', factory=GradingContext)
 
-    config.include('pyramid_chameleon');
+    # Begin: config for the API-Browser
+    config.include('pyramid_apispec.views')
+    config.add_route("openapi_spec", "/openapi.json")
+    config.pyramid_apispec_add_explorer(spec_route_name='openapi_spec')
+    # End: config for the API-Browser
+
+    config.add_route('api_login', '/api/v1/login')
+    config.include('pyramid_chameleon')
+    # TODO: move the prefix addition into a seperate function for later
+    # developed API's.
+    config.route_prefix = 'api/v1'
+    config.include('cornice')
+
+    if not muesli.PRODUCTION_INSTANCE:
+        config.include('pyramid_debugtoolbar')
 
     config.scan()
 

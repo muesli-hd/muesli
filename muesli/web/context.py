@@ -1,6 +1,10 @@
+from muesli.web.navigation_tree import *
 from muesli.models import *
 from pyramid.security import Allow, Deny, Everyone, Authenticated, DENY_ALL, ALL_PERMISSIONS
-from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden
+from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden, HTTPBadRequest
+
+from sqlalchemy import and_
+from sqlalchemy.exc import SQLAlchemyError
 
 from muesli.utils import editAllTutorials, editOwnTutorials, editNoTutorials
 
@@ -34,7 +38,7 @@ def getTutorForTutorials(tutorials):
     else:
         return []
 
-class UserContext(object):
+class UserContext:
     def __init__(self, request):
         user_id = request.matchdict['user_id']
         self.user = request.db.query(User).get(user_id)
@@ -45,7 +49,7 @@ class UserContext(object):
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]
 
-class ConfirmationContext(object):
+class ConfirmationContext:
     def __init__(self, request):
         confirmation_hash = request.matchdict['confirmation']
         self.confirmation = request.db.query(Confirmation).get(confirmation_hash)
@@ -55,14 +59,21 @@ class ConfirmationContext(object):
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]
 
-class GeneralContext(object):
+class NonLoginContext:
     def __init__(self, request):
         self.__acl__ = [
-                (Allow, Authenticated, ('update', 'change_email', 'change_password')),
+            (Allow, Everyone, ('view')),
+            (Allow, 'group:administrators', ALL_PERMISSIONS)
+        ]
+
+class GeneralContext:
+    def __init__(self, request):
+        self.__acl__ = [
+                (Allow, Authenticated, ('update', 'change_email', 'change_password','view_keys','remove_keys')),
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]+[(Allow, 'user:{0}'.format(a.id), 'create_lecture') for a in request.db.query(User).filter(User.is_assistant==1).all()]
 
-class GradingContext(object):
+class GradingContext:
     def __init__(self, request):
         grading_id = request.matchdict['grading_id']
         self.grading = request.db.query(Grading).get(grading_id)
@@ -73,7 +84,7 @@ class GradingContext(object):
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in self.grading.lecture.assistants]
 
 
-class LectureContext(object):
+class LectureContext:
     def __init__(self, request):
         lecture_id = request.matchdict['lecture_id']
         self.lecture = request.db.query(Lecture).get(lecture_id)
@@ -85,7 +96,24 @@ class LectureContext(object):
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit','change_assistant', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for assistant in self.lecture.assistants
                 ]+[(Allow, 'user:{0}'.format(tutor.id), ('view', 'take_tutorial', 'view_tutorials', 'get_tutorials', 'mail_tutors')) for tutor in self.lecture.tutors]
 
-class TutorialContext(object):
+        # add lecture specific links
+        if self.lecture is None:
+            return
+
+        if request.has_permission('edit', self):
+            lecture_root = NavigationTree('Vorlesung: {}'.format(self.lecture.name),
+                    request.route_url('lecture_edit', lecture_id=self.lecture.id))
+        else:
+            lecture_root = NavigationTree('Vorlesung: {}'.format(self.lecture.name),
+                    request.route_url('lecture_view', lecture_id=self.lecture.id))
+        nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
+        for node in nodes:
+            lecture_root.append(node)
+
+        if lecture_root.children:
+            request.navigationTree.prepend(lecture_root)
+
+class TutorialContext:
     def __init__(self, request):
         self.tutorial_ids_str = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', ''))
         self.tutorials, self.tutorial_ids = getTutorials(request)
@@ -101,7 +129,7 @@ class TutorialContext(object):
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]
         if self.lecture:
-            self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewOverview', 'take_tutorial')) for tutor in self.lecture.tutors]
+            self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('viewOverview', 'take_tutorial', 'mail_tutors')) for tutor in self.lecture.tutors]
             self.__acl__ += [((Allow, 'user:{0}'.format(assistant.id), ('viewOverview', 'viewAll', 'sendMail', 'edit', 'remove_student'))) for assistant in self.lecture.assistants]
         if self.tutorials:
             if self.lecture.tutor_rights == editOwnTutorials:
@@ -118,6 +146,33 @@ class TutorialContext(object):
                 self.__acl__.append((Allow, Authenticated, ('subscribe')))
             if self.tutorials[0].lecture.mode in ['direct', 'off']:
                 self.__acl__.append((Allow, Authenticated, ('unsubscribe')))
+
+        # add tutorial specific links
+        if self.lecture is None:
+            return
+
+        if request.has_permission('edit', self):
+            lecture_root = NavigationTree('Vorlesung: {}'.format(self.lecture.name),
+                    request.route_url('lecture_edit', lecture_id=self.lecture.id))
+        else:
+            lecture_root = NavigationTree('Vorlesung: {}'.format(self.lecture.name),
+                    request.route_url('lecture_view', lecture_id=self.lecture.id))
+        nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
+        for node in nodes:
+            lecture_root.append(node)
+
+        for tutorial in self.tutorials:
+            tutorial_root = NavigationTree("{} ({})".format(tutorial.lecture.name, tutorial.time.__html__()),
+                                           request.route_url('tutorial_view', tutorial_ids=tutorial.id))
+            nodes = get_tutorial_specific_nodes(request, self, tutorial.id,
+                    self.lecture.id)
+            for node in nodes:
+                tutorial_root.append(node)
+            if tutorial_root.children:
+                request.navigationTree.prepend(tutorial_root)
+
+        if lecture_root.children:
+            request.navigationTree.prepend(lecture_root)
 
 class AssignStudentContext(object):
     def __init__(self, request):
@@ -136,7 +191,7 @@ class AssignStudentContext(object):
                 ]
 
 
-class ExamContext(object):
+class ExamContext:
     def __init__(self, request):
         exam_id = request.matchdict['exam_id']
         self.exam = request.db.query(Exam).get(exam_id)
@@ -162,7 +217,23 @@ class ExamContext(object):
                     self.__acl__ += [(Allow, 'user:{0}'.format(tutor.id), ('view_points', 'enter_points')) for tutor in self.exam.lecture.tutors]
                 else: raise ValueError('Tutorrights %s not known' % self.exam.lecture.tutor_rights)
 
-class ExerciseContext(object):
+        # add exam specific links
+        if self.exam.lecture is None:
+            return
+
+        if request.has_permission('edit', self):
+            lecture_root = NavigationTree(self.exam.lecture.name,
+                    request.route_url('lecture_edit', lecture_id=self.exam.lecture.id))
+        else:
+            lecture_root = NavigationTree(self.exam.lecture.name,
+                    request.route_url('lecture_view', lecture_id=self.exam.lecture.id))
+        nodes = get_lecture_specific_nodes(request, self, self.exam.lecture.id)
+        for node in nodes:
+            lecture_root.append(node)
+
+        request.navigationTree.prepend(lecture_root)
+
+class ExerciseContext:
     def __init__(self, request):
         exercise_id = request.matchdict['exercise_id']
         self.exercise = request.db.query(Exercise).get(exercise_id)
@@ -183,7 +254,7 @@ class ExerciseContext(object):
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('statistics')) for assistant in self.exam.lecture.assistants
                 ]
 
-class CorrelationContext(object):
+class CorrelationContext:
     def __init__(self, request):
         source1 = request.GET['source1']
         source2 = request.GET['source2']
@@ -209,3 +280,77 @@ class CorrelationContext(object):
                 raise HTTPNotFound('Lecture not found')
         else:
             raise ValueError('Sourcetype not known: %s' % source_type)
+
+
+class LectureEndpointContext:
+    def __init__(self, request):
+        lecture_id = request.matchdict.get('lecture_id', None)
+        self.__acl__ = [
+                (Allow, Authenticated, ('view')),
+                (Allow, 'group:administrators', ALL_PERMISSIONS),
+                ]+[(Allow, 'user:{0}'.format(a.id), 'create_lecture') for a in request.db.query(User).filter(User.is_assistant==1).all()]
+
+        if lecture_id is not None:
+            lecture = request.db.query(Lecture).get(lecture_id)
+            if lecture is not None:
+                self.__acl__ += [(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in lecture.assistants]
+
+
+class TutorialEndpointContext:
+    def __init__(self, request):
+        tutorial_id = request.matchdict.get('tutorial_id', None)
+        self.__acl__ = [(Allow, Authenticated, ('viewOverview')),
+                        (Allow, 'group:administrators', ALL_PERMISSIONS)]
+        if tutorial_id is not None:
+            tutorial = request.db.query(Tutorial).get(tutorial_id)
+            if tutorial is not None:
+                lecture = tutorial.lecture
+                self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('viewAll', 'edit'))] if request.user in lecture.assistants else []
+                if lecture.tutor_rights == editOwnTutorials:
+                    self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('viewAll'))] if request.user == tutorial.tutor else []
+                elif lecture.tutor_rights == editAllTutorials:
+                    self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('viewAll'))] if request.user in lecture.tutors else []
+
+class ExamEndpointContext:
+    def __init__(self, request):
+        exam_id = request.matchdict['exam_id']
+        self.exam = request.db.query(Exam).get(exam_id)
+        if self.exam is None:
+            raise HTTPNotFound(detail='Exam not found')
+        lecture = self.exam.lecture
+        lecture_students = lecture.students
+        self.__acl__ = [(Allow, 'group:administrators', ALL_PERMISSIONS)]
+        if request.user in lecture_students:
+            self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view'))]
+        self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view', 'edit'))] if request.user in lecture.assistants else []
+        self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view'))] if request.user in lecture.tutors else []
+
+class ExerciseEndpointContext:
+    def __init__(self, request):
+        exercise_id = request.matchdict['exercise_id']
+        exercise_id = exercise_id.strip("/")
+        user_id = request.matchdict.get('user_id', None)
+        self.exercise = request.db.query(Exercise).get(exercise_id)
+        if self.exercise is None:
+            raise HTTPBadRequest("Die Angeforderte Übung existiert nicht!")
+        self.lecture = self.exercise.exam.lecture
+        student = None
+        self.user = None
+        if user_id is not None:
+            user_id = user_id.strip("/")
+            self.user = request.db.query(User).get(user_id)
+            try:
+                student = request.db.query(LectureStudent).filter(and_(LectureStudent.student_id == self.user.id, LectureStudent.lecture == self.lecture)).one()
+            except SQLAlchemyError:
+                student = None
+        self.__acl__ = [(Allow, 'group:administrators', ALL_PERMISSIONS)]
+        self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view', 'viewAll', 'viewOwn'))] if request.user in self.lecture.assistants else []
+        if request.user == self.user and request.user is not None:
+            self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view', 'viewOwn'))]
+        if self.lecture.tutor_rights == editAllTutorials:
+            self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view', 'viewAll', 'viewOwn'))] if request.user == self.lecture.tutors else []
+        else:
+            self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view'))] if request.user in self.lecture.tutors else []
+        if student is not None:
+            tutorial = student.tutorial
+            self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('viewOwn'))] if request.user == tutorial.tutor else []

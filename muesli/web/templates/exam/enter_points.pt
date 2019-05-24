@@ -49,6 +49,7 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
   <tr>
     <th tal:condition="not tutorial_ids">Tutor</th>
     <th>Name</th>
+    <th tal:condition="exam.medical_certificate is not None">Attest</th>
     <th tal:repeat="e exam.exercises">${e.nr}</th>
     <th>Σ</th>
   </tr>
@@ -58,15 +59,23 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
         <span tal:condition="ls.tutorial.tutor" tal:content="ls.tutorial.tutor.last_name" />
       </td>
     <td>${ls.student.name()}</td>
-      <td tal:repeat="e exam.exercises">
+    <td tal:condition="exam.medical_certificate is not None"
+        tal:on-error="nothing"
+        tal:define="name     'medical_certificate-%s' % ls.student.id;
+                    value     admissions[ls.student_id].medical_certificate;
+                    readonly  exam.medical_certificate!=True">
+        <metal:main metal:use-macro="templates('Fragments/HTML/input_tristate.pt').macros['input_tristate']" />
+    </td>
+    <td tal:repeat="e exam.exercises">
         <input class="points" tal:attributes="name 'points-'+str(ls.student.id)+'-'+str(e.id); onchange 'update_total('+str(ls.student.id)+')'; value points[ls.student_id][e.id].points" size="3" type="text" />
-     </td>
+    </td>
     <td><input tal:attributes="id 'total-'+str(ls.student.id); value points[ls.student.id]['total']" readonly="readonly" size="4" /></td>
   </tr>
 
   <tfoot>
   <tr>
     <td>Durchschnitt (Gruppe/Gesamt)</td>
+    <th tal:condition="exam.medical_certificate is not None"></th>
     <td tal:condition="not tutorial_ids"></td>
     <td tal:repeat="e exam.exercises">
       <span tal:define="statisticsData statistics[e.id]; statistics_images False" tal:omit-tag="">

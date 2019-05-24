@@ -36,7 +36,7 @@ debug_flag=True
 def dec(f):
     return Decimal(str(f))
 
-class Parser(object):
+class Parser:
     def __init__(self):
         # define grammar
         point = Literal('.')

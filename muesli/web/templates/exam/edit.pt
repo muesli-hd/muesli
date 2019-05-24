@@ -22,6 +22,9 @@
   <li><a tal:attributes="href request.route_path('exam_add_or_edit_exercise', exam_id=exam.id, exercise_id='')">Aufgabe hinzufügen</a></li>
 </ul>
 
+<p>
+  <a tal:attributes="href request.route_path('exam_admission', exam_id=exam.id, tutorial_ids=tutorial_ids)">Zulassungen und Atteste verwalten</a>
+</p>
 
 <div tal:condition="students">
     <h3 tal:condition="exam.admission!=None and exam.registration!=None">Angemeldete und zugelassene Studenten</h3>

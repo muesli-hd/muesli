@@ -10,6 +10,14 @@
 /*]]>*/
 </script>
 
+
+<div tal:condition="uboo">
+    Bitte nehmen Sie sich die Zeit zu überprüfen, ob noch alle Ihre Angaben korrekt sind. Dies ist insbesondere wichtig,
+    wenn Sie den Studiengang gewechselt haben.<br>
+    Bestätigen/Korrigieren Sie <a tal:attributes="href request.route_path('user_check')">hier</a> Ihre Informationen,
+    um diese Erinnerung für den Rest des Semesters nicht mehr zu sehen.
+</div>
+
 <h2>Übersicht Ihrer Veranstaltungen in diesem Semester</h2>
 
 <div tal:omit-tag="" tal:condition="tutorials_as_tutor">
@@ -88,6 +96,17 @@
 <p tal:condition="request.GET.get('show_all', '0')=='0'">Es werden nur aktuelle Veranstaltungen angezeigt.
   <a tal:attributes="href request.route_path('start', _query= {'show_all': '1'})">Alle anzeigen</a>.</p>
 <p tal:condition="request.GET.get('show_all', '0')=='1'">Es werden alle Veranstaltungen angezeigt. <a tal:attributes="href request.route_path('start')">Nur aktuelle anzeigen</a>.</p>
+
+<a tal:condition="request.GET.get('help', '0')=='0'" tal:attributes="href request.route_path('start', _query= {'help': '1'})">Hilfe</a>
+<div tal:condition="request.GET.get('help', '0')=='1'">
+<a tal:attributes="href request.route_path('start')">Hilfe verbergen</a>
+<ul>
+    <li>${tooltips.lecture}</li>
+    <li>${tooltips.email}</li>
+    <li>${tooltips.details}</li>
+    <li tal:condition="tutorials_as_tutor">${tooltips.tutor}</li>
+</ul>
+</div>
 
   </metal:main>
 </metal:main>

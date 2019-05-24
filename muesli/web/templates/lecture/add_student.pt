@@ -17,7 +17,7 @@ Vorlesung: <a tal:attributes="href request.route_path('lecture_edit', lecture_id
       </td>
     </tr>
     <tr>
-      <td><label for="new_tutorial">Tutorial</label></td>
+      <td><label for="new_tutorial">Tutorium</label></td>
       <td>
       <select name="new_tutorial">
         <option tal:repeat="tutorial tutorials" tal:attributes="value tutorial.id">

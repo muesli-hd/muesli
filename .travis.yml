@@ -1,14 +1,15 @@
+---
 language: python
 dist: xenial
 python:
   - "3.5.2"
 
 addons:
-  postgresql: "9.4"
+  postgresql: "9.6"
   apt:
-      packages:
-        - lp-solve
-        - postgresql-server-dev-9.4
+    packages:
+      - lp-solve
+      - postgresql-server-dev-9.6
 
 cache: pip
 
@@ -20,12 +21,16 @@ install:
 before_script:
   - psql -c 'create database mueslitest;' -U postgres
   - psql -c 'create database muesli;' -U postgres
-  - psql -d muesli < travis-muesli-origDb.sql
+  - psql -d muesli -U postgres < travis-muesli-origDb.sql
   - cp muesli.yml.example muesli.yml
-    # ugly hack
+  # ugly hack
   - sudo wget https://www.mathi.uni-heidelberg.de/~jvisintini/lp_solve -O /usr/bin/lp_solve
   - sudo wget https://www.mathi.uni-heidelberg.de/~jvisintini/libxli_DIMACS.so -O /usr/lib/lp_solve/libxli_DIMACS.so
   - sudo python -m smtpd -n -c DebuggingServer localhost:25 &
 
 # command to run tests
-script: MUESLI_PATH=$(pwd) py.test --cov=muesli muesli/tests && codecov
+script: MUESLI_PATH=$(pwd) py.test --cov=muesli muesli/tests/*
+
+after_script:
+  - codecov
+  - pylint --disable=R0801,R0903,C0103,C0301,C0111 muesli.web.api muesli.web.viewsApi muesli.tests.api

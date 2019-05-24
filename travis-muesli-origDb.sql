@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 11.1 (Debian 11.1-1.pgdg90+1)
--- Dumped by pg_dump version 11.1 (Debian 11.1-1.pgdg90+1)
+-- Dumped from database version 11.2 (Debian 11.2-1.pgdg90+1)
+-- Dumped by pg_dump version 11.2 (Debian 11.2-1.pgdg90+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -45,6 +45,47 @@ CREATE TABLE public.beaker_cache (
 ALTER TABLE public.beaker_cache OWNER TO postgres;
 
 --
+-- Name: bearertokens; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.bearertokens (
+    id integer NOT NULL,
+    client text,
+    user_id integer,
+    scopes text,
+    access_token character varying(100),
+    refresh_token character varying(100),
+    expires timestamp without time zone,
+    description text,
+    revoked boolean
+);
+
+
+ALTER TABLE public.bearertokens OWNER TO postgres;
+
+--
+-- Name: bearertokens_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.bearertokens_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.bearertokens_id_seq OWNER TO postgres;
+
+--
+-- Name: bearertokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.bearertokens_id_seq OWNED BY public.bearertokens.id;
+
+
+--
 -- Name: confirmations; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -58,6 +99,19 @@ CREATE TABLE public.confirmations (
 
 
 ALTER TABLE public.confirmations OWNER TO postgres;
+
+--
+-- Name: email_preferences; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.email_preferences (
+    user_id integer NOT NULL,
+    lecture_id integer NOT NULL,
+    receive_status_mails boolean NOT NULL
+);
+
+
+ALTER TABLE public.email_preferences OWNER TO postgres;
 
 --
 -- Name: exam_admissions; Type: TABLE; Schema: public; Owner: postgres
@@ -389,6 +443,18 @@ ALTER SEQUENCE public.tutorials_id_seq OWNED BY public.tutorials.id;
 
 
 --
+-- Name: user_has_updated; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.user_has_updated (
+    user_id integer NOT NULL,
+    has_updated_info character varying NOT NULL
+);
+
+
+ALTER TABLE public.user_has_updated OWNER TO postgres;
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -430,6 +496,13 @@ ALTER TABLE public.users_id_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+
+
+--
+-- Name: bearertokens id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.bearertokens ALTER COLUMN id SET DEFAULT nextval('public.bearertokens_id_seq'::regclass);
 
 
 --
@@ -479,7 +552,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-3d0645977378
+d3d8e4c5a116
 \.
 
 
@@ -489,6 +562,19 @@ COPY public.alembic_version (version_num) FROM stdin;
 
 COPY public.beaker_cache (namespace, accessed, created, data) FROM stdin;
 954f49634d9546e0a1a5301968e8dbb0	2017-07-26 19:02:29.53619	2017-07-26 19:02:29.15067	\\x80027d7101550773657373696f6e7d710228550b617574682e75736572696471034a87060100550e5f61636365737365645f74696d6571044741d65e32c960ea57550e5f6372656174696f6e5f74696d6571054741d65e32c948fe8b55075f63737266745f7106582800000036373039386239396162303234623033633831643638623137366132333864373961393462623235710775732e
+d19c7227c473478b99d8e4c2db462e17	2018-12-01 13:20:31.673958	2018-12-01 12:59:49.184813	\\x8004958e000000000000007d948c0773657373696f6e947d94288c0e5f6372656174696f6e5f74696d65944741d700a1714b90fd8c075f63737266745f948c2862633237396233653861656631666632383635656161653333633366626262303862336638623033948c0e5f61636365737365645f74696d65944741d700a2a7e60c208c0b617574682e757365726964944a8806010075732e
+f675d178cb044b668094e14cf2b35403	2019-03-11 22:34:38.671952	2019-03-11 22:34:38.496332	\\x80049559000000000000007d948c0773657373696f6e947d94288c0e5f6372656174696f6e5f74696d65944741d721b89f9f70bd8c0e5f61636365737365645f74696d65944741d721b89fa0ab2e8c0b617574682e757365726964944a8706010075732e
+958a4206b3674222995e8027b8751847	2019-03-11 22:39:48.327099	2019-03-11 22:38:58.674897	\\x80049559000000000000007d948c0773657373696f6e947d94288c0e5f6372656174696f6e5f74696d65944741d721b8e0ab21fd8c0e5f61636365737365645f74696d65944741d721b8ed10ed448c0b617574682e757365726964944a8706010075732e
+fbff4e43e50b4d4a95af3b3e5e7edc80	2019-03-11 22:52:50.625686	2019-03-11 22:39:51.611467	\\x8004958e000000000000007d948c0773657373696f6e947d94288c0e5f61636365737365645f74696d65944741d721b9b09ee70c8c0b617574682e757365726964944a890601008c075f63737266745f948c2838396138336334643365633838313661336634636532353333326239373235343464653566383462948c0e5f6372656174696f6e5f74696d65944741d721b8ede7117575732e
+2a2b9108870b4f54986d3b315d2f94ce	2019-03-11 22:38:48.075214	2019-03-11 22:34:46.497632	\\x8004958e000000000000007d948c0773657373696f6e947d94288c075f63737266745f948c2832313330316662376463353362643130346262663066376138376234313639646433646266373538948c0e5f61636365737365645f74696d65944741d721b8de037f1f8c0b617574682e757365726964944a890601008c0e5f6372656174696f6e5f74696d65944741d721b8a19fc9e275732e
+\.
+
+
+--
+-- Data for Name: bearertokens; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.bearertokens (id, client, user_id, scopes, access_token, refresh_token, expires, description, revoked) FROM stdin;
 \.
 
 
@@ -502,10 +588,20 @@ b2f1ae65a84224f60c3fea9170fcd950734d80cd	67201	user/register	\N	2017-07-26 19:02
 
 
 --
+-- Data for Name: email_preferences; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.email_preferences (user_id, lecture_id, receive_status_mails) FROM stdin;
+\.
+
+
+--
 -- Data for Name: exam_admissions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.exam_admissions (exam, student, admission, registration, medical_certificate) FROM stdin;
+13415	67209	\N	\N	\N
+13415	67198	\N	\N	\N
 \.
 
 
@@ -524,6 +620,8 @@ COPY public.exams (id, lecture, name, category, admission, registration, medical
 --
 
 COPY public.exercise_students (exercise, student, points) FROM stdin;
+6723	67198	\N
+6723	67209	2.0
 \.
 
 
@@ -580,6 +678,7 @@ COPY public.lecture_removed_students (lecture, student, tutorial) FROM stdin;
 COPY public.lecture_students (lecture, student, tutorial) FROM stdin;
 20109	67198	46839
 20109	67199	46842
+20109	67209	46839
 \.
 
 
@@ -645,12 +744,22 @@ COPY public.tutorials (id, lecture, tutor, place, max_students, comment, "time",
 
 
 --
+-- Data for Name: user_has_updated; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.user_has_updated (user_id, has_updated_info) FROM stdin;
+67207	0
+67209	0
+\.
+
+
+--
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.users (id, email, first_name, last_name, password, matrikel, birth_date, birth_place, subject, second_subject, title, is_admin, is_assistant) FROM stdin;
 67207	admin@muesli.org	Anton	Admin	efacc4001e857f7eba4ae781c2932dedf843865e	2613945	\N		Mathematik (BSc)			1	0
-67198	user@muesli.org	Stefan	Student	c73ba2982c55b7ead0e4098a92f722bdb3a3b3d8	\N	\N	\N	Mathematik (BSc)	\N	\N	0	0
+67198	user@muesli.org	StefFan	Student	c73ba2982c55b7ead0e4098a92f722bdb3a3b3d8	\N	\N	\N	Mathematik (BSc)	\N	\N	0	0
 67199	user2@muesli.org	Sigmund	Student	bd63afe0b3aae9a85c7675a1d989dbca5173abae	\N	\N	\N	Mathematik (MSc)	\N	\N	0	0
 67200	user_without_lecture@muesli.org	Sebastian	Student	341b837c4300466034eacf88eae22824df7ea507	\N	\N	\N	Mathematik (MSc)	\N	\N	0	0
 67201	user_unconfirmed@muesli.org	Ulrich	Student	\N	\N	\N	\N	\N	\N	\N	0	0
@@ -659,7 +768,16 @@ COPY public.users (id, email, first_name, last_name, password, matrikel, birth_d
 67204	tutor2@muesli.org	Thor2sten	Tu2tor	e6d751291b25123d4da3794212021582f2704f83	\N	\N	\N	Mathematik (BSc)	\N	\N	0	0
 67205	assistant@muesli.org	Armin	Assistent	8951365cbe9bc4d747c779d342598e29d06615d4	\N	\N	\N	Mathematik (BSc)	\N	\N	0	1
 67206	assistant2@muesli.org	Armin	Assistent2	c8582b7fae27d83a0af8469228d62ad7df7b1996	\N	\N	\N	Mathematik (BSc)	\N	\N	0	1
+67208	test@test.de	Test	Testerson	7110eda4d09e062aa5e4a390b0a572ac0d2c0220	12332	20.09.1998	Heidelbearsch	Mathematik (BSc)	\N	Herr Graf von und zu	1	0
+67209	user_with_exercise@muesli.org	user_with	exercise	101aa30d5a6b5e8558d7df3b13e785d59be16cab	\N	20.09.1998	Heidelbearsch	Mathematik (BSc)	\N		0	0
 \.
+
+
+--
+-- Name: bearertokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.bearertokens_id_seq', 1, false);
 
 
 --
@@ -701,7 +819,7 @@ SELECT pg_catalog.setval('public.tutorials_id_seq', 46844, true);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 67207, true);
+SELECT pg_catalog.setval('public.users_id_seq', 67209, true);
 
 
 --
@@ -721,11 +839,43 @@ ALTER TABLE ONLY public.beaker_cache
 
 
 --
+-- Name: bearertokens bearertokens_access_token_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.bearertokens
+    ADD CONSTRAINT bearertokens_access_token_key UNIQUE (access_token);
+
+
+--
+-- Name: bearertokens bearertokens_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.bearertokens
+    ADD CONSTRAINT bearertokens_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: bearertokens bearertokens_refresh_token_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.bearertokens
+    ADD CONSTRAINT bearertokens_refresh_token_key UNIQUE (refresh_token);
+
+
+--
 -- Name: confirmations confirmations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.confirmations
     ADD CONSTRAINT confirmations_pkey PRIMARY KEY (hash);
+
+
+--
+-- Name: email_preferences email_preferences_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.email_preferences
+    ADD CONSTRAINT email_preferences_pkey PRIMARY KEY (user_id, lecture_id);
 
 
 --
@@ -849,6 +999,14 @@ ALTER TABLE ONLY public.tutorials
 
 
 --
+-- Name: user_has_updated user_has_updated_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_has_updated
+    ADD CONSTRAINT user_has_updated_pkey PRIMARY KEY (user_id);
+
+
+--
 -- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -865,11 +1023,35 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: bearertokens bearertokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.bearertokens
+    ADD CONSTRAINT bearertokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
 -- Name: confirmations confirmations_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.confirmations
     ADD CONSTRAINT confirmations_user_fkey FOREIGN KEY ("user") REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: email_preferences email_preferences_lecture_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.email_preferences
+    ADD CONSTRAINT email_preferences_lecture_id_fkey FOREIGN KEY (lecture_id) REFERENCES public.lectures(id);
+
+
+--
+-- Name: email_preferences email_preferences_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.email_preferences
+    ADD CONSTRAINT email_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -1102,6 +1284,14 @@ ALTER TABLE ONLY public.tutorials
 
 ALTER TABLE ONLY public.tutorials
     ADD CONSTRAINT tutorials_tutor_fkey FOREIGN KEY (tutor) REFERENCES public.users(id);
+
+
+--
+-- Name: user_has_updated user_has_updated_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_has_updated
+    ADD CONSTRAINT user_has_updated_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
