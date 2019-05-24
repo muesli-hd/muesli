@@ -45,11 +45,11 @@ python-dateutil==2.6.1
 pytz==2018.3
 PyYAML==4.2b1
 repoze.lru==0.7
-requests==2.20.0
+requests==2.22.0
 six==1.11.0
-SQLAlchemy==1.2.5
+SQLAlchemy==1.3.3
 translationstring==1.3
-urllib3==1.23
+urllib3==1.25.3
 venusian==1.1.0
 waitress==1.2.1
 WebOb==1.8.0rc1

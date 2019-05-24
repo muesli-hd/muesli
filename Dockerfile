@@ -1,4 +1,4 @@
-FROM ubuntu:xenial
+FROM ubuntu:bionic
 
 RUN mkdir -p /opt/muesli4
 WORKDIR /opt/muesli4
