@@ -3,28 +3,36 @@ database:
     connection: postgresql:///muesli
 
 listen:
-  host: localhost
-  port: 8080
+    host: 0.0.0.0
+    port: 8080
 
 contact:
     email: muesli@mathi.uni-heidelberg.de
     name: MÜSLI-Team
-    server: localhost
+    server: 0.0.0.0
 
 production: True
 
 subjects:
-    - Mathematik (BSc)
+    - Mathematik (BSc 100%)
+    - Mathematik (BSc 50%)
     - Mathematik (MSc)
     - Mathematik (Dipl.)
     - Mathematik (LA) (Hauptfach)
     - Mathematik (LA) (Beifach)
-    - Physik (BSc)
+    - Mathematik + Informatik (LA) (Hauptfaecher)
+    - Mathematik + Ang. Informatik (BSc jew. 50%)
+    - Angewandte Informatik (BSc 100%)
+    - Angewandte Informatik (BSc 50%)
+    - Angewandte Informatik (MSc)
+    - Informatik (LA) (Hauptfach)
+    - Informatik (LA) (Beifach)
+    - Scientific Computing (MSc)
+    - Physik (BSc 100%)
+    - Physik (BSc 50%)
     - Physik (MSc)
     - Physik (Dipl.)
     - Physik (LA)
-    - Angewandte Informatik (BSc)
-    - Anwendungsorientierte Informatik (MSc)
     - Computerlinguistik (BA)
     - Computerlinguistik (Magister)
     - Medizinische Informatik (BSc)
