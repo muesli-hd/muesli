@@ -303,10 +303,10 @@ class Lecture(Base):
                         sqlalchemy.func.sum(ExerciseStudent.points).label('points'),
                         ExerciseStudent.student_id.label('student_id'),
                         Exam, Exam.id)\
-                .filter(ExerciseStudent.exercise_id.in_([e.id  for e in exercises]))\
-                .filter(ExerciseStudent.student_id.in_([s.student_id for s  in students]))\
-                .join(Exercise).join(Exam)\
-                .group_by(ExerciseStudent.student_id, Exam)
+                        .filter(ExerciseStudent.exercise_id.in_([e.id  for e in exercises]))\
+                        .filter(ExerciseStudent.student_id.in_([s.student_id for s in students]))\
+                        .join(Exercise, ExerciseStudent.exercise).join(Exam, Exercise.exam)\
+                        .group_by(ExerciseStudent.student_id, Exam)
         return lecture_results
 
     def getLectureResultsByCategory(self, *args, **kwargs):
@@ -500,7 +500,7 @@ class Tutorial(Base):
     place = Column(Text)
     max_students = Column(Integer, nullable=False, default=0)
     comment = Column(Text)
-    
+
     @property
     def students(self):
         session = Session.object_session(self)
