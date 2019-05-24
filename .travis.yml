@@ -6,12 +6,12 @@ python:
 
 addons:
   postgresql: "10"
-  apt:
-    packages:
-      - lp-solve
-      - postgresql-server-dev-10
 
 cache: pip
+
+before_install:
+  - sudo apt-get install -y lp-solve
+  - sudo apt-get install -y postgresql-server-dev-10
 
 # command to install dependencies
 install:
