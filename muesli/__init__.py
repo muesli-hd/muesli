@@ -50,7 +50,7 @@ def engine():
     if not PRODUCTION_INSTANCE:
         return create_engine(databaseName, max_overflow=-1)
     else:
-        return create_engine(databaseName)
+        return create_engine(databaseName, poolclass=NullPool)
 
 
 def testengine():
