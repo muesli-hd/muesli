@@ -15,9 +15,7 @@ ip -4 addr show | grep -oP "(?<=inet ).*(?=/)" | grep -ve "127.0.0.1"
 
 if [[ -v MUESLI_TESTMODE ]]
 then
-    uwsgi --http :8080 --wsgi-file muesli.wsgi --callable application --fs-reload /opt/muesli4 --uid muesli \
-     --stats :8081
+    su -c /opt/muesli4/muesli-test muesli
 else
-    uwsgi --http :8080 --wsgi-file muesli.wsgi --callable application --master --processes 4 --threads 2 \
-    --threaded-logger --uid muesli --stats :8081
+    su -c /opt/muesli4/muesli-serve muesli
 fi
