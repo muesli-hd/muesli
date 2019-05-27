@@ -19,5 +19,5 @@ then
      --stats :8081 --disable-logging
 else
     uwsgi --socket :8080 --wsgi-file muesli.wsgi --callable application --master --processes 4 --threads 2 \
-    --threaded-logger --uid muesli --stats :8081 --disable-logging
+    --threaded-logger --uid muesli --stats :8081 --disable-logging --lazy-apps
 fi
