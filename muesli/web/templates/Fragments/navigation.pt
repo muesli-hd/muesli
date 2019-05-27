@@ -1,5 +1,5 @@
 <metal:main metal:define-macro="navigation">
-<div id="navigation" tal:condition="request.user is not None">
+<div id="navigation" tal:condition="request.user is not None and hasattr(request, 'navigationTree')">
     <div tal:define="nodes request.navigationTree.children">
         <ul metal:define-macro="tree_view">
         <li tal:repeat="node nodes" class="navigationNode">
