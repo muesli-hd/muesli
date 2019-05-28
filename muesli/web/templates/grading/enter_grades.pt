@@ -167,12 +167,12 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
 <input type="submit" value="Speichern"/>
 </form>
 
-<h3 tal:condition="grades">Notenvorschau für berechnete Noten</h3>
+<h3 tal:condition="formula">Notenvorschau für berechnete Noten</h3>
 
-<p>Dieses Histogramm bezieht sich auf aus der Formel <b>berechnete</b> Noten. Sie bezieht sich nicht auf übertragene
+<p tal:condition="formula">Dieses Histogramm bezieht sich auf aus der Formel <b>berechnete</b> Noten. Sie bezieht sich nicht auf übertragene
 oder gespeicherte Noten!</p>
 
-<img tal:condition="grades" tal:attributes="src request.route_path('grading_formula_histogram', grading_id=grading.id)"/>
+<img tal:condition="formula" tal:attributes="src request.route_path('grading_formula_histogram', grading_id=grading.id)"/>
 
   </metal:main>
 </metal:main>

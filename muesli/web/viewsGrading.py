@@ -31,7 +31,7 @@ from muesli.web.forms import *
 
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound
+from pyramid.httpexceptions import HTTPNotFound, HTTPFound
 from pyramid.url import route_url
 from sqlalchemy.orm import exc
 from sqlalchemy.sql import func
@@ -279,7 +279,7 @@ class FormulaHistogram(EnterGradesBasic):
         grades_list = [float(grades[student_id]['calc']) for student_id in grades.keys() if not grades[student_id]['calc'] == '']
 
         if not grades_list:
-            raise HTTPBadRequest("Es sind existieren keine Noten für diese Benotung.")
+            raise HTTPNotFound("Es sind existieren keine Noten für diese Benotung.")
 
         # count occurences of grades and save it in a list as tuple (grade, count)
         tuple_list = list(Counter(grades_list).items())
