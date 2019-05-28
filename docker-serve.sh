@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 if [[ -v MUESLI_TESTMODE ]]
 then
-    sed 's/\/\/\//\/\/postgres@postgres\//' muesli.yml.example > muesli.yml
+    sed 's/\/\/\//\/\/postgres@postgres\//' muesli.yml.example | sed 's/production: True/production: False/' > muesli.yml
     sed 's/\/\/\//\/\/postgres@postgres\//' alembic.ini.example > alembic.ini
     echo "Sleeping for 3s ..."; sleep 3;
     echo "Generating configs ... "
     python3 -m smtpd -n -c DebuggingServer localhost:25 &
+    export PYRAMID_DEBUG_TEMPLATES=1
 fi
 
 echo "Running database upgrade ... "
@@ -18,6 +19,6 @@ then
     uwsgi --http :8080 --wsgi-file muesli.wsgi --callable application --fs-reload /opt/muesli4 --uid muesli \
      --stats :8081 --disable-logging
 else
-    uwsgi --socket :8080 --wsgi-file muesli.wsgi --callable application --master --processes 4 --threads 2 \
+    uwsgi --socket :8080 --wsgi-file muesli.wsgi --callable application --master --processes 4 \
     --threaded-logger --uid muesli --stats :8081 --disable-logging --lazy-apps
 fi
