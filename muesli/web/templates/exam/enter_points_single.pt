@@ -235,7 +235,7 @@ function submit_all_points(row_id) {
                         var p = status['submitted_points'][exercise_ids[i][1]];
                         pointsum += p;
                         for (var j = 0; j < status['students'].length; j++) {
-                            window.student_results[status['students'][j]]['points'][i] = p.toFixed(1);
+                            window.student_results[status['students'][j]]['points'][i] = (p === null) ? 'None' : p.toFixed(1);
                             student_results[status['students'][j]]['points'][exercise_ids.length] = pointsum.toFixed(1);
                         }
                         if (p === null) {
