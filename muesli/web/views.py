@@ -243,7 +243,7 @@ def internalServerError(e, request):
         raise e
     now = datetime.datetime.now().strftime("%d. %B %Y, %H:%M Uhr")
     traceback.print_exc()
-    email = request.user.email if request.user else '<nobody>'
+    email = request.user.email if hasattr(request, 'user') and request.user else '<nobody>'
     if "application/json" in request.headers.environ.get("HTTP_ACCEPT", ""):
         response = render(
             "json",
