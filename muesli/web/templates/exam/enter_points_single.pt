@@ -130,12 +130,24 @@ function update_student_names(row_id) {
     var students = students_str.split(',');
     var student_names = [];
     var student_names_field = row.find('#student-names');
+    var student_names_html = '<table><tr>';
 
     students.forEach(function (student_id) {
-        student_names.push(student_results[student_id]['name']);
+        var current_student = '<td>';
+        if (${'true' if show_tutor else 'false'}) {
+            current_student += student_results[student_id]['tutorial_tutor'] + '</td><td>';
+        }
+        if (${'true' if show_time else 'false'}) {
+            current_student += student_results[student_id]['tutorial_time'] + '</td><td>';
+        }
+        current_student += student_results[student_id]['name'];
+        current_student += '</td>';
+        student_names.push(current_student);
     });
+    student_names_html += student_names.join('</tr><tr>');
+    student_names_html += '</tr></table>';
 
-    student_names_field.html(student_names.join('<br/>'));
+    student_names_field.html(student_names_html);
 }
 
 function correct_row(row_id) {

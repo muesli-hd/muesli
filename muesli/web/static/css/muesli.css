@@ -286,3 +286,8 @@ table.colored tr:nth-child(odd) {
   visibility: visible;
   opacity: 1;
 }
+
+#student-names table td {
+    padding-top: 0;
+    padding-bottom: 0;
+}

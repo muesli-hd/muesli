@@ -595,14 +595,17 @@ def enterPointsSingle(request):
     exercise_ids = [[e.nr, e.id] for e in exercises]
     exercise_ids_json = json.dumps(exercise_ids)
     student_results = {}
-    for stud in students:
-        stud_result = exam.getResultsForStudent(stud)
+    for ls in lecture_students:
+        student = ls.student
+        stud_result = exam.getResultsForStudent(student)
         # read exercise ids from exercise_ids, since they will always have the correct order
         current_points = [str(stud_result[exercise_id]['points']) for _, exercise_id in exercise_ids]
         current_points.append(str(stud_result['sum']))
-        student_results[str(stud.id)] = {}
-        student_results[str(stud.id)]['points'] = current_points
-        student_results[str(stud.id)]['name'] = stud.name()
+        student_results[str(student.id)] = {}
+        student_results[str(student.id)]['points'] = current_points
+        student_results[str(student.id)]['name'] = student.name()
+        student_results[str(student.id)]['tutorial_time'] = ls.tutorial.time.__html__()
+        student_results[str(student.id)]['tutorial_tutor'] = ls.tutorial.tutor_name
     student_results_json = json.dumps(student_results)
 
     return {
