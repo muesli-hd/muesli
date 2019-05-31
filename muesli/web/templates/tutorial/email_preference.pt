@@ -7,7 +7,7 @@
 <p>
 Auf dieser Seite können Sie einstellen ob sie Status-Emails erhalten wollen.
 Status-Emails werden ihnen gesendet wenn ein Nutzer eine Übungsgruppe betritt
-oder verlässt.</p>
+oder verlässt.<br/>Diese Auswahl bezieht sich auf alle Übungsgruppen, die Sie für diese Vorlesung verwalten.</p>
 
 
 <form action="/tutorial/email" tal:attributes="action request.route_path('tutorial_email_preference', tutorial_ids=tutorial_ids)" method="POST"
