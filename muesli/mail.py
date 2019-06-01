@@ -51,10 +51,7 @@ def createAttachment(filename, data):
         # use a generic bag-of-bits type.
         ctype = 'application/octet-stream'
     maintype, subtype = ctype.split('/', 1)
-    if maintype == 'text':
-        # Note: we should handle calculating the charset
-        msg = MIMEText(data.read(), _subtype=subtype)
-    elif maintype == 'image':
+    if maintype == 'image':
         msg = MIMEImage(data.read(), _subtype=subtype)
     elif maintype == 'audio':
         msg = MIMEAudio(data.read(), _subtype=subtype)
