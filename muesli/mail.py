@@ -22,6 +22,7 @@
 
 
 import mimetypes
+import chardet
 
 from email import encoders
 from email.message import Message
@@ -51,7 +52,11 @@ def createAttachment(filename, data):
         # use a generic bag-of-bits type.
         ctype = 'application/octet-stream'
     maintype, subtype = ctype.split('/', 1)
-    if maintype == 'image':
+    if maintype == 'text':
+        data_bytes = data.read()
+        charset = chardet.detect(data_bytes)['encoding']
+        msg = MIMEText(data_bytes, _subtype=subtype, _charset=charset)
+    elif maintype == 'image':
         msg = MIMEImage(data.read(), _subtype=subtype)
     elif maintype == 'audio':
         msg = MIMEAudio(data.read(), _subtype=subtype)
