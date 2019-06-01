@@ -21,15 +21,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from cornice.resource import resource, view
-from sqlalchemy.orm import joinedload, undefer
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.sql.expression import desc
 from marshmallow.exceptions import ValidationError
-
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import joinedload, undefer
+from sqlalchemy.sql.expression import desc
 
 from muesli import models
 from muesli.web import context
 from muesli.web.api.v1 import allowed_attributes
+
 
 @resource(collection_path='/lectures',
           path='/lectures/{lecture_id}',
@@ -64,10 +64,10 @@ class Lecture:
         """
         lectures = (
             self.db.query(models.Lecture)
-            .order_by(desc(models.Lecture.term), models.Lecture.name)
-            .options(joinedload(models.Lecture.assistants))
-            .filter(models.Lecture.is_visible == True) # pylint: disable=C0121
-            .all()
+                .order_by(desc(models.Lecture.term), models.Lecture.name)
+                .options(joinedload(models.Lecture.assistants))
+                .filter(models.Lecture.is_visible == True)  # pylint: disable=C0121
+                .all()
         )
         schema = models.LectureSchema(many=True, only=allowed_attributes.collection_lecture())
         return schema.dump(lectures)
@@ -94,7 +94,9 @@ class Lecture:
                 $ref: "#/definitions/Lecture"
         """
         lecture_id = self.request.matchdict['lecture_id']
-        lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'), joinedload(models.Lecture.assistants), joinedload(models.Lecture.tutorials)).get(lecture_id)
+        lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'),
+                                                        joinedload(models.Lecture.assistants),
+                                                        joinedload(models.Lecture.tutorials)).get(lecture_id)
         subscribed = self.request.user.id in [s.id for s in lecture.students]
         allowed_attr = allowed_attributes.lecture()
         if lecture.mode == 'off':
@@ -154,7 +156,8 @@ class Lecture:
                     example: [{'description': {'name': ['Missing data for required field.'], 'test123': ['Unknown field.']}, 'name': 'fail', 'location': 'body'}]
         """
         lecture_id = self.request.matchdict['lecture_id']
-        lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'), joinedload(models.Lecture.assistants)).get(lecture_id)
+        lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count'),
+                                                        joinedload(models.Lecture.assistants)).get(lecture_id)
         schema = models.LectureSchema()
         # attatch db session to schema so it can be used during validation
         schema.context['session'] = self.request.db

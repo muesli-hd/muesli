@@ -20,9 +20,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import requests
 import json
-from header import authenticate, STATIC_HEADERS, MUESLI_URL
+
+import requests
+from header import authenticate, MUESLI_URL
 
 
 def post(endpoint, header):

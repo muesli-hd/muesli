@@ -23,13 +23,13 @@
 import re
 from collections import OrderedDict
 
-from pyramid.view import view_config
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
+from pyramid.view import view_config
 from pyramid_apispec.helpers import add_pyramid_paths
+
 from muesli import models
 from muesli.web.api.v1 import allowed_attributes
-
 
 
 @view_config(route_name='openapi_spec', renderer='json')
@@ -87,10 +87,12 @@ def api_spec(request):
     spec.components.schema('User', schema=models.UserSchema(only=allowed_attributes.user()))
 
     spec.components.schema('Tutorial', schema=models.TutorialSchema(only=allowed_attributes.tutorial()))
-    spec.components.schema('CollectionTutorial', schema=models.TutorialSchema(only=allowed_attributes.collection_tutorial()))
+    spec.components.schema('CollectionTutorial',
+                           schema=models.TutorialSchema(only=allowed_attributes.collection_tutorial()))
 
     spec.components.schema('Lecture', schema=models.LectureSchema(only=allowed_attributes.lecture()))
-    spec.components.schema('CollectionLecture', schema=models.LectureSchema(only=allowed_attributes.collection_lecture()))
+    spec.components.schema('CollectionLecture',
+                           schema=models.LectureSchema(only=allowed_attributes.collection_lecture()))
 
     spec.components.schema('ExerciseStudent', schema=models.ExerciseStudentSchema)
     spec.components.schema('Exercise', schema=models.ExerciseSchema)

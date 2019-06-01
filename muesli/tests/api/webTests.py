@@ -23,8 +23,8 @@
 import random
 import string
 
-from muesli.tests import functionalTests
 from muesli.models import BearerToken
+from muesli.tests import functionalTests
 
 
 class BaseTests(functionalTests.BaseTests):
@@ -33,6 +33,7 @@ class BaseTests(functionalTests.BaseTests):
 
     def test_api_explorer(self):
         self.testapp.get('/api-explorer', status=200)
+
 
 class UserLoggedInTests(functionalTests.PopulatedTests):
     def setUp(self):
@@ -47,7 +48,8 @@ class UserLoggedInTests(functionalTests.PopulatedTests):
 
     def test_key_generation(self):
         res = self.testapp.get('/user/api_keys', status=200)
-        tokens = self.session.query(BearerToken).filter_by(user_id=self.user.id).filter(BearerToken.revoked == False)  # pylint: disable=E0712,C0121
+        tokens = self.session.query(BearerToken).filter_by(user_id=self.user.id).filter(
+            BearerToken.revoked == False)  # pylint: disable=E0712,C0121
         tokens_pre = len(tokens.all())
         teststring = ''.join(random.choice(string.ascii_uppercase) for _ in range(10))
         form = res.form
@@ -55,8 +57,9 @@ class UserLoggedInTests(functionalTests.PopulatedTests):
         res_post_submit = form.submit("submit")
         self.assertTrue(res.status.startswith('200'))
         # Only works if there is one key in the db!
-        created_token = self.session.query(BearerToken).filter(BearerToken.revoked == False).first()  # pylint: disable=E0712,C0121
+        created_token = self.session.query(BearerToken).filter(
+            BearerToken.revoked == False).first()  # pylint: disable=E0712,C0121
         tokens_post = len(tokens.all())
         self.assertResContains(res_post_submit, teststring)
         self.assertTrue(created_token.description == teststring)
-        self.assertTrue((tokens_pre+1) == tokens_post)
+        self.assertTrue((tokens_pre + 1) == tokens_post)

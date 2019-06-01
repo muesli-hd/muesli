@@ -19,11 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from hashlib import sha1
-
-import unittest
-import muesli.web
 from muesli.tests import functionalTests
+
 
 class BaseTests(functionalTests.BaseTests):
     def test_index(self):
@@ -44,8 +41,10 @@ class BaseTests(functionalTests.BaseTests):
     def test_favicon(self):
         res = self.testapp.get('/favicon.ico', status=200)
 
-class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
+
+class UnloggedTests(BaseTests, functionalTests.PopulatedTests):
     pass
+
 
 class UserLoggedInTests(UnloggedTests):
     def setUp(self):
@@ -57,10 +56,12 @@ class UserLoggedInTests(UnloggedTests):
         # get 200 instead of 302
         res = self.testapp.get('/start', status=200)
 
+
 class TutorLoggedInTests(UserLoggedInTests):
     def setUp(self):
         UserLoggedInTests.setUp(self)
         self.setUser(self.tutor)
+
 
 class AssistantLoggedInTests(TutorLoggedInTests):
     def setUp(self):

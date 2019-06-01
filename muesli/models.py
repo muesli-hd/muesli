@@ -19,27 +19,25 @@
 
 # -*- coding: utf-8 -*-
 
+import hashlib
 import math
 import random
 import time
-import hashlib
-
-import muesli
 
 import sqlalchemy
 import sqlalchemy as sa
 import sqlalchemy.ext.declarative
-from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, String, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table, text
-from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
-from muesli.types import Term, TutorialTime, ColumnWrapper
-from muesli.utils import DictOfObjects, AutoVivification, editOwnTutorials, listStrings, getTerms
-from muesli.web.api.v1 import allowed_attributes
-
-from marshmallow import Schema, fields, pre_load, post_load
+from marshmallow import Schema, fields, post_load
 from marshmallow.exceptions import ValidationError
-
+from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, String, Integer, Boolean, Unicode, DateTime, Date, \
+    Numeric, func, Table, text
 from sqlalchemy.dialects.sqlite.base import SQLiteDialect
 from sqlalchemy.interfaces import PoolListener
+from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
+
+from muesli.types import Term, TutorialTime, ColumnWrapper
+from muesli.utils import AutoVivification, editOwnTutorials, listStrings, getTerms
+from muesli.web.api.v1 import allowed_attributes
 
 Base = sqlalchemy.ext.declarative.declarative_base()
 
@@ -65,23 +63,29 @@ def initializeSession(engine):
 
         engine.pool.add_listener(SQLiteConnectionListener())
 
+
 # Session = sessionmaker(bind=engine)
 
 
 lecture_tutors_table = Table('lecture_tutors', Base.metadata,
-        Column('lecture', Integer, ForeignKey('lectures.id'), primary_key=True),
-        Column('tutor', Integer, ForeignKey('users.id'), primary_key=True)
-)
+                             Column('lecture', Integer, ForeignKey('lectures.id'), primary_key=True),
+                             Column('tutor', Integer, ForeignKey('users.id'), primary_key=True)
+                             )
 
 grading_exam_table = Table('grading_exams', Base.metadata,
-        Column('grading', Integer, ForeignKey('gradings.id', ondelete='CASCADE'), nullable=False, primary_key=True),
-        Column('exam', Integer, ForeignKey('exams.id', ondelete='CASCADE'), nullable=False, primary_key=True)
-)
+                           Column('grading', Integer, ForeignKey('gradings.id', ondelete='CASCADE'), nullable=False,
+                                  primary_key=True),
+                           Column('exam', Integer, ForeignKey('exams.id', ondelete='CASCADE'), nullable=False,
+                                  primary_key=True)
+                           )
 
 lecture_assistants_table = Table('lecture_assistants', Base.metadata,
-        Column('lecture', Integer, ForeignKey('lectures.id', ondelete='CASCADE'), nullable=False, primary_key=True),
-        Column('assistant', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True)
-)
+                                 Column('lecture', Integer, ForeignKey('lectures.id', ondelete='CASCADE'),
+                                        nullable=False, primary_key=True),
+                                 Column('assistant', Integer, ForeignKey('users.id', ondelete='CASCADE'),
+                                        nullable=False, primary_key=True)
+                                 )
+
 
 # class GradingExam(Base):
 #        __tablename__ = 'grading_exams'
@@ -111,17 +115,20 @@ class User(Base):
     @property
     def tutorials(self):
         session = Session.object_session(self)
-        return session.query(Tutorial).filter(Tutorial.lecture_students.any(LectureStudent.student_id == self.id)).join(Tutorial.lecture).order_by(Lecture.term)
+        return session.query(Tutorial).filter(Tutorial.lecture_students.any(LectureStudent.student_id == self.id)).join(
+            Tutorial.lecture).order_by(Lecture.term)
 
     @property
     def tutorials_as_tutor(self):
         session = Session.object_session(self)
-        return session.query(Tutorial).filter(Tutorial.tutor_id == self.id).join(Tutorial.lecture).order_by(Lecture.term,Lecture.name,Tutorial.time)
+        return session.query(Tutorial).filter(Tutorial.tutor_id == self.id).join(Tutorial.lecture).order_by(
+            Lecture.term, Lecture.name, Tutorial.time)
 
     @property
     def tutorials_removed(self):
         session = Session.object_session(self)
-        return session.query(LectureRemovedStudent).filter(LectureRemovedStudent.student_id == self.id).join(LectureRemovedStudent.tutorial).join(Tutorial.lecture).order_by(Lecture.term,Lecture.name,Tutorial.time)
+        return session.query(LectureRemovedStudent).filter(LectureRemovedStudent.student_id == self.id).join(
+            LectureRemovedStudent.tutorial).join(Tutorial.lecture).order_by(Lecture.term, Lecture.name, Tutorial.time)
 
     def prepareMultiTutorials(self):
         mt = {}
@@ -210,8 +217,10 @@ class Lecture(Base):
     id = Column(Integer, primary_key=True)
     # Should be removed some day. Stays here just to make muesli3 work.
     assistant_id = Column('assistant', Integer, ForeignKey(User.id, ondelete='SET NULL'))
-    old_assistant = relationship(User, backref=backref('lectures_as_assistant_old', order_by='Lecture.term', lazy='dynamic'))
-    assistants = relationship(User, secondary=lecture_assistants_table, backref=backref("lectures_as_assistant", order_by='Lecture.term', lazy='dynamic'))
+    old_assistant = relationship(User,
+                                 backref=backref('lectures_as_assistant_old', order_by='Lecture.term', lazy='dynamic'))
+    assistants = relationship(User, secondary=lecture_assistants_table,
+                              backref=backref("lectures_as_assistant", order_by='Lecture.term', lazy='dynamic'))
     name = Column(Text)
     # lecture type
     #  'lecture'
@@ -237,34 +246,36 @@ class Lecture(Base):
     minimum_preferences = Column(Integer, default=None)
     tutor_rights = Column(Text, nullable=False, default=editOwnTutorials)
     tutorials = relationship('Tutorial', order_by='Tutorial.time,Tutorial.comment')
-    tutors = relationship(User, secondary=lecture_tutors_table, backref = "lectures_as_tutor")
+    tutors = relationship(User, secondary=lecture_tutors_table, backref="lectures_as_tutor")
 
     @property
     def students(self):
         session = Session.object_session(self)
-        return session.query(User).filter(User.lecture_students.any(LectureStudent.lecture_id==self.id))
+        return session.query(User).filter(User.lecture_students.any(LectureStudent.lecture_id == self.id))
 
     def lecture_students_for_tutorials(self, tutorials=[], order=True):
         ls = self.lecture_students
         if order:
             ls = ls.join(LectureStudent.student).order_by(User.last_name, User.first_name)
         if tutorials:
-            ls = ls.filter(LectureStudent.tutorial_id.in_([tut.id for tut in tutorials]))  # sqlalchemy.or_(*[LectureStudent.tutorial_id==tut.id for tut in tutorials]))
+            ls = ls.filter(LectureStudent.tutorial_id.in_([tut.id for tut in
+                                                           tutorials]))  # sqlalchemy.or_(*[LectureStudent.tutorial_id==tut.id for tut in tutorials]))
         return ls
-#       @property
-#       def tutors(self):
-#               session = Session.object_session(self)
-#               return session.query(User).filter(User.lecture_tutors.any(LectureTutor.lecture==self))
+
+    #       @property
+    #       def tutors(self):
+    #               session = Session.object_session(self)
+    #               return session.query(User).filter(User.lecture_tutors.any(LectureTutor.lecture==self))
 
     def prepareTimePreferences(self, user=None):
         session = Session.object_session(self)
         if self.mode == "prefs":
-            times = session.query(sqlalchemy.func.sum(Tutorial.max_students), Tutorial.time).\
-                    filter(Tutorial.lecture == self).\
-                    group_by(Tutorial.time)
-            times = [{'weekday':   result[1].weekday(),
+            times = session.query(sqlalchemy.func.sum(Tutorial.max_students), Tutorial.time). \
+                filter(Tutorial.lecture == self). \
+                group_by(Tutorial.time)
+            times = [{'weekday': result[1].weekday(),
                       'timeofday': result[1].time(),
-                      'time':      result[1],
+                      'time': result[1],
                       'max_students': result[0]} for result in times]
             for time in times:
                 if user:
@@ -284,36 +295,36 @@ class Lecture(Base):
 
     def pref_subjects(self):
         session = Session.object_session(self)
-        return session.query(sqlalchemy.func.count(User.id), User.subject).\
-                filter(User.time_preferences.any(TimePreference.lecture_id == self.id)).\
-                group_by(User.subject).order_by(User.subject)
+        return session.query(sqlalchemy.func.count(User.id), User.subject). \
+            filter(User.time_preferences.any(TimePreference.lecture_id == self.id)). \
+            group_by(User.subject).order_by(User.subject)
 
     def subjects(self):
         session = Session.object_session(self)
-        return session.query(sqlalchemy.func.count(User.id), User.subject).\
-                filter(User.lecture_students.any(LectureStudent.lecture_id == self.id)).\
-                group_by(User.subject).order_by(User.subject)
+        return session.query(sqlalchemy.func.count(User.id), User.subject). \
+            filter(User.lecture_students.any(LectureStudent.lecture_id == self.id)). \
+            group_by(User.subject).order_by(User.subject)
 
     def getLectureResults(self, tutorials=[], students=None):
         session = Session.object_session(self)
         if not students:
             students = self.lecture_students_for_tutorials(tutorials)
         exercises = session.query(Exercise).filter(Exercise.exam_id.in_([e.id for e in self.exams])).all()
-        lecture_results = session.query(\
-                        sqlalchemy.func.sum(ExerciseStudent.points).label('points'),
-                        ExerciseStudent.student_id.label('student_id'),
-                        Exam, Exam.id)\
-                        .filter(ExerciseStudent.exercise_id.in_([e.id  for e in exercises]))\
-                        .filter(ExerciseStudent.student_id.in_([s.student_id for s in students]))\
-                        .join(Exercise, ExerciseStudent.exercise).join(Exam, Exercise.exam)\
-                        .group_by(ExerciseStudent.student_id, Exam)
+        lecture_results = session.query( \
+            sqlalchemy.func.sum(ExerciseStudent.points).label('points'),
+            ExerciseStudent.student_id.label('student_id'),
+            Exam, Exam.id) \
+            .filter(ExerciseStudent.exercise_id.in_([e.id for e in exercises])) \
+            .filter(ExerciseStudent.student_id.in_([s.student_id for s in students])) \
+            .join(Exercise, ExerciseStudent.exercise).join(Exam, Exercise.exam) \
+            .group_by(ExerciseStudent.student_id, Exam)
         return lecture_results
 
     def getLectureResultsByCategory(self, *args, **kwargs):
         session = Session.object_session(self)
         results = self.getLectureResults(*args, **kwargs).subquery()
-        return session.query(func.sum(results.c.points).label('points'), results.c.student_id, results.c.category)\
-                .group_by(results.c.category, results.c.student_id)
+        return session.query(func.sum(results.c.points).label('points'), results.c.student_id, results.c.category) \
+            .group_by(results.c.category, results.c.student_id)
 
     def getPreparedLectureResults(self, lecture_results):
         results = AutoVivification()
@@ -321,7 +332,8 @@ class Lecture(Base):
             results[res.student_id][res.Exam.id] = res.points
         for exam in self.exams:
             for student_results in list(results.values()):
-                student_results[exam.category] = student_results.get(exam.category,0)+(student_results.get(exam.id,0) or 0)
+                student_results[exam.category] = student_results.get(exam.category, 0) + (
+                            student_results.get(exam.id, 0) or 0)
         return results
 
     def getGradingResults(self, tutorials=[], students=None):
@@ -351,24 +363,24 @@ class Exam(Base):
     @property
     def exercise_points(self):
         session = Session.object_session(self)
-        return session.query(ExerciseStudent).filter(ExerciseStudent.exercise.has(Exercise.exam_id==self.id))
+        return session.query(ExerciseStudent).filter(ExerciseStudent.exercise.has(Exercise.exam_id == self.id))
 
     def getResults(self, students=None):
         session = Session.object_session(self)
         pointsQuery = self.exercise_points
         if students:
-            pointsQuery = pointsQuery.filter(ExerciseStudent.student_id.in_([s.student_id for s  in students]))
+            pointsQuery = pointsQuery.filter(ExerciseStudent.student_id.in_([s.student_id for s in students]))
         pointsStmt = pointsQuery.subquery()
-        examPoints = session.query(\
-                        pointsStmt.c.student.label('student_id'),
-                        func.sum(pointsStmt.c.points).label('points'),
-                ).group_by(pointsStmt.c.student)
+        examPoints = session.query( \
+            pointsStmt.c.student.label('student_id'),
+            func.sum(pointsStmt.c.points).label('points'),
+        ).group_by(pointsStmt.c.student)
         return examPoints
 
     def getResultsForStudent(self, student):
         session = Session.object_session(self)
         pointsQuery = self.exercise_points
-        pointsQuery = pointsQuery.filter(ExerciseStudent.student_id==student.id)
+        pointsQuery = pointsQuery.filter(ExerciseStudent.student_id == student.id)
         results = {}
         for points in pointsQuery.all():
             results[points.exercise_id] = {'points': points.points,
@@ -385,37 +397,37 @@ class Exam(Base):
         session = Session.object_session(self)
         if not students:
             students = self.lecture.lecture_students_for_tutorials(tutorials).all()
-        pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student_id for s  in students]))\
-                                                .filter(ExerciseStudent.points!=None)
+        pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student_id for s in students])) \
+            .filter(ExerciseStudent.points != None)
         pointsStmt = pointsQuery.subquery()
-        exerciseStatistics = session.query(\
-                        pointsStmt.c.exercise.label('exercise_id'),
-                        func.count(pointsStmt.c.student).label('count'),
-                        func.avg(pointsStmt.c.points).label('avg'),
-                        func.variance(pointsStmt.c.points).label('variance')
-                ).group_by(pointsStmt.c.exercise)
-        examPoints = session.query(\
-                        pointsStmt.c.student.label('student_id'),
-                        func.sum(pointsStmt.c.points).label('points'),
-                ).group_by(pointsStmt.c.student).subquery()
-        examStatistics = session.query(\
-                        func.count(examPoints.c.student_id).label('count'),
-                        func.avg(examPoints.c.points).label('avg'),
-                        func.variance(examPoints.c.points).label('variance'),
-                ).one()
+        exerciseStatistics = session.query( \
+            pointsStmt.c.exercise.label('exercise_id'),
+            func.count(pointsStmt.c.student).label('count'),
+            func.avg(pointsStmt.c.points).label('avg'),
+            func.variance(pointsStmt.c.points).label('variance')
+        ).group_by(pointsStmt.c.exercise)
+        examPoints = session.query( \
+            pointsStmt.c.student.label('student_id'),
+            func.sum(pointsStmt.c.points).label('points'),
+        ).group_by(pointsStmt.c.student).subquery()
+        examStatistics = session.query( \
+            func.count(examPoints.c.student_id).label('count'),
+            func.avg(examPoints.c.points).label('avg'),
+            func.variance(examPoints.c.points).label('variance'),
+        ).one()
         statistics['exam'] = {
-                prefix+'_avg': examStatistics.avg,
-                prefix+'_std': math.sqrt(examStatistics.variance) if examStatistics.variance else None,
-                prefix+'_count': examStatistics.count,
-                'max': self.getMaxpoints()}
+            prefix + '_avg': examStatistics.avg,
+            prefix + '_std': math.sqrt(examStatistics.variance) if examStatistics.variance else None,
+            prefix + '_count': examStatistics.count,
+            'max': self.getMaxpoints()}
         for e in self.exercises:
-            statistics[e.id] = {prefix+'_avg': None, prefix+'_std': None, prefix+'_count': 0, 'max': e.maxpoints}
+            statistics[e.id] = {prefix + '_avg': None, prefix + '_std': None, prefix + '_count': 0, 'max': e.maxpoints}
         for e in exerciseStatistics.all():
             statistics[e.exercise_id] = {
-                    prefix+'_avg': e.avg,
-                    prefix+'_std': math.sqrt(e.variance) if e.variance else None,
-                    prefix+'_count': e.count
-                    }
+                prefix + '_avg': e.avg,
+                prefix + '_std': math.sqrt(e.variance) if e.variance else None,
+                prefix + '_count': e.count
+            }
         return statistics
 
     def getStatisticsBySubjects(self, tutorials=None, students=None, statistics=None, prefix='lec'):
@@ -423,43 +435,44 @@ class Exam(Base):
         if not students:
             students = self.lecture.lecture_students_for_tutorials(tutorials)
         exercise_points = session.query(ExerciseStudent, ExerciseStudent.student)
-        pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student_id for s  in students]))\
-                .filter(ExerciseStudent.exercise_id.in_([e.id for e in self.exercises]))\
-                .filter(ExerciseStudent.points!=None).subquery()
-        pointsStmt = session.query(User.subject, pointsQuery).join(pointsQuery, pointsQuery.c.student==User.id).subquery()
-        exerciseStatistics = session.query(\
-                        pointsStmt.c.exercise.label('exercise_id'),
-                        pointsStmt.c.subject.label('subject'),
-                        func.count(pointsStmt.c.student).label('count'),
-                        func.avg(pointsStmt.c.points).label('avg'),
-                        func.variance(pointsStmt.c.points).label('variance')
-                ).group_by(pointsStmt.c.exercise, pointsStmt.c.subject).all()
-        examPoints = session.query(\
-                        pointsStmt.c.student.label('student_id'),
-                        pointsStmt.c.subject.label('subject'),
-                        func.sum(pointsStmt.c.points).label('points'),
-                ).group_by(pointsStmt.c.student, pointsStmt.c.subject).subquery()
-        examStatistics = session.query(\
-                        examPoints.c.subject.label('subject'),
-                        func.count(examPoints.c.student_id).label('count'),
-                        func.avg(examPoints.c.points).label('avg'),
-                        func.variance(examPoints.c.points).label('variance'),
-                ).group_by(examPoints.c.subject).all()
+        pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student_id for s in students])) \
+            .filter(ExerciseStudent.exercise_id.in_([e.id for e in self.exercises])) \
+            .filter(ExerciseStudent.points != None).subquery()
+        pointsStmt = session.query(User.subject, pointsQuery).join(pointsQuery,
+                                                                   pointsQuery.c.student == User.id).subquery()
+        exerciseStatistics = session.query( \
+            pointsStmt.c.exercise.label('exercise_id'),
+            pointsStmt.c.subject.label('subject'),
+            func.count(pointsStmt.c.student).label('count'),
+            func.avg(pointsStmt.c.points).label('avg'),
+            func.variance(pointsStmt.c.points).label('variance')
+        ).group_by(pointsStmt.c.exercise, pointsStmt.c.subject).all()
+        examPoints = session.query( \
+            pointsStmt.c.student.label('student_id'),
+            pointsStmt.c.subject.label('subject'),
+            func.sum(pointsStmt.c.points).label('points'),
+        ).group_by(pointsStmt.c.student, pointsStmt.c.subject).subquery()
+        examStatistics = session.query( \
+            examPoints.c.subject.label('subject'),
+            func.count(examPoints.c.student_id).label('count'),
+            func.avg(examPoints.c.points).label('avg'),
+            func.variance(examPoints.c.points).label('variance'),
+        ).group_by(examPoints.c.subject).all()
         if statistics is None:
             statistics = AutoVivification()
         maxpoints = self.getMaxpoints()
         for res in examStatistics:
-            statistics[res.subject]['exam'] = {prefix+'_avg': res.avg,
-                                               prefix+'_std': math.sqrt(res.variance) if res.variance else None,
-                                               prefix+'_count': res.count,
+            statistics[res.subject]['exam'] = {prefix + '_avg': res.avg,
+                                               prefix + '_std': math.sqrt(res.variance) if res.variance else None,
+                                               prefix + '_count': res.count,
                                                'max': maxpoints}
         for e in exerciseStatistics:
             statistics[e.subject][e.exercise_id] = {
-                    prefix+'_avg': e.avg,
-                    prefix+'_std': math.sqrt(e.variance) if e.variance else None,
-                    prefix+'_count': e.count,
-                    'max': session.query(Exercise).get(e.exercise_id).maxpoints
-                    }
+                prefix + '_avg': e.avg,
+                prefix + '_std': math.sqrt(e.variance) if e.variance else None,
+                prefix + '_count': e.count,
+                'max': session.query(Exercise).get(e.exercise_id).maxpoints
+            }
         return statistics
 
     def getMaxpoints(self):
@@ -469,13 +482,13 @@ class Exam(Base):
         results = self.getResults(students=students).all()
         allcount = len([res for res in results if res.points and res.points >= 0])
         quantils = []
-        for i in range(self.getMaxpoints()+1):
+        for i in range(self.getMaxpoints() + 1):
             count = len([res for res in results if res.points and res.points >= i])
             quantils.append({
-                    'min_points': i,
-                    'min_percent': i/float(self.getMaxpoints()) if self.getMaxpoints() else 0,
-                    'count': count,
-                    'quantile': float(count)/allcount if allcount!=0 else 0})
+                'min_points': i,
+                'min_percent': i / float(self.getMaxpoints()) if self.getMaxpoints() else 0,
+                'count': count,
+                'quantile': float(count) / allcount if allcount != 0 else 0})
         return quantils
 
     @property
@@ -504,7 +517,7 @@ class Tutorial(Base):
     @property
     def students(self):
         session = Session.object_session(self)
-        return session.query(User).filter(User.lecture_students.any(LectureStudent.tutorial==self))
+        return session.query(User).filter(User.lecture_students.any(LectureStudent.tutorial == self))
 
     @property
     def tutor_name(self):
@@ -512,6 +525,7 @@ class Tutorial(Base):
             return self.tutor.last_name
         else:
             return '-'
+
     # weekday and time of tutorial
     # format: "D HH:MM"
     # where
@@ -565,11 +579,12 @@ class LectureStudent(Base):
     tutorial_id = Column('tutorial', Integer, ForeignKey(Tutorial.id))
     tutorial = relationship(Tutorial, backref='lecture_students')
 
+
 Tutorial.student_count = column_property(
-                sa.select([sa.func.count(LectureStudent.student_id)]).\
-                        where(LectureStudent.tutorial_id==Tutorial.id),
-                deferred=True
-                )
+    sa.select([sa.func.count(LectureStudent.student_id)]). \
+        where(LectureStudent.tutorial_id == Tutorial.id),
+    deferred=True
+)
 
 
 class LectureRemovedStudent(Base):
@@ -580,6 +595,7 @@ class LectureRemovedStudent(Base):
     student = relationship(User, backref=backref('lecture_removed_students', lazy='dynamic'))
     tutorial_id = Column('tutorial', Integer, ForeignKey(Tutorial.id))
     tutorial = relationship(Tutorial, backref='lecture_removed_students')
+
 
 # class LectureTutor(Base):
 #        __tablename__ = 'lecture_tutors'
@@ -635,7 +651,7 @@ class Grading(Base):
     hispos_type = Column(Text)
     hispos_date = Column(Text)
     examiner_id = Column(Text)
-    exams = relationship(Exam, secondary=grading_exam_table, backref = "gradings", order_by=Exam.id)
+    exams = relationship(Exam, secondary=grading_exam_table, backref="gradings", order_by=Exam.id)
 
 
 class StudentGrade(Base):
@@ -646,20 +662,24 @@ class StudentGrade(Base):
     student = relationship(User, backref=backref('student_grades', lazy='dynamic'))
     grade = Column(Numeric(precision=2, scale=1), CheckConstraint('grade >= 1.0 AND grade <= 5.0'))
 
+
 class EmailPreferences(Base):
     __tablename__ = 'email_preferences'
     user_id = Column(Integer, ForeignKey(User.id), nullable=False, primary_key=True)
     lecture_id = Column(Integer, ForeignKey(Lecture.id), nullable=False, primary_key=True)
     receive_status_mails = Column(Boolean, nullable=False)
+
     def __init__(self, user_id, lecture_id, receive_status_mails):
         self.user_id = user_id
         self.lecture_id = lecture_id
         self.receive_status_mails = receive_status_mails
 
+
 class UserHasUpdated(Base):
     __tablename__ = 'user_has_updated'
     user_id = Column(Integer, ForeignKey(User.id), nullable=False, primary_key=True)
     has_updated_info = Column(String, nullable=False)
+
     def __init__(self, user_id, user_has_updated):
         self.user_id = user_id
         self.has_updated_info = user_has_updated
@@ -715,7 +735,7 @@ class TutorialSchema(Schema):
     tutor = fields.Nested(
         UserSchema, only=allowed_attributes.user(), dump_only=True)
     comment = fields.String()
-    students = fields.Nested(UserSchema, many=True, only=allowed_attributes.user(),dump_only=True)
+    students = fields.Nested(UserSchema, many=True, only=allowed_attributes.user(), dump_only=True)
     exams = fields.Nested(ExamSchema, many=True, only=["id", "name"], dump_only=True)
     student_count = fields.Method("get_student_num")
 

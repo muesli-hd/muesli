@@ -20,11 +20,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from marshmallow.exceptions import ValidationError
 from cornice.resource import resource, view
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.orm import joinedload
+from marshmallow.exceptions import ValidationError
 from pyramid.httpexceptions import HTTPBadRequest
+from sqlalchemy.orm import joinedload
+from sqlalchemy.orm.exc import NoResultFound
 
 from muesli import models
 from muesli.web import context
@@ -33,7 +33,7 @@ from muesli.web.api.v1 import allowed_attributes
 
 @resource(collection_path='/tutorials',
           path='/tutorials/{tutorial_id}',
-          factory=context.TutorialEndpointContext,)
+          factory=context.TutorialEndpointContext, )
 class Tutorial:
     def __init__(self, request, context=None):
         self.request = request
@@ -60,10 +60,12 @@ class Tutorial:
               schema:
                 $ref: "#/definitions/CollectionTutorial"
         """
-        tutorials = self.request.user.tutorials.options(joinedload(models.Tutorial.tutor), joinedload(models.Tutorial.lecture)).all()
-        tutorials_as_tutor = self.request.user.tutorials_as_tutor.options(joinedload(models.Tutorial.tutor), joinedload(models.Tutorial.lecture)).all()
+        tutorials = self.request.user.tutorials.options(joinedload(models.Tutorial.tutor),
+                                                        joinedload(models.Tutorial.lecture)).all()
+        tutorials_as_tutor = self.request.user.tutorials_as_tutor.options(joinedload(models.Tutorial.tutor),
+                                                                          joinedload(models.Tutorial.lecture)).all()
         schema = models.TutorialSchema(many=True, only=allowed_attributes.collection_tutorial())
-        return schema.dump(tutorials+tutorials_as_tutor)
+        return schema.dump(tutorials + tutorials_as_tutor)
 
     @view(permission='viewOverview')
     def get(self):
@@ -90,11 +92,12 @@ class Tutorial:
             tutorial = self.request.db.query(models.Tutorial).options(
                 joinedload(models.Tutorial.tutor),
                 joinedload(models.Tutorial.lecture)).filter(
-                    models.Tutorial.id == self.request.matchdict['tutorial_id'] # pylint: disable=C0121
-                ).one()
+                models.Tutorial.id == self.request.matchdict['tutorial_id']  # pylint: disable=C0121
+            ).one()
         except NoResultFound:
             raise HTTPBadRequest("Ungueltige Tutorial ID!")
-        exa = tutorial.lecture.exams.filter((models.Exam.results_hidden == False)|(models.Exam.results_hidden == None)) # pylint: disable=C0121
+        exa = tutorial.lecture.exams.filter(
+            (models.Exam.results_hidden == False) | (models.Exam.results_hidden == None))  # pylint: disable=C0121
         if self.request.has_permission('viewAll'):
             tut_schema = models.TutorialSchema()
         else:
@@ -103,7 +106,8 @@ class Tutorial:
 
         result = tut_schema.dump(tutorial)
         try:
-            lecture_student = tutorial.lecture.lecture_students.filter(models.LectureStudent.student_id == self.request.user.id).one()
+            lecture_student = tutorial.lecture.lecture_students.filter(
+                models.LectureStudent.student_id == self.request.user.id).one()
         except NoResultFound:
             lecture_student = None
         # If the user is part of the tutorial he is allowed to view the exams

@@ -20,19 +20,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import subprocess
-import traceback
-import time
 import os
+import subprocess
+import sys
+import time
+import traceback
 
-os.environ['PYRAMID_DEBUG_TEMPLATES']='1'
+os.environ['PYRAMID_DEBUG_TEMPLATES'] = '1'
 while True:
     try:
         start = time.time()
         subprocess.Popen(['./muesli-serve', '--reload']).communicate()
         end = time.time()
-        if end-start < 2:
+        if end - start < 2:
             # Don't start endless loop on syntax errors
             sys.exit()
     except Exception as e:

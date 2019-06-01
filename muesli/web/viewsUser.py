@@ -20,34 +20,31 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from muesli import models
-from muesli import utils
-from muesli.web import forms
-from muesli.web import context
-from muesli.types import Term
-import muesli
+import collections
+import datetime
+import re
+from hashlib import sha1
 
 from pyramid import security
+from pyramid.httpexceptions import HTTPBadRequest, HTTPFound, HTTPForbidden
 from pyramid.view import view_config
-from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTPForbidden
-from pyramid.url import route_url
-from sqlalchemy.orm import exc
 from sqlalchemy import func, or_, not_
-from hashlib import sha1
-from muesli.mail import Message, sendMail
 
-import re
-import os
-import datetime
-import collections
+import muesli
+from muesli import models
+from muesli import utils
+from muesli.mail import Message, sendMail
+from muesli.types import Term
+from muesli.web import context
+from muesli.web import forms
 
 
 @view_config(route_name='user_login', renderer='muesli.web:templates/user/login.pt')
 def login(request):
     form = forms.FormValidator(forms.UserLogin())
     if request.method == 'POST' and form.validate(request.POST):
-        user = request.db.query(models.User).filter_by(email=form['email'].strip(), password=sha1(form['password'].encode('utf-8')).hexdigest()).first()
+        user = request.db.query(models.User).filter_by(email=form['email'].strip(), password=sha1(
+            form['password'].encode('utf-8')).hexdigest()).first()
         if user is not None:
             security.remember(request, user.id)
             request.user = user
@@ -67,7 +64,7 @@ def api_login(request):
     token = models.BearerToken(client="Personal Token",
                                user=user,
                                description="Requested from API",
-                               expires=datetime.datetime.utcnow()+exp
+                               expires=datetime.datetime.utcnow() + exp
                                )
     request.db.add(token)
     request.db.flush()
@@ -80,10 +77,11 @@ def api_login(request):
         }
     return {'result': 'error'}
 
+
 # Only for testing purposes. If it is decided that this should be implemented
 # the function needs to be changed to work similar to api_login
-#@view_config(route_name='api_login', renderer='json', request_method='GET')
-#def refresh(request):
+# @view_config(route_name='api_login', renderer='json', request_method='GET')
+# def refresh(request):
 #    user = request.db.query(models.User).get(request.authenticated_userid)
 #    if user:
 #        return {
@@ -100,7 +98,8 @@ def logout(request):
     return HTTPFound(location=request.route_url('index'))
 
 
-@view_config(route_name='user_list', renderer='muesli.web:templates/user/list.pt', context=context.GeneralContext, permission='admin')
+@view_config(route_name='user_list', renderer='muesli.web:templates/user/list.pt', context=context.GeneralContext,
+             permission='admin')
 def listUser(request):
     users = request.db.query(models.User).order_by(models.User.last_name, models.User.first_name)
     if 'subject' in request.GET:
@@ -108,31 +107,34 @@ def listUser(request):
     return {'users': users}
 
 
-@view_config(route_name='user_list_subjects', renderer='muesli.web:templates/user/list_subjects.pt', context=context.GeneralContext, permission='admin')
+@view_config(route_name='user_list_subjects', renderer='muesli.web:templates/user/list_subjects.pt',
+             context=context.GeneralContext, permission='admin')
 def listSubjects(request):
-    subjects = request.db.query(models.User.subject, func.count(models.User.id)).group_by(models.User.subject).order_by(models.User.subject)
+    subjects = request.db.query(models.User.subject, func.count(models.User.id)).group_by(models.User.subject).order_by(
+        models.User.subject)
     return {'subjects': subjects}
 
 
-@view_config(route_name='user_list_subjects_by_term', renderer='muesli.web:templates/user/list_subjects_by_term.pt', context=context.GeneralContext, permission='admin')
+@view_config(route_name='user_list_subjects_by_term', renderer='muesli.web:templates/user/list_subjects_by_term.pt',
+             context=context.GeneralContext, permission='admin')
 def listSubjectsByTerm(request):
     settings = {
-            'starting_term': '20121',          # SS 2012
-            'minimal_count': 20,               # minimal count overall terms
-            'exclude_lecture_name': 'Vorkurs'  # lecture name to exclude
+        'starting_term': '20121',  # SS 2012
+        'minimal_count': 20,  # minimal count overall terms
+        'exclude_lecture_name': 'Vorkurs'  # lecture name to exclude
     }
     subject_term_dict = collections.defaultdict(lambda: collections.defaultdict(int))
     terms = [str(x[0]) for x in request.db.query(models.Lecture.term)
-            .filter(models.Lecture.term >= settings['starting_term'])
-            .group_by(models.Lecture.term).order_by(models.Lecture.term.desc())]
+        .filter(models.Lecture.term >= settings['starting_term'])
+        .group_by(models.Lecture.term).order_by(models.Lecture.term.desc())]
     subjects_by_term = []
-    table = request.db.query(models.Lecture.term, models.User.subject, func.count(models.User.id))\
-            .join(models.LectureStudent)\
-            .join(models.User)\
-            .filter(models.Lecture.term >= settings['starting_term'])\
-            .filter(not_(models.Lecture.name.contains(settings['exclude_lecture_name'])))\
-            .group_by(models.User.subject, models.Lecture.term)\
-            .order_by(models.Lecture.term, models.User.subject)
+    table = request.db.query(models.Lecture.term, models.User.subject, func.count(models.User.id)) \
+        .join(models.LectureStudent) \
+        .join(models.User) \
+        .filter(models.Lecture.term >= settings['starting_term']) \
+        .filter(not_(models.Lecture.name.contains(settings['exclude_lecture_name']))) \
+        .group_by(models.User.subject, models.Lecture.term) \
+        .order_by(models.Lecture.term, models.User.subject)
     for (term, subject, count) in table:
         subject = re.sub(r'\(.*\)', '', str(subject))
         subject = re.sub(r'\s$', '', str(subject))
@@ -148,7 +150,8 @@ def listSubjectsByTerm(request):
     return {'subjects_by_term': subjects_by_term, 'terms': readable_terms, 'settings': settings}
 
 
-@view_config(route_name='user_edit', renderer='muesli.web:templates/user/edit.pt', context=context.UserContext, permission='edit')
+@view_config(route_name='user_edit', renderer='muesli.web:templates/user/edit.pt', context=context.UserContext,
+             permission='edit')
 def edit(request):
     user_id = request.matchdict['user_id']
     user = request.db.query(models.User).get(user_id)
@@ -180,25 +183,32 @@ def edit(request):
 def delete(request):
     user = request.context.user
     if (user.tutorials.all()):
-        request.session.flash('Benutzer %s ist zu Tutorien angemeldet und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s ist zu Tutorien angemeldet und kann daher nicht gelöscht werden' % user,
+                              queue='errors')
         return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
     elif user.tutorials_as_tutor.all():
-        request.session.flash('Benutzer %s ist Tutor von Tutorien und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s ist Tutor von Tutorien und kann daher nicht gelöscht werden' % user,
+                              queue='errors')
         return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
     elif user.lectures_as_tutor:
-        request.session.flash('Benutzer %s ist als Tutor eingetragen und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s ist als Tutor eingetragen und kann daher nicht gelöscht werden' % user,
+                              queue='errors')
         return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
     elif user.lectures_as_assistant.all():
-        request.session.flash('Benutzer %s verwaltet Vorlesungen und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s verwaltet Vorlesungen und kann daher nicht gelöscht werden' % user,
+                              queue='errors')
         return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
     elif len(user.exercise_points) > 0:
-        request.session.flash('Benutzer %s hat eingetragene Punkte und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s hat eingetragene Punkte und kann daher nicht gelöscht werden' % user,
+                              queue='errors')
         return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
     elif len(user.student_grades.all()) > 0:
-        request.session.flash('Benutzer %s hat eingetragene Noten und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s hat eingetragene Noten und kann daher nicht gelöscht werden' % user,
+                              queue='errors')
         return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
     elif len(user.tutorials_removed.all()) > 0:
-        request.session.flash('Benutzer %s war in Tutorien angemeldet und kann daher nicht gelöscht werden' % user, queue='errors')
+        request.session.flash('Benutzer %s war in Tutorien angemeldet und kann daher nicht gelöscht werden' % user,
+                              queue='errors')
         return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
     else:
         for c in user.confirmations:
@@ -210,7 +220,8 @@ def delete(request):
         return HTTPFound(location=request.route_url('admin'))
 
 
-@view_config(route_name='user_delete_unconfirmed', renderer='muesli.web:templates/user/delete_unconfirmed.pt', context=context.GeneralContext, permission='admin')
+@view_config(route_name='user_delete_unconfirmed', renderer='muesli.web:templates/user/delete_unconfirmed.pt',
+             context=context.GeneralContext, permission='admin')
 def deleteUnconfirmed(request):
     potentially_bad_students = request.db.query(models.User).filter(models.User.password == None).all()
     bad_students = []
@@ -230,7 +241,9 @@ def deleteUnconfirmed(request):
         bad_students = []
     return {'unconfirmed_students': bad_students}
 
-@view_config(route_name='user_doublets', renderer='muesli.web:templates/user/doublets.pt', context=context.GeneralContext, permission='admin')
+
+@view_config(route_name='user_doublets', renderer='muesli.web:templates/user/doublets.pt',
+             context=context.GeneralContext, permission='admin')
 def doublets(request):
     emails = [e.email for e in request.db.query(models.User.email)]
     doublets = collections.defaultdict(lambda: [])
@@ -238,14 +251,15 @@ def doublets(request):
         doublets[user.email.lower()].append(user)
         # doublets[user.name().lower()].append(user)
     for key, value in list(doublets.items()):
-        if len(value)<=1:
+        if len(value) <= 1:
             del doublets[key]
     doublets_list = list(doublets.items())
     doublets_list.sort(key=lambda e: e[1][0].last_name)
     return {'doublets': doublets_list}
 
 
-@view_config(route_name='user_update', renderer='muesli.web:templates/user/update.pt', context=context.GeneralContext, permission='update')
+@view_config(route_name='user_update', renderer='muesli.web:templates/user/update.pt', context=context.GeneralContext,
+             permission='update')
 def user_update(request):
     form = forms.UserUpdate(request, request.user)
     if request.method == 'POST' and form.processPostData(request.POST):
@@ -254,7 +268,9 @@ def user_update(request):
         request.session.flash('Angaben geändert', queue='messages')
     return {'form': form}
 
-@view_config(route_name='user_check', renderer='muesli.web:templates/user/check.pt', context=context.GeneralContext, permission='update')
+
+@view_config(route_name='user_check', renderer='muesli.web:templates/user/check.pt', context=context.GeneralContext,
+             permission='update')
 def user_check(request):
     form = forms.UserUpdate(request, request.user)
     if request.method == 'POST' and form.processPostData(request.POST):
@@ -270,7 +286,9 @@ def user_check(request):
         request.session.flash('Angaben geändert', queue='messages')
     return {'form': form}
 
-@view_config(route_name='user_register', renderer='muesli.web:templates/user/register.pt', context=context.GeneralContext)
+
+@view_config(route_name='user_register', renderer='muesli.web:templates/user/register.pt',
+             context=context.GeneralContext)
 def register(request):
     form = forms.UserRegister(request)
     if request.method == 'POST' and form.processPostData(request.POST):
@@ -279,7 +297,8 @@ def register(request):
     return {'form': form}
 
 
-@view_config(route_name='user_register_other', renderer='muesli.web:templates/user/register_other.pt', context=context.GeneralContext)
+@view_config(route_name='user_register_other', renderer='muesli.web:templates/user/register_other.pt',
+             context=context.GeneralContext)
 def registerOther(request):
     form = forms.UserRegisterOther(request)
     if request.method == 'POST' and form.processPostData(request.POST):
@@ -306,6 +325,7 @@ def registerCommon(request, form):
         request.db.commit()
         send_confirmation_mail(request, user, confirmation)
         return True
+
 
 def send_confirmation_mail(request, user, confirmation):
     body = """
@@ -334,12 +354,14 @@ Das MÜSLI-Team
     sendMail(message)
 
 
-@view_config(route_name='user_wait_for_confirmation', renderer='muesli.web:templates/user/wait_for_confirmation.pt', context=context.GeneralContext)
+@view_config(route_name='user_wait_for_confirmation', renderer='muesli.web:templates/user/wait_for_confirmation.pt',
+             context=context.GeneralContext)
 def waitForConfirmation(request):
     return {}
 
 
-@view_config(route_name='user_resend_confirmation_mail', renderer='muesli.web:templates/user/wait_for_confirmation.pt', context=context.UserContext)
+@view_config(route_name='user_resend_confirmation_mail', renderer='muesli.web:templates/user/wait_for_confirmation.pt',
+             context=context.UserContext)
 def resendConfirmationMail(request):
     user_id = request.matchdict['user_id']
     confirmation = request.db.query(models.Confirmation).filter(models.Confirmation.user_id == user_id).first()
@@ -361,7 +383,8 @@ einfach.
 
 Mit freudlichen Grüßen,
 Das MÜSLI-Team
-    """ % (confirmation.created_on, user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
+    """ % (
+    confirmation.created_on, user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
     message = Message(subject='MÜSLI: Ihre Registrierung bei MÜSLI',
                       sender=('%s <%s>' % (request.config['contact']['name'],
                                            request.config['contact']['email'])),
@@ -371,7 +394,8 @@ Das MÜSLI-Team
     return {}
 
 
-@view_config(route_name='user_confirm', renderer='muesli.web:templates/user/confirm.pt', context=context.ConfirmationContext)
+@view_config(route_name='user_confirm', renderer='muesli.web:templates/user/confirm.pt',
+             context=context.ConfirmationContext)
 def confirm(request):
     form = forms.UserConfirm(request, request.context.confirmation)
     if request.method == 'POST' and form.processPostData(request.POST):
@@ -388,7 +412,8 @@ def confirm(request):
             'confirmation': request.context.confirmation}
 
 
-@view_config(route_name='user_change_email', renderer='muesli.web:templates/user/change_email.pt', context=context.GeneralContext, permission='change_email')
+@view_config(route_name='user_change_email', renderer='muesli.web:templates/user/change_email.pt',
+             context=context.GeneralContext, permission='change_email')
 def changeEmail(request):
     form = forms.UserChangeEmail(request, request.user)
     if request.method == 'POST' and form.processPostData(request.POST):
@@ -432,12 +457,14 @@ Das MÜSLI-Team
     return {'form': form}
 
 
-@view_config(route_name='user_change_email_wait_for_confirmation', renderer='muesli.web:templates/user/change_email_wait_for_confirmation.pt', context=context.GeneralContext)
+@view_config(route_name='user_change_email_wait_for_confirmation',
+             renderer='muesli.web:templates/user/change_email_wait_for_confirmation.pt', context=context.GeneralContext)
 def changeEmailWaitForConfirmation(request):
     return {}
 
 
-@view_config(route_name='user_confirm_email', renderer='muesli.web:templates/user/confirm_email.pt', context=context.ConfirmationContext)
+@view_config(route_name='user_confirm_email', renderer='muesli.web:templates/user/confirm_email.pt',
+             context=context.ConfirmationContext)
 def confirmEmail(request):
     done = False
     aborted = False
@@ -460,7 +487,8 @@ def confirmEmail(request):
             'confirmation': request.context.confirmation}
 
 
-@view_config(route_name='user_change_password', renderer='muesli.web:templates/user/change_password.pt', context=context.GeneralContext, permission='change_password')
+@view_config(route_name='user_change_password', renderer='muesli.web:templates/user/change_password.pt',
+             context=context.GeneralContext, permission='change_password')
 def changePassword(request):
     form = forms.UserChangePassword(request)
     if request.method == 'POST' and form.processPostData(request.POST):
@@ -470,7 +498,8 @@ def changePassword(request):
     return {'form': form}
 
 
-@view_config(route_name='user_reset_password', renderer='muesli.web:templates/user/reset_password.pt', context=context.GeneralContext)
+@view_config(route_name='user_reset_password', renderer='muesli.web:templates/user/reset_password.pt',
+             context=context.GeneralContext)
 def resetPassword(request):
     form = forms.UserResetPassword(request)
     if request.method == 'POST' and form.processPostData(request.POST):
@@ -509,12 +538,14 @@ Das MÜSLI-Team
     return {'form': form}
 
 
-@view_config(route_name='user_reset_password2', renderer='muesli.web:templates/user/reset_password2.pt', context=context.GeneralContext)
+@view_config(route_name='user_reset_password2', renderer='muesli.web:templates/user/reset_password2.pt',
+             context=context.GeneralContext)
 def resetPassword2(request):
     return {}
 
 
-@view_config(route_name='user_reset_password3', renderer='muesli.web:templates/user/reset_password3.pt', context=context.ConfirmationContext)
+@view_config(route_name='user_reset_password3', renderer='muesli.web:templates/user/reset_password3.pt',
+             context=context.ConfirmationContext)
 def resetPassword3(request):
     form = forms.UserResetPassword3(request, request.context.confirmation)
     if request.method == 'POST' and form.processPostData(request.POST):
@@ -527,6 +558,7 @@ def resetPassword3(request):
     #       return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
     return {'form': form,
             'confirmation': request.context.confirmation}
+
 
 @view_config(route_name='user_api_keys',
              renderer='muesli.web:templates/user/api_keys.pt',
@@ -547,12 +579,12 @@ def list_auth_keys(request):
         if len(tokens) >= max_keys and max_keys != -1:
             raise HTTPBadRequest(
                 "Sie haben das Maximum von {} Keys überschritten!"
-                .format(max_keys)
+                    .format(max_keys)
             )
         token = models.BearerToken(client="Personal Token",
                                    user=request.user,
                                    description=form['description'],
-                                   expires=datetime.datetime.utcnow()+exp
+                                   expires=datetime.datetime.utcnow() + exp
                                    )
         request.db.add(token)
         request.db.flush()
@@ -586,9 +618,10 @@ def removeKey(request):
     return HTTPFound(location=request.route_url('start'))
 
 
-@view_config(route_name='user_ajax_complete', renderer='muesli.web:templates/user/ajax_complete.pt', context=context.TutorialContext, permission='viewOverview')
+@view_config(route_name='user_ajax_complete', renderer='muesli.web:templates/user/ajax_complete.pt',
+             context=context.TutorialContext, permission='viewOverview')
 def ajaxComplete(request):
-    search_str = request.POST['name']+'%'
+    search_str = request.POST['name'] + '%'
     lecture_students = request.context.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)
     lecture_students = lecture_students.filter(or_((func.lower(models.User.first_name).like(func.lower(search_str))),
                                                    (func.lower(models.User.last_name).like(func.lower(search_str))),

@@ -18,42 +18,36 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import base64
 
-import numpy
-from matplotlib import pyplot
-
-from muesli import models
-from muesli import utils
-from muesli.parser import Parser
-from muesli.web.context import *
-from muesli.web.forms import *
-
-from pyramid.view import view_config
-from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound, HTTPFound
-from pyramid.url import route_url
-from sqlalchemy.orm import exc
-from sqlalchemy.sql import func
-import sqlalchemy
-from matplotlib.ticker import MaxNLocator
+import datetime
+import io
+import re
 from collections import Counter
 
+import numpy
+import sqlalchemy
+from matplotlib import pyplot
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from openpyxl.writer.excel import save_virtual_workbook
+from pyramid.httpexceptions import HTTPNotFound, HTTPFound
+from pyramid.response import Response
+from pyramid.view import view_config
+from sqlalchemy.orm import exc
+
+from muesli.parser import Parser
+from muesli.web.context import *
+from muesli.web.forms import *
 from muesli.web.tooltips import grading_edit_tooltips
 
-import re
-import os
-import io
-import datetime
 
-@view_config(route_name='grading_edit', renderer='muesli.web:templates/grading/edit.pt', context=GradingContext, permission='edit')
+@view_config(route_name='grading_edit', renderer='muesli.web:templates/grading/edit.pt', context=GradingContext,
+             permission='edit')
 class Edit:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
+
     def __call__(self):
         grading = self.request.context.grading
         form = GradingEdit(self.request, grading)
@@ -63,13 +57,15 @@ class Edit:
             form.message = "Änderungen gespeichert."
         return {'grading': grading,
                 'form': form
-               }
+                }
+
 
 @view_config(route_name='grading_associate_exam', context=GradingContext, permission='edit')
 class AssociateExam:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
+
     def __call__(self):
         grading = self.request.context.grading
         exam = self.db.query(models.Exam).get(self.request.POST['new_exam'])
@@ -79,12 +75,14 @@ class AssociateExam:
                 self.db.commit()
         return HTTPFound(location=self.request.route_url('grading_edit', grading_id=grading.id))
 
+
 @view_config(route_name='grading_delete_exam_association', context=GradingContext, permission='edit')
 class DeleteExamAssociation:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
         self.exam_id = request.matchdict['exam_id']
+
     def __call__(self):
         grading = self.request.context.grading
         exam = self.db.query(models.Exam).get(self.exam_id)
@@ -92,6 +90,7 @@ class DeleteExamAssociation:
             grading.exams.remove(exam)
             self.db.commit()
         return HTTPFound(location=self.request.route_url('grading_edit', grading_id=grading.id))
+
 
 class EnterGradesBasic:
     def __init__(self, request):
@@ -113,7 +112,8 @@ class EnterGradesBasic:
         exam_id = self.request.GET.get('students', None)
         if exam_id:
             exam = self.request.db.query(models.Exam).get(exam_id)
-        else: exam=None
+        else:
+            exam = None
         student_id = self.request.GET.get('student', None)
         lecture_students = grading.lecture.lecture_students_for_tutorials([]) \
             .options(sqlalchemy.orm.joinedload(models.LectureStudent.student))
@@ -121,26 +121,29 @@ class EnterGradesBasic:
             lecture_students = lecture_students.filter(models.LectureStudent.student_id == student_id)
         if exam:
             lecture_students = lecture_students \
-                .join(models.ExerciseStudent, models.LectureStudent.student_id==models.ExerciseStudent.student_id) \
+                .join(models.ExerciseStudent, models.LectureStudent.student_id == models.ExerciseStudent.student_id) \
                 .join(models.Exercise) \
                 .join(models.Exam) \
-                .filter(models.Exam.id==exam_id)
+                .filter(models.Exam.id == exam_id)
         return lecture_students.all()
 
     def get_exam_vars(self, grading):
         exam_ids = [e.id for e in grading.exams]
-        examvars = dict([['$%i' % i, e.id] for i,e in enumerate(grading.exams)])
-        varsForExam = dict([[examvars[var], var] for var in examvars ])
+        examvars = dict([['$%i' % i, e.id] for i, e in enumerate(grading.exams)])
+        varsForExam = dict([[examvars[var], var] for var in examvars])
         return exam_ids, examvars, varsForExam
 
     def get_current_grades(self, grading, lecture_students, exam_ids):
         grades = utils.autovivify()
-        gradesQuery = grading.student_grades.filter(models.StudentGrade.student_id.in_([ls.student_id for ls in lecture_students]))
+        gradesQuery = grading.student_grades.filter(
+            models.StudentGrade.student_id.in_([ls.student_id for ls in lecture_students]))
         for ls in lecture_students:
             grades[ls.student_id]['grade'] = ''
             grades[ls.student_id]['gradestr'] = ''
             grades[ls.student_id]['invalid'] = None
-            grades[ls.student_id]['exams'] = dict([[i, {'points': '', 'admission': None, 'registration': None, 'medical_certificate': None}] for i in exam_ids])
+            grades[ls.student_id]['exams'] = dict(
+                [[i, {'points': '', 'admission': None, 'registration': None, 'medical_certificate': None}] for i in
+                 exam_ids])
             grades[ls.student_id]['calc'] = ''
         for grade in gradesQuery:
             grades[grade.student_id]['grade'] = grade
@@ -163,13 +166,13 @@ class EnterGradesBasic:
                         grades[ls.student_id]['grade'].grade = None
                         grades[ls.student_id]['gradestr'] = ''
                     else:
-                        value = value.replace(',','.')
+                        value = value.replace(',', '.')
                         try:
                             value = float(value)
                             grades[ls.student_id]['grade'].grade = value
                             grades[ls.student_id]['gradestr'] = value
                         except:
-                            error_msgs.append('Could not convert "%s" (%s)'%(value, ls.student.name()))
+                            error_msgs.append('Could not convert "%s" (%s)' % (value, ls.student.name()))
         if self.db.new or self.db.dirty or self.db.deleted:
             self.db.commit()
         return grades, error_msgs
@@ -226,10 +229,10 @@ class EnterGradesBasic:
         grades = self.populate_with_exam_results(grades, lecture_students, grading)
         grades, error_msgs = self.apply_formula(grades, formula, lecture_students, grading, varsForExam, error_msgs)
 
-        #self.request.javascript.append('prototype.js')
+        # self.request.javascript.append('prototype.js')
         self.request.javascript.append('jquery/jquery.min.js')
         self.request.javascript.append('jquery/jquery.fancybox.min.js')
-        #grades = {key: value for key,value in grades.items()}
+        # grades = {key: value for key,value in grades.items()}
 
         return {'grading': grading,
                 'error_msg': '\n'.join(error_msgs),
@@ -242,27 +245,32 @@ class EnterGradesBasic:
                 'lecture_students': lecture_students,
                 'tooltips': grading_edit_tooltips}
 
-@view_config(route_name='grading_enter_grades', renderer='muesli.web:templates/grading/enter_grades.pt', context=GradingContext, permission='edit')
+
+@view_config(route_name='grading_enter_grades', renderer='muesli.web:templates/grading/enter_grades.pt',
+             context=GradingContext, permission='edit')
 class EnterGrades(EnterGradesBasic):
     pass
+
 
 @view_config(route_name='grading_get_row', renderer='json', context=GradingContext, permission='edit')
 class GetRow(EnterGradesBasic):
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
+
     def __call__(self):
         result = super(GetRow, self).__call__()
         grades = result['grades']
         for key, value in list(result['grades'].items()):
             del value['grade']
             value['gradestr'] = str(value['gradestr'])
-            for exam_id  in value['exams']:
+            for exam_id in value['exams']:
                 value['exams'][exam_id]['points'] = str(value['exams'][exam_id]['points'])
             if value['calc'] != None:
                 value['calc'] = str(value['calc'])
         return {'grades': grades,
                 'error_msg': result['error_msg']}
+
 
 @view_config(route_name='grading_formula_histogram', context=GradingContext, permission='edit')
 class FormulaHistogram(EnterGradesBasic):
@@ -276,7 +284,8 @@ class FormulaHistogram(EnterGradesBasic):
         error_msgs = []
         grades = self.populate_with_exam_results(grades, lecture_students, grading)
         grades, error_msgs = self.apply_formula(grades, formula, lecture_students, grading, varsForExam, error_msgs)
-        grades_list = [float(grades[student_id]['calc']) for student_id in grades.keys() if not grades[student_id]['calc'] == '']
+        grades_list = [float(grades[student_id]['calc']) for student_id in grades.keys() if
+                       not grades[student_id]['calc'] == '']
 
         if not grades_list:
             raise HTTPNotFound("Es sind existieren keine Noten für diese Benotung.")
@@ -305,7 +314,7 @@ class FormulaHistogram(EnterGradesBasic):
         pyplot.xlabel('Note')
         pyplot.ylabel('Anzahl')
 
-        yint = range(min(values), math.ceil(max(values)) + 1, math.ceil(max(values)/10))
+        yint = range(min(values), math.ceil(max(values)) + 1, math.ceil(max(values) / 10))
         pyplot.yticks(yint)
 
         percentage_message = []
@@ -313,13 +322,13 @@ class FormulaHistogram(EnterGradesBasic):
         grades_count = len(grades_list)
         percentage_list = []
         for x in range(1, 5):
-            percentage_list.append(100*sum(grade <= x for grade in grades_list)/grades_count)
+            percentage_list.append(100 * sum(grade <= x for grade in grades_list) / grades_count)
 
         percentage_message.append('• {:.1f}% haben die Note 1.0\n'.format(percentage_list[0]))
         percentage_message.append('• {:.1f}% haben die Note 2.0 oder besser\n'.format(percentage_list[1]))
         percentage_message.append('• {:.1f}% haben die Note 3.0 oder besser\n'.format(percentage_list[2]))
         percentage_message.append('• {:.1f}% haben die Note 4.0 oder besser\n'.format(percentage_list[3]))
-        percentage_message.append('• {:.1f}% haben die Note 5.0\n'.format(100-percentage_list[3]))
+        percentage_message.append('• {:.1f}% haben die Note 5.0\n'.format(100 - percentage_list[3]))
 
         pyplot.text(-0.5, -3, "".join(percentage_message), verticalalignment='top')
 
@@ -336,14 +345,17 @@ class FormulaHistogram(EnterGradesBasic):
         output.close()
         return response
 
+
 class ExcelView:
     def __init__(self, request):
         self.request = request
         self.w = Workbook()
+
     def createResponse(self):
         response = Response(content_type='application/vnd.ms-excel')
         response.body = save_virtual_workbook(self.w)
         return response
+
 
 @view_config(route_name='grading_export', context=GradingContext, permission='edit')
 class Export(ExcelView):
@@ -356,13 +368,14 @@ class Export(ExcelView):
         worksheet_exams = w.active
         worksheet_exams.title = 'Pruefung'
         date_style = 'dd.mm.yyyy'
-        header = ['Tabellenname', 'Veranstaltungsnummer', 'Titel', 'Semester', 'Termin', 'Datum', 'PrueferId', 'Pruefername']
+        header = ['Tabellenname', 'Veranstaltungsnummer', 'Titel', 'Semester', 'Termin', 'Datum', 'PrueferId',
+                  'Pruefername']
         worksheet_exams.append(header)
         worksheet_exams.row_dimensions[1].font = Font(bold=True)
         data = ['Pruefungsteilnehmer',
                 lecture.lsf_id,
                 lecture.name,
-                str(lecture.term) if lecture.term!=None else '',
+                str(lecture.term) if lecture.term != None else '',
                 grading.hispos_type,
                 None,
                 grading.examiner_id,
@@ -378,7 +391,7 @@ class Export(ExcelView):
         # set column width
         for column_cells in worksheet_exams.columns:
             max_length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet_exams.column_dimensions[column_cells[0].column].width = max_length*1.2
+            worksheet_exams.column_dimensions[column_cells[0].column].width = max_length * 1.2
 
         # sheet Pruefungsteilnehmer
         worksheet_grades = self.w.create_sheet('Pruefungsteilnehmer')
@@ -388,22 +401,23 @@ class Export(ExcelView):
         grades = grading.student_grades.options(sqlalchemy.orm.joinedload(models.StudentGrade.student)).all()
         for i, grade in enumerate(grades, 1):
             if grade.grade is not None:
-                g = float(grade.grade*100)
+                g = float(grade.grade * 100)
             else:
                 g = ''
             data = [grade.student.matrikel,
                     grade.student.last_name, '',
                     grade.student.formatCompleteSubject(), '', '', g, '']
             for j, d in enumerate(data, 1):
-                worksheet_grades.cell(row=1+i, column=j, value=d)
+                worksheet_grades.cell(row=1 + i, column=j, value=d)
         # set column width
         for column_cells in worksheet_grades.columns:
             max_length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet_grades.column_dimensions[column_cells[0].column].width = max_length*1.2
+            worksheet_grades.column_dimensions[column_cells[0].column].width = max_length * 1.2
 
         # sheet Daten
         worksheet_data = self.w.create_sheet('Daten')
-        header = ['Matrikel', 'Nachname', 'Vorname', 'Geburtsort', 'Geburtsdatum', 'Note', 'Vortragstitel', 'Studiengang']
+        header = ['Matrikel', 'Nachname', 'Vorname', 'Geburtsort', 'Geburtsdatum', 'Note', 'Vortragstitel',
+                  'Studiengang']
         worksheet_data.append(header)
         worksheet_data.row_dimensions[1].font = Font(bold=True)
         for i, grade in enumerate(grades, 1):
@@ -418,12 +432,12 @@ class Export(ExcelView):
                     '',
                     grade.student.formatCompleteSubject()]
             for j, d in enumerate(data, 1):
-                worksheet_data.cell(row=1+i, column=j, value=d)
-            date_cell = worksheet_data.cell(row=1+i, column=5)
+                worksheet_data.cell(row=1 + i, column=j, value=d)
+            date_cell = worksheet_data.cell(row=1 + i, column=5)
             date_cell.value = date
             date_cell.number_format = date_style
         # set column width
         for column_cells in worksheet_data.columns:
             max_length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet_data.column_dimensions[column_cells[0].column].width = max_length*1.2
+            worksheet_data.column_dimensions[column_cells[0].column].width = max_length * 1.2
         return self.createResponse()

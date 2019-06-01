@@ -19,12 +19,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from hashlib import sha1
-
-import unittest
 import muesli.web
-from muesli.tests import functionalTests
 from muesli import utils, models
+from muesli.tests import functionalTests
+
 
 class BaseTests(functionalTests.BaseTests):
     def test_tutorial_view(self):
@@ -41,13 +39,13 @@ class BaseTests(functionalTests.BaseTests):
         res = self.testapp.get('/tutorial/add/%s' % 12456, status=404)
 
     def test_tutorial_duplicate(self):
-        res = self.testapp.get('/tutorial/duplicate/%s/%s' % (12456,1245), status=404)
+        res = self.testapp.get('/tutorial/duplicate/%s/%s' % (12456, 1245), status=404)
 
     def test_tutorial_edit(self):
         res = self.testapp.get('/tutorial/edit/%s' % 12456, status=403)
 
     def test_tutorial_results(self):
-        res = self.testapp.get('/tutorial/results/%s/%s' % (12456,1245), status=403)
+        res = self.testapp.get('/tutorial/results/%s/%s' % (12456, 1245), status=403)
 
     def test_tutorial_subscribe(self):
         res = self.testapp.get('/tutorial/subscribe/%s' % 12456, status=403)
@@ -63,15 +61,16 @@ class BaseTests(functionalTests.BaseTests):
 
     def test_tutorial_ajax_tutorial(self):
         res = self.testapp.post('/tutorial/ajax_get_tutorial/%s' % (1234),
-               {'student_id': 1234}, status=404)
+                                {'student_id': 1234}, status=404)
 
     def test_tutorial_resign_as_tutor(self):
         res = self.testapp.get('/tutorial/resign_as_tutor/%s' % 12345, status=403)
 
     def test_tutorial_remove_student(self):
-        res = self.testapp.get('/tutorial/remove_student/%s/%s' % (12345,12345), status=403)
+        res = self.testapp.get('/tutorial/remove_student/%s/%s' % (12345, 12345), status=403)
 
-class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
+
+class UnloggedTests(BaseTests, functionalTests.PopulatedTests):
     def test_tutorial_view(self):
         res = self.testapp.get('/tutorial/view/%s' % self.tutorial.id, status=403)
 
@@ -79,7 +78,7 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
         res = self.testapp.get('/tutorial/add/%s' % self.lecture.id, status=403)
 
     def test_tutorial_duplicate(self):
-        res = self.testapp.get('/tutorial/duplicate/%s/%s' % (self.lecture.id,self.tutorial.id), status=403)
+        res = self.testapp.get('/tutorial/duplicate/%s/%s' % (self.lecture.id, self.tutorial.id), status=403)
 
     def test_tutorial_edit(self):
         res = self.testapp.get('/tutorial/edit/%s' % self.tutorial.id, status=403)
@@ -101,13 +100,14 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
     def test_tutorial_ajax_tutorial(self):
         res = self.testapp.post('/tutorial/ajax_get_tutorial/%s' % (self.lecture.id),
-               {'student_id': self.tutorial.students[0].id}, status=403)
+                                {'student_id': self.tutorial.students[0].id}, status=403)
 
     def test_tutorial_resign_as_tutor(self):
         res = self.testapp.get('/tutorial/resign_as_tutor/%s' % self.tutorial.id, status=403)
 
     def test_tutorial_remove_student(self):
-        res = self.testapp.get('/tutorial/remove_student/%s/%s' % (self.tutorial.id,self.user.id), status=403)
+        res = self.testapp.get('/tutorial/remove_student/%s/%s' % (self.tutorial.id, self.user.id), status=403)
+
 
 class UserLoggedInTests(UnloggedTests):
     def setUp(self):
@@ -122,6 +122,7 @@ class UserLoggedInTests(UnloggedTests):
         res = self.testapp.get('/tutorial/subscribe/%s' % self.tutorial2.id, status=302)
         res = self.testapp.get('/tutorial/unsubscribe/%s' % self.tutorial2.id, status=302)
 
+
 class TutorLoggedInTests(UserLoggedInTests):
     def setUp(self):
         UserLoggedInTests.setUp(self)
@@ -134,43 +135,53 @@ class TutorLoggedInTests(UserLoggedInTests):
         res = self.testapp.get('/tutorial/view/%s' % self.tutorial_no_tutor.id, status=200)
 
     def test_tutorial_view_different_lectures(self):
-        #Different lectures should be forbidden
+        # Different lectures should be forbidden
         res = self.testapp.get('/tutorial/view/%s,%s' % (self.tutorial.id, self.lecture2_tutorial.id), status=403)
 
     def test_tutorial_view_same_lecture_same_tutor(self):
-        #own tutorial of same lecture allowed
+        # own tutorial of same lecture allowed
         res = self.testapp.get('/tutorial/view/%s,%s' % (self.tutorial.id, self.tutorial2.id), status=200)
 
     def test_tutorial_view_same_lecture_different_tutor(self):
-        #other tutorials of same lecture allowed
+        # other tutorials of same lecture allowed
         res = self.testapp.get('/tutorial/view/%s,%s' % (self.tutorial.id, self.tutorial_tutor2.id), status=200)
 
     def test_tutorial_results(self):
         res = self.testapp.get('/tutorial/results/%s/%s' % (self.lecture.id, self.tutorial.id), status=200)
+
     def test_tutorial_results_no_tutor_all_tutorials(self):
         self.lecture.tutor_rights = utils.editAllTutorials
         self.session.commit()
         res = self.testapp.get('/tutorial/results/%s/%s' % (self.lecture.id, self.tutorial_no_tutor.id), status=200)
+
     def test_tutorial_results_no_tutor_own_tutorial(self):
         res = self.testapp.get('/tutorial/results/%s/%s' % (self.lecture.id, self.tutorial_no_tutor.id), status=403)
+
     def test_tutorial_results_different_lectures(self):
-        #Different lectures should be forbidden
-        res = self.testapp.get('/tutorial/results/%s/%s,%s' % (self.lecture.id, self.tutorial.id, self.lecture2_tutorial.id), status=403)
+        # Different lectures should be forbidden
+        res = self.testapp.get(
+            '/tutorial/results/%s/%s,%s' % (self.lecture.id, self.tutorial.id, self.lecture2_tutorial.id), status=403)
+
     def test_tutorial_results_same_lecture_same_tutor(self):
-        #own tutorials of same lecture allowed
-        res = self.testapp.get('/tutorial/results/%s/%s,%s' % (self.lecture.id, self.tutorial.id, self.tutorial2.id), status=200)
+        # own tutorials of same lecture allowed
+        res = self.testapp.get('/tutorial/results/%s/%s,%s' % (self.lecture.id, self.tutorial.id, self.tutorial2.id),
+                               status=200)
+
     def test_tutorial_results_same_lecture_different_tutor(self):
-        #other tutorials of same lecture not allowed
-        res = self.testapp.get('/tutorial/results/%s/%s,%s' % (self.lecture.id, self.tutorial.id, self.tutorial_tutor2.id), status=403)
+        # other tutorials of same lecture not allowed
+        res = self.testapp.get(
+            '/tutorial/results/%s/%s,%s' % (self.lecture.id, self.tutorial.id, self.tutorial_tutor2.id), status=403)
+
     def test_tutorial_results_no_tutorials(self):
         res = self.testapp.get('/tutorial/results/%s/' % (self.lecture.id), status=403)
 
     def test_tutorial_remove_student(self):
         self.assertIn(self.user, self.tutorial.students.all())
-        res = self.testapp.get('/tutorial/remove_student/%s/%s' % (self.tutorial.id,self.user.id), status=302)
+        res = self.testapp.get('/tutorial/remove_student/%s/%s' % (self.tutorial.id, self.user.id), status=302)
         self.session.expire_all()
         self.assertNotIn(self.user, self.tutorial.students.all())
-        self.assertGreater(self.tutorial.lecture.lecture_removed_students.filter(muesli.models.LectureRemovedStudent.student_id==self.user.id).count(),0)
+        self.assertGreater(self.tutorial.lecture.lecture_removed_students.filter(
+            muesli.models.LectureRemovedStudent.student_id == self.user.id).count(), 0)
 
     def test_tutorial_email(self):
         res = self.testapp.get('/tutorial/email/%s' % self.tutorial.id, status=200)
@@ -184,7 +195,7 @@ class TutorLoggedInTests(UserLoggedInTests):
 
     def test_tutorial_ajax_tutorial(self):
         res = self.testapp.post('/tutorial/ajax_get_tutorial/%s' % (self.lecture.id),
-               {'student_id': self.tutorial.students[0].id}, status=200)
+                                {'student_id': self.tutorial.students[0].id}, status=200)
         self.assertResContains(res, self.tutorial.time.formatted())
 
     def test_tutorial_resign_as_tutor(self):
@@ -193,9 +204,10 @@ class TutorLoggedInTests(UserLoggedInTests):
         res = self.testapp.get('/tutorial/resign_as_tutor/%s' % self.tutorial.id, status=302)
         self.session.expire_all()
         if is_tutor:
-            self.assertTrue(self.tutorial.tutor==None)
+            self.assertTrue(self.tutorial.tutor == None)
         else:
             self.assertEqual(self.tutorial.tutor, old_tutor)
+
 
 class AssistantLoggedInTests(TutorLoggedInTests):
     def setUp(self):
@@ -206,20 +218,22 @@ class AssistantLoggedInTests(TutorLoggedInTests):
         res = self.testapp.get('/tutorial/add/%s' % self.lecture.id, status=200)
 
     def test_tutorial_duplicate(self):
-        res = self.testapp.get('/tutorial/duplicate/%s/%s' % (self.lecture.id,self.tutorial.id), status=200)
+        res = self.testapp.get('/tutorial/duplicate/%s/%s' % (self.lecture.id, self.tutorial.id), status=200)
 
     def test_tutorial_edit(self):
         res = self.testapp.get('/tutorial/edit/%s' % self.tutorial.id, status=200)
 
     def test_tutorial_results_same_lecture_different_tutor(self):
-        #other tutorials of same lecture allowed for assistant
-        res = self.testapp.get('/tutorial/results/%s/%s,%s' % (self.lecture.id, self.tutorial.id, self.tutorial_tutor2.id), status=200)
+        # other tutorials of same lecture allowed for assistant
+        res = self.testapp.get(
+            '/tutorial/results/%s/%s,%s' % (self.lecture.id, self.tutorial.id, self.tutorial_tutor2.id), status=200)
 
     def test_tutorial_results_no_tutor_own_tutorial(self):
         res = self.testapp.get('/tutorial/results/%s/%s' % (self.lecture.id, self.tutorial.id), status=200)
 
     def test_tutorial_results_no_tutorials(self):
         res = self.testapp.get('/tutorial/results/%s/' % (self.lecture.id), status=200)
+
 
 class AdminLoggedInTests(AssistantLoggedInTests):
     def setUp(self):
