@@ -84,6 +84,9 @@ def delete(request):
     if exam.exercises:
         request.session.flash('Dieses Testat hat noch Aufgaben!', queue='errors')
     else:
+        exam_admissions = request.db.query(ExamAdmission).filter(ExamAdmission.exam == exam).all()
+        for exam_admission in exam_admissions:
+            request.db.delete(exam_admission)
         request.db.delete(exam)
         request.db.commit()
         request.session.flash('Testat gelöscht!', queue='messages')
