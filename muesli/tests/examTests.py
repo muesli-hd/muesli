@@ -322,6 +322,8 @@ class AssistantLoggedInTests(TutorLoggedInTests):
         self.exam.medical_certificate = True
         self.session.commit()
         res = self.testapp.get('/exam/export/%s/' % self.exam.id, status=200)
+    def test_exam_delete(self):
+        res = self.testapp.get('/exam/delete/%s/' % self.exam.id, status=200)
 
 class AdminLoggedInTests(AssistantLoggedInTests):
     def setUp(self):
