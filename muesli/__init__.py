@@ -19,9 +19,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-
 from markdown import markdown
+
 from sqlalchemy import create_engine
+from sqlalchemy.pool import NullPool
 
 from .utils import Configuration
 
@@ -29,7 +30,6 @@ config = Configuration(
     os.getenv('MUESLI_PATH', '/opt/muesli4') + '/muesli.yml')
 
 import muesli.mail
-
 muesli.mail.server = config['contact']['server']
 
 databaseName = config['database']['connection']
@@ -45,7 +45,6 @@ changelog_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "
 with open(changelog_path) as f:
     changelog = f.read()
 CHANGELOG_HTML = markdown(changelog)
-
 
 def engine():
     if not PRODUCTION_INSTANCE:

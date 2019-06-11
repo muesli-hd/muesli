@@ -20,17 +20,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+
 import mimetypes
-import smtplib
+import chardet
+
 from email import encoders
+from email.message import Message
 from email.mime.audio import MIMEAudio
 from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.message import MIMEMessage
 from email.utils import parseaddr, formataddr
 
-import chardet
+import smtplib
 
 testing = False
 
@@ -38,8 +42,6 @@ testing = False
 server = 'localhost'
 
 """Code adapted from http://docs.python.org/library/email-examples.html"""
-
-
 def createAttachment(filename, data):
     # Guess the content type based on the file's extension.  Encoding
     # will be ignored, although we should check for simple things like
@@ -67,7 +69,6 @@ def createAttachment(filename, data):
     msg.add_header('Content-Disposition', 'attachment', filename=filename)
     return msg
 
-
 class Message:
     def __init__(self, subject=None, sender=None, to=None, cc=None, bcc=None, body=None):
         COMMASPACE = ', '
@@ -84,18 +85,14 @@ class Message:
         self.outer['Cc'] = ', '.join(self.cc)
         self.outer['Bcc'] = ', '.join(self.bcc)
         self.outer.attach(MIMEText(self.body, 'plain', 'utf-8'))
-
     @property
     def send_to(self):
         return set(self.to) | set(self.cc) | set(self.bcc)
-
     def as_string(self):
         return self.outer.as_string()
-
     def attach(self, filename, data=None):
         data = data or open(filename)
         self.outer.attach(createAttachment(filename, data))
-
 
 def sendMail(message, request=None):
     s = smtplib.SMTP(server)

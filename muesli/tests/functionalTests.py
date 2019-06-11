@@ -19,32 +19,33 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import unittest
 from hashlib import sha1
 
-import muesli.mail
-import muesli.types
+import unittest
 import muesli.web
+import muesli.types
+import muesli.mail
 from muesli import utils
 
+from sqlalchemy.orm import relationship, sessionmaker
 
 class OrigDatabaseTests(unittest.TestCase):
     def setUp(self):
+        import muesli.web
         from muesli.web import main
         app = main({}, testmode=True)
         from webtest import TestApp
         self.testapp = TestApp(app)
 
     def test_root(self):
-        # session = muesli.models.Session()
-        # print("Anzahl lectures", session.query(muesli.models.Lecture).count())
+        #session = muesli.models.Session()
+        #print("Anzahl lectures", session.query(muesli.models.Lecture).count())
         res = self.testapp.get('/lecture/list', status=200)
         self.assertTrue('Liste' in res)
 
     def test_login(self):
         res = self.testapp.get('/user/login', status=200)
         self.assertTrue(True)
-
 
 class BaseTests(unittest.TestCase):
     def setUp(self):
@@ -59,7 +60,7 @@ class BaseTests(unittest.TestCase):
         import muesli.models
         muesli.models.Base.metadata.create_all(self.engine)
         muesli.mailerName = 'pyramid_mailer.testing'
-        muesli.mail.testing = True
+        muesli.mail.testing=True
         muesli.old_engine = muesli.engine
         muesli.engine = lambda: self.engine
         import muesli.web
@@ -77,6 +78,7 @@ class BaseTests(unittest.TestCase):
             self.session.execute(table.delete())
         self.populate()
         self.session.commit()
+
 
     def tearDown(self):
         self.session.close()
@@ -98,21 +100,18 @@ class BaseTests(unittest.TestCase):
                 return res.forms[formindex]
             else:
                 return res.form
-
         form = getForm(res)
         form[name] = newvalue
         res2 = form.submit()
         self.assertResContainsNot(res2, 'formerror')
         form = getForm(res2)
-        if expectedvalue == None: expectedvalue = newvalue
+        if expectedvalue==None: expectedvalue=newvalue
         self.assertTrue(form[name].value == expectedvalue)
         return res2
-
 
 def setUserPassword(user, password):
     user.realpassword = password
     user.password = sha1(password.encode('utf-8')).hexdigest()
-
 
 class PopulatedTests(BaseTests):
     def populate(self):
@@ -123,7 +122,7 @@ class PopulatedTests(BaseTests):
         self.user.subject = self.config['subjects'][0]
         setUserPassword(self.user, 'userpassword')
         self.session.add(self.user)
-        # self.session.commit()
+        #self.session.commit()
 
         self.user2 = muesli.models.User()
         self.user2.first_name = 'Sigmund'
@@ -158,7 +157,7 @@ class PopulatedTests(BaseTests):
         self.unicodeuser.subject = self.config['subjects'][1]
         setUserPassword(self.unicodeuser, 'üüü')
         self.session.add(self.unicodeuser)
-        # self.session.commit()
+        #self.session.commit()
 
         self.tutor = muesli.models.User()
         self.tutor.first_name = 'Thorsten'
@@ -167,7 +166,7 @@ class PopulatedTests(BaseTests):
         self.tutor.subject = self.config['subjects'][2]
         setUserPassword(self.tutor, 'tutorpassword')
         self.session.add(self.tutor)
-        # self.session.commit()
+        #self.session.commit()
 
         self.tutor2 = muesli.models.User()
         self.tutor2.first_name = 'Thor2sten'
@@ -176,7 +175,7 @@ class PopulatedTests(BaseTests):
         self.tutor2.subject = self.config['subjects'][0]
         setUserPassword(self.tutor2, 'tutor2password')
         self.session.add(self.tutor2)
-        # self.session.commit()
+        #self.session.commit()
 
         self.assistant = muesli.models.User()
         self.assistant.first_name = 'Armin'
@@ -184,9 +183,9 @@ class PopulatedTests(BaseTests):
         self.assistant.email = 'assistant@muesli.org'
         self.assistant.subject = self.config['subjects'][0]
         setUserPassword(self.assistant, 'assistantpassword')
-        self.assistant.is_assistant = 1
+        self.assistant.is_assistant=1
         self.session.add(self.assistant)
-        # self.session.commit()
+        #self.session.commit()
 
         self.assistant2 = muesli.models.User()
         self.assistant2.first_name = 'Armin'
@@ -196,7 +195,7 @@ class PopulatedTests(BaseTests):
         setUserPassword(self.assistant2, 'assistant2password')
         self.assistant2.is_assistant = 1
         self.session.add(self.assistant2)
-        # self.session.commit()
+        #self.session.commit()
 
         self.admin = muesli.models.User()
         self.admin.first_name = 'Anton'
@@ -206,7 +205,7 @@ class PopulatedTests(BaseTests):
         self.admin.is_admin = 1
         setUserPassword(self.admin, 'adminpassword')
         self.session.add(self.admin)
-        # self.session.commit()
+        #self.session.commit()
 
         # # Setup a student with an exercise
         # self.user_with_exercise = muesli.models.User()
@@ -224,7 +223,7 @@ class PopulatedTests(BaseTests):
         self.session.add(self.lecture)
         self.lecture.tutors.append(self.tutor2)
         self.lecture.tutors.append(self.tutor)
-        # self.session.commit()
+        #self.session.commit()
 
         self.exam = muesli.models.Exam()
         self.exam.name = "Aufgabenblatt 1"
@@ -244,7 +243,7 @@ class PopulatedTests(BaseTests):
         self.exam2.lecture = self.lecture
         self.exam2.category = utils.categories[0]['id']
         self.session.add(self.exam2)
-        # self.session.commit()
+        #self.session.commit()
 
         self.lecture2 = muesli.models.Lecture()
         self.lecture2.name = "Irgendwas2"
@@ -259,7 +258,7 @@ class PopulatedTests(BaseTests):
         tutorial.time = muesli.types.TutorialTime('0 14:00')
         self.lecture2_tutorial = tutorial
         self.session.add(self.lecture2_tutorial)
-        # self.session.commit()
+        #self.session.commit()
 
         self.tutorial = muesli.models.Tutorial()
         self.tutorial.lecture = self.lecture
@@ -283,7 +282,7 @@ class PopulatedTests(BaseTests):
         tutorial.place = 'In einer noch viel weiter entfernten Galaxis'
         tutorial.max_students = 42
         tutorial.time = muesli.types.TutorialTime('0 18:00')
-        self.tutorial_no_tutor = tutorial
+        self.tutorial_no_tutor= tutorial
         self.session.add(self.tutorial_no_tutor)
 
         self.lecture_student = muesli.models.LectureStudent()
@@ -292,7 +291,7 @@ class PopulatedTests(BaseTests):
         self.lecture_student.tutorial = self.tutorial
         self.session.add(self.lecture_student)
 
-        # self.session.commit()
+        #self.session.commit()
 
         self.tutorial2 = muesli.models.Tutorial()
         self.tutorial2.lecture = self.lecture
@@ -348,32 +347,27 @@ class PopulatedTests(BaseTests):
         res.form['password'] = user.realpassword
         res = res.form.submit()
         self.assertEqual(res.status_int, 302)
-        # res = self.testapp.post('/user/login',{'email': user.email, 'password': user.realpassword}, status=302)
-
+        #res = self.testapp.post('/user/login',{'email': user.email, 'password': user.realpassword}, status=302)
 
 class UserLoggedInTests(PopulatedTests):
     def setUp(self):
         PopulatedTests.setUp(self)
         self.setUser(self.user)
 
-
 class TutorLoggedInTests(UserLoggedInTests):
     def setUp(self):
         UserLoggedInTests.setUp(self)
         self.setUser(self.tutor)
-
 
 class AssistantLoggedInTests(TutorLoggedInTests):
     def setUp(self):
         TutorLoggedInTests.setUp(self)
         self.setUser(self.assistant)
 
-
 class AdminLoggedInTests(AssistantLoggedInTests):
     def setUp(self):
         AssistantLoggedInTests.setUp(self)
         self.setUser(self.admin)
-
 
 class UnicodeUserTests(PopulatedTests):
     def setUp(self):

@@ -19,12 +19,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from hashlib import sha1
 import datetime
 
+import unittest
 import muesli.web
-from muesli.models import *
 from muesli.tests import functionalTests
-
+from muesli.models import *
 
 class BaseTests(functionalTests.BaseTests):
     def test_user_login(self):
@@ -97,10 +98,10 @@ class BaseTests(functionalTests.BaseTests):
     def test_user_confirm(self):
         self.test_user_register()
         self.session.expire_all()
-        user = self.session.query(User).filter(User.email == 'matthias@matthias-k.org').one()
+        user = self.session.query(User).filter(User.email=='matthias@matthias-k.org').one()
         confirmation = user.confirmations[0]
         res = self.testapp.get('/user/confirm/%s' % confirmation.hash, status=200)
-        form = res.form
+        form =  res.form
         form['password'] = 'test'
         form['password_repeat'] = 'test'
         res = form.submit()
@@ -125,7 +126,7 @@ class BaseTests(functionalTests.BaseTests):
         res = self.testapp.get('/user/reset_password2', status=200)
 
     def test_user_ajax_complete(self):
-        res = self.testapp.get('/user/ajax_complete/%s/%s' % (123, 234), status=403)
+        res = self.testapp.get('/user/ajax_complete/%s/%s' % (123,234), status=403)
 
     def test_user_delete(self):
         res = self.testapp.get('/user/delete/%s' % (1234), status=404)
@@ -136,8 +137,7 @@ class BaseTests(functionalTests.BaseTests):
     def test_user_doublets(self):
         res = self.testapp.get('/user/doublets', status=403)
 
-
-class UnloggedTests(BaseTests, functionalTests.PopulatedTests):
+class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
     def test_user_edit(self):
         res = self.testapp.get('/user/edit/%s' % self.user.id, status=403)
 
@@ -169,7 +169,7 @@ class UnloggedTests(BaseTests, functionalTests.PopulatedTests):
         self.setUser(user)
 
     def test_user_ajax_complete(self):
-        res = self.testapp.get('/user/ajax_complete/%s/%s' % (self.lecture.id, self.tutorial.id), status=403)
+        res = self.testapp.get('/user/ajax_complete/%s/%s' % (self.lecture.id,self.tutorial.id), status=403)
 
     def test_user_register_same_email(self):
         res = self.testapp.get('/user/register', status=200)
@@ -201,11 +201,9 @@ class UnloggedTests(BaseTests, functionalTests.PopulatedTests):
     def test_user_delete(self):
         res = self.testapp.get('/user/delete/%s' % (self.user2.id), status=403)
 
-
 class UnicodeTests(functionalTests.UnicodeUserTests):
     def test_unicodepassword(self):
         res = self.testapp.get('/start', status=200)
-
 
 class UserLoggedInTests(UnloggedTests):
     def setUp(self):
@@ -251,13 +249,13 @@ class UserLoggedInTests(UnloggedTests):
         self.session.expire_all()
         self.assertTrue(confirmation not in user.confirmations)
         self.assertTrue(user.email == newmail)
-        # form['password'] = 'test'
-        # form['password_repeat'] = 'test'
-        # res = form.submit()
-        # self.session.expire_all()
-        # self.assertTrue(res.status.startswith('302'))
-        # self.assertTrue(confirmation not in user.confirmations)
-        # self.assertTrue(user.password != None)
+        #form['password'] = 'test'
+        #form['password_repeat'] = 'test'
+        #res = form.submit()
+        #self.session.expire_all()
+        #self.assertTrue(res.status.startswith('302'))
+        #self.assertTrue(confirmation not in user.confirmations)
+        #self.assertTrue(user.password != None)
 
     def test_user_change_password(self):
         res = self.testapp.get('/user/change_password', status=200)
@@ -271,30 +269,28 @@ class UserLoggedInTests(UnloggedTests):
         res = self.testapp.get('/user/logout', status=302)
         self.setUser(self.loggedUser)
 
-
 class TutorLoggedInTests(UserLoggedInTests):
     def setUp(self):
         UserLoggedInTests.setUp(self)
         self.setUser(self.tutor)
 
     def test_user_ajax_complete_tut(self):
-        res = self.testapp.post('/user/ajax_complete/%s/%s' % (self.lecture.id, self.tutorial.id),
-                                {'name': 'GarantiertKeinName'}, status=200)
+        res = self.testapp.post('/user/ajax_complete/%s/%s' % (self.lecture.id,self.tutorial.id),
+               {'name': 'GarantiertKeinName'}, status=200)
         self.assertResContainsNot(res, '</li>')
-        res = self.testapp.post('/user/ajax_complete/%s/%s' % (self.lecture.id, self.tutorial.id),
-                                {'name': self.tutorial.students[0].last_name}, status=200)
+        res = self.testapp.post('/user/ajax_complete/%s/%s' % (self.lecture.id,self.tutorial.id),
+               {'name': self.tutorial.students[0].last_name}, status=200)
         self.assertResContains(res, self.tutorial.students[0].first_name)
 
     def test_user_ajax_complete(self):
-        # All tutors should be allowed to see students from all
-        # tutorials
+        #All tutors should be allowed to see students from all
+        #tutorials
         res = self.testapp.post('/user/ajax_complete/%s/' % (self.lecture.id),
-                                {'name': 'GarantiertKeinName'}, status=200)
+               {'name': 'GarantiertKeinName'}, status=200)
         self.assertResContainsNot(res, '</li>')
         res = self.testapp.post('/user/ajax_complete/%s/' % (self.lecture.id,),
-                                {'name': self.tutorial.students[0].last_name}, status=200)
+               {'name': self.tutorial.students[0].last_name}, status=200)
         self.assertResContains(res, self.tutorial.students[0].first_name)
-
 
 class AssistantLoggedInTests(TutorLoggedInTests):
     def setUp(self):
@@ -313,7 +309,7 @@ class AdminLoggedInTests(AssistantLoggedInTests):
         res = self.testapp.get('/user/edit/%s' % self.tutor.id, status=200)
         res = self.testapp.get('/user/edit/%s' % self.assistant.id, status=200)
         res = self.testapp.get('/user/edit/%s' % self.admin.id, status=200)
-        self.user.subject = 'Ein süßer Umlaut'
+        self.user.subject='Ein süßer Umlaut'
         self.session.commit()
         res = self.testapp.get('/user/edit/%s' % self.user.id, status=200)
 
@@ -321,14 +317,14 @@ class AdminLoggedInTests(AssistantLoggedInTests):
         res = self.testapp.get('/user/list', status=200)
 
     def test_user_delete(self):
-        # Do not delete students from tutorials
+        #Do not delete students from tutorials
         res = self.testapp.get('/user/delete/%s' % (self.user2.id), status=302)
         self.assertIn('/user/edit/%s' % self.user2.id, res.headers['location'])
         res = res.follow()
         self.assertResContains(res, 'Tutorien angemeldet')
         self.assertResContainsNot(res, 'wurde gelöscht')
 
-        # Do not delete tutors
+        #Do not delete tutors
         res = self.testapp.get('/user/delete/%s' % (self.tutor.id), status=302)
         self.assertIn('/user/edit/%s' % self.tutor.id, res.headers['location'])
         res = res.follow()
@@ -397,7 +393,7 @@ class AdminLoggedInTests(AssistantLoggedInTests):
         self.assertEqual(res.status_int, 200)
         self.assertResContains(res, '1 Studenten gelöscht')
         self.session.expire_all()
-        self.assertEqual(self.session.query(muesli.models.User).count(), student_count - 1)
+        self.assertEqual(self.session.query(muesli.models.User).count(), student_count-1)
 
     def test_user_doublets(self):
         res = self.testapp.get('/user/doublets', status=200)

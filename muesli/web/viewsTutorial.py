@@ -19,43 +19,45 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import io
+from muesli import models
+from muesli import utils
+from muesli.mail import Message
+import muesli.mail
+from muesli.web.forms import *
+from muesli.web.context import *
+
+from pyramid.view import view_config
+from pyramid.response import Response
+from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPForbidden, HTTPFound
+from pyramid.url import route_url
+from sqlalchemy.orm import exc
+import sqlalchemy
+
+import re
+import os
 
 import PIL.Image
 import PIL.ImageDraw
-import sqlalchemy
+import io
 from natsort import natsorted
-from pyramid.httpexceptions import HTTPForbidden, HTTPFound
-from pyramid.response import Response
-from pyramid.view import view_config
-from sqlalchemy.orm import exc
 
-import muesli.mail
-from muesli.mail import Message
-from muesli.web.context import *
-from muesli.web.forms import *
-
-
-@view_config(route_name='tutorial_view', renderer='muesli.web:templates/tutorial/view.pt', context=TutorialContext,
-             permission='viewOverview')
+@view_config(route_name='tutorial_view', renderer='muesli.web:templates/tutorial/view.pt', context=TutorialContext, permission='viewOverview')
 class View:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
         self.tutorial_ids = request.matchdict['tutorial_ids']
-
     def __call__(self):
         tutorials = self.request.context.tutorials
-        lecture_students = self.request.context.lecture.lecture_students_for_tutorials(tutorials).options(
-            sqlalchemy.orm.joinedload(LectureStudent.student))
-        students = [ls.student for ls in lecture_students]  # self.db.query(models.User).filter(filterClause)
+        lecture_students = self.request.context.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))
+        students = [ls.student for ls in lecture_students] #self.db.query(models.User).filter(filterClause)
         tutorial = tutorials[0]
         other_tutorials = tutorial.lecture.tutorials
         # Query results are already lexicographically sorted.
         # Sort again using length as key so we get length lexicographical sorting
         # https://github.com/muesli-hd/muesli/issues/28
-        exams = dict([[cat['id'], natsorted(list(tutorial.lecture.exams.filter(models.Exam.category == cat['id'])),
-                                            key=lambda x: x.name)]
+        exams = dict([[cat['id'], natsorted(list(tutorial.lecture.exams.filter(models.Exam.category==cat['id'])),
+                                         key=lambda x: x.name)]
                       for cat in utils.categories])
         return {'tutorial': tutorial,
                 'tutorials': tutorials,
@@ -65,9 +67,8 @@ class View:
                 'categories': utils.categories,
                 'exams': exams,
                 'names': self.request.config['lecture_types'][tutorial.lecture.type],
-                'old_tutorial_id': None  # see move_student
+                'old_tutorial_id': None  #see move_student
                 }
-
 
 @view_config(route_name='tutorial_occupancy_bar')
 class OccupancyBar:
@@ -77,18 +78,17 @@ class OccupancyBar:
         self.max_count = int(request.matchdict['max_count'])
         self.width = 60
         self.height = 10
-        self.color1 = (0, 0, 255)
-        self.color2 = (140, 140, 255)
-
+        self.color1 = (0,0,255)
+        self.color2 = (140,140,255)
     def __call__(self):
-        image = PIL.Image.new('RGB', (self.width, self.height), (255, 255, 255))
+        image = PIL.Image.new('RGB', (self.width,self.height),(255,255,255))
         draw = PIL.ImageDraw.Draw(image)
         # prevent 0-division error
         if self.max_count > 0:
-            draw.rectangle([(0, 0), (float(self.width) * self.max_count / self.max_count, 10)], fill=self.color2)
-            draw.rectangle([(0, 0), (float(self.width) * self.count / self.max_count, 10)], fill=self.color1)
+            draw.rectangle([(0,0),(float(self.width)*self.max_count/self.max_count,10)], fill=self.color2)
+            draw.rectangle([(0,0),(float(self.width)*self.count/self.max_count,10)], fill=self.color1)
         else:
-            draw.rectangle([(0, 0), (float(self.width), 10)], fill=self.color1)
+            draw.rectangle([(0,0),(float(self.width),10)], fill=self.color1)
         output = io.BytesIO()
         image.save(output, format='PNG')
         response = Response()
@@ -98,15 +98,12 @@ class OccupancyBar:
         output.close()
         return response
 
-
-@view_config(route_name='tutorial_add', renderer='muesli.web:templates/tutorial/add.pt', context=LectureContext,
-             permission='edit')
+@view_config(route_name='tutorial_add', renderer='muesli.web:templates/tutorial/add.pt', context=LectureContext, permission='edit')
 class Add:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
         self.lecture_id = request.matchdict['lecture_id']
-
     def __call__(self):
         error_msg = ''
         lecture = self.db.query(models.Lecture).get(self.lecture_id)
@@ -123,16 +120,13 @@ class Add:
                 'form': form,
                 'error_msg': error_msg}
 
-
-@view_config(route_name='tutorial_duplicate', renderer='muesli.web:templates/tutorial/add.pt', context=LectureContext,
-             permission='edit')
+@view_config(route_name='tutorial_duplicate', renderer='muesli.web:templates/tutorial/add.pt', context=LectureContext, permission='edit')
 class Duplicate(object):
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
         self.lecture_id = request.matchdict['lecture_id']
         self.tutorial_id = request.matchdict['tutorial_id']
-
     def __call__(self):
         error_msg = ''
         orig_tutorial = self.db.query(models.Tutorial).get(self.tutorial_id)
@@ -142,11 +136,11 @@ class Duplicate(object):
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
             tutorial = models.Tutorial()
             tutorial.lecture = orig_tutorial.lecture
-            tutorial.place = orig_tutorial.place
+            tutorial.place=orig_tutorial.place
             tutorial.time = orig_tutorial.time
-            tutorial.max_students = orig_tutorial.max_students
-            tutorial.comment = orig_tutorial.comment
-            tutorial.is_special = orig_tutorial.is_special
+            tutorial.max_students=orig_tutorial.max_students
+            tutorial.comment=orig_tutorial.comment
+            tutorial.is_special=orig_tutorial.is_special
             form.obj = tutorial
             form.saveValues()
             self.request.db.commit()
@@ -155,7 +149,6 @@ class Duplicate(object):
                 'names': self.request.config['lecture_types'][lecture.type],
                 'form': form,
                 'error_msg': error_msg}
-
 
 @view_config(route_name='tutorial_delete', context=TutorialContext, permission='edit')
 def delete(request):
@@ -168,17 +161,14 @@ def delete(request):
             request.db.delete(tutorial)
             request.session.flash('Übungsgruppe gelöscht.', queue='messages')
     request.db.commit()
-    return HTTPFound(location=request.route_url('lecture_edit', lecture_id=request.context.lecture.id))
+    return HTTPFound(location=request.route_url('lecture_edit', lecture_id = request.context.lecture.id))
 
-
-@view_config(route_name='tutorial_edit', renderer='muesli.web:templates/tutorial/edit.pt', context=TutorialContext,
-             permission='edit')
+@view_config(route_name='tutorial_edit', renderer='muesli.web:templates/tutorial/edit.pt', context=TutorialContext, permission='edit')
 class Edit:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
         self.tutorial_id = request.matchdict['tutorial_id']
-
     def __call__(self):
         error_msg = ''
         tutorial = self.db.query(models.Tutorial).get(self.tutorial_id)
@@ -192,15 +182,12 @@ class Edit:
                 'form': form,
                 'error_msg': error_msg}
 
-
-@view_config(route_name='tutorial_results', renderer='muesli.web:templates/tutorial/results.pt',
-             context=TutorialContext, permission='viewAll')
+@view_config(route_name='tutorial_results', renderer='muesli.web:templates/tutorial/results.pt', context=TutorialContext, permission='viewAll')
 def results(request):
     tutorials = request.context.tutorials
     lecture = request.context.lecture
-    lecture_students = lecture.lecture_students_for_tutorials(tutorials=tutorials).options(
-        sqlalchemy.orm.joinedload(LectureStudent.student)) \
-        .options(sqlalchemy.orm.joinedload(LectureStudent.tutorial)).all()
+    lecture_students = lecture.lecture_students_for_tutorials(tutorials=tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))\
+            .options(sqlalchemy.orm.joinedload(LectureStudent.tutorial)).all()
     lecture_results = lecture.getLectureResults(students=lecture_students)
     results = lecture.getPreparedLectureResults(lecture_results)
     cat_maxpoints = dict([cat['id'], 0] for cat in utils.categories)
@@ -215,10 +202,8 @@ def results(request):
             'names': request.config['lecture_types'][lecture.type],
             'categories': utils.categories,
             'cat_maxpoints': cat_maxpoints,
-            'exams_by_cat': dict([[cat['id'], lecture.exams.filter(models.Exam.category == cat['id']).all()] for cat in
-                                  utils.categories]),
+            'exams_by_cat': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id']).all()] for cat in utils.categories]),
             }
-
 
 @view_config(route_name='tutorial_take', context=TutorialContext, permission='take_tutorial')
 def take(request):
@@ -231,8 +216,7 @@ def take(request):
             request.session.flash('Sie wurden als Übungsleiter eingetragen!', queue='messages')
     if request.db.dirty:
         request.db.commit()
-    return HTTPFound(location=request.route_url('lecture_view', lecture_id=request.context.lecture.id))
-
+    return HTTPFound(location=request.route_url('lecture_view', lecture_id = request.context.lecture.id))
 
 @view_config(route_name='tutorial_resign_as_tutor', context=TutorialContext, permission='viewAll')
 def resignAsTutor(request):
@@ -245,8 +229,7 @@ def resignAsTutor(request):
             request.session.flash('Sie sind als Tutor zurückgetreten', queue='messages')
     if request.db.dirty or request.db.new or request.db.deleted:
         request.db.commit()
-    return HTTPFound(location=request.route_url('lecture_view', lecture_id=request.context.lecture.id))
-
+    return HTTPFound(location=request.route_url('lecture_view', lecture_id = request.context.lecture.id))
 
 @view_config(route_name='tutorial_subscribe', context=TutorialContext, permission='subscribe')
 def subscribe(request):
@@ -276,7 +259,6 @@ def subscribe(request):
         pass
     return HTTPFound(location=request.route_url('lecture_view', lecture_id=lecture.id))
 
-
 @view_config(route_name='tutorial_unsubscribe', context=TutorialContext, permission='unsubscribe')
 def unsubscribe(request):
     tutorials = request.context.tutorials
@@ -298,7 +280,6 @@ def unsubscribe(request):
     request.session.flash('Erfolgreich aus Übungsgruppe ausgetragen', queue='messages')
     return HTTPFound(location=request.route_url('start'))
 
-
 @view_config(route_name='tutorial_remove_student', context=TutorialContext, permission='remove_student')
 def removeStudent(request):
     student_id = int(request.matchdict['student_id'])
@@ -319,22 +300,19 @@ def removeStudent(request):
     else:
         return HTTPFound(location=request.route_url('start'))
 
-
 def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
     mail_preference = request.db.query(models.EmailPreferences).get((tutorial.tutor_id, tutorial.lecture.id))
     if mail_preference is None:
         mail_preference = models.EmailPreferences(tutorial.tutor_id, tutorial.lecture.id, True)
     if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
-    text = 'In Ihre Übungsgruppe zur Vorlesung %s am %s hat sich %s eingetragen' \
-           % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
+    text = 'In Ihre Übungsgruppe zur Vorlesung %s am %s hat sich %s eingetragen'\
+            % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
     if fromTutorial:
-        text += ' (Wechsel aus der Gruppe am %s von %s).' % (
-        fromTutorial.time.__html__(), fromTutorial.tutor.name() if fromTutorial.tutor else 'NN')
+        text += ' (Wechsel aus der Gruppe am %s von %s).' % (fromTutorial.time.__html__(), fromTutorial.tutor.name() if fromTutorial.tutor else 'NN')
     else:
         text += '.'
     sendChangesMail(request, tutorial.tutor, text)
-
 
 def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
     mail_preference = request.db.query(models.EmailPreferences).get((tutorial.tutor_id, tutorial.lecture.id))
@@ -342,26 +320,22 @@ def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
         mail_preference = models.EmailPreferences(tutorial.tutor_id, tutorial.lecture.id, True)
     if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
-    text = 'Aus Ihrer Übungsgruppe zur Vorlesung %s am %s hat sich %s ausgetragen' \
-           % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
+    text = 'Aus Ihrer Übungsgruppe zur Vorlesung %s am %s hat sich %s ausgetragen'\
+                    % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
     if toTutorial:
-        text += ' (Wechsel in die Gruppe am %s von %s).' % (
-        toTutorial.time.__html__(), toTutorial.tutor.name() if toTutorial.tutor else 'NN')
+        text += ' (Wechsel in die Gruppe am %s von %s).' % (toTutorial.time.__html__(), toTutorial.tutor.name() if toTutorial.tutor else 'NN')
     else:
         text += '.'
     sendChangesMail(request, tutorial.tutor, text)
 
-
 def sendChangesMail(request, tutor, text):
     message = Message(subject='MÜSLI: Änderungen in Ihrer Übungsgruppe',
-                      sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])),
-                      to=[tutor.email],
-                      body='Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
+            sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])),
+            to = [tutor.email],
+            body='Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
     muesli.mail.sendMail(message)
 
-
-@view_config(route_name='tutorial_email_preference', renderer='muesli.web:templates/tutorial/email_preference.pt',
-             context=TutorialContext, permission='viewAll')
+@view_config(route_name='tutorial_email_preference', renderer='muesli.web:templates/tutorial/email_preference.pt', context=TutorialContext, permission='viewAll')
 def email_preference(request):
     db = request.db
     tutorials = request.context.tutorials
@@ -386,8 +360,7 @@ def email_preference(request):
             'form': form}
 
 
-@view_config(route_name='tutorial_email', renderer='muesli.web:templates/tutorial/email.pt', context=TutorialContext,
-             permission='sendMail')
+@view_config(route_name='tutorial_email', renderer='muesli.web:templates/tutorial/email.pt', context=TutorialContext, permission='sendMail')
 def email(request):
     db = request.db
     tutorials = request.context.tutorials
@@ -396,14 +369,14 @@ def email(request):
     if request.method == 'POST' and form.processPostData(request.POST):
         lecture_students = lecture.lecture_students_for_tutorials(tutorials=tutorials)
         message = muesli.mail.Message(subject=form['subject'],
-                                      sender=request.user.email,
-                                      to=[request.user.email] if form['copytome'] == 0 else [],
-                                      bcc=[ls.student.email for ls in lecture_students],
-                                      body=form['body'])
+                sender=request.user.email,
+                to=[request.user.email] if form['copytome']==0 else [],
+                bcc=[ls.student.email for ls in lecture_students],
+                body=form['body'])
         if request.POST['attachments'] not in ['', None]:
             message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
         try:
-            muesli.mail.sendMail(message, request)
+            muesli.mail.sendMail(message,request)
         except:
             pass
         else:
@@ -414,9 +387,7 @@ def email(request):
             'lecture': lecture,
             'form': form}
 
-
-@view_config(route_name='tutorial_ajax_get_tutorial', renderer='json', context=LectureContext,
-             permission='get_tutorials')
+@view_config(route_name='tutorial_ajax_get_tutorial', renderer='json', context=LectureContext, permission='get_tutorials')
 def ajaxGetTutorial(request):
     lecture = request.context.lecture
     student_id = request.POST['student_id']
@@ -430,9 +401,7 @@ def ajaxGetTutorial(request):
     else:
         return {'msg': 'No Tutorial found!'}
 
-
-@view_config(route_name='tutorial_assign_student', renderer='muesli.web:templates/tutorial/assign_student.pt',
-             context=AssignStudentContext, permission='move')
+@view_config(route_name='tutorial_assign_student', renderer='muesli.web:templates/tutorial/assign_student.pt', context=AssignStudentContext, permission='move')
 def assign_student(request):
     student = request.context.student
     new_tutorial = request.context.tutorial
@@ -451,8 +420,8 @@ def assign_student(request):
     ls.tutorial = new_tutorial
     if not ls in request.db: request.db.add(ls)
     request.db.commit()
-    # if oldtutorial:
+    #if oldtutorial:
     #       sendChangesMailUnsubscribe(request, oldtutorial, request.user, toTutorial=tutorial)
-    # sendChangesMailSubscribe(request, tutorial, request.user, fromTutorial=oldtutorial)
+    #sendChangesMailSubscribe(request, tutorial, request.user, fromTutorial=oldtutorial)
     return {'student': student,
             'new_tutorial': new_tutorial}

@@ -19,9 +19,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from hashlib import sha1
+
+import unittest
 import muesli.web
 from muesli.tests import functionalTests
-
 
 class BaseTests(functionalTests.BaseTests):
     def test_lecture_list(self):
@@ -47,7 +49,7 @@ class BaseTests(functionalTests.BaseTests):
         res = self.testapp.get('/lecture/add_grading/%s' % 123456, status=404)
 
     def test_lecture_remove_tutor(self):
-        res = self.testapp.get('/lecture/remove_tutor/%s/%s' % (123456, 123), status=404)
+        res = self.testapp.get('/lecture/remove_tutor/%s/%s' % (123456,123), status=404)
 
     def test_lecture_export_students_html(self):
         res = self.testapp.get('/lecture/export_students_html/%s' % 123456, status=404)
@@ -91,8 +93,7 @@ class BaseTests(functionalTests.BaseTests):
     def test_all_lecture_export_excel(self):
         res = self.testapp.get('/lecture/export_excel/downloadDetailTutorials.xlsx', status=403)
 
-
-class UnloggedTests(BaseTests, functionalTests.PopulatedTests):
+class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
     def test_lecture_view(self):
         res = self.testapp.get('/lecture/view/%s' % self.lecture.id, status=403)
 
@@ -117,7 +118,7 @@ class UnloggedTests(BaseTests, functionalTests.PopulatedTests):
         res = self.testapp.get('/lecture/add_grading/%s' % self.lecture.id, status=403)
 
     def test_lecture_remove_tutor(self):
-        res = self.testapp.get('/lecture/remove_tutor/%s/%s' % (self.lecture.id, self.tutor.id), status=403)
+        res = self.testapp.get('/lecture/remove_tutor/%s/%s' % (self.lecture.id,self.tutor.id), status=403)
 
     def test_lecture_export_students_html(self):
         res = self.testapp.get('/lecture/export_students_html/%s' % self.lecture.id, status=403)
@@ -158,7 +159,6 @@ class UnloggedTests(BaseTests, functionalTests.PopulatedTests):
     def test_all_lecture_export_excel(self):
         res = self.testapp.get('/lecture/export_excel/downloadDetailTutorials.xlsx', status=403)
 
-
 class UserLoggedInTests(UnloggedTests):
     def setUp(self):
         UnloggedTests.setUp(self)
@@ -173,10 +173,10 @@ class UserLoggedInTests(UnloggedTests):
         res = self.testapp.get('/lecture/set_preferences/%s' % self.prefLecture.id, status=302)
         res = self.testapp.get('/lecture/view/%s' % self.prefLecture.id, status=200)
         form = res.forms[0]
-        # Works only, if there are no tutorials with same time!
-        for i, tut in enumerate(self.prefLecture.tutorials):
-            form['time-%s' % (i + 1)] = str(tut.time)
-            form['pref-%s' % (i + 1)] = "1"
+        #Works only, if there are no tutorials with same time!
+        for i,tut in enumerate(self.prefLecture.tutorials):
+            form['time-%s' % (i+1)] = str(tut.time)
+            form['pref-%s'% (i+1)] = "1"
         res = form.submit()
         self.assertTrue(res.status.startswith('302'))
         res = res.follow()
@@ -195,8 +195,7 @@ class UserLoggedInTests(UnloggedTests):
         res = self.testapp.post('/lecture/add_tutor/%s' % self.lecture.id, {'password': ''}, status=302)
         res = res.follow()
         res.mustcontain('Fehler aufgetreten')
-        res = self.testapp.post('/lecture/add_tutor/%s' % self.lecture.id, {'password': self.lecture.password},
-                                status=302)
+        res = self.testapp.post('/lecture/add_tutor/%s' % self.lecture.id, {'password': self.lecture.password}, status=302)
         res = res.follow()
         if alreadyTutor:
             res.mustcontain('Sie sind bereits')
@@ -205,7 +204,6 @@ class UserLoggedInTests(UnloggedTests):
 
     def test_all_lecture_export_excel(self):
         res = self.testapp.get('/lecture/export_excel/downloadDetailTutorials.xlsx', status=403)
-
 
 class TutorLoggedInTests(UserLoggedInTests):
     def setUp(self):
@@ -246,7 +244,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
         self.assertTrue(res.status.startswith('302'))
         self.session.expire_all()
         leccount2 = self.session.query(muesli.models.Lecture).count()
-        self.assertEqual(leccount + 1, leccount2)
+        self.assertEqual(leccount+1, leccount2)
 
     def test_lecture_edit(self):
         res = self.testapp.get('/lecture/edit/%s' % self.lecture.id, status=200)
@@ -273,7 +271,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
     def test_lecture_add_exam(self):
         res = self.testapp.get('/lecture/add_exam/%s' % self.lecture.id, status=200)
-        form = res.form
+        form =  res.form
         form['name'] = 'Testblatt'
         res = form.submit()
         self.assertEqual(res.status_int, 302)
@@ -283,7 +281,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
     def test_lecture_remove_tutor(self):
         self.assertTrue(self.tutor2 in self.lecture.tutors)
-        res = self.testapp.get('/lecture/remove_tutor/%s/%s' % (self.lecture.id, self.tutor2.id), status=302)
+        res = self.testapp.get('/lecture/remove_tutor/%s/%s' % (self.lecture.id,self.tutor2.id), status=302)
         self.session.expire_all()
         self.assertTrue(self.tutor2 not in self.lecture.tutors)
 
@@ -307,7 +305,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
         res = self.testapp.get('/lecture/add_student/%s' % self.lecture.id, status=200)
         form = res.form
         form['student_email'] = self.user_without_lecture.email
-        form['new_tutorial'] = self.lecture.tutorials[0].id
+        form['new_tutorial']  = self.lecture.tutorials[0].id
         res = form.submit()
         self.assertTrue(res.status.startswith('200'))
         self.session.expire_all()
@@ -319,7 +317,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
         res = self.testapp.get('/lecture/add_student/%s' % self.lecture.id, status=200)
         form = res.form
         form['student_email'] = self.user.email
-        form['new_tutorial'] = self.lecture.tutorials[0].id
+        form['new_tutorial']  = self.lecture.tutorials[0].id
         res = form.submit()
         self.assertTrue(res.status.startswith('200'))
         self.session.expire_all()
@@ -330,7 +328,7 @@ class AssistantLoggedInTests(TutorLoggedInTests):
         res = self.testapp.get('/lecture/add_student/%s' % self.lecture.id, status=200)
         form = res.form
         form['student_email'] = self.user.email
-        form['new_tutorial'] = self.lecture.tutorials[0].id
+        form['new_tutorial']  = self.lecture.tutorials[0].id
         res = form.submit()
         self.assertResContains(res, 'bereits eingetragen')
 

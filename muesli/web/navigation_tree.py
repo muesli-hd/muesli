@@ -18,10 +18,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from sqlalchemy.orm import joinedload
-
 from muesli import utils
 
+from pyramid import security
+
+import sqlalchemy
+from sqlalchemy.orm import relationship, sessionmaker, backref, column_property, joinedload
 
 class NavigationTree(object):
     def __init__(self, label, url=""):
@@ -36,9 +38,9 @@ class NavigationTree(object):
         self.children.append(node)
 
     def __repr__(self, level=0):
-        ret = "{}{}({})\n".format("+" * level, self.label, self.url)
+        ret = "{}{}({})\n".format("+"*level, self.label, self.url)
         for child in self.children:
-            ret += child.__repr__(level + 1)
+            ret += child.__repr__(level+1)
         return ret
 
 
@@ -70,10 +72,10 @@ def create_navigation_tree(request, user):
     root.append(tutorial_root_node)
     for t in tutorials:
         tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
-                                                            t.time.__html__(), t.tutor_name),
-                                       request.route_url('lecture_view_points',
-                                                         lecture_id=t.lecture.id))
+            t.time.__html__(), t.tutor_name), request.route_url('lecture_view_points',
+                lecture_id=t.lecture.id))
         tutorial_root_node.append(tutorial_node)
+
 
     # add tutorials the user tutors
     tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
@@ -81,8 +83,8 @@ def create_navigation_tree(request, user):
     tutor_node = NavigationTree("Eigene Übungsgruppen", request.route_url('start'))
     for t in tutorials_as_tutor:
         tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
-                                                            t.time.__html__(), t.place),
-                                       request.route_url('tutorial_view', tutorial_ids=t.id))
+            t.time.__html__(), t.place),
+            request.route_url('tutorial_view', tutorial_ids=t.id))
         tutor_node.append(tutorial_node)
 
     if tutor_node.children:
@@ -94,7 +96,7 @@ def create_navigation_tree(request, user):
     assistant_node = NavigationTree("Eigene Vorlesungen", request.route_url('start'))
     for l in lectures_as_assistant:
         lecture_node = NavigationTree(l.name,
-                                      request.route_url('lecture_edit', lecture_id=l.id))
+            request.route_url('lecture_edit', lecture_id=l.id))
         assistant_node.append(lecture_node)
 
     if assistant_node.children:
@@ -127,10 +129,9 @@ def get_lecture_specific_nodes(request, context, lecture_id):
 
     if request.has_permission('edit', context):
         NavigationTree("Liste der Ergebnisse", request.route_path('tutorial_results',
-                                                                  lecture_id=lecture_id, tutorial_ids='')),
+            lecture_id=lecture_id, tutorial_ids='')),
 
     return nodes
-
 
 def get_tutorial_specific_nodes(request, context, tutorial_id, lecture_id):
     """Create navigation tree, to append to the main navigation tree containing
@@ -143,19 +144,19 @@ def get_tutorial_specific_nodes(request, context, tutorial_id, lecture_id):
 
     if request.has_permission('edit', context):
         nodes.append(NavigationTree("Tutorial editieren",
-                                    request.route_path('tutorial_edit', tutorial_id=tutorial_id)))
+            request.route_path('tutorial_edit', tutorial_id=tutorial_id)))
 
     if request.has_permission('viewAll', context):
         nodes.append(NavigationTree("Punkteübersicht",
-                                    request.route_path('tutorial_results', lecture_id=lecture_id,
-                                                       tutorial_ids=tutorial_id)))
+            request.route_path('tutorial_results', lecture_id=lecture_id,
+                tutorial_ids=tutorial_id)))
 
     if request.has_permission('sendMail', context):
         nodes.append(NavigationTree("E-Mail an Teilnehmer schreiben",
-                                    request.route_path('tutorial_email', tutorial_ids=tutorial_id)))
+            request.route_path('tutorial_email', tutorial_ids=tutorial_id)))
 
     if request.has_permission('viewAll', context):
         nodes.append(NavigationTree("Status-Emails bestellen/ abbestellen",
-                                    request.route_path('tutorial_email_preference', tutorial_ids=tutorial_id)))
+            request.route_path('tutorial_email_preference', tutorial_ids=tutorial_id)))
 
     return nodes

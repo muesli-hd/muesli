@@ -19,60 +19,48 @@
 
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import types
+import muesli
 
+from sqlalchemy import types
 
 class WrappedColumn:
     def __init__(self, value):
         self.value = value
-
     def __str__(self):
         return self.value or ''
-
     def __eq__(self, other):
         if not isinstance(other, WrappedColumn):
             return False
         else:
             return self.value == other.value
 
-
 def ColumnWrapper(type):
     class Wrapped(types.TypeDecorator):
         impl = types.Unicode
-
         def process_bind_param(self, value, dialect):
             if isinstance(value, type):
                 return value.value
             return value
-
         def process_result_value(self, value, dialect):
             return type(value)
-
     return Wrapped
-
 
 class Term(WrappedColumn):
     def __html__(self):
-        return self.value[0:4] + ' ' + ('SS' if self.value[4] == '1' else 'WS') if self.value else '-'
-
+        return self.value[0:4]+' '+('SS' if self.value[4] == '1' else 'WS') if self.value else '-'
 
 class TutorialTime(WrappedColumn):
-    weekdays = {'0': 'Mo', '1': 'Di', '2': 'Mi', \
-                '3': 'Do', '4': 'Fr', '5': 'Sa', '6': 'So'}
-
+    weekdays = {'0': 'Mo', '1': 'Di', '2': 'Mi',\
+                        '3': 'Do', '4': 'Fr', '5': 'Sa', '6': 'So'}
     def time(self):
         return self.value[2:]
-
     def weekday(self):
         return self.value[0]
-
     def __html__(self):
-        return self.weekdays[self.weekday()] + ' ' + self.time()
-
+        return self.weekdays[self.weekday()]+' '+self.time()
     def formatted(self):
         return self.__html__()
-
     def __hash__(self):
         return hash(self.value)
-    # def __str__(self):
+    #def __str__(self):
     #       return self.__html__()

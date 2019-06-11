@@ -16,44 +16,36 @@
 SQL helper functions for database maintainance.
 """
 
-from sqlalchemy.sql import text
-
 from muesli.exceptions import *
 
+from sqlalchemy.sql import text
 
 class DBUpdate:
     def __init__(self, schema_version, statements=None, callable=None):
         self.schema_version = schema_version
         self.statements = statements
         self.callable = callable
-
     def run(self, connection):
         print("Upgrading to schema version {0}".format(self.schema_version))
         with connection.begin():
             if self.schema_version != 1:
                 old_version = connection.execute("SELECT value FROM config WHERE key = 'schema_version'").scalar()
                 if int(old_version) + 1 != self.schema_version:
-                    raise DatabaseError(
-                        "Tried to update schema from {0} to {1}".format(old_version, self.schema_version))
+                    raise DatabaseError("Tried to update schema from {0} to {1}".format(old_version, self.schema_version))
             if self.statements:
                 for s in self.statements:
                     connection.execute(s)
             if self.callable:
                 self.callable(connection)
-        connection.execute(text("UPDATE config SET value = :version WHERE key = 'schema_version'"),
-                           version=self.schema_version)
-
+        connection.execute(text("UPDATE config SET value = :version WHERE key = 'schema_version'"), version=self.schema_version)
 
 class DBUpdater:
     __shared = {'updates': {}}
-
     def __init__(self):
         self.__dict__ = self.__shared
-
     def add(self, schema_version, statements=None, callable=None):
         update = DBUpdate(schema_version, statements, callable=callable)
         self.updates[schema_version] = update
-
     def run(self, engine, create_database=False):
         connection = engine.connect()
         try:
@@ -67,12 +59,11 @@ class DBUpdater:
         finally:
             connection.close()
 
-
 DBUpdater().add(1, statements=[
-    """
-    CREATE TABLE config (
-      key TEXT PRIMARY KEY,
-      value TEXT
-    )""",
-    """INSERT INTO config (key, value) VALUES ('schema_version', '1')""",
-])
+        """
+        CREATE TABLE config (
+          key TEXT PRIMARY KEY,
+          value TEXT
+        )""",
+        """INSERT INTO config (key, value) VALUES ('schema_version', '1')""",
+        ])

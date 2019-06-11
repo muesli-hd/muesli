@@ -24,7 +24,6 @@ from cornice.resource import resource, view
 
 from muesli.web import context
 
-
 @resource(path='/whoami',
           factory=context.NonLoginContext)
 class Whoami:

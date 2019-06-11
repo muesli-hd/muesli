@@ -20,17 +20,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import requests
 import json
 
-import requests
-from header import authenticate, MUESLI_URL
+from header import authenticate, STATIC_HEADERS, MUESLI_URL
 
 
 def get(endpoint, header):
     endpoint = MUESLI_URL + endpoint
     r = requests.get(endpoint, headers=header)
     print(json.dumps(r.json()))
-
 
 def post(endpoint, header):
     endpoint = MUESLI_URL + endpoint
@@ -44,7 +43,6 @@ def post(endpoint, header):
     r = requests.post(endpoint, json=lecture, headers=header)
     print(json.dumps(r.json()))
 
-
 def put(endpoint, header):
     endpoint = MUESLI_URL + endpoint
     lecture = {
@@ -52,7 +50,6 @@ def put(endpoint, header):
     }
     r = requests.put(endpoint, json=lecture, headers=header)
     print(json.dumps(r.json()))
-
 
 def main():
     headers = authenticate('test@test.de', '1234')

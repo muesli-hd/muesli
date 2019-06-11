@@ -19,8 +19,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from muesli.tests import functionalTests
+from hashlib import sha1
 
+import unittest
+import muesli.web
+from muesli.tests import functionalTests
 
 class BaseTests(functionalTests.BaseTests):
     def test_grading_edit(self):
@@ -30,7 +33,7 @@ class BaseTests(functionalTests.BaseTests):
         res = self.testapp.get('/grading/associate_exam/%s' % 12345, status=404)
 
     def test_grading_delete_exam_association(self):
-        res = self.testapp.get('/grading/delete_exam_association/%s/%s' % (12345, 12), status=404)
+        res = self.testapp.get('/grading/delete_exam_association/%s/%s' % (12345,12), status=404)
 
     def test_grading_enter_grades(self):
         res = self.testapp.get('/grading/enter_grades/%s' % 12345, status=404)
@@ -38,8 +41,7 @@ class BaseTests(functionalTests.BaseTests):
     def test_grading_export(self):
         res = self.testapp.get('/grading/export/%s.xlsx' % 12345, status=404)
 
-
-class UnloggedTests(BaseTests, functionalTests.PopulatedTests):
+class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
     def test_grading_edit(self):
         res = self.testapp.get('/grading/edit/%s' % self.grading.id, status=403)
 
@@ -54,7 +56,6 @@ class UnloggedTests(BaseTests, functionalTests.PopulatedTests):
 
     def test_grading_export(self):
         res = self.testapp.get('/grading/export/%s.xlsx' % self.grading.id, status=403)
-
 
 class UserLoggedInTests(UnloggedTests):
     def setUp(self):
