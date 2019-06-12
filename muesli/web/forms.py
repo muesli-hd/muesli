@@ -378,13 +378,6 @@ class UserEdit(ObjectForm):
                    label='Beifach',
                    comment='Falls Lehramt: Beifach',
                    value=user.second_subject),
-                FormField('birth_date',
-                   label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
-                   validator=DateString(),
-                   value=user.birth_date),
-                FormField('birth_place',
-                   label='Geburtsort', size=20,
-                   value=user.birth_place),
                 FormField('is_assistant',
                    label='Assistent',
                    type='radio',
@@ -443,19 +436,11 @@ class UserUpdate(ObjectForm):
                    label='Beifach',
                    comment='Falls Lehramt: Beifach',
                    value=user.second_subject),
-                FormField('birth_date',
-                   label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
-                   validator=DateString(),
-                   value=user.birth_date),
-                FormField('birth_place',
-                   label='Geburtsort', size=20,
-                   value=user.birth_place),
                 ]
         ObjectForm.__init__(self, user, formfields, request, send='Änderungen übernehmen')
         self.editok = ['title', 'subject', 'subject_alt', 'second_subject']
-        for field in ['matrikel', 'birth_date', 'birth_place']:
-            if not getattr(user, field):
-                self.editok.append(field)
+        if not getattr(user, 'matrikel'):
+            self.editok.append('matrikel')
         for field in self.named_fields:
             if field not in self.editok:
                 self.named_fields[field].readonly=True
@@ -506,18 +491,7 @@ class UserRegister(ObjectForm):
                    required=True),
                 FormField('subject_alt',
                    label='Studiengang', size=30, comment='Genauer Studiengang (falls Sonstiges gewählt). Bitte in der Form "Fach (Studiengang)".',
-                   value=''),
-                FormField('birth_date',
-                   label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
-                   #value=user.birth_date,
-                   validator=DateString(),
-                   required=True
-                   ),
-                FormField('birth_place',
-                   label='Geburtsort', size=20,
-                   #value=user.birth_place,
-                   required=True
-                   )
+                   value='')
                 ]
         ObjectForm.__init__(self, None, formfields, request, send='Registrieren')
     def saveField(self, fieldName):

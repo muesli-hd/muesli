@@ -27,7 +27,6 @@
     <td>${ls.student.last_name}, ${ls.student.first_name}</td>
     <td>${ls.student.matrikel}</td>
     <td>${ls.student.subject}</td>
-    <td>${ls.student.birth_date}, ${ls.student.birth_place}</td>
     <td tal:repeat="ex exam.exercises">${points[ls.student_id][ex.id].points if points[ls.student_id][ex.id].points!= None else ''}</td>
     <td>${points[ls.student_id].get('total', '')}</td>
     <td tal:condition="exam.admission!=None">

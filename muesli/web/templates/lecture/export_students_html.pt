@@ -23,8 +23,6 @@
     <td>${ls.student.first_name}</td>
     <td>${ls.tutorial.tutor.last_name if ls.tutorial.tutor else ''}</td>
     <td>${ls.student.matrikel}</td>
-    <td>${ls.student.birth_place}</td>
-    <td>${ls.student.birth_date}</td>
     <td>${ls.student.subject}</td>
     <td><a tal:attributes="href 'mailto:'+ls.student.email">${ls.student.email}</a></td>
   </tr>

@@ -675,8 +675,6 @@ class UserSchema(Schema):
     first_name = fields.String()
     last_name = fields.String()
     matrikel = fields.String()
-    birth_date = fields.String()
-    birth_place = fields.String()
     subject = fields.String()
 
     @post_load()

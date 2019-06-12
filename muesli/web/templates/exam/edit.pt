@@ -51,7 +51,6 @@
       <td>${ls.student.last_name}, ${ls.student.first_name}</td>
       <td>${ls.student.matrikel}</td>
       <td>${ls.student.subject}</td>
-      <td>${ls.student.birth_date}, ${ls.student.birth_place}</td>
     </tr>
   </tbody>
 

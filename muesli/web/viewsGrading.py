@@ -400,30 +400,4 @@ class Export(ExcelView):
         for column_cells in worksheet_grades.columns:
             max_length = max(len(str(cell.value)) for cell in column_cells)
             worksheet_grades.column_dimensions[column_cells[0].column].width = max_length*1.2
-
-        # sheet Daten
-        worksheet_data = self.w.create_sheet('Daten')
-        header = ['Matrikel', 'Nachname', 'Vorname', 'Geburtsort', 'Geburtsdatum', 'Note', 'Vortragstitel', 'Studiengang']
-        worksheet_data.append(header)
-        worksheet_data.row_dimensions[1].font = Font(bold=True)
-        for i, grade in enumerate(grades, 1):
-            m = date_p.match(grade.student.birth_date or '')
-            date = datetime.datetime(year=int(m.group(3)), month=int(m.group(2)), day=int(m.group(1))) if m else ''
-            data = [grade.student.matrikel,
-                    grade.student.last_name,
-                    grade.student.first_name,
-                    grade.student.birth_place,
-                    None,
-                    float(grade.grade) if grade.grade is not None else '',
-                    '',
-                    grade.student.formatCompleteSubject()]
-            for j, d in enumerate(data, 1):
-                worksheet_data.cell(row=1+i, column=j, value=d)
-            date_cell = worksheet_data.cell(row=1+i, column=5)
-            date_cell.value = date
-            date_cell.number_format = date_style
-        # set column width
-        for column_cells in worksheet_data.columns:
-            max_length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet_data.column_dimensions[column_cells[0].column].width = max_length*1.2
         return self.createResponse()
