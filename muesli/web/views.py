@@ -142,16 +142,6 @@ def emailUsers(request):
                     bad_students.append(student)
         for s in bad_students:
             table.append((s,s.subject, s.second_subject))
-    elif ttype=='wrong_birthday':
-        headers = ["Geburtstag"]
-        validator = DateString()
-        for student in students:
-            try:
-                date = validator.to_python(student.birth_date)
-            except formencode.Invalid:
-                bad_students.append(student)
-        for s in bad_students:
-            table.append((s,s.birth_date))
     elif ttype == 'unconfirmed':
         headers = ['Anmeldedatum']
         bad_students = request.db.query(models.User).filter(models.User.password == None).all()

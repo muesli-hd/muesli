@@ -61,8 +61,6 @@ Sie haben auf dieser Webseite die Möglichkeit im Rahmen der Registrierung eines
     Titel, Vorname und Nachname
     Matrikelnummer
     Studiengang
-    Geburtstag
-    Geburtsort
 
 Sie können ein Benutzerkonto auch mit weniger Angaben erstellen, falls Sie nur einen Teil der Funktionen dieser Webseite verwenden möchten.
 

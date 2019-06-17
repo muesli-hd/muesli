@@ -17,7 +17,6 @@
     <th>Name</th>
     <th>Matrikel</th>
     <th>Studiengang</th>
-    <th>Geburtstag, -ort</th>
     <div tal:repeat="cat exams_by_category">
       <th tal:repeat="exam cat['exams']">${exam.name}</th>
       <th>Σ</th>

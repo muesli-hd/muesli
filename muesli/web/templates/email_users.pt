@@ -11,7 +11,6 @@ Geben Sie hierzu in das Formular unten einen Betreff und die Nachricht ein und k
 
 <ul>
   <li><a tal:attributes="href request.route_path('email_users',_query={'type': 'wrong_subject'})">Falsches Fach</a></li>
-  <li><a tal:attributes="href request.route_path('email_users',_query={'type': 'wrong_birthday'})">Falscher Geburtstag</a></li>
   <li><a tal:attributes="href request.route_path('email_users',_query={'type': 'unconfirmed'})">Karteileichen</a></li>
 </ul>
 
