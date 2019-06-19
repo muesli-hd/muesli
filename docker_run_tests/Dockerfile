@@ -13,7 +13,7 @@ RUN useradd muesli
 RUN apt-get update && \
 apt-get install -y python3.6 python3.6-dev lp-solve \
 postgresql-server-dev-10 wget python3-pip libjs-prototype \
-libjs-select2.js libjs-jquery-fancybox locales && \
+libjs-select2.js libjs-jquery-fancybox libjs-jquery-tablesorter locales && \
 apt-get install -y --no-install-recommends chromium-chromedriver && \
 rm -rf /var/lib/apt/lists/*
 
