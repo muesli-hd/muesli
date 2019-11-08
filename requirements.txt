@@ -24,7 +24,7 @@ numpy==1.14.1
 openpyxl==2.5.0
 Paste==2.0.3
 PasteDeploy==1.5.2
-Pillow==5.0.0
+Pillow==6.2.0
 plaster==1.0
 plaster-pastedeploy==0.4.2
 pluggy==0.6.0
