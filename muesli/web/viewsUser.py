@@ -53,7 +53,7 @@ def login(request):
             request.user = user
             url = request.route_url('start')
             return HTTPFound(location=url)
-        request.session.flash('Nicht gefunden', queue='errors')
+        request.session.flash('Benutzername oder Passwort sind falsch.', queue='errors')
     return {'form': form, 'user': security.authenticated_userid(request)}
 
 
