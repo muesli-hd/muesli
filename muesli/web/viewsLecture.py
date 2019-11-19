@@ -84,9 +84,11 @@ class View:
     def __call__(self):
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
         times = lecture.prepareTimePreferences(user=self.request.user)
-        subscribed = self.request.user.id in [s.id for s in lecture.students]
+        subscribed_to_any_tutorial = self.request.user.id in [s.id for s in lecture.students]
+        subscribed_tutorial_id = None  # TODO Determine the ID of the tutorial to which the student is subscribed
         return {'lecture': lecture,
-                'subscribed': subscribed,
+                'subscribed_to_any_tutorial': subscribed_to_any_tutorial,
+                'subscribed_tutorial_id': subscribed_tutorial_id,
                 'times': times,
                 'prefs': utils.preferences}
 
