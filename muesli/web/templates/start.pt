@@ -47,7 +47,7 @@
 <div tal:condition="tutorials">
   <h3>Feste Eintragungen in Übungsgruppen</h3>
   <table>
-    <tr><th></th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th>Übungsleiter</th><th></th><th></th></tr>
+    <tr><th></th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th>Übungsleiter</th><th></th></tr>
 
     <tr tal:repeat="tutorial tutorials">
       <td>${tutorial.lecture.term}</td>
@@ -57,10 +57,6 @@
       <td>
         <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a></td>
       <td><a tal:attributes="href request.route_path('lecture_view_points', lecture_id=tutorial.lecture.id)">Punkte und Klausuren</a></td>
-      <td>
-        <a tal:condition="tutorial.lecture.mode != 'static'" onclick="return confirm_unsubscribe()"
-           tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">[&nbsp;Austreten&nbsp;]</a>
-      </td>
     </tr>
   </table>
 </div>
