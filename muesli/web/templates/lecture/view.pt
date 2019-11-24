@@ -56,11 +56,11 @@
           <a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">Details</a>
         </td>
         <td>
-          <a tal:condition="(tutorial.student_count &lt; tutorial.max_students) and tutorial != subscribed_tutorial"
-              tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)">
+          <a class="action" tal:condition="(tutorial.student_count &lt; tutorial.max_students) and tutorial != subscribed_tutorial"
+             tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)">
             ${'Beitreten' if not subscribed_tutorial else 'Wechseln'}
           </a>
-          <a tal:condition="tutorial == subscribed_tutorial" onclick="return confirm_unsubscribe()"
+          <a class="action" tal:condition="tutorial == subscribed_tutorial"
              tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">
             Austreten
           </a>
