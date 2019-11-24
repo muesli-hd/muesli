@@ -48,7 +48,7 @@
             ${tutorial.tutor.first_name} ${tutorial.tutor.last_name}
           </span>
           <span tal:omit-tag='' tal:condition="not tutorial.tutor and request.permissionInfo.has_permission('take_tutorial')"> <!-- TODO: and (is assistant or is_tutor) -->
-            <a tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
+            <a class="action" tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
           </span>
         </td>
         <td>${tutorial.comment}</td>
