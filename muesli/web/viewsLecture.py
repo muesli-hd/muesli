@@ -449,8 +449,8 @@ def emailTutors(request):
         tutors = lecture.tutors
         message = Message(subject=form['subject'],
                 sender=request.user.email,
-                to= [assistant.email for assistant in lecture.assistants],
-                cc=[t.email for t in tutors],
+                to=[t.email for t in tutors],
+                cc=[assistant.email for assistant in lecture.assistants],
                 body=form['body'])
         if request.POST['attachments'] not in ['', None]:
             message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
