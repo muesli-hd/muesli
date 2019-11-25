@@ -820,6 +820,12 @@ class LectureEmailTutors(CSRFSecureForm):
                    growable=False,
                    validator=validators.FieldStorageUploadConverter()
                    ),
+                FormField('copytoassistants',
+                   label='Kopie an die Assistenten',
+                   type='radio',
+                   options=list(enumerate(['Senden', 'Nicht senden'])),
+                   value=0
+                   ),
                 ]
         CSRFSecureForm.__init__(self, formfields, request, send='Senden')
 
