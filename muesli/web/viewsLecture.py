@@ -445,12 +445,17 @@ def emailTutors(request):
     db = request.db
     lecture = request.context.lecture
     form = LectureEmailTutors(request)
+    
+    assistants_to_be_cced = []
+    if form['copytoassistants'] == 0:  # TODO For some strange reason, this is always true
+        assistants_to_be_cced = [assistant.email for assistant in lecture.assistants]
+
     if request.method == 'POST' and form.processPostData(request.POST):
         tutors = lecture.tutors
         message = Message(subject=form['subject'],
                 sender=request.user.email,
                 to=[t.email for t in tutors],
-                cc=[assistant.email for assistant in lecture.assistants],
+                cc=assistants_to_be_cced,
                 body=form['body'])
         if request.POST['attachments'] not in ['', None]:
             message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
