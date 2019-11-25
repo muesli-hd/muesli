@@ -315,6 +315,11 @@ a.action:active {
 }
 
 a.action.wait-for-confirmation {
+    animation: pulse-yellow 4s;
+    animation-iteration-count: infinite;
+}
+
+a.action.critical.wait-for-confirmation {
     animation: pulse-red 4s;
     animation-iteration-count: infinite;
 }
@@ -328,5 +333,17 @@ a.action.wait-for-confirmation {
     }
     100% {
         background-color: #f33;
+    }
+}
+
+@keyframes pulse-yellow {
+    0% {
+        background-color: #B8860B;
+    }
+    50% {
+        background-color: #e4bc59;
+    }
+    100% {
+        background-color: #B8860B;
     }
 }
