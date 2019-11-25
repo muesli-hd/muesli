@@ -446,11 +446,10 @@ def emailTutors(request):
     lecture = request.context.lecture
     form = LectureEmailTutors(request)
     
-    assistants_to_be_cced = []
-    if form['copytoassistants'] == 0:  # TODO For some strange reason, this is always true
-        assistants_to_be_cced = [assistant.email for assistant in lecture.assistants]
-
     if request.method == 'POST' and form.processPostData(request.POST):
+        assistants_to_be_cced = []
+        if form['copytoassistants'] == 0:
+            assistants_to_be_cced = [assistant.email for assistant in lecture.assistants]
         tutors = lecture.tutors
         message = Message(subject=form['subject'],
                 sender=request.user.email,
