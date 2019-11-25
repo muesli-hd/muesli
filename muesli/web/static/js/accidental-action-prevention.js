@@ -14,7 +14,7 @@ function onActionClicked(event) {
 
 // TODO Not the most beautiful code I've ever written
 for(action of document.getElementsByClassName("action")) {
-    if(action.tagName == "A") {
+    if(action.tagName == "A" && action.classList.contains("needs-confirmation")) {
         action.onclick = onActionClicked;
     }
 }
