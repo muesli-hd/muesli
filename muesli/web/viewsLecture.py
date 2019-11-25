@@ -83,14 +83,12 @@ class View:
         self.lecture_id = request.matchdict['lecture_id']
     def __call__(self):
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
-        print(lecture)
         times = lecture.prepareTimePreferences(user=self.request.user)
         subscribed_tutorial = self.db.query(models.Tutorial).filter(
             Tutorial.lecture_students.any(
                 LectureStudent.student_id == self.request.user.id and LectureStudent.lecture_id == self.lecture_id
             )
         ).first()
-        print(subscribed_tutorial)
         return {'lecture': lecture,
                 'subscribed_tutorial': subscribed_tutorial,
                 'times': times,
