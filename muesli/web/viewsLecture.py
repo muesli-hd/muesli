@@ -84,9 +84,9 @@ class View:
     def __call__(self):
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
         times = lecture.prepareTimePreferences(user=self.request.user)
-        subscribed = self.request.user.id in [s.id for s in lecture.students]
+        subscribed_tutorial = self.request.user.tutorials.filter(LectureStudent.lecture_id == self.lecture_id).first()
         return {'lecture': lecture,
-                'subscribed': subscribed,
+                'subscribed_tutorial': subscribed_tutorial,
                 'times': times,
                 'prefs': utils.preferences}
 
