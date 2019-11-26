@@ -481,7 +481,8 @@ class UserRegister(ObjectForm):
                    label='Matrikelnummer', size=10, comment='Falls noch keine Matrikelnummer bekannt ist bitte 00000 eintragen. Die Matrikelnummer muss dann baldmöglichst unter „Angaben ergänzen“ richtig gestellt werden!',
                    validator=validators.Number,
                    #value=user.matrikel,
-                   required=True
+                   required=True,
+                   type="number"
                    ),
                 FormField('subject',
                    label='Studiengang',
