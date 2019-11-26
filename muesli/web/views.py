@@ -83,12 +83,12 @@ def admin(request):
 def contact(request):
     return {}
 
-@view_config(route_name='index', renderer='muesli.web:templates/index.pt')
+@view_config(route_name='index')
 def index(request):
     if request.user:
         return HTTPFound(location = request.route_url('start'))
     else:
-        return {}
+        return HTTPFound(location = request.route_url('user_login'))
 
 @view_config(route_name='email_all_users', renderer='muesli.web:templates/email_all_users.pt', context=GeneralContext, permission='admin')
 def emailAllUsers(request):
