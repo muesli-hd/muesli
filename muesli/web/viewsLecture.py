@@ -447,14 +447,11 @@ def emailTutors(request):
     form = LectureEmailTutors(request)
     
     if request.method == 'POST' and form.processPostData(request.POST):
-        assistants_to_be_cced = []
-        if form['copytoassistants'] == 0:
-            assistants_to_be_cced = [assistant.email for assistant in lecture.assistants]
         tutors = lecture.tutors
         message = Message(subject=form['subject'],
                 sender=request.user.email,
                 to=[t.email for t in tutors],
-                cc=assistants_to_be_cced,
+                cc=[assistant.email for assistant in lecture.assistants if form['copytoassistants'] == 0],
                 body=form['body'])
         if request.POST['attachments'] not in ['', None]:
             message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
