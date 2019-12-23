@@ -20,12 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-import mimetypes
-import chardet
-
 from email import encoders
-from email.message import Message
 from email.mime.audio import MIMEAudio
 from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
@@ -34,7 +29,11 @@ from email.mime.text import MIMEText
 from email.mime.message import MIMEMessage
 from email.utils import parseaddr, formataddr
 
+
+import mimetypes
 import smtplib
+import chardet
+
 
 testing = False
 
@@ -71,7 +70,6 @@ def createAttachment(filename, data):
 
 class Message:
     def __init__(self, subject=None, sender=None, to=None, cc=None, bcc=None, body=None):
-        COMMASPACE = ', '
         self.subject = subject
         self.sender = sender
         self.to = to or []
@@ -85,11 +83,14 @@ class Message:
         self.outer['Cc'] = ', '.join(self.cc)
         self.outer['Bcc'] = ', '.join(self.bcc)
         self.outer.attach(MIMEText(self.body, 'plain', 'utf-8'))
+
     @property
     def send_to(self):
         return set(self.to) | set(self.cc) | set(self.bcc)
+
     def as_string(self):
         return self.outer.as_string()
+
     def attach(self, filename, data=None):
         data = data or open(filename)
         self.outer.attach(createAttachment(filename, data))
