@@ -88,6 +88,7 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
   </tfoot>
 
 </table>
+<br>
 <input type="submit" value="Speichern"/>
 </form>
 
