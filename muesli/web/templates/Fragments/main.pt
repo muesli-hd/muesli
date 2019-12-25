@@ -2,22 +2,33 @@
 <metal:main metal:define-macro="main">
 <html>
 <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <!--
   Copyright 2011, Matthias Kümmerer <matthias@matthias-k.org>
 
   Released under the terms of the GNU GPL 3 or later
   -->
   <title>MÜSLI</title>
-  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/muesli.css')"></link>
+  <!-- <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/muesli.css')"></link> -->
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/fancybox/jquery.fancybox.css')"></link>
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/select2.css')"></link>
   <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+
 </head>
 <body onload="aprilFool()">
-<div id="header">
-  <h1>MÜSLI</h1>
-  <h2>Mathematisches Übungsgruppen- und Scheinlisten-Interface</h2>
-</div>
+<!-- <div id="header"> -->
+<!--   <h1>MÜSLI</h1> -->
+<!--   <h2>Mathematisches Übungsgruppen- und Scheinlisten-Interface</h2> -->
+<!-- </div> -->
 <metal:main metal:use-macro="templates('Fragments/menu.pt').macros['menu']" />
 
 <script>
@@ -79,26 +90,41 @@ function set_navigation(nav) {
 </script>
 <div id="history">
 </div>
-<div id="content">
+<div class="jumbotron jumbotron-fluid">
+  <div class="container">
+    <p tal:condition="request.session.peek_flash('errors')"
+    tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('errors'))"
+        class="alert alert-danger"></p>
+    <p tal:condition="request.session.peek_flash('messages')"
+       tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('messages'))"
+       class="alert alert-success"></p>
 
-<p tal:condition="request.session.peek_flash('errors')" tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('errors'))" class="error"></p>
-<p tal:condition="request.session.peek_flash('messages')" tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('messages'))" class="message"></p>
-
-<metal:main metal:use-macro="templates('Fragments/navigation.pt').macros['navigation']" />
-<metal:content define-slot="content" />
+    <metal:main metal:use-macro="templates('Fragments/navigation.pt').macros['navigation']" />
+    <metal:content define-slot="content" />
+  </div>
 </div>
 
-<div id="bottom">
-
-<div id="legal">
-<a href="https://www.uni-heidelberg.de/impressum.html">Impressum</a> <a href="/datenschutzerklaerung.html">Datenschutzerkl&auml;rung</a>
-</div>
-<div id="debug">
-loading time: ${'{0:.3f}s'.format(request.now() - request.time)}
-queries: ${request.queries}
-</div>
-
-</div>
+<footer class="footer mt-auto py-3">
+  <div class="container">
+    <div class="row">
+      <div class="text-muted col-sm text-left">
+        loading time: ${'{0:.3f}s'.format(request.now() - request.time)}
+        queries: ${request.queries}
+      </div>
+      <div class="text-muted col-sm text-right">
+        <a href="https://www.uni-heidelberg.de/impressum.html">Impressum</a> <a href="/datenschutzerklaerung.html">Datenschutzerkl&auml;rung</a>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
 </body>
 </html>
 </metal:main>

@@ -39,6 +39,9 @@
             <input type="file" tal:attributes="name field.name; size str(field.size); value field.value" />
             <input tal:condition="field.growable" type="button" tal:attributes="onclick 'javascript:fb_grow('+field.name+')'" value="Weitere" />
           </div>
+          <div tal:condition="field.type=='multifile'" tal:omit-tag="">
+            <input type="file" tal:attributes="name field.name; size str(field.size); value field.value" multiple/>
+          </div>
           <span tal:condition="field.comment and field.name not in form.errors">${field.comment}</span>
         </td>
         <td><span class="formerror" tal:condition="field.name in form.errors" tal:content="form.errors[field.name]"></span></td>
