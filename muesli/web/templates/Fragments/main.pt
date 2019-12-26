@@ -108,6 +108,13 @@ function set_navigation(nav) {
         loading time: ${'{0:.3f}s'.format(request.now() - request.time)}
         queries: ${request.queries}
       </div>
+
+      <div class="text-muted col-sm text-center">
+        <a role="button"
+           class="btn btn-info btn-sm mr-2"
+           tal:attributes="href request.route_path('changelog')">What's new?</a>
+      </div>
+
       <div class="text-muted col-sm text-right">
         <a href="https://www.uni-heidelberg.de/impressum.html">Impressum</a> <a href="/datenschutzerklaerung.html">Datenschutzerkl&auml;rung</a>
       </div>

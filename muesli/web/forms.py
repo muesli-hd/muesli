@@ -220,11 +220,6 @@ class ObjectForm(CSRFSecureForm):
             if name != 'csrf_token':
                 self.saveField(name)
 
-
-class UserLogin(formencode.Schema):
-    email = validators.String(not_empty=True)
-    password = validators.String(not_empty=True)
-
 class LectureEdit(ObjectForm):
     def __init__(self, request, lecture):
         self.request = request
@@ -704,6 +699,25 @@ class UserConfirm(ObjectForm):
             self, None, formfields, request, send='Registrierung abschließen',
             chained_validators=[validators.FieldsMatch('password', 'password_repeat')]
         )
+
+class UserLoginForm(ObjectForm):
+    def __init__(self, request):
+        formfields = [
+            FormField(
+                'email',
+                label='E-Mail', size=40,
+                required=True,
+                validator=validators.Email()
+
+            ),
+            PasswordField(
+                'password',
+                label='Passwort',
+                required=True,
+                validator=validators.String(not_empty=True)
+            ),
+        ]
+        ObjectForm.__init__(self, None, formfields, request, send='Anmelden')
 
 class UserChangeEmail(ObjectForm):
     def __init__(self, request, user):

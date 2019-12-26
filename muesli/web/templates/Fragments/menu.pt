@@ -17,6 +17,7 @@
           <li class="nav-item active">
             <a class="nav-link" tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a>
           </li>
+
         </ul>
 
         <div class="btn-toolbar" role="toolbar"
@@ -40,10 +41,12 @@
             tal:condition="not (request.userInfo.is_loggedin() or
                                 request.url == request.route_url('user_register'))"
             tal:attributes="href request.route_path('user_register')">Registrieren</a>
+
           <a role="button"
              class="btn btn-success btn-large nav-item"
              tal:attributes="href request.route_path('user_login')"
              tal:condition="not request.userInfo.is_loggedin()">Anmelden</a>
+
           <a role="button"
              class="btn btn-danger btn-large nav-item"
              tal:attributes="href request.route_path('user_logout')"
