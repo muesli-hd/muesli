@@ -9,10 +9,10 @@
 <div tal:define="fF lambda f: '%.1f' % f if f!=None else '-'" >
   <div tal:repeat="catexams exams_by_category" tal:omit-tag="">
     <h4>${catexams['name']}</h4>
-    <table>
+    <table class="table table-sm">
       <tr tal:repeat="exam catexams['exams']">
         <span tal:condition="not exam.results_hidden" tal:omit-tag="">
-        <th>
+        <th scope="row">
           <a tal:condition="exam.url" tal:attributes="href exam.url">${exam.name}</a>
           <span tal:condition="not exam.url" tal:omit-tag="">${exam.name}</span>
         </th>
@@ -23,7 +23,7 @@
         </span>
       </tr>
     <tr>
-      <th>Insgesamt</th>
+      <th scope="row">Insgesamt</th>
       <td colspan="2"><strong>${fF(catexams['sum'])}/${fF(catexams['max'])}</strong>
         <span tal:condition="catexams['max']>0">
          (${'%2.f' % (catexams['sum']/catexams['max']*100)}%)
