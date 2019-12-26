@@ -45,8 +45,8 @@ import collections
 
 @view_config(route_name='user_login', renderer='muesli.web:templates/user/login.pt')
 def login(request):
-    form = forms.FormValidator(forms.UserLogin())
-    if request.method == 'POST' and form.validate(request.POST):
+    form = forms.UserLoginForm(request)
+    if request.method == 'POST' and form.processPostData(request.POST):
         user = request.db.query(models.User).filter_by(email=form['email'].strip(), password=sha1(form['password'].encode('utf-8')).hexdigest()).first()
         if user is not None:
             security.remember(request, user.id)
