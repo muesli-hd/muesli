@@ -68,7 +68,8 @@ class DateString(formencode.FancyValidator):
 class FormField:
     def __init__(self, name, label="", type="text", options=None,
                  value=None, size=40, comment=None, validator=None,
-                 required=False, cols=64, rows=24, readonly=False):
+                 required=False, cols=64, rows=24, readonly=False,
+                 placeholder=None):
         self.name = name
         self.label = label
         self.type = type
@@ -81,6 +82,7 @@ class FormField:
         self.cols = cols
         self.rows = rows
         self.readonly = readonly
+        self.placeholder = placeholder
 
 class FileField(FormField):
     def __init__(self, name, growable=False, **kwargs):
@@ -245,7 +247,8 @@ class LectureEdit(ObjectForm):
                 type='text',
                 size=100,
                 value=lecture.name,
-                required=True
+                required=True,
+                placeholder="Lineare Algebra II"
             ),
             FormField(
                 'term',
@@ -259,7 +262,8 @@ class LectureEdit(ObjectForm):
                 label='Veranstaltungsnummer',
                 type='text',
                 size=20,
-                value=lecture.lsf_id
+                value=lecture.lsf_id,
+                placeholder="LSF#123456"
             ),
             FormField(
                 'lecturer',
@@ -272,7 +276,8 @@ class LectureEdit(ObjectForm):
                 'url',
                 label='Homepage',
                 size=100,
-                value=lecture.url
+                value=lecture.url,
+                placeholder="https://example.com"
             ),
             FormField(
                 'mode',
@@ -324,6 +329,7 @@ class LectureEdit(ObjectForm):
                    #required=True,
                    #))
         ObjectForm.__init__(self, lecture, formfields, request, send='Ändern')
+
     def saveField(self, fieldName):
         if fieldName == 'is_visible':
             self.obj.is_visible = valueToBool(self['is_visible'])
