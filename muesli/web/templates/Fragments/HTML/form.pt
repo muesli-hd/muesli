@@ -6,8 +6,8 @@
 
 <div class="container">
   <div tal:repeat="field form.formfields">
-    <div class="row" tal:condition="field.type!='hidden'" tal:omit-tag="">
-      <div class="input-group mb-3" tal:condition="field.type=='select'">
+    <div class="form-group" tal:condition="field.type != 'hidden'" tal:omit-tag="">
+      <div class="input-group mb-3" tal:condition="field.type == 'select'">
         <!-- DROPDOWN SELECTION -->
         <div class="input-group-prepend">
           <span class="input-group-text" id="select-prepend-text">${field.label}</span>
@@ -28,7 +28,7 @@
         </div>
       </div>
 
-      <div class="input-group mb-3" tal:condition="field.type=='text'">
+      <div class="input-group mb-3" tal:condition="field.type == 'text'">
         <!-- TEXT INPUT -->
         <div class="input-group-prepend">
           <span class="input-group-text" id="text-input-prepend-text">${field.label}</span>
@@ -40,7 +40,7 @@
         placeholder ('z.B. ' + field.placeholder) if field.placeholder else None;">
       </div>
 
-      <div class="input-group mb-3" tal:condition="field.type=='password'">
+      <div class="input-group mb-3" tal:condition="field.type == 'password'">
         <!-- PASSWORD INPUT -->
         <div class="input-group-prepend">
           <span class="input-group-text" id="password-input-prepend-text">${field.label}</span>
@@ -49,11 +49,6 @@
         aria-describedby="password-input-prepend-text" tal:attributes="
         name field.name; size str(field.size); value field.value;
         aria-label field.name; readonly 'readonly' if field.readonly else None;">
-      </div>
-
-      <div tal:condition="field.type=='hidden'" tal:omit-tag="">
-        <!-- HIDDEN INPUT -->
-        <input type="hidden" tal:attributes="name field.name; size str(field.size); value field.value; readonly 'readonly' if field.readonly else None"/>
       </div>
 
       <div tal:condition="field.type=='textarea'" tal:omit-tag="">
@@ -72,13 +67,18 @@
         <input type="file" tal:attributes="name field.name; size str(field.size); value field.value" multiple/>
       </div>
 
+
       <div class="alert alert-danger" tal:condition="field.name in form.errors"
           tal:content="'&uarr; ' + form.errors[field.name]">
       </div>
     </div>
+
+    <div tal:condition="field.type == 'hidden'" tal:omit-tag="">
+      <!-- HIDDEN INPUT -->
+      <input type="hidden" tal:attributes="name field.name; size str(field.size); value field.value; readonly 'readonly' if field.readonly else None"/>
+    </div>
+
   </div>
-  <div class="row">
-    <input role="button" class="btn btn-primary" type="submit" tal:attributes="value form.send" />
-  </div>
+  <input role="button" class="btn btn-primary" type="submit" tal:attributes="value form.send" />
 </div>
 </metal:main>
