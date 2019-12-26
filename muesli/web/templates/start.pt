@@ -21,9 +21,18 @@
 <h2>Übersicht Ihrer Veranstaltungen in diesem Semester</h2>
 
 <div tal:omit-tag="" tal:condition="tutorials_as_tutor">
-  <h3>Eigene Übungsgruppen (als Übungsleiter)</h3>
-  <table>
-    <tr><th>Semester</th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th></th></tr>
+  <h3>
+    Eigene Übungsgruppen
+    <small class="text-muted">(als Übungsleiter)</small>
+  </h3>
+  <table class="table">
+    <thead>
+      <th scope="col">Semester</th>
+      <th scope="col">Vorlesung</th>
+      <th scope="col">Zeit</th>
+      <th scope="col">Raum</th>
+      <th scope="col"></th>
+    </thead>
     <tr tal:repeat="tutorial tutorials_as_tutor">
       <td>${tutorial.lecture.term}</td>
       <td><a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
@@ -31,8 +40,11 @@
       </a></td>
       <td>${tutorial.time}</td>
       <td>${tutorial.place}</td>
-      <td><a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">
-         [&nbsp;Details&nbsp;]
+      <td>
+          <a role="button"
+             class="btn btn-info"
+             tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">
+         Details
          </a>
           <a tal:define="multi_tutorials request.user.prepareMultiTutorials()"
             tal:condition="len(multi_tutorials[tutorial.lecture.id])&gt; 1"
@@ -46,8 +58,16 @@
 
 <div tal:condition="tutorials">
   <h3>Feste Eintragungen in Übungsgruppen</h3>
-  <table>
-    <tr><th></th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th>Übungsleiter</th><th></th><th></th></tr>
+  <table class="table">
+    <thead>
+      <th scope="col"></th>
+      <th scope="col">Vorlesung</th>
+      <th scope="col">Zeit</th>
+      <th scope="col">Raum</th>
+      <th scope="col">Übungsleiter</th>
+      <th scope="col"></th>
+      <th scope="col"></th>
+    </thead>
 
     <tr tal:repeat="tutorial tutorials">
       <td>${tutorial.lecture.term}</td>
@@ -56,10 +76,17 @@
       <td>${tutorial.place}</td>
       <td>
         <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a></td>
-      <td><a tal:attributes="href request.route_path('lecture_view_points', lecture_id=tutorial.lecture.id)">[&nbsp;Details&nbsp;]</a></td>
       <td>
-        <a tal:condition="tutorial.lecture.mode != 'static'" onclick="return confirm_unsubscribe()"
-           tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">[&nbsp;Austreten&nbsp;]</a>
+        <a role="button"
+           class="btn btn-info"
+          tal:attributes="href request.route_path('lecture_view_points',
+          lecture_id=tutorial.lecture.id)">Details</a></td>
+      <td>
+        <a role="button"
+           class="btn btn-primary"
+           tal:condition="tutorial.lecture.mode != 'static'" onclick="return confirm_unsubscribe()"
+           tal:attributes="href request.route_path('tutorial_unsubscribe',
+           tutorial_id=tutorial.id)">Austreten</a>
       </td>
     </tr>
   </table>
@@ -67,12 +94,12 @@
 
 <div tal:condition="time_preferences">
 <h3>Vorläufige Eintragungen in Übungsgruppen</h3>
-<table>
-  <tr>
-    <th>Vorlesung</th>
-    <th>Zeit</th>
-    <th>Präferenz</th>
-  </tr>
+<table class="table">
+  <thead>
+    <th scope="col">Vorlesung</th>
+    <th scope="col">Zeit</th>
+    <th scope="col">Präferenz</th>
+  </thead>
   <div tal:omit-tag="" tal:repeat="lecture_id time_preferences">
     <metal:main
       metal:use-macro="templates('Fragments/Format/time_preferences_table.pt').macros['time_preferences_table']" />
