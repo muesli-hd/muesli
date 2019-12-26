@@ -258,6 +258,7 @@ class Edit:
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
         form = LectureEdit(self.request, lecture)
         assistants = self.db.query(models.User).filter(models.User.is_assistant==1).order_by(models.User.last_name).all()
+
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
             form.saveValues()
             self.request.db.commit()
