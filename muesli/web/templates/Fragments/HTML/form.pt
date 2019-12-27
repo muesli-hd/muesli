@@ -68,7 +68,7 @@
       </div>
 
 
-      <div class="alert alert-danger" tal:condition="field.name in form.errors"
+      <div name="formerror" class="alert alert-danger" tal:condition="field.name in form.errors"
           tal:content="'&uarr; ' + form.errors[field.name]">
       </div>
     </div>
