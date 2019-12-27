@@ -46,7 +46,7 @@ import traceback
 @view_config(route_name='start', renderer='muesli.web:templates/start.pt')
 def start(request):
     if not request.user:
-        return HTTPFound(location = request.route_url('start'))
+        return HTTPFound(location=request.route_url('index'))
     tutorials_as_tutor = request.user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
     tutorials = request.user.tutorials.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
     lectures_as_assistant = request.user.lectures_as_assistant

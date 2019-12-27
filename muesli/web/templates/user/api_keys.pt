@@ -31,14 +31,14 @@
     Hier können Sie ihre aktuellen API Keys verwalten.
     </p>
 
-    <table class="colored">
+    <table class="table">
     <thead>
       <tr>
-        <th> ID </th>
-        <th> Ablaufdatum </th>
-        <th> Beschreibung </th>
-        <th> Entfernen </th>
-        <th tal:condition="freshtoken"></th>
+        <th scope="col"> ID </th>
+        <th scope="col"> Ablaufdatum </th>
+        <th scope="col"> Beschreibung </th>
+        <th scope="col"> Entfernen </th>
+        <th scope="col" tal:condition="freshtoken"></th>
       </tr>
     <tbody>
       <tr tal:condition="keys" tal:repeat="key keys">
@@ -47,10 +47,9 @@
         </td>
         <td>
             ${key.expires.strftime("%d. %B %Y, %H:%M Uhr")}
-
         </td>
 
-        <td tal:define="italic 'font-style: italic !important;;font-size: 0.9em;;'" tal:attributes="style italic" tal:condition="not key.description">
+        <td class="font-italic" tal:condition="not key.description">
             Keine Beschreibung
         </td>
 
@@ -59,11 +58,11 @@
         </td>
         <td>
           <form method="post" tal:attributes="action request.route_path('remove_api_key',key_id=key.id)">
-            <input type="submit" value="Entfernen"/>
+            <input role="button" class="btn btn-danger btn-sm" type="submit" value="Entfernen"/>
           </form>
         </td>
         <td tal:condition="freshtoken">
-          <button tal:condition="key.id == max([e.id for e in keys])" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
+          <button role="button" class="btn btn-secondary btn-sm" tal:condition="key.id == max([e.id for e in keys])" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
         </td>
       </tr>
     </tbody>
