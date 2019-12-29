@@ -1132,3 +1132,15 @@ class GradingEdit(ObjectForm):
             ),
         ]
         ObjectForm.__init__(self, grading, formfields, request, send='Ändern')
+
+class TutorLectureSignIn(ObjectForm):
+    def __init__(self, request):
+        formfields = [
+            FormField(
+                'password',
+                label='Passwort für Übungsleiter',
+                size=40,
+                comment='Bei leerem Passwort keine Anmeldung als Übungsleiter möglich',
+            )
+        ]
+        ObjectForm.__init__(self, None, formfields, request, send='Anmelden')

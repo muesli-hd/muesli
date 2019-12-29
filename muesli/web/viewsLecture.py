@@ -85,10 +85,13 @@ class View:
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
         times = lecture.prepareTimePreferences(user=self.request.user)
         subscribed_tutorial = self.request.user.tutorials.filter(LectureStudent.lecture_id == self.lecture_id).first()
+        form = TutorLectureSignIn(self.request)
+
         return {'lecture': lecture,
                 'subscribed_tutorial': subscribed_tutorial,
                 'times': times,
-                'prefs': utils.preferences}
+                'prefs': utils.preferences,
+                'form': form}
 
 @view_config(route_name='lecture_add_exam', renderer='muesli.web:templates/lecture/add_exam.pt', context=LectureContext, permission='edit')
 class AddExam:
