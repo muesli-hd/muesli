@@ -33,39 +33,68 @@
     Zu dieser Vorlesung werden die folgenden Übungsgruppen angeboten:
     </p>
 
-    <table>
-      <tr tal:condition='lecture.type == "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Kommentar</th><th></th><th></th></tr>
-      <tr tal:condition='lecture.type != "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Titel</th><th></th><th></th></tr>
+    <table class="table">
+      <thead tal:condition='lecture.type == "lecture"'>
+        <th scope="col">Zeit</th>
+        <th scope="col">Raum</th>
+        <th scope="col">Auslastung</th>
+        <th scope="col">Tutor</th>
+        <th scope="col">Kommentar</th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+      </thead>
 
-      <tr tal:repeat='tutorial lecture.tutorials'>
-        <td>${tutorial.time}</td>
-        <td>${tutorial.place}</td>
-        <td>
-          <metal:main metal:use-macro="templates('Fragments/HTML/tutorial_occupancy.pt').macros['tutorial_occupancy']" />
-        </td>
-        <td>
-          <span tal:omit-tag='' tal:condition='tutorial.tutor'>
-            ${tutorial.tutor.first_name} ${tutorial.tutor.last_name}
-          </span>
-          <span tal:omit-tag='' tal:condition="not tutorial.tutor and request.permissionInfo.has_permission('take_tutorial')"> <!-- TODO: and (is assistant or is_tutor) -->
-            <a tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
-          </span>
-        </td>
-        <td>${tutorial.comment}</td>
-        <td tal:condition="request.permissionInfo.has_permission('view_tutorials')">
-          <a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">Details</a>
-        </td>
-        <td>
-          <a tal:condition="(tutorial.student_count &lt; tutorial.max_students) and tutorial != subscribed_tutorial"
-              tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)">
-            ${'Beitreten' if not subscribed_tutorial else 'Wechseln'}
-          </a>
-          <a tal:condition="tutorial == subscribed_tutorial" onclick="return confirm_unsubscribe()"
-             tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">
-            Austreten
-          </a>
-        </td>
-      </tr>
+      <thead tal:condition='lecture.type != "lecture"'>
+        <th scope="col">Zeit</th>
+        <th scope="col">Raum</th>
+        <th scope="col">Auslastung</th>
+        <th scope="col">Tutor</th>
+        <th scope="col">Titel</th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+      </thead>
+
+      <tbody>
+        <tr tal:repeat='tutorial lecture.tutorials'>
+          <td>${tutorial.time}</td>
+          <td>${tutorial.place}</td>
+          <td>
+            <metal:main metal:use-macro="templates('Fragments/HTML/tutorial_occupancy.pt').macros['tutorial_occupancy']" />
+          </td>
+          <td>
+            <span tal:omit-tag='' tal:condition='tutorial.tutor'>
+              ${tutorial.tutor.first_name} ${tutorial.tutor.last_name}
+            </span>
+            <span tal:omit-tag='' tal:condition="not tutorial.tutor and request.permissionInfo.has_permission('take_tutorial')"> <!-- TODO: and (is assistant or is_tutor) -->
+              <a tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
+            </span>
+          </td>
+          <td tal:condition="tutorial.comment">${tutorial.comment}</td>
+          <td class="font-italic" tal:condition="not tutorial.comment">Keine Beschreibung</td>
+          <td tal:condition="request.permissionInfo.has_permission('view_tutorials')">
+            <a role="button"
+               class="btn-sm btn-info"
+              tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">
+              Details
+            </a>
+          </td>
+          <td>
+            <a role="button"
+               class="btn-sm btn-primary"
+               tal:condition="(tutorial.student_count &lt; tutorial.max_students) and tutorial != subscribed_tutorial"
+               tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)">
+              ${'Beitreten' if not subscribed_tutorial else 'Wechseln'}
+            </a>
+            <a role="button"
+               class="btn-sm btn-danger"
+               tal:condition="tutorial == subscribed_tutorial"
+               tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">
+              Austreten
+            </a>
+          </td>
+        </tr>
+      </tbody>
+>>>>>>> styled some tables and moved the tutor SignIn process to extra form
    </table>
   </div>
 
@@ -84,13 +113,13 @@
       <th>Verf. Plätze</th>
       <th>Präferenz</th>
     </tr>
-    <tr tal:repeat='(count,time) enumerate(times,1)'>
+    <tr tal:repeat='(count, time) enumerate(times, 1)'>
       <td>${time['time']}</td>
       <td>${time['max_students']}</td>
       <td>
         <input type='hidden' name="time-${count}" value="${str(time['time'])}" />
         <select name='pref-${count}'>
-          <option tal:repeat="pref prefs" value="${pref['penalty']}" tal:attributes="selected 'selected' if pref['penalty']==time['penalty'] else None">
+          <option tal:repeat="pref prefs" value="${pref['penalty']}" tal:attributes="selected 'selected' if pref['penalty'] == time['penalty'] else None">
             ${pref['name']}
           </option>
         </select>
@@ -115,21 +144,8 @@
   </p>
 
   <form method="post" tal:attributes="action request.route_path('lecture_add_tutor', lecture_id=lecture.id)">
-  <table>
-    <tr>
-      <td>Passwort:</td>
-      <td><input type="text" size="30" name="password"/></td>
-    </tr>
-    <tr>
-      <td></td>
-      <td><input type="submit" value="Anmelden"/></td>
-    </tr>
-  </table>
-  </form>
-
+      <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
   </div>
-
-
 
   </metal:main>
 </metal:main>

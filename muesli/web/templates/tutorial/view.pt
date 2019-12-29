@@ -64,33 +64,32 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
 
 <h3>Teilnehmer</h3>
 
-<table class="colored">
+<span tal:condition="not students" class="font-italic">Keine Teilnehmer eingetragen</span>
+<table class="table" tal:condition="students">
+  <thead>
+    <tr>
+      <th scope="col">Name (E-Mail)</th>
+      <th scope="col">Studiengang</th>
+      <th scope="col" tal:condition="request.permissionInfo.has_permission('edit')">Verschieben</th>
+      <th scope="col">Entfernen</th>
+    </tr>
+  </thead>
 
-<thead>
-  <tr>
-    <th>Name (E-Mail)</th>
-    <th>Studiengang</th>
-    <th tal:condition="request.permissionInfo.has_permission('edit')">Verschieben</th>
-    <th>Entfernen</th>
-  </tr>
-</thead>
+  <tbody>
+    <tr tal:repeat="student students">
+      <td><a tal:attributes="href 'mailto:'+student.email">${student.name()}</a></td>
+      <td>${student.subject}</td>
+      <td tal:condition="request.permissionInfo.has_permission('edit')">
+        <metal:main metal:use-macro="templates('Fragments/HTML/move_student.pt').macros['movestudentmacro']" />
+      </td>
+      <td>
+        <form method="post" tal:attributes="action request.route_path('tutorial_remove_student', tutorial_ids=tutorial_ids, student_id=student.id)">
+          <input role="button" class="btn btn-danger" type="submit" value="Entfernen"/>
+        </form>
+      </td>
+    </tr>
 
-<tbody>
-  <tr tal:repeat="student students">
-    <td><a tal:attributes="href 'mailto:'+student.email">${student.name()}</a></td>
-    <td>${student.subject}</td>
-    <td tal:condition="request.permissionInfo.has_permission('edit')">
-      <metal:main metal:use-macro="templates('Fragments/HTML/move_student.pt').macros['movestudentmacro']" />
-    </td>
-    <td>
-      <form method="post" tal:attributes="action request.route_path('tutorial_remove_student', tutorial_ids=tutorial_ids, student_id=student.id)">
-        <input type="submit" value="Entfernen"/>
-      </form>
-    </td>
-  </tr>
-
-</tbody>
-
+  </tbody>
 </table>
   </metal:main>
 </metal:main>
