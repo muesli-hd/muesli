@@ -1,57 +1,57 @@
 <metal:main metal:define-macro="menu">
-   <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-      <a class="display-1 navbar-brand" href="#">MÜSLI</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarCollapse">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" tal:attributes="href request.route_path('start')">Übersicht</a>
-          </li>
+ <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="display-1 navbar-brand" href="#">MÜSLI</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" tal:attributes="href request.route_path('start')">Übersicht</a>
+        </li>
 
-          <li class="nav-item active" tal:condition="request.userInfo.is_admin()">
-            <a class="nav-link" tal:attributes="href request.route_path('admin')">Administration</a>
-          </li>
+        <li class="nav-item active" tal:condition="request.userInfo.is_admin()">
+          <a class="nav-link" tal:attributes="href request.route_path('admin')">Administration</a>
+        </li>
 
-          <li class="nav-item active">
-            <a class="nav-link" tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a>
-          </li>
+        <li class="nav-item active">
+          <a class="nav-link" tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a>
+        </li>
 
-        </ul>
+      </ul>
 
-        <div class="btn-toolbar" role="toolbar"
-             aria-label="An/Abmelde/Registrierfunktionen">
+      <div class="btn-toolbar" role="toolbar"
+           aria-label="An/Abmelde/Registrierfunktionen">
 
-          <div class="dropdown nav-item mr-2"
-              tal:condition="request.userInfo.is_loggedin()">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Nutzereinstellungen
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" tal:attributes="href request.route_path('user_update')">Angaben ergänzen</a>
-              <a class="dropdown-item" tal:attributes="href request.route_path('user_change_email')">E-Mail ändern</a>
-              <a class="dropdown-item" tal:attributes="href request.route_path('user_change_password')">Passwort ändern</a>
-              <a class="dropdown-item" tal:attributes="href request.route_path('user_api_keys')">API</a>
-            </div>
+        <div class="dropdown nav-item mr-2"
+            tal:condition="request.userInfo.is_loggedin()">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Nutzereinstellungen
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" tal:attributes="href request.route_path('user_update')">Angaben ergänzen</a>
+            <a class="dropdown-item" tal:attributes="href request.route_path('user_change_email')">E-Mail ändern</a>
+            <a class="dropdown-item" tal:attributes="href request.route_path('user_change_password')">Passwort ändern</a>
+            <a class="dropdown-item" tal:attributes="href request.route_path('user_api_keys')">API</a>
           </div>
-
-          <a role="button"
-             class="btn btn-primary btn-large nav-item mr-2"
-            tal:condition="not (request.userInfo.is_loggedin() or
-                                request.url == request.route_url('user_register'))"
-            tal:attributes="href request.route_path('user_register')">Registrieren</a>
-
-          <a role="button"
-             class="btn btn-success btn-large nav-item"
-             tal:attributes="href request.route_path('user_login')"
-             tal:condition="not request.userInfo.is_loggedin()">Anmelden</a>
-
-          <a role="button"
-             class="btn btn-danger btn-large nav-item"
-             tal:attributes="href request.route_path('user_logout')"
-             tal:condition="request.userInfo.is_loggedin()">Abmelden</a>
         </div>
+
+        <a role="button"
+           class="btn btn-primary btn-large nav-item mr-2"
+          tal:condition="not (request.userInfo.is_loggedin() or
+                              request.url == request.route_url('user_register'))"
+          tal:attributes="href request.route_path('user_register')">Registrieren</a>
+
+        <a role="button"
+           class="btn btn-success btn-large nav-item"
+           tal:attributes="href request.route_path('user_login')"
+           tal:condition="not request.userInfo.is_loggedin()">Anmelden</a>
+
+        <a role="button"
+           class="btn btn-danger btn-large nav-item"
+           tal:attributes="href request.route_path('user_logout')"
+           tal:condition="request.userInfo.is_loggedin()">Abmelden</a>
       </div>
-    </nav>
+    </div>
+  </nav>
 </metal:main>
