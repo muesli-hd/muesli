@@ -1,6 +1,14 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
+
+<script>
+  function confirm_unsubscribe() {
+    return confirm("Wollen Sie wirklich diese Übungsgruppe verlassen?");
+  }
+</script>
+
+
   <h2>${lecture.name}</h2>
 
   <p tal:condition="lecture.url">
@@ -49,10 +57,10 @@
         </td>
         <td>
           <a tal:condition="(tutorial.student_count &lt; tutorial.max_students) and tutorial != subscribed_tutorial"
-             tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)">
+              tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)">
             ${'Beitreten' if not subscribed_tutorial else 'Wechseln'}
           </a>
-          <a tal:condition="tutorial == subscribed_tutorial"
+          <a tal:condition="tutorial == subscribed_tutorial" onclick="return confirm_unsubscribe()"
              tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">
             Austreten
           </a>
