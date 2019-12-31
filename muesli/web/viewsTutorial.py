@@ -114,7 +114,7 @@ class Add:
             form.obj = tutorial
             form.saveValues()
             self.request.db.commit()
-            form.message = "Neue Übungsgruppe angelegt."
+            self.request.session.flash('Neue Übungsgruppe angelegt.', queue='messages')
         return {'lecture': lecture,
                 'names': self.request.config['lecture_types'][lecture.type],
                 'form': form,

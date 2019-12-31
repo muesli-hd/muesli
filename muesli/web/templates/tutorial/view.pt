@@ -66,7 +66,7 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
 
 <span tal:condition="not students" class="font-italic">Keine Teilnehmer eingetragen</span>
 <table class="table" tal:condition="students">
-  <thead>
+  <thead class="thead-dark">
     <tr>
       <th scope="col">Name (E-Mail)</th>
       <th scope="col">Studiengang</th>
@@ -77,7 +77,11 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
 
   <tbody>
     <tr tal:repeat="student students">
-      <td><a tal:attributes="href 'mailto:'+student.email">${student.name()}</a></td>
+      <td>
+        <a tal:attributes="href 'mailto:'+student.email">
+          ${student.name()}
+        </a>
+      </td>
       <td>${student.subject}</td>
       <td tal:condition="request.permissionInfo.has_permission('edit')">
         <metal:main metal:use-macro="templates('Fragments/HTML/move_student.pt').macros['movestudentmacro']" />
