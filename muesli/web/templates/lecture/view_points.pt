@@ -4,26 +4,34 @@
 
 <h2>Resultate für ${lecture.name}</h2>
 
-<h3>Punkte</h3>
-
-<div tal:define="fF lambda f: '%.1f' % f if f!=None else '-'" >
+<div tal:define="fF lambda f: '%.1f' % f if f != None else '-'" >
   <div tal:repeat="catexams exams_by_category" tal:omit-tag="">
-    <h4>${catexams['name']}</h4>
-    <table class="table table-sm">
+    <table class="table table-fluid table-striped table-sm" style="width: auto !important">
+      <thead class="thead-dark">
+        <th scope="col">
+          ${catexams['name']}
+        </th>
+        <!-- The hack used below makes the tablehead fit above all further cols -->
+        <th scope="col" tal:attributes="colspan 1+max([len(e.exercises) for e in catexams['exams']])">
+          Punkte
+        </th>
+      </thead>
       <tr tal:repeat="exam catexams['exams']">
         <span tal:condition="not exam.results_hidden" tal:omit-tag="">
-        <th scope="row">
+        <th scope="col">
           <a tal:condition="exam.url" tal:attributes="href exam.url">${exam.name}</a>
           <span tal:condition="not exam.url" tal:omit-tag="">${exam.name}</span>
         </th>
-        <td><strong>${fF(results[exam.id]['sum'])}/${fF(exam.getMaxpoints())}</strong></td>
+        <td>
+          <strong>${fF(results[exam.id]['sum'])}/${fF(exam.getMaxpoints())}</strong>
+        </td>
         <td tal:repeat="e exam.exercises">
           ${fF(results[exam.id][e.id]['points'])}/${fF(results[exam.id][e.id]['exercise'].maxpoints)}
         </td>
         </span>
       </tr>
     <tr>
-      <th scope="row">Insgesamt</th>
+      <th scope="row">Insgesamt: </th>
       <td colspan="2"><strong>${fF(catexams['sum'])}/${fF(catexams['max'])}</strong>
         <span tal:condition="catexams['max']>0">
          (${'%2.f' % (catexams['sum']/catexams['max']*100)}%)
