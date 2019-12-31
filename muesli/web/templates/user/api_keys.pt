@@ -27,47 +27,12 @@
     </p>
     <h2>API Keys verwalten</h2>
 
+    <metal:main metal:use-macro="templates('Fragments/api_keys_table.pt').macros['api_key_table']" />
+
     <p>
     Hier können Sie ihre aktuellen API Keys verwalten.
     </p>
 
-    <table class="table">
-    <thead>
-      <tr>
-        <th scope="col"> ID </th>
-        <th scope="col"> Ablaufdatum </th>
-        <th scope="col"> Beschreibung </th>
-        <th scope="col"> Entfernen </th>
-        <th scope="col" tal:condition="freshtoken"></th>
-      </tr>
-    <tbody>
-      <tr tal:condition="keys" tal:repeat="key keys">
-        <td style="font-family:monospace;font-size:1.1em;">
-            ${key.id}
-        </td>
-        <td>
-            ${key.expires.strftime("%d. %B %Y, %H:%M Uhr")}
-        </td>
-
-        <td class="font-italic" tal:condition="not key.description">
-            Keine Beschreibung
-        </td>
-
-        <td tal:condition="key.description">
-            ${key.description}
-        </td>
-        <td>
-          <form method="post" tal:attributes="action request.route_path('remove_api_key',key_id=key.id)">
-            <input role="button" class="btn btn-danger btn-sm" type="submit" value="Entfernen"/>
-          </form>
-        </td>
-        <td tal:condition="freshtoken">
-          <button role="button" class="btn btn-secondary btn-sm" tal:condition="key.id == max([e.id for e in keys])" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
-        </td>
-      </tr>
-    </tbody>
-    </thead>
-    </table>
     <br>
     <form action="/user/api_keys" tal:attributes="action request.route_path('user_api_keys')" method="POST">
       <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
