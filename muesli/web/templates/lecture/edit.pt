@@ -5,35 +5,41 @@
 
 
 <form action="/lecture/edit" tal:attributes="action request.route_path('lecture_edit', lecture_id=lecture.id)" method="POST">
-<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+  <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
 
 <div tal:condition="request.permissionInfo.has_permission('change_assistant')">
   <form tal:attributes="action request.route_path('lecture_change_assistants', lecture_id=lecture.id)" method="POST">
-  <ul>
-    <li tal:repeat="assistant lecture.assistants">
-       <select tal:attributes="name 'assistant-%i' % assistant.id">
+  <div class="form-group">
+    <div class="input-group mb-2" tal:repeat="assistant lecture.assistants">
+       <select class="custom-select" style="width: auto !important" tal:attributes="name 'assistant-%i' % assistant.id">
          <span tal:repeat="assistant2 assistants" tal:omit-tag="">
-         <option tal:attributes="value assistant2.id; selected 'selected' if assistant.id==assistant2.id else None">
+         <option tal:attributes="value assistant2.id; selected 'selected' if assistant.id == assistant2.id else None">
            ${assistant2}
          </option>
          </span>
        </select>
-       <input type="submit" value="Ändern" tal:attributes="name 'change-%i' % assistant.id" />
-       <input type="submit" value="Löschen" tal:attributes="name 'remove-%i' % assistant.id" />
-    </li>
-    <li>
-       <select name="new-assistant">
+       <div class="input-group-append">
+         <input class="btn btn-primary" role="button" type="submit" value="Ändern" tal:attributes="name 'change-%i' % assistant.id" />
+       </div>
+       <div class="input-group-append">
+         <input class="btn btn-danger" role="button" type="submit" value="Löschen" tal:attributes="name 'remove-%i' % assistant.id" />
+       </div>
+    </div>
+    <div class="input-group">
+       <select class="custom-select" name="new-assistant">
          <option value="None" selected="selected">---</option>
          <span tal:repeat="assistant2 assistants" tal:omit-tag="">
-         <option tal:attributes="value assistant2.id">
-           ${assistant2}
-         </option>
+           <option tal:attributes="value assistant2.id">
+             ${assistant2}
+           </option>
          </span>
        </select>
-       <input type="submit" value="Hinzufügen" name="add-assistant" />
-    </li>
-  </ul>
+       <div class="input-group-append">
+         <input class="btn btn-success" role="button" type="submit" value="Hinzufügen" name="add-assistant" />
+       </div>
+    </div>
+  </div>
   </form>
 </div>
 <div tal:condition="not request.permissionInfo.has_permission('change_assistant')">
@@ -134,10 +140,16 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   </tbody>
 </table>
 
-<a role="button" class="btn btn-primary" tal:attributes="href request.route_path('tutorial_add', lecture_id = lecture.id)">Neue ${names['tutorial']} hinzufügen</a>
-<a role="button" class="btn btn-primary" tal:attributes="href request.route_path('lecture_switch_students', lecture_id = lecture.id)">Übungsgruppen von Studenten tauschen</a>
-
-<br>
+<div class="mb-3">
+  <a role="button" class="btn btn-primary"
+     tal:attributes="href request.route_path('tutorial_add', lecture_id = lecture.id)">
+    Neue ${names['tutorial']} hinzufügen
+  </a>
+  <a role="button" class="btn btn-primary"
+     tal:attributes="href request.route_path('lecture_switch_students', lecture_id = lecture.id)">
+    Übungsgruppen von Studenten tauschen
+  </a>
+</div>
 
 <h3>
   ${names['tutors']}
@@ -174,24 +186,28 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
 </div>
 
 
-<form method="get" tal:attributes="action request.route_path('exam_correlation')">
-  <select name="source1">
-    <option tal:repeat="exam lecture.exams" tal:attributes="value 'exam_%s' % exam.id">
-      ${exam.name}
-    </option>
-    <option tal:attributes="value 'lecture_%s' % lecture.id">
-      Summe Übungszettel
-    </option>
-  </select>
-  <select name="source2">
-    <option tal:repeat="exam lecture.exams" tal:attributes="value 'exam_%s' % exam.id">
-      ${exam.name}
-    </option>
-    <option tal:attributes="value 'lecture_%s' % lecture.id">
-      Summe Übungszettel
-    </option>
-  </select>
-  <input type="submit" value="Korrelation"/>
+<form class="form-inline" method="get" tal:attributes="action request.route_path('exam_correlation')">
+  <div class="form-group pr-1">
+    <select class="custom-select" name="source1">
+      <option tal:repeat="exam lecture.exams" tal:attributes="value 'exam_%s' % exam.id">
+        ${exam.name}
+      </option>
+      <option tal:attributes="value 'lecture_%s' % lecture.id">
+        Summe Übungszettel
+      </option>
+    </select>
+  </div>
+  <div class="form-group pr-1">
+    <select class="custom-select" name="source2">
+      <option tal:repeat="exam lecture.exams" tal:attributes="value 'exam_%s' % exam.id">
+        ${exam.name}
+      </option>
+      <option tal:attributes="value 'lecture_%s' % lecture.id">
+        Summe Übungszettel
+      </option>
+    </select>
+  </div>
+  <input role="button" class="btn btn-primary" type="submit" value="Korrelation"/>
 </form>
 
 <h3>
