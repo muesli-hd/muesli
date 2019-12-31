@@ -10,7 +10,7 @@
       <div class="input-group mb-3" tal:condition="field.type == 'select'">
         <!-- DROPDOWN SELECTION -->
         <div class="input-group-prepend">
-          <span class="input-group-text" id="select-prepend-text">${field.label}</span>
+          <span class="input-group-text font-weight-bold" id="select-prepend-text">${field.label}</span>
         </div>
         <select class="custom-select" tal:attributes="name field.name; disabled 'disabled' if field.readonly else None">
           <option tal:repeat="option field.options"
@@ -20,18 +20,25 @@
         </select>
       </div>
 
-      <div class="custom-control custom-radio custom-control-inline" tal:condition="field.type == 'radio'" tal:omit-tag="">
+      <div class="form-group row" tal:condition="field.type == 'radio'" tal:omit-tag="">
         <!-- RADIO BUTTONS -->
-        <div tal:repeat="option field.options" class="custom-control custom-radio custom-control-inline">
-          <input type="radio" class="custom-control-input" tal:attributes="name field.name; value str(option[0]); id field.name+'_'+str(option[0]); checked 'checked' if option[0]==field.value else None; readonly 'readonly' if field.readonly else None">
-          <label class="custom-control-label" tal:attributes="for field.name+'_'+str(option[0])">${option[1]}</label>
+        <div class="col">
+          <span class="font-weight-bold" id="radio-prepend-text">${field.label}</span>
+        </div>
+        <div class="col">
+          <div class="custom-control">
+            <div tal:repeat="option field.options" class="custom-control custom-radio custom-control-inline">
+              <input aria-describedby="radio-prepend-text" type="radio" class="custom-control-input" tal:attributes="name field.name; value str(option[0]); id field.name+'_'+str(option[0]); checked 'checked' if option[0]==field.value else None; readonly 'readonly' if field.readonly else None">
+              <label class="custom-control-label" tal:attributes="for field.name+'_'+str(option[0])">${option[1]}</label>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="input-group mb-3" tal:condition="field.type == 'text'">
         <!-- TEXT INPUT -->
         <div class="input-group-prepend">
-          <span class="input-group-text" id="text-input-prepend-text">${field.label}</span>
+          <span class="input-group-text font-weight-bold" id="text-input-prepend-text">${field.label}</span>
         </div>
         <input type="text" class="form-control"
         aria-describedby="text-input-prepend-text" tal:attributes="
@@ -43,7 +50,7 @@
       <div class="input-group mb-3" tal:condition="field.type == 'password'">
         <!-- PASSWORD INPUT -->
         <div class="input-group-prepend">
-          <span class="input-group-text" id="password-input-prepend-text">${field.label}</span>
+          <span class="input-group-text font-weight-bold" id="password-input-prepend-text">${field.label}</span>
         </div>
         <input type="password" class="form-control"
         aria-describedby="password-input-prepend-text" tal:attributes="
@@ -53,13 +60,17 @@
 
       <div tal:condition="field.type=='textarea'" tal:omit-tag="">
         <!-- TEXTAREA -->
-        <textarea tal:attributes="name field.name; cols str(field.cols); rows str(field.rows); readonly 'readonly' if field.readonly else None" tal:content="field.value"></textarea>
+        <textarea class="form-control"
+          tal:attributes="name field.name; cols str(field.cols); rows str(field.rows); readonly 'readonly' if field.readonly else None" 
+          tal:content="field.value"></textarea>
       </div>
 
       <div tal:condition="field.type=='file'" tal:omit-tag="">
         <!-- FILE SELECTION -->
-        <input type="file" tal:attributes="name field.name; size str(field.size); value field.value" />
-        <input tal:condition="field.growable" type="button" tal:attributes="onclick 'javascript:fb_grow('+field.name+')'" value="Weitere" />
+        <input class="btn btn-primary"
+          role="button" type="file"
+          tal:attributes="name field.name; size str(field.size); value field.value" />
+        <!-- <input class="btn"  tal:condition="field.growable" type="button" tal:attributes="onclick 'javascript:fb_grow('+field.name+')'" value="Weitere" /> -->
       </div>
 
       <div tal:condition="field.type=='multifile'" tal:omit-tag="">
