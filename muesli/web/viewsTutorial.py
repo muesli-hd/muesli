@@ -353,7 +353,7 @@ def email_preference(request):
         if not mail_preference in request.db:
             db.add(mail_preference)
         request.db.commit()
-        request.session.flash('Your preferences have been updated', queue='messages')
+        request.session.flash('Ihre Einstellungen wurden geändert!', queue='messages')
     return {'tutorials': tutorials,
             'tutorial_ids': request.context.tutorial_ids_str,
             'lecture': lecture,
