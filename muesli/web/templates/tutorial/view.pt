@@ -11,9 +11,9 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
   <a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
   ${names['name']} ${tutorial.lecture.name}
   </a>
-  <span class="text-muted">
+  <small class="text-muted">
     (${', '.join(['%s %s' %  (ctut.time.__html__(), ctut.place) for ctut in tutorials])})
-  </span>
+  </small>
 </h2>
 
 <p tal:condition="tutorial.tutor">
