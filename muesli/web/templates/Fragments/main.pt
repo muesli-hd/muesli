@@ -11,10 +11,11 @@
   Released under the terms of the GNU GPL 3 or later
   -->
   <title>MÜSLI</title>
-  <!-- <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/muesli.css')"></link> -->
+  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/muesli.css')"></link>
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/fancybox/jquery.fancybox.css')"></link>
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/select2.css')"></link>
   <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
+  <script tal:attributes="src request.static_url('muesli.web:static/js/april_fool.js')"></script>
   <!-- Bootstrap -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
@@ -44,45 +45,6 @@ function set_navigation(nav) {
 /* ]]> */
 </script>
 <script>
-    var backgroundColorInterval, cursorInterval;
-    function getRandomColor() {
-        var letters = '0123456789ABCDEF';
-        var color = '#';
-        for (var i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-    }
-    function setRandomBackgroundColor(waitTime) {
-        document.getElementById("header").style.backgroundColor = getRandomColor();
-        backgroundColorInterval = setInterval(function() {
-            document.getElementById("header").style.backgroundColor = getRandomColor();
-        }, waitTime);
-    }
-    function changeCursor(waitTime) {
-        var cursors = [
-            'url(https://www.mathi.uni-heidelberg.de/~jvisintini/aprilfool/mathematikon_32.png), auto',
-            'url(https://www.mathi.uni-heidelberg.de/~jvisintini/aprilfool/unihd_32.png), auto',
-            'url(https://www.mathi.uni-heidelberg.de/~jvisintini/aprilfool/physik_32.png), auto',
-            'url(https://www.mathi.uni-heidelberg.de/~jvisintini/aprilfool/websurface_32.png), auto',
-            'url(https://www.mathi.uni-heidelberg.de/~jvisintini/aprilfool/kleinbottle_32.png), auto',
-            'url(https://www.mathi.uni-heidelberg.de/~jvisintini/aprilfool/moebiusstrip_32.png), auto',
-        ];
-        document.body.style.cursor = cursors[cursors.length-1];
-        var cursorIdx = 0;
-        cursorInterval = setInterval(function() {
-            document.body.style.cursor = cursors[cursorIdx];
-            cursorIdx = (cursorIdx + 1) % cursors.length;
-        }, waitTime);
-    }
-    function aprilFool() {
-        var waitTime = 10000;
-        var now = new Date();
-        if (now.getDate() === 1 && now.getMonth() === 3) {
-            changeCursor(waitTime);
-            setRandomBackgroundColor(waitTime);
-        }
-    }
 </script>
 
 <div id="history">
@@ -109,14 +71,6 @@ function set_navigation(nav) {
 </div>
 
 <metal:main metal:use-macro="templates('Fragments/footer.pt')">
-
-<!-- Bootstrap core JavaScript -->
-<!-- Placed at the end of the document so the pages load faster -->
-<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
-<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
-<script src="../../dist/js/bootstrap.min.js"></script>
-<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
 
 </body>
 </html>

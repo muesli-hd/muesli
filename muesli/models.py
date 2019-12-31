@@ -210,8 +210,16 @@ class Lecture(Base):
     id = Column(Integer, primary_key=True)
     # Should be removed some day. Stays here just to make muesli3 work.
     assistant_id = Column('assistant', Integer, ForeignKey(User.id, ondelete='SET NULL'))
-    old_assistant = relationship(User, backref=backref('lectures_as_assistant_old', order_by='Lecture.term', lazy='dynamic'))
-    assistants = relationship(User, secondary=lecture_assistants_table, backref=backref("lectures_as_assistant", order_by='Lecture.term', lazy='dynamic'))
+    old_assistant = relationship(
+        User, backref=backref(
+            'lectures_as_assistant_old', order_by='Lecture.term', lazy='dynamic'
+        )
+    )
+    assistants = relationship(
+        User, secondary=lecture_assistants_table, backref=backref(
+            "lectures_as_assistant", order_by='Lecture.term', lazy='dynamic'
+        )
+    )
     name = Column(Text)
     # lecture type
     #  'lecture'
@@ -237,7 +245,7 @@ class Lecture(Base):
     minimum_preferences = Column(Integer, default=None)
     tutor_rights = Column(Text, nullable=False, default=editOwnTutorials)
     tutorials = relationship('Tutorial', order_by='Tutorial.time,Tutorial.comment')
-    tutors = relationship(User, secondary=lecture_tutors_table, backref = "lectures_as_tutor")
+    tutors = relationship(User, secondary=lecture_tutors_table, backref="lectures_as_tutor")
 
     @property
     def students(self):
