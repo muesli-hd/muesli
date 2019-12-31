@@ -116,26 +116,30 @@
   </p>
 
   <form method='post' tal:attributes='action request.route_path("lecture_set_preferences", lecture_id=lecture.id)'>
-    <table>
-      <tr>
-        <th>Zeit</th>
-        <th>Verf. Plätze</th>
-        <th>Präferenz</th>
-      </tr>
-      <tr tal:repeat='(count, time) enumerate(times, 1)'>
-        <td>${time['time']}</td>
-        <td>${time['max_students']}</td>
-        <td>
-          <input type='hidden' name="time-${count}" value="${str(time['time'])}" />
-          <select name='pref-${count}'>
-            <option tal:repeat="pref prefs" value="${pref['penalty']}" tal:attributes="selected 'selected' if pref['penalty'] == time['penalty'] else None">
-              ${pref['name']}
-            </option>
-          </select>
-        </td>
-      </tr>
+    <table class="table" style="width: auto !important">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">Zeit</th>
+          <th scope="col">Verf. Plätze</th>
+          <th scope="col">Präferenz</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr tal:repeat='(count, time) enumerate(times, 1)'>
+          <td>${time['time']}</td>
+          <td>${time['max_students']}</td>
+          <td>
+            <input type='hidden' name="time-${count}" value="${str(time['time'])}" />
+            <select class="custom-select" name='pref-${count}'>
+              <option tal:repeat="pref prefs" value="${pref['penalty']}" tal:attributes="selected 'selected' if pref['penalty'] == time['penalty'] else None">
+                ${pref['name']}
+              </option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
     </table>
-    <input type='submit' value='Ausgewählte Präferenzen speichern'/>
+    <input class="btn btn-primary" role="button" type='submit' value='Ausgewählte Präferenzen speichern'/>
   </form>
 
   <form tal:condition="request.user.hasPreferences(lecture)" method="post"
