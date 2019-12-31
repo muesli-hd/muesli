@@ -12,9 +12,9 @@ $(document).ready(function()
 );
 </script>
 
-<table id="resultstable" class="colored">
+<table id="resultstable" class="table">
 
-<thead>
+<thead class="thead-dark">
   <tr>
     <th tal:condition="not tutorial_ids">Tutor ↕</th>
     <th>Name ↕</th>
