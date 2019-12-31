@@ -1,28 +1,28 @@
-<!-- -*- coding: utf-8 -*- -->
+<!--! -*- coding: utf-8 -*- -->
 
-<!-- muesli/web/viewsApi.py -->
+<!--! muesli/web/templates/Fragments/footer.pt -->
 
-<!-- This file is part of MUESLI. -->
-<!-- Copyright (C) 2018, Christian Heusel <christian (at) heusel.eu> -->
+<!--! This file is part of MUESLI. -->
+<!--! Copyright (C) 2018, Christian Heusel <christian (at) heusel.eu> -->
 
-<!-- This program is free software: you can redistribute it and/or modify -->
-<!-- it under the terms of the GNU General Public License as published by -->
-<!-- the Free Software Foundation, either version 3 of the License, or -->
-<!-- (at your option) any later version. -->
+<!--! This program is free software: you can redistribute it and/or modify -->
+<!--! it under the terms of the GNU General Public License as published by -->
+<!--! the Free Software Foundation, either version 3 of the License, or -->
+<!--! (at your option) any later version. -->
 
-<!-- This program is distributed in the hope that it will be useful, -->
-<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of -->
-<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the -->
-<!-- GNU General Public License for more details. -->
+<!--! This program is distributed in the hope that it will be useful, -->
+<!--! but WITHOUT ANY WARRANTY; without even the implied warranty of -->
+<!--! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the -->
+<!--! GNU General Public License for more details. -->
 
-<!-- You should have received a copy of the GNU General Public License -->
-<!-- along with this program.  If not, see <http://www.gnu.org/licenses/>. -->
+<!--! You should have received a copy of the GNU General Public License -->
+<!--! along with this program.  If not, see <http://www.gnu.org/licenses/>. -->
 
 <metal:main metal:define-macro="navigation">
   <footer class="footer mt-auto py-3">
     <div class="container">
       <div class="row">
-        <div class="text-muted col-sm text-left">
+        <div class="text-muted col-sm text-md-left text-center">
           loading time: ${'{0:.3f}s'.format(request.now() - request.time)}
           queries: ${request.queries}
         </div>
@@ -33,7 +33,7 @@
              tal:attributes="href request.route_path('changelog')">What's new?</a>
         </div>
 
-        <div class="text-muted col-sm text-right">
+        <div class="text-muted col-sm text-center text-md-right">
           <a href="https://www.uni-heidelberg.de/impressum.html">Impressum</a> <a href="/datenschutzerklaerung.html">Datenschutzerkl&auml;rung</a>
         </div>
       </div>
