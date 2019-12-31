@@ -19,28 +19,33 @@ jQuery(document).ready(function() {
 </script>
 
 <form action="/lecture/switch_students" tal:attributes="action request.route_path('lecture_switch_students', lecture_id=lecture.id)" method="POST">
-  <table>
-    <tr>
-      <td><label>Students</label></td>
-      <td>   
-         <select class="student_select1" name="student1">
-             <option tal:repeat="student students" value="${student.id}">${student.last_name}, ${student.first_name} (${student.matrikel})</option>
-         </select>
-         <select class="student_select2" name="student2">
-             <option tal:repeat="student students" value="${student.id}">${student.last_name}, ${student.first_name} (${student.matrikel})</option>
-         </select>
-      </td>
-    </tr>
-    <tr>
-      <td><input type="submit" value="Tauschen"/></td>
-    </tr>
-  </table>
+  <div class="row">
+    <div class="col-md-auto font-weight-bold align-self-center">
+      Students
+    </div>
+    <div class="col-md">
+      <select class="student_select1 custom-select" name="student1">
+        <option tal:repeat="student students" value="${student.id}">${student.last_name}, ${student.first_name} (${student.matrikel})</option>
+      </select>
+    </div>
+    <div class="col-md">
+      <select class="student_select2 custom-select" name="student2">
+        <option tal:repeat="student students" value="${student.id}">${student.last_name}, ${student.first_name} (${student.matrikel})</option>
+      </select>
+    </div>
+  </div>
+  <div class="row pt-3">
+    <div class="col text-md-left text-center">
+      <input role="button" class="btn btn-danger" type="submit" value="Tauschen"/>
+    </div>
+  </div>
 </form>
-  <tr>
-    <td colspan="3">
-      <a tal:attributes="href request.route_path('lecture_edit', lecture_id = lecture.id)">Zurück zur Vorlesung</a>
-    </td>
-  </tr>
+
+<div class="row pt-3">
+  <div class="col text-md-left text-center">
+    <a role="button" class="btn btn-primary" tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">Zurück zur Vorlesung</a>
+  </div>
+</div>
 
   </metal:main>
 </metal:main>
