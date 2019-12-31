@@ -34,7 +34,7 @@
     </p>
 
     <table class="table">
-      <thead tal:condition='lecture.type == "lecture"'>
+      <thead class="thead-dark" tal:condition='lecture.type == "lecture"'>
         <th scope="col">Zeit</th>
         <th scope="col">Raum</th>
         <th scope="col">Auslastung</th>
@@ -44,7 +44,7 @@
         <th scope="col"></th>
       </thead>
 
-      <thead tal:condition='lecture.type != "lecture"'>
+      <thead class="thead-dark" tal:condition='lecture.type != "lecture"'>
         <th scope="col">Zeit</th>
         <th scope="col">Raum</th>
         <th scope="col">Auslastung</th>
@@ -66,7 +66,7 @@
               ${tutorial.tutor.first_name} ${tutorial.tutor.last_name}
             </span>
             <span tal:omit-tag='' tal:condition="not tutorial.tutor and request.permissionInfo.has_permission('take_tutorial')"> <!-- TODO: and (is assistant or is_tutor) -->
-              <a tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
+              <a role="button" class="btn-sm btn-success" tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
             </span>
           </td>
           <td tal:condition="tutorial.comment">${tutorial.comment}</td>
