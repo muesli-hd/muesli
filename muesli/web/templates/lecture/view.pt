@@ -2,13 +2,6 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<script>
-  function confirm_unsubscribe() {
-    return confirm("Wollen Sie wirklich diese Übungsgruppe verlassen?");
-  }
-</script>
-
-
   <h2>${lecture.name}</h2>
 
   <p tal:condition="lecture.url">
