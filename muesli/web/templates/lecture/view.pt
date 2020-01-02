@@ -7,7 +7,6 @@
     }
   </script>
 
-
   <h2>
     ${lecture.name}
   </h2>
@@ -111,7 +110,6 @@
           </td>
         </tr>
       </tbody>
->>>>>>> styled some tables and moved the tutor SignIn process to extra form
    </table>
   </div>
 

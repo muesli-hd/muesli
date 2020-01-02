@@ -570,10 +570,12 @@ class UserRegister(ObjectForm):
         formfields = [
             FormField(
                 'email',
-                 label='E-Mail', size=40, comment='ACHTUNG: Unbedingt eine uni-heidelberg.de Mailadresse verwenden!',
-                 #value=user.email,
-                 required=True,
-                 validator=validators.Email()
+                label='E-Mail',
+                size=40,
+                comment='ACHTUNG: Unbedingt eine uni-heidelberg.de Mailadresse verwenden!',
+                #value=user.email,
+                required=True,
+                validator=validators.Email()
             ),
             FormField(
                 'title',
@@ -594,11 +596,14 @@ class UserRegister(ObjectForm):
             ),
             FormField(
                 'matrikel',
-                label='Matrikelnummer', size=10, comment='Falls noch keine Matrikelnummer bekannt ist bitte 00000 eintragen. Die Matrikelnummer muss dann baldmöglichst unter „Angaben ergänzen“ richtig gestellt werden!',
+                label='Matrikelnummer',
+                size=10,
+                comment="""Falls noch keine Matrikelnummer bekannt ist bitte
+                00000 eintragen. Die Matrikelnummer muss dann baldmöglichst
+                unter „Angaben ergänzen“ richtig gestellt werden!""",
                 validator=validators.Number,
                 #value=user.matrikel,
-                required=True,
-                type="number"
+                required=True
             ),
             FormField(
                 'subject',
@@ -612,7 +617,8 @@ class UserRegister(ObjectForm):
                 'subject_alt',
                 label='Studiengang',
                 size=30,
-                comment='Genauer Studiengang (falls Sonstiges gewählt). Bitte in der Form "Fach (Studiengang)".',
+                comment='''Genauer Studiengang (falls Sonstiges gewählt). Bitte
+                in der Form "Fach (Studiengang)".''',
                 value=''
             )
         ]

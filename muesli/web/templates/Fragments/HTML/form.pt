@@ -66,7 +66,7 @@
       <div tal:condition="field.type=='textarea'" tal:omit-tag="">
         <!-- TEXTAREA -->
         <textarea class="form-control"
-          tal:attributes="name field.name; cols str(field.cols); rows str(field.rows); readonly 'readonly' if field.readonly else None" 
+          tal:attributes="name field.name; cols str(field.cols); rows str(field.rows); readonly 'readonly' if field.readonly else None"
           tal:content="field.value"></textarea>
       </div>
 
