@@ -196,7 +196,7 @@ class EnterPointsBasic:
                     elif medical_certificate_value == '0':
                         admissions[student.student_id].medical_certificate = False
                     else:
-                        admissions[student.student_id].medical_certificate = None    
+                        admissions[student.student_id].medical_certificate = None
                 for e in exam.exercises:
                     param = 'points-%u-%u' % (student.student_id, e.id)
                     if param in self.request.POST:
@@ -612,15 +612,15 @@ def enterPointsSingle(request):
     student_results_json = json.dumps(student_results)
 
     return {
-            'students': students,
-            'exam': exam,
-            'exercises': exercises,
-            'exercise_ids': exercise_ids_json,
-            'student_results': student_results_json,
-            'tutorial_ids': request.context.tutorial_ids_str,
-            'show_tutor': show_tutor,
-            'show_time': show_time
-            }
+        'students': students,
+        'exam': exam,
+        'exercises': exercises,
+        'exercise_ids': exercise_ids_json,
+        'student_results': student_results_json,
+        'tutorial_ids': request.context.tutorial_ids_str,
+        'show_tutor': show_tutor,
+        'show_time': show_time
+    }
 
 
 def parse_points(post_data, exercises):

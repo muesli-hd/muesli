@@ -8,7 +8,8 @@ Features dem Müsli hinzugefügt.
 * Enpoints für verschiedene Funktionen des Müsli erstellt
 * Rechtesystem für die API erstellt
 * Dokumentation für die API
-Für weitere Informationen: <link-zum-finalen-pr>
+
+Für weitere Informationen [hier klicken](/api-explorer).
 
 ##### GUI-1 Gruppe
 

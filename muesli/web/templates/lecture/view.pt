@@ -148,9 +148,9 @@
     <input class="btn btn-primary" role="button" type='submit' value='Ausgewählte Präferenzen speichern'/>
   </form>
 
-  <form tal:condition="request.user.hasPreferences(lecture)" method="post"
+  <form tal:condition="request.user.hasPreferences(lecture)" method="post" class="pt-1"
         tal:attributes="action request.route_path('lecture_remove_preferences', lecture_id=lecture.id)">
-    <input type="submit" value="Präferenzen vergessen"/>
+    <input class="btn btn-danger" type="submit" value="Präferenzen vergessen"/>
   </form>
 
   </div>
