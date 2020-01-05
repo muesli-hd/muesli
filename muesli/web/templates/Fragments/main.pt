@@ -70,7 +70,7 @@ function set_navigation(nav) {
   </div>
 </div>
 
-<metal:main metal:use-macro="templates('Fragments/footer.pt')">
+<metal:main metal:use-macro="templates('Fragments/footer.pt').macros['footer']">
 
 </body>
 </html>

@@ -18,7 +18,7 @@
 <!--! You should have received a copy of the GNU General Public License -->
 <!--! along with this program.  If not, see <http://www.gnu.org/licenses/>. -->
 
-<metal:main metal:define-macro="navigation">
+<metal:main metal:define-macro="footer">
   <footer class="footer mt-auto py-3">
     <div class="container">
       <div class="row">
