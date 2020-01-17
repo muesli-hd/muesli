@@ -1,5 +1,30 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:define-macro="tutorial_occupancy">
-  <img tal:attributes="src request.route_path('tutorial_occupancy_bar', count=tutorial.student_count, max_count=tutorial.max_students)" />
-  ${tutorial.student_count}/${tutorial.max_students}
+  <?python
+    percentage = 0
+    str_percentage = "0"
+    if tutorial.student_count != 0:
+      percentage = (tutorial.student_count/tutorial.max_students) * 100
+      str_percentage = "%5.2f" % percentage
+
+    if percentage < 50:
+      color_attr = "bg-success"
+    elif percentage >= 50 and percentage < 75:
+      color_attr = "bg-warning"
+    elif percentage >= 75:
+      color_attr = "bg-danger"
+  ?>
+  <div class="row">
+    <div class="col">
+      <div class="progress bg-light">
+        <div class="progress-bar progress-bar-striped"
+             role="progressbar" style="padding: 0; margin: 0"
+             aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"
+             tal:attributes="aria-valuenow percentage; class color_attr; style 'width:' + str_percentage + '%'"></div>
+      </div>
+    </div>
+    <div class="col-sm-auto" style="padding: 0; margin: 0">
+      ${tutorial.student_count}/${tutorial.max_students}
+    </div>
+  </div>
 </metal:main>
