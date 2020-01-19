@@ -3,7 +3,7 @@
 <!--! muesli/web/templates/Fragments/footer.pt -->
 
 <!--! This file is part of MUESLI. -->
-<!--! Copyright (C) 2018, Christian Heusel <christian (at) heusel.eu> -->
+<!--! Copyright (C) 2019, Christian Heusel <christian (at) heusel.eu> -->
 
 <!--! This program is free software: you can redistribute it and/or modify -->
 <!--! it under the terms of the GNU General Public License as published by -->
@@ -23,8 +23,9 @@
     <div class="container">
       <div class="row">
         <div class="text-muted col-sm text-md-left text-center">
-          <small>loading time: ${'{0:.3f}s'.format(request.now() - request.time)}
-          queries: ${request.queries}
+          <small>
+            loading time: ${'{0:.3f}s'.format(request.now() - request.time)}
+            queries: ${request.queries}
           </small>
         </div>
 

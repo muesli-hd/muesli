@@ -33,6 +33,8 @@
 
   <p class="alert alert-warning" tal:condition='lecture.mode == "off" and lecture.tutorials'>
     Es ist derzeit noch nicht möglich sich zu Übungsgruppen in dieser Vorlesung anzumelden.
+    <span tal:condition="request.userInfo.is_assistant()">Sie sehen die Übungsgruppen, da Sie Assistent sind.</span>
+    <span tal:condition="request.userInfo.is_admin()">Sie sehen die Übungsgruppen, da Sie Admin sind.</span>
   </p>
 
   <div tal:condition="not lecture.tutorials" class="alert alert-info">
