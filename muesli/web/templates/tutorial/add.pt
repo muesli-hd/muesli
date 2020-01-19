@@ -27,7 +27,7 @@
       <td>${tutorial.time}</td>
       <td>${tutorial.place}</td>
       <td>
-        <span tal:condition="tutorial.tutor" tal:content="tutorial.tutor.name()" tal:omit-tag="" />
+        <span tal:condition="tutorial.tutor" tal:content="tutorial.tutor.name" tal:omit-tag="" />
         <a role="button" class="btn-sm btn-success"
            tal:condition="not tutorial.tutor"
            tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>

@@ -307,9 +307,9 @@ def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
     if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'In Ihre Übungsgruppe zur Vorlesung %s am %s hat sich %s eingetragen'\
-            % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
+            % (tutorial.lecture.name, tutorial.time.__html__(), student.name)
     if fromTutorial:
-        text += ' (Wechsel aus der Gruppe am %s von %s).' % (fromTutorial.time.__html__(), fromTutorial.tutor.name() if fromTutorial.tutor else 'NN')
+        text += ' (Wechsel aus der Gruppe am %s von %s).' % (fromTutorial.time.__html__(), fromTutorial.tutor.name if fromTutorial.tutor else 'NN')
     else:
         text += '.'
     sendChangesMail(request, tutorial.tutor, text)
@@ -321,9 +321,9 @@ def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
     if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'Aus Ihrer Übungsgruppe zur Vorlesung %s am %s hat sich %s ausgetragen'\
-                    % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
+                    % (tutorial.lecture.name, tutorial.time.__html__(), student.name)
     if toTutorial:
-        text += ' (Wechsel in die Gruppe am %s von %s).' % (toTutorial.time.__html__(), toTutorial.tutor.name() if toTutorial.tutor else 'NN')
+        text += ' (Wechsel in die Gruppe am %s von %s).' % (toTutorial.time.__html__(), toTutorial.tutor.name if toTutorial.tutor else 'NN')
     else:
         text += '.'
     sendChangesMail(request, tutorial.tutor, text)
@@ -395,7 +395,7 @@ def ajaxGetTutorial(request):
     ret = {}
     if ls and ls.tutorial:
         ret = {'msg': 'sucessful'}
-        ret['tutor'] = ls.tutorial.tutor.name() if ls.tutorial.tutor else 'N.N.'
+        ret['tutor'] = ls.tutorial.tutor.name if ls.tutorial.tutor else 'N.N.'
         ret['time'] = ls.tutorial.time.formatted()
         return ret
     else:

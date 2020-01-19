@@ -5,10 +5,10 @@
 <h2>Punkteübersicht</h2>
 
 <script type="text/javascript">
-$(document).ready(function() 
-    { 
-        $("#resultstable").tablesorter(); 
-    } 
+$(document).ready(function()
+    {
+        $("#resultstable").tablesorter();
+    }
 );
 </script>
 
@@ -25,7 +25,7 @@ $(document).ready(function()
 <tbody>
   <tr tal:repeat="ls lecture_students">
     <td tal:condition="not tutorial_ids">${ls.tutorial.tutor_name}</td>
-    <td>${ls.student.name()}</td>
+    <td>${ls.student.name}</td>
     <td tal:repeat="cat categories">
       <span class="popup">
         <span style="display:none">${'%09.3f' % float(results[ls.student_id].get(cat['id'],0))}</span>

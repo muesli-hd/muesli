@@ -84,7 +84,7 @@
           <td>${tutorial.time}</td>
           <td>${tutorial.place}</td>
           <td>
-            <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a>
+            <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name}</a>
           </td>
           <td>
             <a role="button"

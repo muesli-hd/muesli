@@ -236,7 +236,7 @@ def doublets(request):
     doublets = collections.defaultdict(lambda: [])
     for user in request.db.query(models.User).all():
         doublets[user.email.lower()].append(user)
-        # doublets[user.name().lower()].append(user)
+        # doublets[user.name.lower()].append(user)
     for key, value in list(doublets.items()):
         if len(value)<=1:
             del doublets[key]
@@ -325,7 +325,7 @@ einfach.
 
 Mit freudlichen Grüßen,
 Das MÜSLI-Team
-    """ % (user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
+    """ % (user.name, user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
     message = Message(subject='MÜSLI: Ihre Registrierung bei MÜSLI',
                       sender=('%s <%s>' % (request.config['contact']['name'],
                                            request.config['contact']['email'])),
@@ -361,7 +361,7 @@ einfach.
 
 Mit freudlichen Grüßen,
 Das MÜSLI-Team
-    """ % (confirmation.created_on, user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
+    """ % (confirmation.created_on, user.name, user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
     message = Message(subject='MÜSLI: Ihre Registrierung bei MÜSLI',
                       sender=('%s <%s>' % (request.config['contact']['name'],
                                            request.config['contact']['email'])),

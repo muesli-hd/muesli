@@ -57,7 +57,7 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
       <td tal:condition="not tutorial_ids">
         <span tal:condition="ls.tutorial.tutor" tal:content="ls.tutorial.tutor.last_name" />
       </td>
-    <td>${ls.student.name()}</td>
+    <td>${ls.student.name}</td>
     <td tal:condition="exam.medical_certificate is not None"
         tal:on-error="nothing"
         tal:define="name     'medical_certificate-%s' % ls.student.id;

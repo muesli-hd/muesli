@@ -242,7 +242,7 @@ class SwitchStudents(object):
                 muesli.web.viewsTutorial.sendChangesMailSubscribe(self.request, ls2.tutorial, student2, ls1.tutorial)
                 muesli.web.viewsTutorial.sendChangesMailUnsubscribe(self.request, ls1.tutorial, student2, ls2.tutorial)
                 muesli.web.viewsTutorial.sendChangesMailUnsubscribe(self.request, ls2.tutorial, student1, ls1.tutorial)
-                self.request.session.flash('Sie haben die Tutorien von {} und {} vertauscht'.format(student1.name(),student2.name()), queue='messages')
+                self.request.session.flash('Sie haben die Tutorien von {} und {} vertauscht'.format(student1.name,student2.name), queue='messages')
 
         return {'lecture': lecture,
                 'tutorials': tutorials,
@@ -673,7 +673,7 @@ def exportYaml(request):
     for lecture in lectures.all():
         lecture_dict = {}
         tutors = set([tutorial.tutor for tutorial in lecture.tutorials])
-        lecture_dict['tutors'] = [tutor.name() for tutor in tutors if tutor!= None]
+        lecture_dict['tutors'] = [tutor.name for tutor in tutors if tutor!= None]
         lecture_dict['name'] = lecture.name
         lecture_dict['lecturer'] = lecture.lecturer
         lecture_dict['student_count'] = lecture.lecture_students.count()
@@ -693,7 +693,7 @@ def exportYaml_details(request):
         lecture_dict = {}
         lecture_dict['tutorials'] = []
         for tutorial in lecture.tutorials:
-            vtutor = 'tutor: ' + tutorial.tutor.name() if tutorial.tutor!=None else 'tutor: '
+            vtutor = 'tutor: ' + tutorial.tutor.name if tutorial.tutor!=None else 'tutor: '
             vemail = 'email: ' + tutorial.tutor.email  if tutorial.tutor!=None else 'email: '
             vplace = 'place: ' + tutorial.place
             vtime = 'time: '+ tutorial.time.__html__()
@@ -746,7 +746,7 @@ class DoExport(ExcelExport):
             tutorial_list = []
             lecture_name = lecture.name
             for tutorial in lecture.tutorials:
-                vtutor = tutorial.tutor.name() if tutorial.tutor is not None else 'None'
+                vtutor = tutorial.tutor.name if tutorial.tutor is not None else 'None'
                 vtutor_first_name = tutorial.tutor.first_name if tutorial.tutor is not None else 'None'
                 vtutor_last_name = tutorial.tutor.last_name if tutorial.tutor is not None else 'None'
                 vemail = tutorial.tutor.email if tutorial.tutor is not None else 'None'

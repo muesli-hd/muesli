@@ -109,6 +109,15 @@ class User(Base):
     is_assistant = Column(Integer, nullable=False, default=0)
 
     @property
+    def name(self):
+        name = "{}{}{}".format(
+            self.title+' ' if self.title is not None else '',
+            self.first_name+' ' if self.first_name is not None else '',
+            self.last_name if self.last_name is not None else ''
+        )
+        return name
+
+    @property
     def tutorials(self):
         session = Session.object_session(self)
         return session.query(Tutorial).filter(Tutorial.lecture_students.any(LectureStudent.student_id == self.id)).join(Tutorial.lecture).order_by(Lecture.term)
@@ -131,9 +140,6 @@ class User(Base):
             else:
                 mt[tutorial.lecture.id] = [tutorial]
         return mt
-
-    def name(self):
-        return self.first_name + ' ' + self.last_name
 
     def getFirstName(self):
         return self.first_name
@@ -186,10 +192,10 @@ class User(Base):
         return True
 
     def __str__(self):
-        return '{name} <{email}>'.format(name=self.name(), email=self.email)
+        return '{name} <{email}>'.format(name=self.name, email=self.email)
 
     def __repr__(self):
-        return 'u<User %r <%r>>' % (self.name(), self.email)
+        return 'u<User %r <%r>>' % (self.name, self.email)
 
 
 class Confirmation(Base):

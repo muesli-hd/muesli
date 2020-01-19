@@ -154,7 +154,7 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
           <metal:main metal:use-macro="templates('Fragments/Format/exam_points.pt').macros['exam_points']" />
         </span>
       </td>
-    <td>${ls.student.name()}</td>
+    <td>${ls.student.name}</td>
     <td><span id="calc-${ls.student_id}">${grades[ls.student_id]['calc']}</span></td>
 
     <td><input tal:attributes="class 'invalid' if grades[ls.student_id]['invalid'] else 'points';

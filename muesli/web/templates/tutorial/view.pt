@@ -17,7 +17,10 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
 </h2>
 
 <p tal:condition="tutorial.tutor">
-  ${names['tutor']}: <a tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a>
+  ${names['tutor']}:
+  <a tal:attributes="href 'mailto:'+tutorial.tutor.email">
+    ${tutorial.tutor.name}
+  </a>
 </p>
 
 <h3>Administrativa</h3>
@@ -87,7 +90,7 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
     <tr tal:repeat="student students">
       <td>
         <a tal:attributes="href 'mailto:'+student.email">
-          ${student.name()}
+          ${student.name}
         </a>
       </td>
       <td>${student.subject}</td>

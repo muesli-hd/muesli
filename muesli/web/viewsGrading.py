@@ -169,7 +169,7 @@ class EnterGradesBasic:
                             grades[ls.student_id]['grade'].grade = value
                             grades[ls.student_id]['gradestr'] = value
                         except:
-                            error_msgs.append('Could not convert "%s" (%s)'%(value, ls.student.name()))
+                            error_msgs.append('Could not convert "%s" (%s)'%(value, ls.student.name))
         if self.db.new or self.db.dirty or self.db.deleted:
             self.db.commit()
         return grades, error_msgs

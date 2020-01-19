@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-    
+
 <metal:main metal:define-macro="user_list">
       <span tal:condition="not users">
          kein
@@ -13,7 +13,7 @@
           </tr>
 
           <tr tal:repeat="u users">
-            <td><a tal:attributes="href 'mailto:'+u.email">${u.name()}</a></td>
+            <td><a tal:attributes="href 'mailto:'+u.email">${u.name}</a></td>
             <td>
               <span tal:repeat="p prefs[u.id]" tal:omit-tag="">
                 ${p.time}

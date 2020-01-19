@@ -5,9 +5,9 @@
 <h2>Student zu Übungsgruppe zuweisen</h2>
 
 <p>
-${student.name()} wurde der Übungsgruppe ${new_tutorial.time}
+${student.name} wurde der Übungsgruppe ${new_tutorial.time}
   <span tal:condition="new_tutorial.tutor">
-bei ${new_tutorial.tutor.name()}
+bei ${new_tutorial.tutor.name}
   </span>
 zugewiesen.
 </p>

@@ -101,7 +101,7 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
         <span tal:omit-tag='' tal:condition="not tutorial.tutor and request.permissionInfo.has_permission('take_tutorial')"> <!-- TODO: and (is assistant or is_tutor) -->
           <a role="button" class="btn-sm btn-success" tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
         </span>
-        <!-- ${tutorial.tutor.name() if tutorial.tutor else ''} -->
+        <!-- ${tutorial.tutor.name if tutorial.tutor else ''} -->
       </td>
       <td>
         <span class="font-italic" tal:condition="not tutorial.comment">Keine Beschreibung</span>
@@ -163,7 +163,7 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
 <table>
   <tr tal:repeat="tutor lecture.tutors">
     <td>
-      <a tal:attributes="href 'mailto:'+tutor.email">${tutor.name()}</a>
+      <a tal:attributes="href 'mailto:'+tutor.email">${tutor.name}</a>
       (<a tal:attributes="href request.route_path('lecture_remove_tutor', lecture_id=lecture.id, tutor_id=tutor.id)">entfernen</a>)
     </td>
   </tr>

@@ -209,7 +209,7 @@ class EnterPointsBasic:
                                 value = float(value)
                                 points[student.student_id][e.id].points = value
                             except:
-                                error_msgs.append('Could not convert "%s" (%s, Exercise %i)'%(value, student.student.name(), e.nr))
+                                error_msgs.append('Could not convert "%s" (%s, Exercise %i)'%(value, student.student.name, e.nr))
         for student in points:
             points[student]['total'] = sum([v.points for v in list(points[student].values()) if v.points])
         if self.db.new or self.db.dirty or self.db.deleted:
@@ -606,7 +606,7 @@ def enterPointsSingle(request):
         current_points.append(str(stud_result['sum']))
         student_results[str(student.id)] = {}
         student_results[str(student.id)]['points'] = current_points
-        student_results[str(student.id)]['name'] = student.name()
+        student_results[str(student.id)]['name'] = student.name
         student_results[str(student.id)]['tutorial_time'] = ls.tutorial.time.__html__()
         student_results[str(student.id)]['tutorial_tutor'] = ls.tutorial.tutor_name
     student_results_json = json.dumps(student_results)

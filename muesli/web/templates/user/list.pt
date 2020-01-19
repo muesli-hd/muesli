@@ -13,7 +13,7 @@
     <tr tal:repeat="user users">
       <td>
         <a tal:attributes="href request.route_path('user_edit', user_id=user.id)">
-          ${user.last_name}, ${user.first_name}
+          ${user.name}
         </a>
       </td>
       <td class="text-monospace">${user.email}</td>
