@@ -512,26 +512,40 @@ class HistogramForExam(Histogram):
         self.points = [round(float(p.points)-0.01) for p in exercise_points if p.points!=None]
         self.max = self.exam.getMaxpoints()
 
+
 @view_config(route_name='exam_correlation', context=CorrelationContext, permission='correlation')
 class Correlation(MatplotlibView):
     def __init__(self, request):
         super(Correlation, self).__init__()
         self.request = request
+
     def getExamData(self, id):
         exam = self.request.db.query(models.Exam).get(id)
         points = exam.getResults()
         return dict([(e.student_id, e.points) for e in points if e.points != None]), exam.getMaxpoints(), exam.name
+
     def getLectureData(self, id):
         lecture = self.request.db.query(models.Lecture).get(id)
         points = lecture.getLectureResultsByCategory()
         max_points = sum([exam.getMaxpoints() for exam in lecture.exams if exam.category == 'assignment'])
         return dict([(e.student_id, e.points) for e in points if e.points != None and e.category == 'assignment']), max_points, lecture.name
+
+    def getExerciseData(self, id):
+        exercise = self.request.db.query(models.Exercise).get(id)
+        points = exercise.exam.lecture.getLectureResultsByCategory()
+        return (dict([(e.student_id, e.points) for e in points if e.points != None and e.category == 'assignment']),
+                exercise.maxpoints,
+                "Aufgabe {}".format(exercise.nr))
+
     def getData(self, source):
         source_type, source_id = source.split('_',1)
         if source_type == 'exam':
             return self.getExamData(source_id)
         elif source_type == 'lecture':
             return self.getLectureData(source_id)
+        elif source_type == 'exercise':
+            return self.getExerciseData(source_id)
+
     def getBins(self, max_value, max_bins = 10):
         if float(max_value)/max_bins < 1:
             stepsize = 0.5
@@ -541,6 +555,7 @@ class Correlation(MatplotlibView):
         while bins[-1] < float(max_value):
             bins.append(bins[-1]+stepsize)
         return bins
+
     def __call__(self):
         source1 = self.request.GET['source1']
         source2 = self.request.GET['source2']
@@ -582,6 +597,7 @@ class Correlation(MatplotlibView):
         corrcoef = np.corrcoef(x, y)[0,1] if len(x)>0 else 0
         ax.set_title("Korrelation = %.2f" % corrcoef)
         return self.createResponse()
+
 
 @view_config(route_name='exam_enter_points_single', renderer='muesli.web:templates/exam/enter_points_single.pt', context=ExamContext, permission='enter_points')
 def enterPointsSingle(request):

@@ -266,6 +266,12 @@ class CorrelationContext:
                 ] + [(Allow, 'user:{0}'.format(id), ('correlation')) for id in ids]
     def get_allowed_ids(self, source, request):
         source_type, source_id = source.split('_',1)
+        if source_type == 'exercise':
+            exercise = request.db.query(Exercise).get(source_id)
+            if exercise:
+                return [assistant.id for assistant in exercise.exam.lecture.assistants]+[tutor.id for tutor in exercise.exam.lecture.tutors]
+            else:
+                raise HTTPNotFound('Exercise not found')
         if source_type == 'exam':
             exam = request.db.query(Exam).get(source_id)
             if exam:
