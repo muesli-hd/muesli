@@ -2,7 +2,6 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-</script>
 <h1 class="display-4">Startseite</h1>
 
 <h2>
@@ -182,5 +181,6 @@
     <li tal:condition="tutorials_as_tutor">${tooltips.tutor}</li>
 </ul>
 </div>
+
   </metal:main>
 </metal:main>
