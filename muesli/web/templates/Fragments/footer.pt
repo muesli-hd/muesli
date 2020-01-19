@@ -23,13 +23,14 @@
     <div class="container">
       <div class="row">
         <div class="text-muted col-sm text-md-left text-center">
-          loading time: ${'{0:.3f}s'.format(request.now() - request.time)}
+          <small>loading time: ${'{0:.3f}s'.format(request.now() - request.time)}
           queries: ${request.queries}
+          </small>
         </div>
 
         <div class="text-muted col-sm text-center">
           <a role="button"
-             class="btn btn-info btn-sm mr-2"
+             class="btn btn-sm btn-info"
              tal:attributes="href request.route_path('changelog')">What's new?</a>
         </div>
 

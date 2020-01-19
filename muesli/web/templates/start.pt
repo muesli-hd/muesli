@@ -2,13 +2,8 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<script>
-/*<![CDATA[*/
-  function confirm_unsubscribe() {
-    return confirm("Wollen Sie wirklich diese Übungsgruppe verlassen?");
-  }
-/*]]>*/
 </script>
+<h1 class="display-4">Startseite</h1>
 
 <h2>
   Übersicht Ihrer Veranstaltungen
@@ -22,7 +17,7 @@
   um diese Erinnerung dieses Semester nicht mehr zu sehen.
 </div>
 
-<div class="card mb-2 mt-2" tal:condition="tutorials_as_tutor">
+<div class="card mb-2" tal:condition="tutorials_as_tutor">
   <div class="card-body">
     <h3 class="card-title">
       Eigene Übungsgruppen
@@ -82,22 +77,48 @@
       <tbody>
         <tr tal:repeat="tutorial tutorials">
           <td>${tutorial.lecture.term}</td>
-          <td><a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">${tutorial.lecture.name}</a></td>
+          <td>
+            <a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
+              ${tutorial.lecture.name}
+            </a>
+          </td>
           <td>${tutorial.time}</td>
           <td>${tutorial.place}</td>
           <td>
-            <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a></td>
+            <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a>
+          </td>
           <td>
             <a role="button"
                class="btn-sm btn-info"
               tal:attributes="href request.route_path('lecture_view_points',
-              lecture_id=tutorial.lecture.id)">Details</a></td>
+              lecture_id=tutorial.lecture.id)">Details</a>
+          </td>
           <td>
-            <a role="button"
-               class="btn-sm btn-primary"
-               tal:condition="tutorial.lecture.mode != 'static'" onclick="return confirm_unsubscribe()"
-               tal:attributes="href request.route_path('tutorial_unsubscribe',
-               tutorial_id=tutorial.id)">Austreten</a>
+            <a role="button" class="btn-sm btn-danger text-white" data-toggle="modal" data-target="#confirm_unsubscribe">
+              Austreten
+            </a>
+            <div class="modal" tabindex="-1" role="dialog" id="confirm_unsubscribe">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title text-danger">! Achtung !</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Möchtest du die Übungsgruppe der Vorlesung "${tutorial.lecture.name}" wirklick verlassen?</p>
+                  </div>
+                  <div class="modal-footer">
+                    <a role="button"
+                       class="btn btn-danger"
+                       tal:condition="tutorial.lecture.mode != 'static'"
+                       tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">Austreten</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -161,6 +182,5 @@
     <li tal:condition="tutorials_as_tutor">${tooltips.tutor}</li>
 </ul>
 </div>
-
   </metal:main>
 </metal:main>
