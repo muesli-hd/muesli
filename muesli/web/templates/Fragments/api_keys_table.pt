@@ -8,7 +8,7 @@
       <th scope="col"> Ablaufdatum </th>
       <th scope="col"> Beschreibung </th>
       <th scope="col"> Entfernen </th>
-      <th scope="col" tal:condition="'freshtoken' in locals()"></th>
+      <th scope="col"></th>
     </tr>
   <tbody>
     <tr tal:condition="keys" tal:repeat="key keys">
@@ -31,7 +31,7 @@
           <input role="button" class="btn btn-danger btn-sm" type="submit" value="Entfernen"/>
         </form>
       </td>
-      <td tal:condition="'freshtoken' in locals()">
+      <td tal:condition="freshtoken">
         <button role="button" class="btn btn-secondary btn-sm" tal:condition="key.id == max([e.id for e in keys])" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
       </td>
     </tr>
