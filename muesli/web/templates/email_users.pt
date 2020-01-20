@@ -42,7 +42,12 @@ Mit freundlichen Grüßen,<br />
 </form>
 
 <p>Anzahl: ${len(students)}</p>
-<table class="table table-striped">
+
+<p tal:condition="not table" class="alert alert-primary">
+Es gibt anscheinend keine Studis im Müsli, du hast also wohl irgendwas kaputt gemacht :P
+</p>
+
+<table tal:condition="table" class="table table-striped">
   <thead class="thead-dark">
     <th scope="col">Name</th>
     <th scope="col" tal:repeat="header headers">${header}</th>

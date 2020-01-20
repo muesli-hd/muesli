@@ -15,28 +15,38 @@
         }
       };
     </script>
-    <h2>Dokumentation</h2>
-    <p>
-    Die verschiedenen API-Zugriffe sind über eine Swagger-UI dokumentiert.
-    <br>
-    Diese finden Sie
-    <a href="../api-explorer" target="_blank" rel="noopener noreferrer"
-       title="Link zur Swagger UI">hier</a>.
-    <br>
-    <strong>Achtung:</strong> Die dort angezeigten <em>"Try it out"</em>-Knöpfe führen die Anfragen auch tatsächlich aus.
-    </p>
-    <h2>API Keys verwalten</h2>
+    <h1 class="display-4">API</h1>
 
-    <metal:main metal:use-macro="templates('Fragments/api_keys_table.pt').macros['api_key_table']" />
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title">Dokumentation</h2>
+        <p>
+        Die verschiedenen API-Zugriffe sind über eine Swagger-UI dokumentiert.
+        <br>
+        Diese finden Sie
+        <a href="../api-explorer" target="_blank" rel="noopener noreferrer"
+           title="Link zur Swagger UI">hier</a>.
+        <br>
+        <strong>Achtung:</strong> Die dort angezeigten <em>"Try it out"</em>-Knöpfe führen die Anfragen auch tatsächlich aus.
+        </p>
+      </div>
+    </div>
+    <div class="card mt-2">
+      <div class="card-body">
+        <h2>API Keys verwalten</h2>
 
-    <p>
-    Hier können Sie ihre aktuellen API Keys verwalten.
-    </p>
+        <metal:main metal:use-macro="templates('Fragments/api_keys_table.pt').macros['api_key_table']" />
 
-    <br>
-    <form action="/user/api_keys" tal:attributes="action request.route_path('user_api_keys')" method="POST">
-      <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
-    </form>
+        <p>
+        Hier können Sie ihre aktuellen API Keys verwalten.
+        </p>
+
+        <br>
+        <form action="/user/api_keys" tal:attributes="action request.route_path('user_api_keys')" method="POST">
+          <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+        </form>
+      </div>
+    </div>
 
   </metal:main>
 </metal:main>
