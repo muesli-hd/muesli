@@ -2,11 +2,11 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<h2>Resultate für ${lecture.name}</h2>
+<h2 class="display-4">Resultate <small class="text-muted">für ${lecture.name}</small></h2>
 
 <div tal:define="fF lambda f: '%.1f' % f if f != None else '-'" >
   <div tal:repeat="catexams exams_by_category" tal:omit-tag="">
-    <table class="table table-fluid table-striped table-sm" style="width: auto !important">
+    <table class="table table-striped table-sm" style="width: auto !important">
       <thead class="thead-dark">
         <th scope="col">
           ${catexams['name']}
@@ -30,68 +30,71 @@
         </td>
         </span>
       </tr>
-    <tr>
-      <th scope="row">Insgesamt: </th>
-      <td colspan="2"><strong>${fF(catexams['sum'])}/${fF(catexams['max'])}</strong>
-        <span tal:condition="catexams['max']>0">
-         (${'%2.f' % (catexams['sum']/catexams['max']*100)}%)
-        </span>
-     </td>
-    </tr>
+      <tfoot>
+        <th scope="row">Insgesamt: </th>
+        <td colspan="2"><strong>${fF(catexams['sum'])}/${fF(catexams['max'])}</strong>
+          <span tal:condition="catexams['max']>0">
+            (${'%2.f' % (catexams['sum']/catexams['max']*100)}%)
+          </span>
+        </td>
+      </tfoot>
     </table>
 
   </div>
 
-  <div tal:condition="admissions">
-  <h3>Klausurzulassungen</h3>
-  <table>
-    <tr tal:repeat="adm admissions.values()">
-      <td>${adm.exam.name}</td>
-      <td>
-        <span tal:condition="adm.admission==False" tal:omit-tag="">Nicht zugelassen</span>
-        <span tal:condition="adm.admission==True" tal:omit-tag="">Zugelassen</span>
-        <span tal:condition="adm.admission==None" tal:omit-tag="">Zulassung ausstehend</span>
-      </td>
-    </tr>
-  </table>
+  <div class="card" tal:condition="admissions">
+    <div class="card-body">
+    <h3 class="card-title">Klausurzulassungen</h3>
+    <table>
+      <tr tal:repeat="adm admissions.values()">
+        <td class="pr-2">${adm.exam.name}</td>
+        <td>
+          <span class="badge badge-danger" tal:condition="adm.admission == False">Nicht zugelassen</span>
+          <span class="badge badge-success" tal:condition="adm.admission == True">Zugelassen</span>
+          <span class="badge badge-warning" tal:condition="adm.admission == None">Zulassung ausstehend</span>
+        </td>
+      </tr>
+    </table>
+    </div>
   </div>
 
-  <div tal:condition="registrations" tal:omit-tag="">
-  <h3>Klausuranmeldungen</h3>
-
-  <p>
-        Bitte melden Sie sich ggf. für die Klausuren an.
-      <strong>J</strong> bedeutet, daß Sie an der Klausur teilnehmen möchten; <strong>N</strong>, daß Sie <strong>nicht</strong> an der Klausur teilnehmen möchten.
+  <div class="card mt-2" tal:condition="registrations">
+    <div class="card-body">
+      <h3 class="card-title">Klausuranmeldungen</h3>
+      <p>
+      Bitte melden Sie sich ggf. für die Klausuren an.
+      <strong>J</strong> bedeutet, daß Sie an der Klausur teilnehmen möchten;
+      <strong>N</strong>, daß Sie <strong>nicht</strong> an der Klausur teilnehmen möchten.
       Falls Sie sich noch nicht entschieden haben, können Sie <strong>?</strong> angeben.
-  </p>
-  <p>
+      </p>
+      <p>
       Sie können Ihre Auswahl bis zum Ende der Anmeldephase mehrmals ändern.
-  </p>
+      </p>
 
-  <form method="POST">
-  <table>
-
-    <tr tal:repeat="reg registrations.values()">
-      <td>${reg.exam.name}</td>
-      <td tal:define="name 'registration-%s' % reg.exam.id;value reg.registration;readonly reg.exam.registration!=True">
-         <metal:main metal:use-macro="templates('Fragments/HTML/input_tristate.pt').macros['input_tristate']" />
-      </td>
-    </tr>
-
-  </table>
-
-  <input type="submit" value="Speichern"/>
-  </form>
+      <form method="POST" class="mb-2">
+        <table>
+          <tr tal:repeat="reg registrations.values()">
+            <td class="pr-2">${reg.exam.name}</td>
+            <td tal:define="name 'registration-%s' % reg.exam.id;value reg.registration;readonly reg.exam.registration!=True">
+               <metal:main metal:use-macro="templates('Fragments/HTML/input_tristate.pt').macros['input_tristate']" />
+            </td>
+          </tr>
+        </table>
+        <input role="button" class="btn btn-primary" type="submit" value="Speichern"/>
+      </form>
+    </div>
   </div>
 
-  <div tal:condition="grades" tal:omit-tag="">
-  <h3>Benotungen</h3>
-  <table>
-    <tr tal:repeat="grade grades">
-      <th>${grade.grading.name}</th>
-      <td>${grade.grade}</td>
-    </tr>
-  </table>
+  <div class="card" tal:condition="grades" tal:omit-tag="">
+    <div class="card-body">
+    <h3 class="card-title">Benotungen</h3>
+    <table>
+      <tr tal:repeat="grade grades">
+        <th>${grade.grading.name}</th>
+        <td>${grade.grade}</td>
+      </tr>
+    </table>
+    </div>
   </div>
 </div>
   </metal:main>

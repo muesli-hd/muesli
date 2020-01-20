@@ -2,7 +2,7 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<h2>Liste aller registrierten Nutzer</h2>
+<h2 class="display-4">Registrierte Nutzer</h2>
 
 <table class="table table-striped">
   <thead class="thead-dark">

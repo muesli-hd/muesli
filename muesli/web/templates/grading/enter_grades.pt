@@ -79,9 +79,9 @@
 
 <h2>Noten eintragen</h2>
 
-<h3>${grading.name} der Vorlesung ${grading.lecture.name}</h3>
+<h3>Benotung "${grading.name}" der Vorlesung ${grading.lecture.name}</h3>
 
-<p tal:condition="error_msg" class="error">${error_msg}</p>
+<p tal:condition="error_msg" class="alert alert-danger">${error_msg}</p>
 
 
 <a tal:attributes="href request.route_path('grading_export', grading_id=grading.id)">
@@ -96,7 +96,7 @@
 
 <form method="get">
   Berechnungsformel <input type="text" name="formula" size="80" tal:attributes="value formula" />
-  <input type="submit" value="Berechnen"/> <input type="submit" name="fill" value="Berechnen &amp; übertragen"/>
+  <input class="btn btn-primary" type="submit" value="Berechnen"/> <input class="btn btn-success" type="submit" name="fill" value="Berechnen &amp; übertragen"/>
   <a class="nohelp" href="javascript:show_help()">Hilfe</a><a class="help" style="display:none" href="javascript:hide_help()">Hilfe verbergen</a>
 </form>
 <div class="help" style="display:none"><p>
@@ -126,45 +126,54 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
 </ul>
 </div>
 
-<form method="get">
-  <select name="students">
+<form class="form-inline pt-3" method="get">
+  <select class="custom-select mr-2" name="students">
     <option value="">Alle</option>
     <option tal:repeat="exam grading.exams" tal:attributes="selected str(exam.id)==exam_id; value exam.id">${exam.name}</option>
   </select>
-  <input type="submit" value="Anzeigen"/>
+  <input class="btn btn-primary"type="submit" value="Anzeigen"/>
 </form>
 
-<form id="gradingsform" method="post" tal:attributes="action request.route_path('grading_enter_grades', grading_id=grading.id)">
-<input type="hidden" name="submit" value="1" />
-<table class="colored">
-  <tr>
-    <th tal:condition="not tutorial_ids">Tutor</th>
-    <th tal:repeat="exam grading.exams">${exam.name} (${varsForExam[exam.id]})</th>
-    <th>Name</th>
-    <th>Berechnete Note</th>
-    <th>Note</th>
-  </tr>
-  <tr tal:repeat="ls lecture_students"
-      tal:attributes="id 'row-%i' % ls.student_id">
-      <td tal:condition="not tutorial_ids">
-        <span tal:condition="ls.tutorial.tutor" tal:content="ls.tutorial.tutor.last_name" tal:omit-tag="" />
-      </td>
-      <td tal:repeat="exam grading.exams">
-        <span tal:define="exam_points grades[ls.student_id]['exams'][exam.id]">
-          <metal:main metal:use-macro="templates('Fragments/Format/exam_points.pt').macros['exam_points']" />
-        </span>
-      </td>
-    <td>${ls.student.name}</td>
-    <td><span id="calc-${ls.student_id}">${grades[ls.student_id]['calc']}</span></td>
+<form class="pt-3" id="gradingsform" method="post" tal:attributes="action request.route_path('grading_enter_grades', grading_id=grading.id)">
+  <input type="hidden" name="submit" value="1" />
+  <table class="table">
+    <thead class="thead-dark">
+      <th scope="col" tal:condition="not tutorial_ids">Tutor</th>
+      <th scope="col" tal:repeat="exam grading.exams">${exam.name} (${varsForExam[exam.id]})</th>
+      <th scope="col">Name</th>
+      <th scope="col">Berechnete Note</th>
+      <th scope="col">Note</th>
+      <th scope="col"></th>
+    </thead>
+    <tbody>
+      <tr tal:repeat="ls lecture_students"
+          tal:attributes="id 'row-%i' % ls.student_id">
+        <td tal:condition="not tutorial_ids">
+          <span tal:condition="ls.tutorial.tutor" tal:content="ls.tutorial.tutor.last_name" tal:omit-tag="" />
+        </td>
+        <td tal:repeat="exam grading.exams">
+          <span tal:define="exam_points grades[ls.student_id]['exams'][exam.id]">
+            <metal:main metal:use-macro="templates('Fragments/Format/exam_points.pt').macros['exam_points']" />
+          </span>
+        </td>
+        <td>${ls.student.name}</td>
+        <td>
+          <span id="calc-${ls.student_id}">${grades[ls.student_id]['calc']}</span>
+        </td>
 
-    <td><input tal:attributes="class 'invalid' if grades[ls.student_id]['invalid'] else 'points';
-             name 'grade-%i' % ls.student_id;
-             value grades[ls.student_id]['gradestr'];
-             id 'grade-%i' % ls.student_id;" size="4"/></td>
-    <td><input type="button" onclick="saveRow(event,${ls.student_id})" value="Speichern"/><span id="msg-${ls.student_id}"></span></td>
-  </tr>
-</table>
-<input type="submit" value="Speichern"/>
+        <td>
+          <input tal:attributes="class 'invalid' if grades[ls.student_id]['invalid'] else 'points';
+                 name 'grade-%i' % ls.student_id;
+                 value grades[ls.student_id]['gradestr'];
+                 id 'grade-%i' % ls.student_id;" size="4"/></td>
+        <td>
+          <input class="btn btn-primary" type="button" onclick="saveRow(event,${ls.student_id})" value="Speichern"/>
+          <span id="msg-${ls.student_id}" \>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <input class="btn btn-primary" type="submit" value="Speichern"/>
 </form>
 
 <h3 tal:condition="formula">Notenvorschau für berechnete Noten</h3>
