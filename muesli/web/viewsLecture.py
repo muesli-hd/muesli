@@ -501,12 +501,11 @@ def emailStudents(request):
 
 @view_config(route_name='lecture_view_removed_students', renderer='muesli.web:templates/lecture/view_removed_students.pt', context=LectureContext, permission='edit')
 def viewRemovedStudents(request):
-    db = request.db
     lecture = request.context.lecture
-    ls = lecture.lecture_removed_students
-    ls = ls.join(LectureRemovedStudent.student).order_by(User.last_name, User.first_name)
+    lecture_students = lecture.lecture_removed_students
+    lecture_students = lecture_students.join(LectureRemovedStudent.student).order_by(User.last_name, User.first_name)
     return {'lecture': lecture,
-            'removed_students': ls}
+            'removed_students': list(lecture_students)}
 
 @view_config(route_name='lecture_export_totals', renderer='muesli.web:templates/lecture/export_totals.pt', context=LectureContext, permission='edit')
 def exportTotals(request):

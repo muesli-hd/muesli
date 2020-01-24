@@ -4,7 +4,10 @@
 
 <h2>Entfernte und abgemeldete Studenten</h2>
 
-<table class="table">
+<p class="alert alert-primary" tal:condition="not removed_students">
+Es gibt keine Studenten die sich abgemeldet haben oder entfernt wurden.
+</p>
+<table class="table" tal:condition="removed_students">
   <thead class="thead-dark">
     <tr>
       <th scope="col">Name</th>
