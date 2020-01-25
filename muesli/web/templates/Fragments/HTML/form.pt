@@ -63,7 +63,7 @@
         aria-label field.name; readonly 'readonly' if field.readonly else None;">
       </div>
 
-      <div tal:condition="field.type=='textarea'" tal:omit-tag="">
+      <div class="mb-1" tal:condition="field.type=='textarea'">
         <!-- TEXTAREA -->
         <textarea class="form-control"
           tal:attributes="name field.name; cols str(field.cols); rows str(field.rows); readonly 'readonly' if field.readonly else None"
@@ -72,10 +72,11 @@
 
       <div tal:condition="field.type=='file'" tal:omit-tag="">
         <!-- FILE SELECTION -->
-        <input class="btn btn-primary"
-          role="button" type="file"
+        <div class="custom-file w-25">
+          <input type="file" class="custom-file-input" id="file_upload"
           tal:attributes="name field.name; size str(field.size); value field.value" />
-        <!-- <input class="btn"  tal:condition="field.growable" type="button" tal:attributes="onclick 'javascript:fb_grow('+field.name+')'" value="Weitere" /> -->
+          <label class="custom-file-label" for="file_upload">Choose file</label>
+        </div>
       </div>
 
       <div tal:condition="field.type=='multifile'" tal:omit-tag="">
