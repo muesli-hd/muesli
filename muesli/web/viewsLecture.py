@@ -314,24 +314,27 @@ def delete(request):
 def change_assistants(request):
     lecture = request.context.lecture
     if request.method == 'POST':
-        for nr, assistant in enumerate(lecture.assistants):
-            if 'change-%i' % assistant.id in request.POST:
+        for index, assistant in enumerate(lecture.assistants):
+            if 'change-{}'.format(assistant.id) in request.POST:
                 new_assistant = request.db.query(models.User).get(request.POST['assistant-%i' % assistant.id])
                 if new_assistant in lecture.assistants:
-                    request.session.flash('Assistent ist bereits in Vorlesung eingetragen', queue='errors')
+                    request.session.flash('{} ist bereits als Assistent für die Vorlesung eingetragen'.format(new_assistant.name), queue='errors')
                 else:
-                    lecture.assistants[nr] = new_assistant
-            if 'remove-%i' % assistant.id in request.POST:
-                del lecture.assistants[nr]
+                    lecture.assistants[index] = new_assistant
+                    request.session.flash('{} ist jetzt als neuer Assistent für die Vorlesung eingetragen!'.format(new_assistant.name), queue='messages')
+            if 'remove-{}'.format(assistant.id) in request.POST:
+                del lecture.assistants[index]
+                request.session.flash('{} wurde als Vorlesungsassistent entfernt!'.format(lecture.assistants[index].name), queue='messages')
         if 'add-assistant' in request.POST:
             if request.POST['new-assistant'] == "None":
-                request.session.flash('Bitte einen Assistenten auswählen', queue='errors')
+                request.session.flash('Bitte einen Assistenten auswählen!', queue='errors')
             else:
                 new_assistant = request.db.query(models.User).get(request.POST['new-assistant'])
                 if new_assistant and new_assistant not in lecture.assistants:
                     lecture.assistants.append(new_assistant)
+                    request.session.flash('{} ist jetzt als zusätzlicher Assistent für die Vorlesung eingetragen!'.format(new_assistant.name), queue='messages')
     if request.db.new or request.db.dirty or request.db.deleted:
-        if len(lecture.assistants)>0:
+        if len(lecture.assistants) > 0:
             lecture.old_assistant = lecture.assistants[0]
         else:
             lecture.old_assistant = None
