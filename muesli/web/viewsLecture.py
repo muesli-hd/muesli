@@ -229,7 +229,7 @@ class SwitchStudents(object):
 
             if student1_id == student2_id:
                 self.request.session.flash('Student kann nicht mit sich selbst getauscht werden!', queue='errors')
-            elif ls1.tutorial==ls2.tutorial:
+            elif ls1.tutorial == ls2.tutorial:
                 self.request.session.flash('Die beiden Studenten sind im gleichen Tutorium!', queue='errors')
             else:
                 tmp = ls1.tutorial
@@ -242,12 +242,11 @@ class SwitchStudents(object):
                 muesli.web.viewsTutorial.sendChangesMailSubscribe(self.request, ls2.tutorial, student2, ls1.tutorial)
                 muesli.web.viewsTutorial.sendChangesMailUnsubscribe(self.request, ls1.tutorial, student2, ls2.tutorial)
                 muesli.web.viewsTutorial.sendChangesMailUnsubscribe(self.request, ls2.tutorial, student1, ls1.tutorial)
-                self.request.session.flash('Sie haben die Tutorien von {} und {} vertauscht'.format(student1.name,student2.name), queue='messages')
+                self.request.session.flash('Sie haben die Tutorien von {} und {} vertauscht'.format(student1.name, student2.name), queue='messages')
 
         return {'lecture': lecture,
                 'tutorials': tutorials,
-                'students': students
-                }
+                'students': students}
 
 
 @view_config(route_name='lecture_edit', renderer='muesli.web:templates/lecture/edit.pt', context=LectureContext, permission='edit')
