@@ -13,12 +13,12 @@
 <h3>Registrierung</h3>
 <p>Der Nutzer muss seine Anmeldung noch bestätigen.</p>
 <form method="post" tal:attributes="action request.route_path('user_resend_confirmation_mail', user_id=user.id)">
-  <input type="submit" value="Bestätigungsmail erneut verschicken" />
+  <input role="button" class="btn btn-primary" type="submit" value="Bestätigungsmail erneut verschicken" />
 </form>
 
 </div>
 
-<div tal:condition="user.tutorials.count() !=0">
+<div tal:condition="user.tutorials.count()">
 <h3>Teilnahme an Übungsgruppen</h3>
 <ul>
   <li tal:repeat="tutorial user.tutorials">(${tutorial.lecture.term})
@@ -26,7 +26,7 @@
 </ul>
 </div>
 
-<div tal:condition="len(time_preferences)!=0">
+<div tal:condition="time_preferences">
 <h3>Vorläufige Eintragungen in Übungsgruppen</h3>
 <table>
   <tr>
@@ -41,7 +41,7 @@
 </table>
 </div>
 
-<div tal:condition="len(lectures_as_assistant)!=0">
+<div tal:condition="lectures_as_assistant">
 <h3>Betreute Vorlesungen</h3>
 <ul>
   <li tal:repeat="lecture lectures_as_assistant">(${lecture.term})
