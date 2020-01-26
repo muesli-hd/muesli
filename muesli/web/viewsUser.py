@@ -178,36 +178,40 @@ def edit(request):
 
 @view_config(route_name='user_delete', context=context.UserContext, permission='delete')
 def delete(request):
+    user_is_deletable = True
     user = request.context.user
-    if (user.tutorials.all()):
-        request.session.flash('Benutzer %s ist zu Tutorien angemeldet und kann daher nicht gelöscht werden' % user, queue='errors')
-        return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
-    elif user.tutorials_as_tutor.all():
-        request.session.flash('Benutzer %s ist Tutor von Tutorien und kann daher nicht gelöscht werden' % user, queue='errors')
-        return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
-    elif user.lectures_as_tutor:
-        request.session.flash('Benutzer %s ist als Tutor eingetragen und kann daher nicht gelöscht werden' % user, queue='errors')
-        return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
-    elif user.lectures_as_assistant.all():
-        request.session.flash('Benutzer %s verwaltet Vorlesungen und kann daher nicht gelöscht werden' % user, queue='errors')
-        return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
-    elif len(user.exercise_points) > 0:
-        request.session.flash('Benutzer %s hat eingetragene Punkte und kann daher nicht gelöscht werden' % user, queue='errors')
-        return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
-    elif len(user.student_grades.all()) > 0:
-        request.session.flash('Benutzer %s hat eingetragene Noten und kann daher nicht gelöscht werden' % user, queue='errors')
-        return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
-    elif len(user.tutorials_removed.all()) > 0:
-        request.session.flash('Benutzer %s war in Tutorien angemeldet und kann daher nicht gelöscht werden' % user, queue='errors')
-        return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
-    else:
+    if user.tutorials.all():
+        request.session.flash('{} ist zu Tutorien angemeldet und kann daher nicht gelöscht werden!'.format(user.name), queue='errors')
+        user_is_deletable = False
+    if user.tutorials_as_tutor.all():
+        request.session.flash('{} ist Tutor von Tutorien und kann daher nicht gelöscht werden!'.format(user.name), queue='errors')
+        user_is_deletable = False
+    if user.lectures_as_tutor:
+        request.session.flash('{} ist als Tutor eingetragen und kann daher nicht gelöscht werden!'.format(user.name), queue='errors')
+        user_is_deletable = False
+    if user.lectures_as_assistant.all():
+        request.session.flash('{} verwaltet Vorlesungen und kann daher nicht gelöscht werden!'.format(user.name), queue='errors')
+        user_is_deletable = False
+    if len(user.exercise_points) > 0:
+        request.session.flash('{} hat eingetragene Punkte und kann daher nicht gelöscht werden!'.format(user.name), queue='errors')
+        user_is_deletable = False
+    if len(user.student_grades.all()) > 0:
+        request.session.flash('{} hat eingetragene Noten und kann daher nicht gelöscht werden!'.format(user.name), queue='errors')
+        user_is_deletable = False
+    if len(user.tutorials_removed.all()) > 0:
+        request.session.flash('{} war in Tutorien angemeldet und kann daher nicht gelöscht werden!'.format(user.name), queue='errors')
+        user_is_deletable = False
+
+    if user_is_deletable:
         for c in user.confirmations:
             request.db.delete(c)
         # old_name = str(user)
         request.db.delete(user)
         request.db.commit()
-        request.session.flash('Benutzer %s wurde gelöscht!' % user, queue='messages')
+        request.session.flash('{} wurde gelöscht!'.format(user.name), queue='messages')
         return HTTPFound(location=request.route_url('admin'))
+
+    return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
 
 
 @view_config(route_name='user_delete_unconfirmed', renderer='muesli.web:templates/user/delete_unconfirmed.pt', context=context.GeneralContext, permission='admin')

@@ -44,24 +44,19 @@ function set_navigation(nav) {
 }
 /* ]]> */
 </script>
-<script>
-</script>
 
 <div id="history">
 </div>
 
+<metal:main metal:use-macro="templates('Fragments/message_queue.pt').macros['message_queue']">
 
 <div class="container-fluid">
   <main class="pt-3" role="main">
     <div class="jumbotron bg-mdb-color-lighten-6">
-      <p tal:condition="request.session.peek_flash('errors')"
-      tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('errors'))"
-          class="alert alert-danger"/>
-      <p tal:condition="request.session.peek_flash('messages')"
-         tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('messages'))"
-         class="alert alert-success"/>
+
       <!-- <metal:main metal:use-macro="templates('Fragments/navigation.pt').macros['navigation']" /> -->
       <metal:content define-slot="content" />
+
     </div>
   </main>
 </div>
