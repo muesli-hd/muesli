@@ -7,44 +7,48 @@
 <div class="container pb-3">
   <div tal:repeat="field form.formfields" class="pb-1">
     <div class="form-group" tal:condition="field.type != 'hidden'" tal:omit-tag="">
-      <div class="input-group mb-3" tal:condition="field.type == 'select'">
-        <!-- DROPDOWN SELECTION -->
-        <div class="input-group-prepend">
-          <span class="input-group-text font-weight-bold" id="select-prepend-text">${field.label}</span>
+      <div class="form-row mb-3" tal:condition="field.type == 'select'">
+          <!-- DROPDOWN SELECTION -->
+          <div class="col-sm-3 col-xl-2">
+            <span class="font-weight-bold" id="select-prepend-text">${field.label}</span>
+          </div>
+          <div class="col-sm-9 col-xl-10">
+            <select class="custom-select" tal:attributes="name field.name; disabled 'disabled' if field.readonly else None">
+              <option tal:repeat="option field.options"
+                 tal:attributes="value str(option[0]); selected 'selected' if option[0]==field.value else None">
+                  ${option[1]}
+              </option>
+            </select>
         </div>
-        <select class="custom-select" tal:attributes="name field.name; disabled 'disabled' if field.readonly else None">
-          <option tal:repeat="option field.options"
-             tal:attributes="value str(option[0]); selected 'selected' if option[0]==field.value else None">
-              ${option[1]}
-          </option>
-        </select>
       </div>
 
-      <div class="form-group row" tal:condition="field.type == 'radio'" tal:omit-tag="">
+      <div class="form-row" tal:condition="field.type == 'radio'" tal:omit-tag="">
         <!-- RADIO BUTTONS -->
-        <div class="col">
-          <span class="font-weight-bold" id="radio-prepend-text">${field.label}</span>
-        </div>
-        <div class="col">
-          <div class="custom-control">
-            <div tal:repeat="option field.options" class="custom-control custom-radio custom-control-inline">
-              <input aria-describedby="radio-prepend-text" type="radio" class="custom-control-input" tal:attributes="name field.name; value str(option[0]); id field.name+'_'+str(option[0]); checked 'checked' if option[0]==field.value else None; readonly 'readonly' if field.readonly else None">
-              <label class="custom-control-label" tal:attributes="for field.name+'_'+str(option[0])">${option[1]}</label>
-            </div>
+        <div class="input-group">
+          <div class="col-sm-3">
+            <span class="font-weight-bold">${field.label}</span>
+          </div>
+            <div class="custom-control col-sm-9">
+              <div tal:repeat="option field.options" class="custom-control custom-radio custom-control-inline">
+                <input aria-describedby="radio-prepend-text" type="radio" class="custom-control-input" tal:attributes="name field.name; value str(option[0]); id field.name+'_'+str(option[0]); checked 'checked' if option[0]==field.value else None; readonly 'readonly' if field.readonly else None">
+                <label class="custom-control-label" tal:attributes="for field.name+'_'+str(option[0])">${option[1]}</label>
+              </div>
           </div>
         </div>
       </div>
 
-      <div class="input-group mb-3" tal:condition="field.type == 'text'">
+      <div class="form-row mb-3" tal:condition="field.type == 'text'">
         <!-- TEXT INPUT -->
-        <div class="input-group-prepend">
-          <span class="input-group-text font-weight-bold" id="text-input-prepend-text">${field.label}</span>
+        <div class="col-sm-3 col-xl-2">
+          <span class="font-weight-bold text-break" id="text-input-prepend-text">${field.label}</span>
         </div>
+        <div class="col-sm-9 col-xl-10">
         <input type="text" class="form-control"
         aria-describedby="text-input-prepend-text" tal:attributes="
         name field.name; size str(field.size); value field.value;
         aria-label field.name; readonly 'readonly' if field.readonly else None;
         placeholder ('z.B. ' + field.placeholder) if field.placeholder else None;">
+        </div>
       </div>
 
       <div tal:condition="field.type=='number'" tal:omit-tag="">
@@ -52,15 +56,17 @@
         <input type="number" tal:attributes="name field.name; size str(field.size); value field.value; readonly 'readonly' if field.readonly else None"/>
       </div>
 
-      <div class="input-group mb-3" tal:condition="field.type == 'password'">
+      <div class="form-row" tal:condition="field.type == 'password'">
         <!-- PASSWORD INPUT -->
-        <div class="input-group-prepend">
-          <span class="input-group-text font-weight-bold" id="password-input-prepend-text">${field.label}</span>
+        <div class="col-sm-3 col-xl-2">
+          <span class="font-weight-bold text-break" id="password-input-prepend-text">${field.label}</span>
         </div>
-        <input type="password" class="form-control"
-        aria-describedby="password-input-prepend-text" tal:attributes="
-        name field.name; size str(field.size); value field.value;
-        aria-label field.name; readonly 'readonly' if field.readonly else None;">
+        <div class="col-sm-9 col-xl-10">
+          <input type="password" class="form-control"
+          aria-describedby="password-input-prepend-text" tal:attributes="
+          name field.name; size str(field.size); value field.value;
+          aria-label field.name; readonly 'readonly' if field.readonly else None;">
+        </div>
       </div>
 
       <div class="mb-1" tal:condition="field.type=='textarea'">
