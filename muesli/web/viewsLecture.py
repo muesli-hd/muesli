@@ -289,25 +289,35 @@ class Edit:
 @view_config(route_name='lecture_delete', context=LectureContext, permission='delete_lecture')
 def delete(request):
     lecture = request.context.lecture
+    lecture_is_deletable = True
     if lecture.tutorials:
         request.session.flash('Vorlesung hat noch Übungsgruppen!', queue='errors')
-    elif lecture.tutors:
+        lecture_is_deletable = False
+    if lecture.tutors:
         request.session.flash('Vorlesung hat noch Tutoren!', queue='errors')
-    elif lecture.lecture_students.all():
+        lecture_is_deletable = False
+    if lecture.lecture_students.all():
         request.session.flash('Vorlesung hat noch Studenten', queue='errors')
-    elif lecture.lecture_removed_students.all():
+        lecture_is_deletable = False
+    if lecture.lecture_removed_students.all():
         request.session.flash('Vorlesung hat noch gelöschte Studenten', queue='errors')
-    elif lecture.exams.all():
+        lecture_is_deletable = False
+    if lecture.exams.all():
         request.session.flash('Vorlesung hat noch Testate', queue='errors')
-    elif lecture.gradings:
+        lecture_is_deletable = False
+    if lecture.gradings:
         request.session.flash('Vorlesung hat noch Benotungen', queue='errors')
-    elif lecture.time_preferences.all():
+        lecture_is_deletable = False
+    if lecture.time_preferences.all():
         request.session.flash('Vorlesung hat noch Präferenzen', queue='errors')
-    else:
+        lecture_is_deletable = False
+
+    if lecture_is_deletable:
         lecture.assistants = []
         request.db.delete(lecture)
         request.db.commit()
         request.session.flash('Vorlesung gelöscht', queue='messages')
+
     return HTTPFound(location=request.route_url('lecture_list'))
 
 @view_config(route_name='lecture_change_assistants', context=LectureContext, permission='change_assistant')
@@ -316,15 +326,15 @@ def change_assistants(request):
     if request.method == 'POST':
         for index, assistant in enumerate(lecture.assistants):
             if 'change-{}'.format(assistant.id) in request.POST:
-                new_assistant = request.db.query(models.User).get(request.POST['assistant-%i' % assistant.id])
+                new_assistant = request.db.query(models.User).get(request.POST['assistant-{}'.format(assistant.id)])
                 if new_assistant in lecture.assistants:
                     request.session.flash('{} ist bereits als Assistent für die Vorlesung eingetragen'.format(new_assistant.name), queue='errors')
                 else:
                     lecture.assistants[index] = new_assistant
                     request.session.flash('{} ist jetzt als neuer Assistent für die Vorlesung eingetragen!'.format(new_assistant.name), queue='messages')
             if 'remove-{}'.format(assistant.id) in request.POST:
-                del lecture.assistants[index]
                 request.session.flash('{} wurde als Vorlesungsassistent entfernt!'.format(lecture.assistants[index].name), queue='messages')
+                del lecture.assistants[index]
         if 'add-assistant' in request.POST:
             if request.POST['new-assistant'] == "None":
                 request.session.flash('Bitte einen Assistenten auswählen!', queue='errors')
