@@ -41,12 +41,18 @@ import PIL.ImageDraw
 import io
 from natsort import natsorted
 
-@view_config(route_name='tutorial_view', renderer='muesli.web:templates/tutorial/view.pt', context=TutorialContext, permission='viewOverview')
+@view_config(
+    route_name='tutorial_view',
+    renderer='muesli.web:templates/tutorial/view.pt',
+    context=TutorialContext,
+    permission='viewOverview'
+)
 class View:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
         self.tutorial_ids = request.matchdict['tutorial_ids']
+
     def __call__(self):
         tutorials = self.request.context.tutorials
         lecture_students = self.request.context.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))
@@ -56,9 +62,11 @@ class View:
         # Query results are already lexicographically sorted.
         # Sort again using length as key so we get length lexicographical sorting
         # https://github.com/muesli-hd/muesli/issues/28
-        exams = dict([[cat['id'], natsorted(list(tutorial.lecture.exams.filter(models.Exam.category==cat['id'])),
-                                         key=lambda x: x.name)]
-                      for cat in utils.categories])
+        exams = dict([[cat['id'], natsorted(
+                    list(tutorial.lecture.exams.filter(models.Exam.category==cat['id'])),
+                    key=lambda x: x.name)
+            ] for cat in utils.categories
+        ])
         return {'tutorial': tutorial,
                 'tutorials': tutorials,
                 'tutorial_ids': self.tutorial_ids,
@@ -401,27 +409,29 @@ def ajaxGetTutorial(request):
     else:
         return {'msg': 'No Tutorial found!'}
 
-@view_config(route_name='tutorial_assign_student', renderer='muesli.web:templates/tutorial/assign_student.pt', context=AssignStudentContext, permission='move')
+@view_config(route_name='tutorial_assign_student', context=AssignStudentContext, permission='move')
 def assign_student(request):
     student = request.context.student
     new_tutorial = request.context.tutorial
     lecture = new_tutorial.lecture
     lrs = request.db.query(models.LectureRemovedStudent).get((lecture.id, student.id))
-    if lrs: request.db.delete(lrs)
-    ls = request.db.query(models.LectureStudent).get((lecture.id, student.id))
-    if ls:
-        pass
-    #       oldtutorial = ls.tutorial
-    else:
-        ls = models.LectureStudent()
-        ls.lecture = lecture
-        ls.student = student
-    #       oldtutorial = None
-    ls.tutorial = new_tutorial
-    if not ls in request.db: request.db.add(ls)
+    if lrs:
+        request.db.delete(lrs)
+    lecture_student = request.db.query(models.LectureStudent).get((lecture.id, student.id))
+    # TODO: is this really needed?!
+    if not lecture_student:
+        lecture_student = models.LectureStudent()
+        lecture_student.lecture = lecture
+        lecture_student.student = student
+    lecture_student.tutorial = new_tutorial
+    if lecture_student not in request.db:
+        request.db.add(lecture_student)
     request.db.commit()
-    #if oldtutorial:
-    #       sendChangesMailUnsubscribe(request, oldtutorial, request.user, toTutorial=tutorial)
-    #sendChangesMailSubscribe(request, tutorial, request.user, fromTutorial=oldtutorial)
-    return {'student': student,
-            'new_tutorial': new_tutorial}
+    request.session.flash(
+        '{} wurde der Übungsgruppe am {} zugeteilt!'.format(
+            student.name,
+            new_tutorial.time.formatted()
+        ),
+        queue='messages'
+    )
+    return HTTPFound(location=request.referrer)

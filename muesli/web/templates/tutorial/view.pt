@@ -86,7 +86,9 @@ set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lec
   <div class="card-body">
     <h3 class="card-title">Teilnehmer</h3>
 
-    <p tal:condition="not students" class="alert alert-primary">Im moment sind in das Tutorium keine Teilnehmer eingetragen!</p>
+    <p tal:condition="not students" class="alert alert-primary">
+    Im Moment sind in das Tutorium noch keine Teilnehmer eingetragen!
+    </p>
     <table class="table" tal:condition="students">
       <thead class="thead-light">
         <tr>
