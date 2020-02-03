@@ -22,7 +22,8 @@
       Eigene Übungsgruppen
     </h3>
     <h4 class="card-subtitle mb-2 text-muted">(als Übungsleiter)</h4>
-      <table class="table table-fluid">
+    <div class="table-responsive">
+      <table class="table">
         <thead class="thead-light">
           <th scope="col">Semester</th>
           <th scope="col">Vorlesung</th>
@@ -54,6 +55,7 @@
           </td>
       </tr>
       </table>
+    </div>
   </div>
 </div>
 
@@ -63,44 +65,90 @@
     <h3 class="card-title">
       Feste Eintragungen in Übungsgruppen
     </h3>
-    <table class="table">
-      <thead class="thead-light">
-        <th scope="col">Semester</th>
-        <th scope="col">Vorlesung</th>
-        <th scope="col">Zeit</th>
-        <th scope="col">Raum</th>
-        <th scope="col">Übungsleiter</th>
-        <th scope="col"></th>
-        <th scope="col"></th>
-      </thead>
-      <tbody>
-        <tr tal:repeat="tutorial tutorials">
-          <td>${tutorial.lecture.term}</td>
-          <td>
-            <a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
-              ${tutorial.lecture.name}
-            </a>
-          </td>
-          <td>${tutorial.time}</td>
-          <td>${tutorial.place}</td>
-          <td>
-            <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name}</a>
-          </td>
-          <td>
-            <a role="button"
-               class="btn-sm btn-info"
-              tal:attributes="href request.route_path('lecture_view_points',
-              lecture_id=tutorial.lecture.id)">Details</a>
-          </td>
-          <td>
-            <a role="button" class="btn-sm btn-danger text-white" data-toggle="modal" data-target="#confirm_unsubscribe">
-              Austreten
-            </a>
-            <metal:main metal:use-macro="templates('Fragments/unsubscribe_modal.pt').macros['unsubscribe_modal']" />
-          </td>
+    <div class="d-lg-none m-3">
+      <table class="table">
+        <div tal:omit-tag="" tal:repeat="tutorial tutorials">
+          <tr class="row">
+            <th scope="col" class="col text-center bg-dark text-white h4 m-0">
+              <a class="text-white" tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
+                ${tutorial.lecture.name}
+              </a>
+            </th>
+          </tr>
+          <tr class="row">
+            <th scope="row" class="col-sm-2 table-active">Semester</th>
+            <td class="col">${tutorial.lecture.term}</td>
+          </tr>
+          <tr class="row">
+            <th scope="row" class="col-sm-2 table-active">Zeit</th>
+            <td class="col">${tutorial.time}</td>
+          </tr>
+          <tr class="row">
+            <th scope="row" class="col-sm-2 table-active">Raum</th>
+            <td class="col">${tutorial.place}</td>
+          </tr>
+          <tr class="row">
+            <th scope="row" class="col-sm-2 table-active">Tutor</th>
+            <td class="col">
+              <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name}</a>
+            </td>
+          </tr>
+          <tr class="row text-center table-secondary mb-3">
+            <td class="col">
+              <a role="button"
+                 class="btn btn-info"
+                tal:attributes="href request.route_path('lecture_view_points',
+                lecture_id=tutorial.lecture.id)">Details</a>
+            </td>
+            <td class="col">
+              <a role="button" class="btn btn-danger text-white" data-toggle="modal" data-target="#confirm_unsubscribe">
+                Austreten
+              </a>
+              <metal:main metal:use-macro="templates('Fragments/unsubscribe_modal.pt').macros['unsubscribe_modal']" />
+            </td>
+          </tr>
+        </div>
+      </table>
+    </div>
+
+    <div class="d-none d-lg-block m-3">
+      <table class="table">
+        <tr class="thead-light">
+          <th>Semester</th>
+          <th>Vorlesung</th>
+          <th>Zeit</th>
+          <th>Raum</th>
+          <th>Übungsleiter</th>
+          <th></th>
+          <th></th>
         </tr>
-      </tbody>
-    </table>
+          <tr tal:repeat="tutorial tutorials">
+            <td>${tutorial.lecture.term}</td>
+            <td>
+              <a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
+                ${tutorial.lecture.name}
+              </a>
+            </td>
+            <td>${tutorial.time}</td>
+            <td>${tutorial.place}</td>
+            <td>
+              <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name}</a>
+            </td>
+            <td>
+              <a role="button"
+                 class="btn-sm btn-info"
+                tal:attributes="href request.route_path('lecture_view_points',
+                lecture_id=tutorial.lecture.id)">Details</a>
+            </td>
+            <td>
+              <a role="button" class="btn-sm btn-danger text-white" data-toggle="modal" data-target="#confirm_unsubscribe">
+                Austreten
+              </a>
+              <metal:main metal:use-macro="templates('Fragments/unsubscribe_modal.pt').macros['unsubscribe_modal']" />
+            </td>
+          </tr>
+      </table>
+    </div>
   </div>
 </div>
 
