@@ -168,9 +168,11 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('contact', '/contact')
     config.add_route('changelog', '/changelog')
     config.add_route('admin', '/admin', factory = GeneralContext)
+    config.add_route('test_exceptions', 'test_exception', factory=GeneralContext)
     config.add_route('index', '/')
     config.add_route('email_users', '/email_users', factory = GeneralContext)
     config.add_route('email_all_users','/email_all_users',factory = GeneralContext)
+
     config.add_route('user_update', '/user/update', factory = GeneralContext)
     config.add_route('user_check', '/user/check', factory = GeneralContext)
     config.add_route('user_change_email', '/user/change_email', factory = GeneralContext)

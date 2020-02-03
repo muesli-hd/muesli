@@ -79,6 +79,22 @@ def start(request):
 def admin(request):
     return {}
 
+@view_config(
+    route_name='test_exceptions',
+    renderer='muesli.web:templates/test_exceptions.pt',
+    context=GeneralContext,
+    permission='admin'
+)
+def test_exceptions(request):
+    if request.method == 'POST':
+        if request.POST.get("HTTPInternalServerError"):
+            raise Exception("Das ist eine Testnachricht!")
+        if request.POST.get("HTTPBadRequest"):
+            raise HTTPBadRequest("Dies ist eine Testfehlermeldung!")
+        if request.POST.get("HTTPForbidden"):
+            raise HTTPForbidden("Du kommsch hier ned rein!")
+    return {}
+
 @view_config(route_name='contact', renderer='muesli.web:templates/contact.pt')
 def contact(request):
     return {}

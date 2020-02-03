@@ -9,21 +9,21 @@
     Geben Sie dann bitte die Informationen unten an.
     </p>
 
-    <table>
+    <table class="table w-auto">
       <tr>
-        <td><strong>URI</strong></td>
-        <td>${request.path}</td>
+        <td class="font-weight-bold">URI</td>
+        <td class="text-monospace">${request.path}</td>
       </tr>
       <tr>
-        <td><strong>Zeit:</strong></td>
+        <td class="font-weight-bold">Zeit:</td>
         <td>${now}</td>
       </tr>
       <tr>
-        <td><strong>Nutzer:</strong></td>
-        <td>${email}</td>
+        <td class="font-weight-bold">Nutzer:</td>
+        <td class="text-monospace">${email}</td>
       </tr>
       <tr>
-        <td><strong>Fehlermeldung:</strong></td>
+        <td class="font-weight-bold">Fehlermeldung:</td>
         <td>${error}</td>
       </tr>
     </table>

@@ -2,7 +2,6 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 <h2>Administration</h2>
-
 <ul>
   <li><a tal:attributes="href request.route_path('user_list')">Nutzerliste</a></li>
   <li><a tal:attributes="href request.route_path('user_list_subjects')">Studiengangsliste</a></li>
@@ -22,5 +21,9 @@
   <li><a tal:attributes="href request.route_path('user_doublets')">Mehrfache Anmeldungen</a></li>
 </ul>
 
+<h2>Developement</h2>
+<ul>
+  <li><a tal:attributes="href request.route_path('test_exceptions')">Trigger exceptions</a></li>
+</ul>
   </metal:main>
 </metal:main>
