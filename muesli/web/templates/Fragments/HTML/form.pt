@@ -4,7 +4,7 @@
   ${form.message}
 </p>
 
-<div class="container pb-3">
+<div class="container-fluid pb-3">
   <div tal:repeat="field form.formfields" class="pb-1">
     <div class="form-group" tal:condition="field.type != 'hidden'" tal:omit-tag="">
       <div class="form-row mb-3" tal:condition="field.type == 'select'">

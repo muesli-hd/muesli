@@ -9,12 +9,12 @@
 <h2>Kontakt</h2>
 
 <p>
-Bei Problemen mit Übungsgruppen wenden Sie sich bitte an den die Vorlesung betreuenden Assistenten.
+Bei Problemen mit Übungsgruppen wenden Sie sich bitte an den die Vorlesung betreuenden Assistenten. <br>
 Bei Problemen mit MÜSLI selbst <a tal:attributes="href 'mailto:'+request.config['contact']['email']">schreiben Sie uns bitte eine Mail</a>.
 </p>
 
 <p>
-Der Quelltext von Müsli kann auf <a href="https://github.com/muesli-hd/muesli">Github</a> eingesehen werden. Auch Verbesserungsvorschläge können dort abgegeben werden.
+Der Quelltext von Müsli kann auf <a href="https://github.com/muesli-hd/muesli">GitHub</a> eingesehen werden. Auch Verbesserungsvorschläge können dort abgegeben werden.
 </p>
 
 
