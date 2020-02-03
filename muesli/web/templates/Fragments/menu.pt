@@ -1,57 +1,77 @@
+<!--! -*- coding: utf-8 -*-                                                 -->
+<!--! muesli/web/templates/Fragments/menu.pt                   -->
+<!--                                                                        -->
+<!--! This file is part of MUESLI.                                          -->
+<!--! Copyright (C) 2020, Christian Heusel <christian (at) heusel.eu>       -->
+<!--                                                                        -->
+<!--! This program is free software: you can redistribute it and/or modify  -->
+<!--! it under the terms of the GNU General Public License as published by  -->
+<!--! the Free Software Foundation, either version 3 of the License, or     -->
+<!--! (at your option) any later version.                                   -->
+<!--                                                                        -->
+<!--! This program is distributed in the hope that it will be useful,       -->
+<!--! but WITHOUT ANY WARRANTY; without even the implied warranty of        -->
+<!--! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         -->
+<!--! GNU General Public License for more details.                          -->
+<!--                                                                        -->
+<!--! You should have received a copy of the GNU General Public License     -->
+<!--! along with this program.  If not, see <http://www.gnu.org/licenses/>. -->
+
 <metal:main metal:define-macro="menu">
- <nav class="navbar navbar-expand-md navbar-dark sticky-top bg-dark">
-    <a class="display-1 navbar-brand text-warning" href="#">MÜSLI</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarCollapse">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <a class="nav-link" tal:attributes="href request.route_path('start')">Übersicht</a>
-        </li>
+  <nav class="navbar navbar-dark navbar-expand-md bg-dark justify-content-md-center justify-content-start">
+      <a class="display-1 navbar-brand text-warning" href="#">MÜSLI</a>
+      <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#collapsingNavbar2">
+          <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="navbar-collapse collapse justify-content-between align-items-center w-100" id="collapsingNavbar2">
 
-        <li class="nav-item active" tal:condition="request.userInfo.is_admin()">
-          <a class="nav-link" tal:attributes="href request.route_path('admin')">Administration</a>
-        </li>
+          <ul class="navbar-nav mx-auto text-center">
+            <li class="nav-item active">
+              <a class="nav-link" tal:attributes="href request.route_path('start')">Übersicht</a>
+            </li>
 
-        <li class="nav-item active">
-          <a class="nav-link" tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a>
-        </li>
+            <li class="nav-item active" tal:condition="request.userInfo.is_admin()">
+              <a class="nav-link" tal:attributes="href request.route_path('admin')">Administration</a>
+            </li>
 
-      </ul>
+            <li class="nav-item active">
+              <a class="nav-link" tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a>
+            </li>
+          </ul>
 
-      <div class="btn-toolbar" role="toolbar"
-           aria-label="An/Abmelde/Registrierfunktionen">
-
-        <div class="dropdown nav-item mr-2"
-            tal:condition="request.userInfo.is_loggedin()">
-          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Nutzereinstellungen
-          </button>
-          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item" tal:attributes="href request.route_path('user_update')">Angaben ergänzen</a>
-            <a class="dropdown-item" tal:attributes="href request.route_path('user_change_email')">E-Mail ändern</a>
-            <a class="dropdown-item" tal:attributes="href request.route_path('user_change_password')">Passwort ändern</a>
-            <a class="dropdown-item" tal:attributes="href request.route_path('user_api_keys')">API</a>
-          </div>
-        </div>
-
-        <a role="button"
-           class="btn btn-primary btn-large nav-item mr-2"
-          tal:condition="not (request.userInfo.is_loggedin() or
-                              request.url == request.route_url('user_register'))"
-          tal:attributes="href request.route_path('user_register')">Registrieren</a>
-
-        <a role="button"
-           class="btn btn-success btn-large nav-item"
-           tal:attributes="href request.route_path('user_login')"
-           tal:condition="not request.userInfo.is_loggedin()">Anmelden</a>
-
-        <a role="button"
-           class="btn btn-danger btn-large nav-item"
-           tal:attributes="href request.route_path('user_logout')"
-           tal:condition="request.userInfo.is_loggedin()">Abmelden</a>
+          <ul class="nav navbar-nav flex-row justify-content-center">
+            <li class="nav-item dropdown text-center mr-2"
+                tal:condition="request.userInfo.is_loggedin()">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Nutzereinstellungen
+              </button>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" tal:attributes="href request.route_path('user_update')">Angaben ergänzen</a>
+                <a class="dropdown-item" tal:attributes="href request.route_path('user_change_email')">E-Mail ändern</a>
+                <a class="dropdown-item" tal:attributes="href request.route_path('user_change_password')">Passwort ändern</a>
+                <a class="dropdown-item" tal:attributes="href request.route_path('user_api_keys')">API</a>
+              </div>
+            </li>
+            <li>
+              <a role="button"
+                 class="btn btn-primary btn-large nav-item"
+                 tal:condition="not (request.userInfo.is_loggedin() or
+                                     request.url == request.route_url('user_register'))"
+                 tal:attributes="href request.route_path('user_register')">Registrieren</a>
+            </li>
+            <li>
+              <a role="button"
+                 class="btn btn-success btn-large nav-item"
+                 tal:attributes="href request.route_path('user_login')"
+                 tal:condition="not request.userInfo.is_loggedin()">Anmelden</a>
+            </li>
+            <li>
+              <a role="button"
+                 class="btn btn-danger btn-large nav-item"
+                 tal:attributes="href request.route_path('user_logout')"
+                 tal:condition="request.userInfo.is_loggedin()">Abmelden</a>
+            </li>
+          </ul>
       </div>
-    </div>
   </nav>
 </metal:main>
