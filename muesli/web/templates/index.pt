@@ -3,7 +3,7 @@
   <metal:main metal:fill-slot="content">
     <h2 class="display-4">Willkommen bei MÜSLI!</h2>
 
-    <p>
+    <p class="lead">
     MÜSLI verwaltet viele Übungsgruppen und Vorlesungen an der Fakultät für Mathematik und Informatik der Universität Heidelberg.
     </p>
 

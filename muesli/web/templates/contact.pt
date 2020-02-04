@@ -2,9 +2,13 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<div style="text-align:right; float:right; margin-left:3em">
-<i>Liber scriptus proferetur,<br />In quo totum continetur,<br />Unde mundus iudicetur.</i>
-</div>
+<!-- Was auch immer das hier soll ¯\_(ツ)_/¯ -->
+<blockquote class="blockquote float-right text-right mt-0 small">
+  <p class="mb-0">Liber scriptus proferetur,<br />In quo totum continetur,<br />Unde mundus iudicetur.</p>
+  <footer class="blockquote-footer">
+    aus <a href="https://de.wikipedia.org/wiki/Dies_irae"><cite title="dies irae">dies irae</cite></a>
+  </footer>
+</blockquote>
 
 <h2>Kontakt</h2>
 
@@ -16,7 +20,6 @@ Bei Problemen mit MÜSLI selbst <a tal:attributes="href 'mailto:'+request.config
 <p>
 Der Quelltext von Müsli kann auf <a href="https://github.com/muesli-hd/muesli">GitHub</a> eingesehen werden. Auch Verbesserungsvorschläge können dort abgegeben werden.
 </p>
-
 
   </metal:main>
 </metal:main>
