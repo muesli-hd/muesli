@@ -19,7 +19,7 @@
 
 <metal:main metal:define-macro="menu">
   <nav class="navbar navbar-dark navbar-expand-md bg-dark justify-content-md-center justify-content-start">
-      <a class="display-1 navbar-brand text-warning" href="#">MÜSLI</a>
+      <a class="display-1 navbar-brand text-warning" tal:attributes="href request.route_path('start')">MÜSLI</a>
       <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#collapsingNavbar2">
           <span class="navbar-toggler-icon"></span>
       </button>
@@ -27,7 +27,8 @@
 
           <ul class="navbar-nav mx-auto text-center">
             <li class="nav-item active">
-              <a class="nav-link" tal:attributes="href request.route_path('start')">Übersicht</a>
+              <a tal:condition="request.userInfo.is_loggedin()"
+                 class="nav-link" tal:attributes="href request.route_path('start')">Übersicht</a>
             </li>
 
             <li class="nav-item active" tal:condition="request.userInfo.is_admin()">
