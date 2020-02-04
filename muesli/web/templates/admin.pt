@@ -1,29 +1,55 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
-<h2>Administration</h2>
-<ul>
-  <li><a tal:attributes="href request.route_path('user_list')">Nutzerliste</a></li>
-  <li><a tal:attributes="href request.route_path('user_list_subjects')">Studiengangsliste</a></li>
-  <li><a tal:attributes="href request.route_path('user_list_subjects_by_term')">Studiengangsliste nach Semestern und Teilnahmen</a></li>
-  <li><a tal:attributes="href request.route_path('lecture_list', _query={'show_all': 1 })">Liste aller Vorlesungen</a></li>
-  <li><a tal:attributes="href request.route_path('lecture_export_yaml')">Aktuelle Vorlesungen als YAML exportieren</a>
-    (<a tal:attributes="href request.route_path('lecture_export_yaml', _query={'show_all': 1})">Alle exportieren</a>)
-  </li>
- <li><a tal:attributes="href request.route_path('lecture_export_yaml_details')">Aktuelle Vorlesungen und Tutorien als YAML exportieren</a>
-    (<a tal:attributes="href request.route_path('lecture_export_yaml_details', _query={'show_all': 1})">Alle exportieren</a>)
-  </li>
-  <li> <a tal:attributes="href request.route_path('lecture_export_excel')">Aktuelle Vorlesungen und Tutorien als Excel Exportieren</a> </li>
-  <li><a tal:attributes="href request.route_path('lecture_add')">Neue Vorlesung</a></li>
-  <li><a tal:attributes="href request.route_path('email_users')">Studenten mit Problems mailen</a></li>
-  <li><a tal:attributes="href request.route_path('email_all_users')">Alles Studenten mailen</a></li>
-  <li><a tal:attributes="href request.route_path('user_delete_unconfirmed')">Karteileichen sichten und löschen</a></li>
-  <li><a tal:attributes="href request.route_path('user_doublets')">Mehrfache Anmeldungen</a></li>
-</ul>
+<style type="text/css" media="screen">
+#content {
+  background-image: linear-gradient(45deg, violet, indigo, blue, green, yellow, orange, red);
+}
+.white-text-border {
+  text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}
+.flip {
+  -moz-transform:    scaleX(-1); /* Gecko */
+  -o-transform:      scaleX(-1); /* Opera */
+  -webkit-transform: scaleX(-1); /* Webkit */
+  transform:         scaleX(-1); /* Standard */
 
-<h2>Developement</h2>
-<ul>
-  <li><a tal:attributes="href request.route_path('test_exceptions')">Trigger exceptions</a></li>
-</ul>
+  filter: FlipH;                 /* IE 6/7/8 */
+}
+</style>
+<h2 class="flip white-text-border">Administration mit viel Regenbogen</h2>
+<div class="row">
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('user_list')"><span class="align-self-center mx-auto">Nutzerliste</span></a>
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('user_list_subjects')"><span class="align-self-center mx-auto">Studiengangsliste</span></a>
+</div>
+<div class="row">
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('user_list_subjects_by_term')"><span class="align-self-center mx-auto">Studiengangsliste nach Semestern und Teilnahmen</span></a>
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_list', _query={'show_all': 1 })"><span class="align-self-center mx-auto">Liste aller Vorlesungen</span></a>
+</div>
+<div class="row">
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml')"><span class="align-self-center mx-auto">Aktuelle Vorlesungen als YAML exportieren</span></a>
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml', _query={'show_all': 1})"><span class="align-self-center mx-auto">Alle Vorlesungen als YAML exportieren</span></a>
+</div>
+<div class="row">
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml_details')"><span class="align-self-center mx-auto">Aktuelle Vorlesungen und Tutorien als YAML exportieren</span></a>
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml_details', _query={'show_all': 1})"><span class="align-self-center mx-auto">Alle Vorlesungen und Tutorien als YAMLexportieren</span></a>
+</div>
+<div class="row">
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_excel')"><span class="align-self-center mx-auto">Aktuelle Vorlesungen und Tutorien als Excel Exportieren</span></a>
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_add')"><span class="align-self-center mx-auto">Neue Vorlesung</span></a>
+</div>
+<div class="row">
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('email_users')"><span class="align-self-center mx-auto">Studenten mit Problems mailen</span></a>
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('email_all_users')"><span class="align-self-center mx-auto">Alles Studenten mailen</span></a>
+</div>
+<div class="row">
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('user_delete_unconfirmed')"><span class="align-self-center mx-auto">Karteileichen sichten und löschen</span></a>
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('user_doublets')"><span class="align-self-center mx-auto">Mehrfache Anmeldungen</span></a>
+</div>
+
+<h2 class="flip white-text-border">Developement</h2>
+<div class="list-group">
+  <a class="btn btn-dark" tal:attributes="href request.route_path('test_exceptions')">Trigger exceptions</a>
+</div>
   </metal:main>
 </metal:main>

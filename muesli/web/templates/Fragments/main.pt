@@ -52,7 +52,7 @@ function set_navigation(nav) {
 
 <div class="container-fluid">
   <main class="pt-3" role="main">
-    <div class="jumbotron bg-mdb-color-lighten-6">
+    <div class="jumbotron bg-mdb-color-lighten-6" id="content">
 
       <!-- <metal:main metal:use-macro="templates('Fragments/navigation.pt').macros['navigation']" /> -->
       <metal:content define-slot="content" />
