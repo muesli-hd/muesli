@@ -276,6 +276,9 @@ def user_check(request):
 
 @view_config(route_name='user_register', renderer='muesli.web:templates/user/register.pt', context=context.GeneralContext)
 def register(request):
+    if request.user:
+        request.session.flash('Sie sind bereits mit einem Account angemeldet!', queue='errors')
+        return HTTPFound(location=request.route_url('start'))
     form = forms.UserRegister(request)
     if request.method == 'POST' and form.processPostData(request.POST):
         if registerCommon(request, form):
