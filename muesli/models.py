@@ -674,6 +674,7 @@ class UserSchema(Schema):
     email = fields.Email()
     first_name = fields.String()
     last_name = fields.String()
+    title = fields.String()
     matrikel = fields.String()
     subject = fields.String()
 
