@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 if [[ -v MUESLI_TESTMODE ]]
 then
-    sed 's/\/\/\//\/\/postgres@postgres\//' muesli.yml.example | sed 's/production: True/production: False/' > muesli.yml
-    sed 's/\/\/\//\/\/postgres@postgres\//' alembic.ini.example > alembic.ini
+    sed "s/\/\/\//\/\/${MUESLI_DB_USER:-postgres}@postgres\//" muesli.yml.example | sed 's/production: True/production: False/' > muesli.yml
+    sed "s/\/\/\//\/\/${MUESLI_DB_USER:-postgres}@postgres\//" alembic.ini.example > alembic.ini
     echo "Sleeping for 3s ..."; sleep 3;
     echo "Generating configs ... "
     python3 -m smtpd -n -c DebuggingServer localhost:25 &
