@@ -164,7 +164,7 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   <tr tal:repeat="tutor lecture.tutors">
     <td>
       <a tal:attributes="href 'mailto:'+tutor.email">${tutor.name}</a>
-      (<a tal:attributes="href request.route_path('lecture_remove_tutor', lecture_id=lecture.id, tutor_id=tutor.id)">entfernen</a>)
+      <a class="btn-sm btn-danger" tal:attributes="href request.route_path('lecture_remove_tutor', lecture_id=lecture.id, tutor_id=tutor.id)">entfernen</a>
     </td>
   </tr>
 </table>
