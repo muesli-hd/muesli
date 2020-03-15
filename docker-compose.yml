@@ -6,6 +6,7 @@ services:
     image: 'postgres:latest'
     environment:
       - POSTGRES_DB=muesli
+      - POSTGRES_HOST_AUTH_METHOD=trust
     ports:
       - '127.0.0.1:5433:5432'
     volumes:
