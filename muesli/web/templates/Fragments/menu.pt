@@ -19,7 +19,21 @@
 
 <metal:main metal:define-macro="menu">
   <nav class="navbar navbar-dark navbar-expand-md bg-dark justify-content-md-center justify-content-start">
-      <a class="display-1 navbar-brand text-warning" tal:attributes="href request.route_path('start')">MÜSLI</a>
+      <div class="dropdown">
+        <a href="#" class="display-1 navbar-brand" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <img class="mr-1" style="height: 1.5em;" tal:attributes="src request.static_url('muesli.web:static/favicon.ico')">
+          MÜSLI
+        </a>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+          <a class="dropdown-item" tal:attributes="href request.route_path('start')">
+            <img class="mr-1" style="height: 1em;" tal:attributes="src request.static_url('muesli.web:static/favicon.ico')">
+            MÜSLI
+          </a>
+          <div tal:repeat="site request.config['urls']" tal:omit-tag="">
+            <a class="dropdown-item" tal:attributes="href site['link']"><img class="mr-1" style="height: 1em;" tal:attributes="src site['favicon']">${site['displayname']}</a>
+          </div>
+        </div>
+      </div>
       <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#collapsingNavbar2">
           <span class="navbar-toggler-icon"></span>
       </button>

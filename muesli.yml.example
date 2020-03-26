@@ -1,4 +1,10 @@
 ---
+
+urls:
+    - displayname: MaMpf
+      link: "https:mampf.media"
+      favicon: "https://mampf.mathi.uni-heidelberg.de/favicon.ico"
+
 database:
     connection: postgresql:///muesli
 
