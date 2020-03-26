@@ -21,12 +21,12 @@
   <nav class="navbar navbar-dark navbar-expand-md bg-dark justify-content-md-center justify-content-start">
       <div class="dropdown">
         <a href="#" class="display-1 navbar-brand" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <img class="mr-1" style="height: 1.5em;" tal:attributes="src request.static_url('muesli.web:static/favicon.ico')">
+          <img class="mr-1" style="height: 1.5em;" tal:attributes="src request.route_path('muesli.web:static/favicon.ico')">
           MÜSLI
         </a>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
           <a class="dropdown-item" tal:attributes="href request.route_path('start')">
-            <img class="mr-1" style="height: 1em;" tal:attributes="src request.static_url('muesli.web:static/favicon.ico')">
+            <img class="mr-1" style="height: 1em;" tal:attributes="src request.route_path('muesli.web:static/favicon.ico')">
             MÜSLI
           </a>
           <div tal:repeat="site request.config['urls']" tal:omit-tag="">
