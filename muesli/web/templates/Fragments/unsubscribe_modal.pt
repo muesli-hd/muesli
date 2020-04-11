@@ -30,7 +30,7 @@
         </div>
         <div class="modal-body">
           <p>
-          Möchtest du die Übungsgruppe der Vorlesung "${tutorial.lecture.name}" bei ${tutorial.tutor.name}
+          Möchtest du die Übungsgruppe der Vorlesung "${tutorial.lecture.name}" "${'bei {}'.format(tutorial.tutor.name) if tutorial.tutor is not None else ''}"
           wirklick verlassen?</p>
         </div>
         <div class="modal-footer">
