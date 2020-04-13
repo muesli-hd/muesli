@@ -291,3 +291,25 @@ table.colored tr:nth-child(odd) {
     padding-top: 0;
     padding-bottom: 0;
 }
+
+/* Button-like <a> elements for any <a> that actually triggers an action */
+a.action {
+    background-color: lightgray;
+    padding: 3px 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    color:black;
+    box-shadow: 1px 1px 2px black;
+    line-height: 21px;
+    cursor: default;
+    margin: 0 2px 2px 0;
+}
+
+a.action:hover {
+    background-color: #eee;
+}
+
+a.action:active {
+    box-shadow: none;
+    margin: 2px 0 0 2px;
+}

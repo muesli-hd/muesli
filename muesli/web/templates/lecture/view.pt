@@ -2,13 +2,6 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<script>
-  function confirm_unsubscribe() {
-    return confirm("Wollen Sie wirklich diese Übungsgruppe verlassen?");
-  }
-</script>
-
-
   <h2>${lecture.name}</h2>
 
   <p tal:condition="lecture.url">
@@ -48,7 +41,7 @@
             ${tutorial.tutor.first_name} ${tutorial.tutor.last_name}
           </span>
           <span tal:omit-tag='' tal:condition="not tutorial.tutor and request.permissionInfo.has_permission('take_tutorial')"> <!-- TODO: and (is assistant or is_tutor) -->
-            <a tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
+            <a class="action" tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
           </span>
         </td>
         <td>${tutorial.comment}</td>
@@ -56,11 +49,11 @@
           <a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">Details</a>
         </td>
         <td>
-          <a tal:condition="(tutorial.student_count &lt; tutorial.max_students) and tutorial != subscribed_tutorial"
-              tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)">
+          <a class="action" tal:condition="(tutorial.student_count &lt; tutorial.max_students) and tutorial != subscribed_tutorial"
+             tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)">
             ${'Beitreten' if not subscribed_tutorial else 'Wechseln'}
           </a>
-          <a tal:condition="tutorial == subscribed_tutorial" onclick="return confirm_unsubscribe()"
+          <a class="action" tal:condition="tutorial == subscribed_tutorial"
              tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">
             Austreten
           </a>

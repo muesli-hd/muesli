@@ -2,15 +2,6 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<script>
-/*<![CDATA[*/
-  function confirm_unsubscribe() {
-    return confirm("Wollen Sie wirklich diese Übungsgruppe verlassen?");
-  }
-/*]]>*/
-</script>
-
-
 <div tal:condition="uboo">
     Bitte nehmen Sie sich die Zeit zu überprüfen, ob noch alle Ihre Angaben korrekt sind. Dies ist insbesondere wichtig,
     wenn Sie den Studiengang gewechselt haben.<br>
@@ -47,7 +38,7 @@
 <div tal:condition="tutorials">
   <h3>Feste Eintragungen in Übungsgruppen</h3>
   <table>
-    <tr><th></th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th>Übungsleiter</th><th></th><th></th></tr>
+    <tr><th></th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th>Übungsleiter</th><th></th></tr>
 
     <tr tal:repeat="tutorial tutorials">
       <td>${tutorial.lecture.term}</td>
@@ -56,11 +47,7 @@
       <td>${tutorial.place}</td>
       <td>
         <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a></td>
-      <td><a tal:attributes="href request.route_path('lecture_view_points', lecture_id=tutorial.lecture.id)">[&nbsp;Details&nbsp;]</a></td>
-      <td>
-        <a tal:condition="tutorial.lecture.mode != 'static'" onclick="return confirm_unsubscribe()"
-           tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">[&nbsp;Austreten&nbsp;]</a>
-      </td>
+      <td><a tal:attributes="href request.route_path('lecture_view_points', lecture_id=tutorial.lecture.id)">Punkte und Klausuren</a></td>
     </tr>
   </table>
 </div>
