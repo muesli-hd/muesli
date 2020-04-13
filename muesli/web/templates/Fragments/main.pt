@@ -45,8 +45,7 @@ function set_navigation(nav) {
 /* ]]> */
 </script>
 
-<div id="history">
-</div>
+<div id="history"></div>
 
 <metal:main metal:use-macro="templates('Fragments/message_queue.pt').macros['message_queue']">
 

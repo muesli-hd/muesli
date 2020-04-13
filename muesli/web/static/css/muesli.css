@@ -50,6 +50,10 @@
   margin: 0em 1em 0em 1em;
 }
 
+#history:empty {
+  display: none;
+}
+
 #history ul {
   font-size: 70%;
   margin: 0em;
