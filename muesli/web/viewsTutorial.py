@@ -278,7 +278,7 @@ def unsubscribe(request):
     request.db.commit()
     sendChangesMailUnsubscribe(request, tutorial, request.user)
     request.session.flash('Erfolgreich aus Übungsgruppe ausgetragen', queue='messages')
-    return HTTPFound(location=request.route_url('start'))
+    return HTTPFound(location=request.route_url('overview'))
 
 @view_config(route_name='tutorial_remove_student', context=TutorialContext, permission='remove_student')
 def removeStudent(request):
@@ -298,7 +298,7 @@ def removeStudent(request):
     if request.referrer:
         return HTTPFound(location=request.referrer)
     else:
-        return HTTPFound(location=request.route_url('start'))
+        return HTTPFound(location=request.route_url('overview'))
 
 def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
     mail_preference = request.db.query(models.EmailPreferences).get((tutorial.tutor_id, tutorial.lecture.id))

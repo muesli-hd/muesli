@@ -1,7 +1,7 @@
 <metal:main metal:define-macro="menu">
   <ul class="menu" id="menu-left">
     <div tal:omit-tag="" tal:condition="request.userInfo.is_loggedin()">
-      <li><a tal:attributes="href request.route_path('start')">Übersicht</a></li>
+      <li><a tal:attributes="href request.route_path('overview')">Übersicht</a></li>
       <li tal:condition="request.userInfo.is_admin()"><a tal:attributes="href request.route_path('admin')">Administration</a></li>
 
       <li><a tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a></li>

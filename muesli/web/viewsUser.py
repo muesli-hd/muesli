@@ -51,7 +51,7 @@ def login(request):
         if user is not None:
             security.remember(request, user.id)
             request.user = user
-            url = request.route_url('start')
+            url = request.route_url('overview')
             return HTTPFound(location=url)
         request.session.flash('Benutzername oder Passwort sind falsch.', queue='errors')
     return {'form': form, 'user': security.authenticated_userid(request)}
@@ -583,7 +583,7 @@ def removeKey(request):
         request.session.flash('API Key nicht gefunden', queue='errors')
     if request.referrer:
         return HTTPFound(location=request.referrer)
-    return HTTPFound(location=request.route_url('start'))
+    return HTTPFound(location=request.route_url('overview'))
 
 
 @view_config(route_name='user_ajax_complete', renderer='muesli.web:templates/user/ajax_complete.pt', context=context.TutorialContext, permission='viewOverview')
