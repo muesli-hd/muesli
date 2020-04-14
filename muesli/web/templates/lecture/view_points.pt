@@ -2,7 +2,7 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<h2 class="display-4">Resultate <small class="text-muted">für ${lecture.name}</small></h2>
+<h2 class="display-4">Ergebnisse <small class="text-muted">für ${lecture.name}</small></h2>
 
 <div tal:define="fF lambda f: '%.1f' % f if f != None else '-'" >
   <div tal:repeat="catexams exams_by_category" tal:omit-tag="">
