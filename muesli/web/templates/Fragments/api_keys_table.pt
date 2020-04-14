@@ -1,13 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:define-macro="api_key_table">
-<span tal:condition="not keys" class="font-italic">Keine aktiven Keys vorhanden</span>
+<div tal:condition="not keys" class="font-italic">Keine aktiven Keys vorhanden</div>
 <table class="table" tal:condition="keys">
   <thead class="thead-dark">
     <tr>
       <th scope="col"> ID </th>
       <th scope="col"> Ablaufdatum </th>
       <th scope="col"> Beschreibung </th>
-      <th scope="col"> Entfernen </th>
+      <th scope="col"></th>
       <th scope="col"></th>
     </tr>
   <tbody>
@@ -31,8 +31,8 @@
           <input role="button" class="btn btn-danger btn-sm" type="submit" value="Entfernen"/>
         </form>
       </td>
-      <td tal:condition="freshtoken">
-        <button role="button" class="btn btn-secondary btn-sm" tal:condition="key.id == max([e.id for e in keys])" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
+      <td>
+        <button role="button" class="btn btn-secondary btn-sm" tal:condition="freshtoken and (key.id == max([e.id for e in keys]))" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
       </td>
     </tr>
   </tbody>
