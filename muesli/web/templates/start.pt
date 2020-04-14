@@ -180,9 +180,8 @@
   <a tal:attributes="href request.route_path('start')">Nur aktuelle anzeigen</a>.
 </p>
 
-<a tal:condition="request.GET.get('help', '0') == '0'" tal:attributes="href request.route_path('start', _query={'help': '1'})">Hilfe</a>
-<div tal:condition="request.GET.get('help', '0') == '1'">
-<a tal:attributes="href request.route_path('start')">Hilfe verbergen</a>
+<div>
+<h6>Hilfe</h6>
 <ul>
     <li>${tooltips.lecture}</li>
     <li>${tooltips.email}</li>
