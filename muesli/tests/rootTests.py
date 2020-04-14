@@ -27,7 +27,8 @@ from muesli.tests import functionalTests
 
 class BaseTests(functionalTests.BaseTests):
     def test_index(self):
-        res = self.testapp.get('/', status=200)
+        # Logged out users are redirected to the login page
+        res = self.testapp.get('/', status=302)
 
     def test_overview(self):
         res = self.testapp.get('/overview', status=302)
