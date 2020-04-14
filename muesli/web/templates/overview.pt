@@ -2,8 +2,6 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<h1 class="display-4">Übersicht</h1>
-
 <h2>
   Übersicht Ihrer Veranstaltungen
 </h2>
