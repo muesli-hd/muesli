@@ -217,6 +217,6 @@ table.colored tr:nth-child(odd) {
 }
 
 #student-names table td {
-    padding-top: 0;
-    padding-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
