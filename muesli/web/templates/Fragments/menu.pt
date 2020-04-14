@@ -25,7 +25,7 @@
           MÜSLI
         </a>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-          <a class="dropdown-item" tal:attributes="href request.route_path('start')">
+          <a class="dropdown-item" tal:attributes="href request.route_path('overview')">
             <img class="mr-1" style="height: 1em;" tal:attributes="src '/favicon.ico'">
             MÜSLI
           </a>
@@ -42,7 +42,7 @@
           <ul class="navbar-nav mx-auto text-center">
             <li class="nav-item active">
               <a tal:condition="request.userInfo.is_loggedin()"
-                 class="nav-link" tal:attributes="href request.route_path('start')">Übersicht</a>
+                 class="nav-link" tal:attributes="href request.route_path('overview')">Übersicht</a>
             </li>
 
             <li class="nav-item active" tal:condition="request.userInfo.is_admin()">

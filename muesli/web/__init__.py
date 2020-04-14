@@ -164,7 +164,7 @@ def main(global_config=None, testmode=False, **settings):
     config.set_jwt_authentication_policy(jwt_authentication_policy)
     config.add_static_view('static', 'muesli.web:static')
 
-    config.add_route('start', '/start', factory = GeneralContext)
+    config.add_route('overview', '/overview', factory = GeneralContext)
     config.add_route('contact', '/contact')
     config.add_route('changelog', '/changelog')
     config.add_route('admin', '/admin', factory = GeneralContext)
@@ -201,7 +201,6 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('remove_api_key', '/user/remove_api_key/{key_id}',factory=GeneralContext)
 
     config.add_route('user_ajax_complete', '/user/ajax_complete/{lecture_id}/{tutorial_ids:[^/]*}', factory = TutorialContext)
-    config.add_route('overview', '/')
     config.add_route('lecture_add', '/lecture/add', factory = GeneralContext)
     config.add_route('lecture_list', '/lecture/list', factory = GeneralContext)
     config.add_route('lecture_edit', '/lecture/edit/{lecture_id}', factory = LectureContext)

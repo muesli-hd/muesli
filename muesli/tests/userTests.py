@@ -193,7 +193,7 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 class UnicodeTests(functionalTests.UnicodeUserTests):
     def test_unicodepassword(self):
-        res = self.testapp.get('/start', status=200)
+        res = self.testapp.get('/overview', status=200)
 
 class UserLoggedInTests(UnloggedTests):
     def setUp(self):
