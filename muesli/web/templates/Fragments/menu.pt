@@ -78,7 +78,8 @@
               <a role="button"
                  class="btn btn-success btn-large nav-item ml-2"
                  tal:attributes="href request.route_path('user_login')"
-                 tal:condition="not request.userInfo.is_loggedin()">Anmelden</a>
+                 tal:condition="not (request.userInfo.is_loggedin() or 
+                                     request.url == request.route_url('user_login'))">Anmelden</a>
             </li>
             <li>
               <a role="button"
