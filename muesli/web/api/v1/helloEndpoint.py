@@ -23,6 +23,8 @@
 from cornice.resource import resource, view
 
 from muesli.web import context
+from muesli.models import UserSchema
+from muesli.web.api.v1 import allowed_attributes
 
 @resource(path='/whoami',
           factory=context.NonLoginContext)
@@ -33,8 +35,29 @@ class Whoami:
 
     @view(permission='view')
     def get(self):
+        """
+        ---
+        get:
+          security:
+            - Bearer: [read]
+            - Basic: [read]
+          tags:
+            - "v1"
+          summary: "return my user"
+          description: ""
+          operationId: "whoami_get"
+          produces:
+            - "application/json"
+          responses:
+            200:
+              description: "response for 200 code"
+              schema:
+                $ref: "#/definitions/User"
+        """
+        schema = UserSchema(only=allowed_attributes.user())
         if self.request.user:
-            user = str(self.request.user)
+            user = self.request.user
+
         else:
             user = None
-        return {"user": user}
+        return schema.dump(user)
