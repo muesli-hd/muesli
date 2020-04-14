@@ -85,20 +85,20 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
           ${tutorial.tutor.first_name} ${tutorial.tutor.last_name}
         </span>
         <span tal:omit-tag='' tal:condition="not tutorial.tutor and request.permissionInfo.has_permission('take_tutorial')"> <!-- TODO: and (is assistant or is_tutor) -->
-          <a role="button" class="btn-sm btn-success" tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
+          <a role="button" class="btn btn-sm btn-success" tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
         </span>
       </td>
       <td tal:condition="tutorial.comment">${tutorial.comment}</td>
       <td class="font-italic" tal:condition="not tutorial.comment">Keine Beschreibung</td>
       <td>
         <a role="button"
-           class="btn-sm btn-info"
+           class="btn btn-sm btn-info"
            tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">
           Details
         </a>
       </td>
       <td>
-        <a role="button" class="btn-sm btn-primary" tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">
+        <a role="button" class="btn btn-sm btn-primary" tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">
           Bearbeiten
         </a>
       </td>

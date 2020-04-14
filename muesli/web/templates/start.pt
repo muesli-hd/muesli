@@ -38,13 +38,13 @@
           <td>
               <a role="button"
                  style="text-decoration: none"
-                 class="btn-sm btn-info"
+                 class="btn btn-sm btn-info"
                  tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">
              Details
              </a>
               <a role="button"
                  style="text-decoration: none"
-                 class="btn-sm btn-primary font-bold ml-1"
+                 class="btn btn-sm btn-primary font-bold ml-1"
                  tal:define="multi_tutorials request.user.prepareMultiTutorials()"
                  tal:condition="len(multi_tutorials[tutorial.lecture.id])&gt; 1"
                  tal:attributes="href request.route_path('tutorial_view', tutorial_ids=','.join([str(t.id) for t in multi_tutorials[tutorial.lecture.id]]))"
@@ -136,7 +136,7 @@
                 lecture_id=tutorial.lecture.id)">Ergebnisse</a>
             </td>
             <td>
-              <a role="button" class="btn-sm btn-danger text-white" data-toggle="modal" data-target="#confirm_unsubscribe">
+              <a role="button" class="btn btn-sm btn-danger text-white" data-toggle="modal" data-target="#confirm_unsubscribe">
                 Austreten
               </a>
               <metal:main metal:use-macro="templates('Fragments/unsubscribe_modal.pt').macros['unsubscribe_modal']" />

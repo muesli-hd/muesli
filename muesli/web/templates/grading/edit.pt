@@ -16,7 +16,7 @@ ${grading.name}: <a tal:attributes="href request.route_path('lecture_edit', lect
 
 <ul>
   <li tal:repeat="exam grading.exams">${exam.name}
-    <a class="btn-sm btn-danger" tal:attributes="href request.route_path('grading_delete_exam_association', grading_id=grading.id, exam_id=exam.id)">Entfernen</a>
+    <a class="btn btn-sm btn-danger" tal:attributes="href request.route_path('grading_delete_exam_association', grading_id=grading.id, exam_id=exam.id)">Entfernen</a>
   </li>
 </ul>
 
