@@ -80,6 +80,10 @@
               <a class="nav-link" tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a>
             </li>
 
+            <li class="nav-item active">
+              <a class="nav-link" tal:attributes="href request.route_path('user_api_keys')">API</a>
+            </li>
+
             <li class="nav-item dropdown text-center"
                 tal:condition="request.userInfo.is_loggedin()">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
