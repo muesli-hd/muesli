@@ -1,3 +1,7 @@
+### Ausstehend
+
+Vollständiges Redesign von MÜSLI mittels Bootstrap: MÜSLI funktioniert jetzt unter anderem auch gut auf Mobilgeräten.
+
 ### 2019-03-12
 
 Durch das Softwareprakikum bei Prof. Andrzejak haben verschiedenen Gruppen neue
