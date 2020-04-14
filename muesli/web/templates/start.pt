@@ -97,12 +97,6 @@
                 tal:attributes="href request.route_path('lecture_view_points',
                 lecture_id=tutorial.lecture.id)">Ergebnisse</a>
             </td>
-            <td class="col">
-              <a role="button" class="btn btn-danger text-white" data-toggle="modal" data-target="#confirm_unsubscribe">
-                Austreten
-              </a>
-              <metal:main metal:use-macro="templates('Fragments/unsubscribe_modal.pt').macros['unsubscribe_modal']" />
-            </td>
           </tr>
         </div>
       </table>
@@ -116,7 +110,6 @@
           <th>Zeit</th>
           <th>Raum</th>
           <th>Übungsleiter</th>
-          <th></th>
           <th></th>
         </tr>
           <tr tal:repeat="tutorial tutorials">
@@ -134,12 +127,6 @@
             <td>
               <a tal:attributes="href request.route_path('lecture_view_points',
                 lecture_id=tutorial.lecture.id)">Ergebnisse</a>
-            </td>
-            <td>
-              <a role="button" class="btn btn-sm btn-danger text-white" data-toggle="modal" data-target="#confirm_unsubscribe">
-                Austreten
-              </a>
-              <metal:main metal:use-macro="templates('Fragments/unsubscribe_modal.pt').macros['unsubscribe_modal']" />
             </td>
           </tr>
       </table>
