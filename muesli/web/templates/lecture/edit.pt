@@ -147,7 +147,7 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   </a>
   <a role="button" class="btn btn-primary"
      tal:attributes="href request.route_path('lecture_switch_students', lecture_id = lecture.id)">
-    Übungsgruppen von Studenten tauschen
+    Übungsgruppen von Studierenden tauschen
   </a>
 </div>
 
