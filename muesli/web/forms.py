@@ -64,7 +64,7 @@ class DateString(formencode.FancyValidator):
             raise formencode.Invalid('Ungültiges Jahr!', value, state)
         return string
 
-class FormField(object):
+class FormField:
     def __init__(self, name, label="", type="text", options=None,
             value=None, size=40, comment=None,
             validator=None, required=False,
@@ -100,7 +100,7 @@ class HiddenField(FormField):
         kwargs['type'] = 'hidden'
         FormField.__init__(self, name, **kwargs)
 
-class Form(object):
+class Form:
     def __init__(self, formfields, send="Senden", chained_validators=[]):
         self.formfields = formfields
         self.updateNames()
@@ -154,7 +154,7 @@ class Form(object):
     def __setitem__(self, key, value):
         self.named_fields[key].value=value
 
-class FormValidator(object):
+class FormValidator:
     def __init__(self, schema, obj=None, fields=[]):
         self.schema = schema
         self.value = {}
@@ -378,13 +378,6 @@ class UserEdit(ObjectForm):
                    label='Beifach',
                    comment='Falls Lehramt: Beifach',
                    value=user.second_subject),
-                FormField('birth_date',
-                   label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
-                   validator=DateString(),
-                   value=user.birth_date),
-                FormField('birth_place',
-                   label='Geburtsort', size=20,
-                   value=user.birth_place),
                 FormField('is_assistant',
                    label='Assistent',
                    type='radio',
@@ -443,19 +436,11 @@ class UserUpdate(ObjectForm):
                    label='Beifach',
                    comment='Falls Lehramt: Beifach',
                    value=user.second_subject),
-                FormField('birth_date',
-                   label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
-                   validator=DateString(),
-                   value=user.birth_date),
-                FormField('birth_place',
-                   label='Geburtsort', size=20,
-                   value=user.birth_place),
                 ]
         ObjectForm.__init__(self, user, formfields, request, send='Änderungen übernehmen')
         self.editok = ['title', 'subject', 'subject_alt', 'second_subject']
-        for field in ['matrikel', 'birth_date', 'birth_place']:
-            if not getattr(user, field):
-                self.editok.append(field)
+        if not getattr(user, 'matrikel'):
+            self.editok.append('matrikel')
         for field in self.named_fields:
             if field not in self.editok:
                 self.named_fields[field].readonly=True
@@ -496,7 +481,8 @@ class UserRegister(ObjectForm):
                    label='Matrikelnummer', size=10, comment='Falls noch keine Matrikelnummer bekannt ist bitte 00000 eintragen. Die Matrikelnummer muss dann baldmöglichst unter „Angaben ergänzen“ richtig gestellt werden!',
                    validator=validators.Number,
                    #value=user.matrikel,
-                   required=True
+                   required=True,
+                   type="number"
                    ),
                 FormField('subject',
                    label='Studiengang',
@@ -506,18 +492,7 @@ class UserRegister(ObjectForm):
                    required=True),
                 FormField('subject_alt',
                    label='Studiengang', size=30, comment='Genauer Studiengang (falls Sonstiges gewählt). Bitte in der Form "Fach (Studiengang)".',
-                   value=''),
-                FormField('birth_date',
-                   label='Geburtstag', size=10, comment='(TT.MM.JJJJ)',
-                   #value=user.birth_date,
-                   validator=DateString(),
-                   required=True
-                   ),
-                FormField('birth_place',
-                   label='Geburtsort', size=20,
-                   #value=user.birth_place,
-                   required=True
-                   )
+                   value='')
                 ]
         ObjectForm.__init__(self, None, formfields, request, send='Registrieren')
     def saveField(self, fieldName):
@@ -594,6 +569,22 @@ class UserChangeEmail(ObjectForm):
         ObjectForm.__init__(self, user, formfields, request, send='E-Mail-Adresse ändern')
     def saveField(self, fieldName):
         pass
+
+
+class SetAuthCodeDescription(ObjectForm):
+    def __init__(self, request):
+        formfields = [
+                FormField('description',
+                          label='Beschreibung', size=20,
+                          required=False,
+                          validator=validators.MaxLength(20))
+                ]
+        ObjectForm.__init__(self, None, formfields,
+                            request, send='Generiere API-Key')
+
+    def saveField(self, fieldName):
+        pass
+
 
 class LectureAddExam(ObjectForm):
     def __init__(self, request):
@@ -755,6 +746,18 @@ class TutorialEdit(ObjectForm):
         else:
             ObjectForm.saveField(self, fieldName)
 
+class TutorialEmailPreference(CSRFSecureForm):
+    def __init__(self, request):
+        formfields = [
+                FormField('receive_status_mails',
+                   label='Status-Emails an mich senden',
+                   type='radio',
+                   options=list(enumerate(['Nein', 'Ja'])),
+                   value=0
+                   ),
+                ]
+        CSRFSecureForm.__init__(self, formfields, request, send='Speichern')
+
 class TutorialEmail(CSRFSecureForm):
     def __init__(self, request):
         formfields = [
@@ -817,6 +820,12 @@ class LectureEmailTutors(CSRFSecureForm):
                    label='Anhänge', size=64,
                    growable=False,
                    validator=validators.FieldStorageUploadConverter()
+                   ),
+                FormField('copytoassistants',
+                   label='Kopie an die Assistenten',
+                   type='radio',
+                   options=list(enumerate(['Senden', 'Nicht senden'])),
+                   value=0
                    ),
                 ]
         CSRFSecureForm.__init__(self, formfields, request, send='Senden')

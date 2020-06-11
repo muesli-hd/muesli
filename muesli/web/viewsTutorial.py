@@ -39,9 +39,10 @@ import os
 import PIL.Image
 import PIL.ImageDraw
 import io
+from natsort import natsorted
 
 @view_config(route_name='tutorial_view', renderer='muesli.web:templates/tutorial/view.pt', context=TutorialContext, permission='viewOverview')
-class View(object):
+class View:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -52,19 +53,25 @@ class View(object):
         students = [ls.student for ls in lecture_students] #self.db.query(models.User).filter(filterClause)
         tutorial = tutorials[0]
         other_tutorials = tutorial.lecture.tutorials
+        # Query results are already lexicographically sorted.
+        # Sort again using length as key so we get length lexicographical sorting
+        # https://github.com/muesli-hd/muesli/issues/28
+        exams = dict([[cat['id'], natsorted(list(tutorial.lecture.exams.filter(models.Exam.category==cat['id'])),
+                                         key=lambda x: x.name)]
+                      for cat in utils.categories])
         return {'tutorial': tutorial,
                 'tutorials': tutorials,
                 'tutorial_ids': self.tutorial_ids,
                 'other_tutorials': other_tutorials,
                 'students': students,
                 'categories': utils.categories,
-                'exams': dict([[cat['id'], tutorial.lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
+                'exams': exams,
                 'names': self.request.config['lecture_types'][tutorial.lecture.type],
                 'old_tutorial_id': None  #see move_student
                 }
 
 @view_config(route_name='tutorial_occupancy_bar')
-class OccupancyBar(object):
+class OccupancyBar:
     def __init__(self, request):
         self.request = request
         self.count = int(request.matchdict['count'])
@@ -92,7 +99,7 @@ class OccupancyBar(object):
         return response
 
 @view_config(route_name='tutorial_add', renderer='muesli.web:templates/tutorial/add.pt', context=LectureContext, permission='edit')
-class Add(object):
+class Add:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -104,6 +111,36 @@ class Add(object):
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
             tutorial = models.Tutorial()
             tutorial.lecture = lecture
+            form.obj = tutorial
+            form.saveValues()
+            self.request.db.commit()
+            form.message = "Neue Übungsgruppe angelegt."
+        return {'lecture': lecture,
+                'names': self.request.config['lecture_types'][lecture.type],
+                'form': form,
+                'error_msg': error_msg}
+
+@view_config(route_name='tutorial_duplicate', renderer='muesli.web:templates/tutorial/add.pt', context=LectureContext, permission='edit')
+class Duplicate(object):
+    def __init__(self, request):
+        self.request = request
+        self.db = self.request.db
+        self.lecture_id = request.matchdict['lecture_id']
+        self.tutorial_id = request.matchdict['tutorial_id']
+    def __call__(self):
+        error_msg = ''
+        orig_tutorial = self.db.query(models.Tutorial).get(self.tutorial_id)
+        lecture = self.db.query(models.Lecture).get(self.lecture_id)
+
+        form = TutorialEdit(self.request, orig_tutorial)
+        if self.request.method == 'POST' and form.processPostData(self.request.POST):
+            tutorial = models.Tutorial()
+            tutorial.lecture = orig_tutorial.lecture
+            tutorial.place=orig_tutorial.place
+            tutorial.time = orig_tutorial.time
+            tutorial.max_students=orig_tutorial.max_students
+            tutorial.comment=orig_tutorial.comment
+            tutorial.is_special=orig_tutorial.is_special
             form.obj = tutorial
             form.saveValues()
             self.request.db.commit()
@@ -127,7 +164,7 @@ def delete(request):
     return HTTPFound(location=request.route_url('lecture_edit', lecture_id = request.context.lecture.id))
 
 @view_config(route_name='tutorial_edit', renderer='muesli.web:templates/tutorial/edit.pt', context=TutorialContext, permission='edit')
-class Edit(object):
+class Edit:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -241,7 +278,7 @@ def unsubscribe(request):
     request.db.commit()
     sendChangesMailUnsubscribe(request, tutorial, request.user)
     request.session.flash('Erfolgreich aus Übungsgruppe ausgetragen', queue='messages')
-    return HTTPFound(location=request.route_url('start'))
+    return HTTPFound(location=request.route_url('overview'))
 
 @view_config(route_name='tutorial_remove_student', context=TutorialContext, permission='remove_student')
 def removeStudent(request):
@@ -261,10 +298,13 @@ def removeStudent(request):
     if request.referrer:
         return HTTPFound(location=request.referrer)
     else:
-        return HTTPFound(location=request.route_url('start'))
+        return HTTPFound(location=request.route_url('overview'))
 
 def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
-    if not tutorial.tutor:
+    mail_preference = request.db.query(models.EmailPreferences).get((tutorial.tutor_id, tutorial.lecture.id))
+    if mail_preference is None:
+        mail_preference = models.EmailPreferences(tutorial.tutor_id, tutorial.lecture.id, True)
+    if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'In Ihre Übungsgruppe zur Vorlesung %s am %s hat sich %s eingetragen'\
             % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
@@ -273,8 +313,12 @@ def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
     else:
         text += '.'
     sendChangesMail(request, tutorial.tutor, text)
+
 def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
-    if not tutorial.tutor:
+    mail_preference = request.db.query(models.EmailPreferences).get((tutorial.tutor_id, tutorial.lecture.id))
+    if mail_preference is None:
+        mail_preference = models.EmailPreferences(tutorial.tutor_id, tutorial.lecture.id, True)
+    if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'Aus Ihrer Übungsgruppe zur Vorlesung %s am %s hat sich %s ausgetragen'\
                     % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
@@ -290,6 +334,31 @@ def sendChangesMail(request, tutor, text):
             to = [tutor.email],
             body='Hallo!\n\n%s\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % text)
     muesli.mail.sendMail(message)
+
+@view_config(route_name='tutorial_email_preference', renderer='muesli.web:templates/tutorial/email_preference.pt', context=TutorialContext, permission='viewAll')
+def email_preference(request):
+    db = request.db
+    tutorials = request.context.tutorials
+    lecture = tutorials[0].lecture
+    form = TutorialEmailPreference(request)
+    mail_preference = db.query(models.EmailPreferences).get((request.user.id, lecture.id))
+    if mail_preference is None:
+        mail_preference = models.EmailPreferences(request.user.id, lecture.id, True)
+    form['receive_status_mails'] = mail_preference.receive_status_mails
+    if request.method == 'POST' and form.processPostData(request.POST):
+        if form['receive_status_mails'] == 1:
+            mail_preference.receive_status_mails = True
+        else:
+            mail_preference.receive_status_mails = False
+        if not mail_preference in request.db:
+            db.add(mail_preference)
+        request.db.commit()
+        request.session.flash('Your preferences have been updated', queue='messages')
+    return {'tutorials': tutorials,
+            'tutorial_ids': request.context.tutorial_ids_str,
+            'lecture': lecture,
+            'form': form}
+
 
 @view_config(route_name='tutorial_email', renderer='muesli.web:templates/tutorial/email.pt', context=TutorialContext, permission='sendMail')
 def email(request):

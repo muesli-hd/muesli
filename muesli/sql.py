@@ -20,7 +20,7 @@ from muesli.exceptions import *
 
 from sqlalchemy.sql import text
 
-class DBUpdate(object):
+class DBUpdate:
     def __init__(self, schema_version, statements=None, callable=None):
         self.schema_version = schema_version
         self.statements = statements
@@ -39,7 +39,7 @@ class DBUpdate(object):
                 self.callable(connection)
         connection.execute(text("UPDATE config SET value = :version WHERE key = 'schema_version'"), version=self.schema_version)
 
-class DBUpdater(object):
+class DBUpdater:
     __shared = {'updates': {}}
     def __init__(self):
         self.__dict__ = self.__shared

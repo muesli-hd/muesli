@@ -27,10 +27,11 @@ from muesli.tests import functionalTests
 
 class BaseTests(functionalTests.BaseTests):
     def test_index(self):
-        res = self.testapp.get('/', status=200)
+        # Logged out users are redirected to the login page
+        res = self.testapp.get('/', status=302)
 
-    def test_start(self):
-        res = self.testapp.get('/start', status=302)
+    def test_overview(self):
+        res = self.testapp.get('/overview', status=302)
 
     def test_admin(self):
         res = self.testapp.get('/admin', status=403)
@@ -52,10 +53,10 @@ class UserLoggedInTests(UnloggedTests):
         UnloggedTests.setUp(self)
         self.setUser(self.user)
 
-    def test_start(self):
+    def test_overview(self):
         # Now we are logged in, thus we should
         # get 200 instead of 302
-        res = self.testapp.get('/start', status=200)
+        res = self.testapp.get('/overview', status=200)
 
 class TutorLoggedInTests(UserLoggedInTests):
     def setUp(self):
@@ -79,5 +80,4 @@ class AdminLoggedInTests(AssistantLoggedInTests):
     def test_email_users(self):
         res = self.testapp.get('/email_users', status=200)
         res = self.testapp.get('/email_users?type=wrong_subject', status=200)
-        res = self.testapp.get('/email_users?type=wrong_birthday', status=200)
         res = self.testapp.get('/email_users?type=unconfirmed', status=200)

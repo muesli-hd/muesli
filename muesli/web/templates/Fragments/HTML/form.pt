@@ -26,6 +26,9 @@
           <div tal:condition="field.type=='text'" tal:omit-tag="">
             <input tal:attributes="name field.name; size str(field.size); value field.value; readonly 'readonly' if field.readonly else None"/>
           </div>
+          <div tal:condition="field.type=='number'" tal:omit-tag="">
+            <input type="number" tal:attributes="name field.name; size str(field.size); value field.value; readonly 'readonly' if field.readonly else None"/>
+          </div>
           <div tal:condition="field.type=='password'" tal:omit-tag="">
             <input type="password" tal:attributes="name field.name; size str(field.size); value field.value; readonly 'readonly' if field.readonly else None"/>
           </div>

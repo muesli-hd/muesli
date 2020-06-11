@@ -40,6 +40,9 @@ class BaseTests(functionalTests.BaseTests):
     def test_tutorial_add(self):
         res = self.testapp.get('/tutorial/add/%s' % 12456, status=404)
 
+    def test_tutorial_duplicate(self):
+        res = self.testapp.get('/tutorial/duplicate/%s/%s' % (12456,1245), status=404)
+
     def test_tutorial_edit(self):
         res = self.testapp.get('/tutorial/edit/%s' % 12456, status=403)
 
@@ -54,6 +57,9 @@ class BaseTests(functionalTests.BaseTests):
 
     def test_tutorial_email(self):
         res = self.testapp.get('/tutorial/email/%s' % 12456, status=403)
+
+    def test_tutorial_email_preference(self):
+        res = self.testapp.get('/tutorial/email_preference/%s' % 12456, status=403)
 
     def test_tutorial_ajax_tutorial(self):
         res = self.testapp.post('/tutorial/ajax_get_tutorial/%s' % (1234),
@@ -72,6 +78,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
     def test_tutorial_add(self):
         res = self.testapp.get('/tutorial/add/%s' % self.lecture.id, status=403)
 
+    def test_tutorial_duplicate(self):
+        res = self.testapp.get('/tutorial/duplicate/%s/%s' % (self.lecture.id,self.tutorial.id), status=403)
+
     def test_tutorial_edit(self):
         res = self.testapp.get('/tutorial/edit/%s' % self.tutorial.id, status=403)
 
@@ -86,6 +95,9 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
     def test_tutorial_email(self):
         res = self.testapp.get('/tutorial/email/%s' % self.tutorial.id, status=403)
+
+    def test_tutorial_email_preference(self):
+        res = self.testapp.get('/tutorial/email_preference/%s' % self.tutorial.id, status=403)
 
     def test_tutorial_ajax_tutorial(self):
         res = self.testapp.post('/tutorial/ajax_get_tutorial/%s' % (self.lecture.id),
@@ -167,6 +179,9 @@ class TutorLoggedInTests(UserLoggedInTests):
         res = res.form.submit()
         self.assertTrue(res.status.startswith('302'))
 
+    def test_tutorial_email_preference(self):
+        res = self.testapp.get('/tutorial/email_preference/%s' % self.tutorial.id, status=200)
+
     def test_tutorial_ajax_tutorial(self):
         res = self.testapp.post('/tutorial/ajax_get_tutorial/%s' % (self.lecture.id),
                {'student_id': self.tutorial.students[0].id}, status=200)
@@ -189,6 +204,9 @@ class AssistantLoggedInTests(TutorLoggedInTests):
 
     def test_tutorial_add(self):
         res = self.testapp.get('/tutorial/add/%s' % self.lecture.id, status=200)
+
+    def test_tutorial_duplicate(self):
+        res = self.testapp.get('/tutorial/duplicate/%s/%s' % (self.lecture.id,self.tutorial.id), status=200)
 
     def test_tutorial_edit(self):
         res = self.testapp.get('/tutorial/edit/%s' % self.tutorial.id, status=200)

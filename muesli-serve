@@ -23,17 +23,17 @@
 import sys
 
 import muesli.web
-from paste.httpserver import serve
+from waitress import serve
 import subprocess
 
-import yaml
-
 if '--reload' in sys.argv:
-    files = subprocess.Popen(['find', '.', '-iname', '*.pt'], stdout=subprocess.PIPE).communicate()[0].decode('utf-8').split('\n')[:-1]
+    files = subprocess.Popen(['find', '.', '-iname', '*.pt'],
+                             stdout=subprocess.PIPE).communicate()[0].decode('utf-8').split('\n')[:-1]
     import paste.reloader
     for template_file in files:
         paste.reloader.watch_file(template_file)
     paste.reloader.install()
 
 app = muesli.web.main()
-serve(app, host=muesli.config['listen']['host'] ,port=muesli.config['listen']['port'])
+serve(app, host=muesli.config['listen']['host'], port=muesli.config['listen']['port'], trusted_proxy='*',
+      trusted_proxy_headers="x-forwarded-for x-forwarded-host x-forwarded-proto x-forwarded-port")

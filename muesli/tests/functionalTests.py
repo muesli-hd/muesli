@@ -33,7 +33,7 @@ class OrigDatabaseTests(unittest.TestCase):
     def setUp(self):
         import muesli.web
         from muesli.web import main
-        app = main({})
+        app = main({}, testmode=True)
         from webtest import TestApp
         self.testapp = TestApp(app)
 
@@ -51,8 +51,11 @@ class BaseTests(unittest.TestCase):
     def setUp(self):
         import muesli
         import sqlalchemy
-        self.engine = sqlalchemy.create_engine('postgresql:///mueslitest')
         self.config = muesli.config
+
+        databaseName = muesli.config['database']['connection']
+        databaseName = databaseName + "test"
+        self.engine = sqlalchemy.create_engine(databaseName)
 
         import muesli.models
         muesli.models.Base.metadata.create_all(self.engine)
@@ -66,11 +69,16 @@ class BaseTests(unittest.TestCase):
         from webtest import TestApp
         self.testapp = TestApp(self.app)
         self.session = muesli.models.Session()
+
+        # TODO: This makes it incredibly hard to setup new testcases.
+        # Since you cant just modify the sql image but have to change the
+        # values in the PopulatedTests.populate() function -.-
+
         for table in reversed(muesli.models.Base.metadata.sorted_tables):
             self.session.execute(table.delete())
+        self.populate()
         self.session.commit()
 
-        self.populate()
 
     def tearDown(self):
         self.session.close()
@@ -185,7 +193,7 @@ class PopulatedTests(BaseTests):
         self.assistant2.email = 'assistant2@muesli.org'
         self.assistant2.subject = self.config['subjects'][0]
         setUserPassword(self.assistant2, 'assistant2password')
-        self.assistant2.is_assistant=1
+        self.assistant2.is_assistant = 1
         self.session.add(self.assistant2)
         #self.session.commit()
 
@@ -198,6 +206,13 @@ class PopulatedTests(BaseTests):
         setUserPassword(self.admin, 'adminpassword')
         self.session.add(self.admin)
         #self.session.commit()
+
+        # # Setup a student with an exercise
+        # self.user_with_exercise = muesli.models.User()
+        # self.user_with_exercise.first_name = "User"
+        # self.user_with_exercise.last_name = "With Exercise"
+        # self.user_with_exercise.email = "user_with_exercise@muesli.org"
+        # setUserPassword(self.admin, 'user_with_exercisepassword')
 
         self.lecture = muesli.models.Lecture()
         self.lecture.name = "Irgendwas"

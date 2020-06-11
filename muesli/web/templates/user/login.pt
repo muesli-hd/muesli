@@ -11,6 +11,12 @@ Sie sind zur Zeit als ${request.user.email} angemeldet.
   pyramid.security glaubt, sie seien ${user}.
 </p>
 
+<p>
+MÜSLI verwaltet viele Übungsgruppen und Vorlesungen an der Fakultät für
+Mathematik und Informatik der Universität Heidelberg. Diese Version von 
+MÜSLI wurde in den Semesterferien zum Wintersemester 2011/12 neu aufgesetzt.
+</p>
+
 <form action="/user/login" tal:attributes="action request.route_path('user_login')" method="POST">
 <table>
 <tr>
@@ -32,9 +38,12 @@ Sie sind zur Zeit als ${request.user.email} angemeldet.
 </form>
 
 <p>
-Wenn Sie noch keinen Account haben, müssen Sie sich zuerst <a tal:attributes="href request.route_path('user_register')">bei MÜSLI registrieren</a>.
-Falls Sie Ihr Passwort vergessen haben, können Sie Ihr <a tal:attributes="href request.route_path('user_reset_password')">Passwort zurücksetzen</a>.
-Sollten Sie dennoch Probleme bei der Anmeldung haben, <a tal:attributes="href request.route_path('contact')">wenden Sie sich an uns</a>.
+Wenn Sie noch keinen Account haben, müssen Sie sich zuerst
+<a tal:attributes="href request.route_path('user_register')">bei MÜSLI registrieren</a>.
+Falls Sie Ihr Passwort vergessen haben, können Sie Ihr 
+<a tal:attributes="href request.route_path('user_reset_password')">Passwort zurücksetzen</a>.
+Sollten Sie dennoch Probleme bei der Anmeldung haben,
+<a tal:attributes="href request.route_path('contact')">wenden Sie sich an uns</a>.
 </p>
 
   </metal:main>

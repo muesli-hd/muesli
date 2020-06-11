@@ -82,8 +82,28 @@ body {
     color: grey;
 }
 
+#navigation {
+    max-width: 30%;
+    float: right;
+    display: flex;
+    border: 1px solid gray;
+    border-top: 0px;
+    border-right: 0px;
+    margin-left: 5px;
+}
+
+#navigation ul {
+    list-style-position: outside;
+}
+
+@media (max-width: 750px) {
+    #navigation {
+        display: none;
+    }
+}
 
 #content {
+    overflow: auto;
     padding: 0.8em;
     padding-left: 3em;
     border: 1px solid gray;
@@ -206,4 +226,90 @@ table.colored tr:nth-child(odd) {
 
 .changelog_description {
   vertical-align: top;
+}
+
+/* Tooltip container */
+.tooltip_questionmark {
+  position: relative;
+  display: inline-block;
+  background-color: lightgrey;
+  border-radius: 100%;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  color: #FFFFFF;
+  font-family: sans-serif;
+}
+
+.tooltip_questionmark:before{
+    content:'?';
+    font-weight: bold;
+    color:#fff;
+}
+
+/* Tooltip text */
+.tooltip_questionmark p {
+  visibility: hidden;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 5px 5px;
+  border-radius: 6px;
+  width: 300px;
+
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -150px;
+
+  /* Fade in tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Tooltip arrow */
+.tooltip_questionmark p::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip_questionmark:hover p {
+  visibility: visible;
+  opacity: 1;
+}
+
+#student-names table td {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Button-like <a> elements for any <a> that actually triggers an action */
+a.action {
+    background-color: lightgray;
+    padding: 3px 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    color:black;
+    box-shadow: 1px 1px 2px black;
+    line-height: 21px;
+    cursor: default;
+    margin: 0 2px 2px 0;
+}
+
+a.action:hover {
+    background-color: #eee;
+}
+
+a.action:active {
+    box-shadow: none;
+    margin: 2px 0 0 2px;
 }

@@ -44,6 +44,7 @@ from openpyxl.writer.excel import save_virtual_workbook
 import io
 #
 from muesli import types
+from muesli.web.tooltips import lecture_edit_tooltips
 
 import re
 import os
@@ -51,7 +52,7 @@ import os
 import yaml
 
 @view_config(route_name='lecture_list', renderer='muesli.web:templates/lecture/list.pt')
-class List(object):
+class List:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -75,7 +76,7 @@ class List(object):
                 'sticky_lectures': sticky_lectures}
 
 @view_config(route_name='lecture_view', renderer='muesli.web:templates/lecture/view.pt', context=LectureContext, permission='view')
-class View(object):
+class View:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -83,14 +84,14 @@ class View(object):
     def __call__(self):
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
         times = lecture.prepareTimePreferences(user=self.request.user)
-        subscribed = self.request.user.id in [s.id for s in lecture.students]
+        subscribed_tutorial = self.request.user.tutorials.filter(Tutorial.lecture_id == self.lecture_id).first()
         return {'lecture': lecture,
-                'subscribed': subscribed,
+                'subscribed_tutorial': subscribed_tutorial,
                 'times': times,
                 'prefs': utils.preferences}
 
 @view_config(route_name='lecture_add_exam', renderer='muesli.web:templates/lecture/add_exam.pt', context=LectureContext, permission='edit')
-class AddExam(object):
+class AddExam:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -129,7 +130,7 @@ def addTutor(request):
     return HTTPFound(location=request.route_url('lecture_view', lecture_id = lecture.id))
 
 @view_config(route_name='lecture_add_grading', renderer='muesli.web:templates/lecture/add_grading.pt', context=LectureContext, permission='edit')
-class AddGrading(object):
+class AddGrading:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -149,7 +150,7 @@ class AddGrading(object):
                }
 
 @view_config(route_name='lecture_add_student', renderer='muesli.web:templates/lecture/add_student.pt', context=LectureContext, permission='edit')
-class AddStudent(object):
+class AddStudent:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -193,9 +194,62 @@ class AddStudent(object):
                 'tutorials': tutorials
                 }
 
+def sendMailAfterSwitch(request, student1, student2, lecture):
+    message = Message(subject='MÜSLI: Sie haben ihre Übungsgruppe getauscht',
+            sender=('%s <%s>' % (request.config['contact']['name'], request.config['contact']['email'])),
+            to=[student1.email],
+            body='Hallo %s!\n\nSie haben erfolgreich das Tutorium mit Ihrem Kommilitonen %s in der Vorlesung %s getauscht.'
+                 '\nWenn dies nicht nach Ihrem Wunsch geschehen ist, bitte wenden Sie sich an Ihren Tutor oder Dozenten.'
+                 '\n\nMit freundlichen Grüßen,\n  Das MÜSLI-Team\n' % (student1.name, student2.name, lecture.name))
+    muesli.mail.sendMail(message)
+
+@view_config(route_name='lecture_switch_students', renderer='muesli.web:templates/lecture/switch_students.pt', context=LectureContext, permission='edit')
+class SwitchStudents(object):
+    def __init__(self, request):
+        self.request = request
+        self.db = self.request.db
+        self.lecture_id = request.matchdict['lecture_id']
+        request.javascript.append('jquery/jquery.min.js')
+        request.javascript.append('jquery/select2.min.js')
+
+    def __call__(self):
+        lecture = self.db.query(models.Lecture).get(self.lecture_id)
+        tutorials = lecture.tutorials
+        students = lecture.students.all()
+        if self.request.method == 'POST':
+            student1_id = int(self.request.POST['student1'])
+            student2_id = int(self.request.POST['student2'])
+            student1 = self.db.query(models.User).filter(models.User.id==student1_id).one()
+            student2 = self.db.query(models.User).filter(models.User.id == student2_id).one()
+
+            ls1 = self.request.db.query(models.LectureStudent).get((lecture.id, student1.id))
+            ls2 = self.request.db.query(models.LectureStudent).get((lecture.id, student2.id))
+
+            if student1_id == student2_id:
+                self.request.session.flash('Student kann nicht mit sich selbst getauscht werden!', queue='errors')
+            elif ls1.tutorial==ls2.tutorial:
+                self.request.session.flash('Die beiden Studenten sind im gleichen Tutorium!', queue='errors')
+            else:
+                tmp = ls1.tutorial
+                ls1.tutorial = ls2.tutorial
+                ls2.tutorial = tmp
+                self.request.db.commit()
+                sendMailAfterSwitch(self.request, student1, student2, lecture)
+                sendMailAfterSwitch(self.request, student2, student1, lecture)
+                muesli.web.viewsTutorial.sendChangesMailSubscribe(self.request, ls1.tutorial, student1, ls2.tutorial)
+                muesli.web.viewsTutorial.sendChangesMailSubscribe(self.request, ls2.tutorial, student2, ls1.tutorial)
+                muesli.web.viewsTutorial.sendChangesMailUnsubscribe(self.request, ls1.tutorial, student2, ls2.tutorial)
+                muesli.web.viewsTutorial.sendChangesMailUnsubscribe(self.request, ls2.tutorial, student1, ls1.tutorial)
+                self.request.session.flash('Sie haben die Tutorien von {} und {} vertauscht'.format(student1.name(),student2.name()), queue='messages')
+
+        return {'lecture': lecture,
+                'tutorials': tutorials,
+                'students': students
+                }
+
 
 @view_config(route_name='lecture_edit', renderer='muesli.web:templates/lecture/edit.pt', context=LectureContext, permission='edit')
-class Edit(object):
+class Edit:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -212,15 +266,22 @@ class Edit(object):
         pref_count = sum([pref[0] for pref in pref_subjects])
         subjects = lecture.subjects()
         student_count = sum([subj[0] for subj in subjects])
+        # Query results are already lexicographically sorted.
+        # Sort again using length as key so we get length lexicographical sorting
+        # https://github.com/muesli-hd/muesli/issues/28
+        exams = dict([[cat['id'], sorted(list(lecture.exams.filter(models.Exam.category==cat['id'])),
+                              key=lambda x:len(x.name))]
+                      for cat in utils.categories])
         return {'lecture': lecture,
                 'names': names,
                 'pref_count': pref_count,
                 'subjects': subjects,
                 'student_count': student_count,
                 'categories': utils.categories,
-                'exams': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
+                'exams': exams,
                 'assistants': assistants,
-                'form': form}
+                'form': form,
+                'tooltips': lecture_edit_tooltips}
 
 @view_config(route_name='lecture_delete', context=LectureContext, permission='delete_lecture')
 def delete(request):
@@ -275,7 +336,7 @@ def change_assistants(request):
     return HTTPFound(location=request.route_url('lecture_edit', lecture_id = lecture.id))
 
 @view_config(route_name='lecture_preferences', renderer='muesli.web:templates/lecture/preferences.pt', context=LectureContext, permission='edit')
-class Preferences(object):
+class Preferences:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -327,7 +388,7 @@ class PrefHistogram(MatplotlibView):
         return self.createResponse()
 
 @view_config(route_name='lecture_add', renderer='muesli.web:templates/lecture/add.pt', context=GeneralContext, permission='create_lecture')
-class Add(object):
+class Add:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -344,7 +405,7 @@ class Add(object):
         return {'form': form}
 
 @view_config(route_name='lecture_remove_tutor', context=LectureContext, permission='edit')
-class RemoveTutor(object):
+class RemoveTutor:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -366,7 +427,7 @@ class RemoveTutor(object):
         return HTTPFound(location=self.request.route_url('lecture_edit', lecture_id=lecture.id))
 
 @view_config(route_name='lecture_export_students_html', renderer='muesli.web:templates/lecture/export_students_html.pt', context=LectureContext, permission='edit')
-class ExportStudentsHtml(object):
+class ExportStudentsHtml:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
@@ -384,12 +445,13 @@ def emailTutors(request):
     db = request.db
     lecture = request.context.lecture
     form = LectureEmailTutors(request)
+    
     if request.method == 'POST' and form.processPostData(request.POST):
         tutors = lecture.tutors
         message = Message(subject=form['subject'],
                 sender=request.user.email,
-                to= [assistant.email for assistant in lecture.assistants],
-                bcc=[t.email for t in tutors],
+                to=[t.email for t in tutors],
+                cc=[assistant.email for assistant in lecture.assistants if form['copytoassistants'] == 0],
                 body=form['body'])
         if request.POST['attachments'] not in ['', None]:
             message.attach(request.POST['attachments'].filename, data=request.POST['attachments'].file)
@@ -546,8 +608,12 @@ def viewPoints(request):
         return HTTPForbidden()
     visible_exams = lecture.exams.filter((models.Exam.results_hidden==False)|(models.Exam.results_hidden==None))
     exams = visible_exams.all()
+    # Query results are already lexicographically sorted.
+    # Sort again using length as key so we get length lexicographical sorting
+    # https://github.com/muesli-hd/muesli/issues/28
     exams_by_category = [
-            {'id':cat['id'], 'name': cat['name'], 'exams': visible_exams.filter(models.Exam.category==cat['id']).all()} for cat in utils.categories]
+            {'id':cat['id'], 'name': cat['name'], 'exams': sorted(list(visible_exams.filter(models.Exam.category==cat['id']).all()),
+             key=lambda x:len(x.name))} for cat in utils.categories]
     exams_by_category = [cat for cat in exams_by_category if cat['exams']]
     results = {}
     for exam in exams:
@@ -628,7 +694,7 @@ def exportYaml_details(request):
             vemail = 'email: ' + tutorial.tutor.email  if tutorial.tutor!=None else 'email: '
             vplace = 'place: ' + tutorial.place
             vtime = 'time: '+ tutorial.time.__html__()
-            vcomment = 'comment: ' + tutorial.comment
+            vcomment = 'comment: ' + tutorial.comment if tutorial.comment!= None else 'comment: '
             tutorialItem = (vtutor.replace("'",""),vemail, vplace.replace("'",""), vtime.replace("'",""),vcomment.replace("'",""))
             lecture_dict['tutorials'].append(tutorialItem)
         lecture_dict['name'] = lecture.name
@@ -637,11 +703,11 @@ def exportYaml_details(request):
         lecture_dict['term'] = lecture.term.__html__()
         out.append(lecture_dict)
         response = Response(content_type='application/x-yaml')
-    response.body = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
+    response.text = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
     return response
 
 
-class ExcelExport(object):
+class ExcelExport:
     def __init__(self, request):
         self.request = request
         self.w = Workbook()

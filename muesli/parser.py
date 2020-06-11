@@ -36,7 +36,7 @@ debug_flag=True
 def dec(f):
     return Decimal(str(f))
 
-class Parser(object):
+class Parser:
     def __init__(self):
         # define grammar
         point = Literal('.')
@@ -101,7 +101,7 @@ class Parser(object):
                         "*" : self.handleNone( lambda a,b: a * b, none_survives=True ),
                         "/" : self.handleNone( lambda a,b: a / b, none_survives=True ),
                         "^" : self.handleNone( lambda a,b: a ** b, none_survives=True ) }
-        self.functions = { 'max': max,
+        self.functions = { 'max': self.max,
                 'min': self.min,
                 'cases': self.cases,
                 'cases1': self.cases1,
@@ -110,12 +110,21 @@ class Parser(object):
                 'cases333': self.cases333,
                 'round3down': self.round3down
                 }
+
     def min(self, arr):
-        arr = [a for a in arr if a != None]
+        arr = [a for a in arr if a is not None]
         if arr:
             return min(arr)
         else:
             return None
+
+    def max(self, arr):
+        arr = [a for a in arr if a is not None]
+        if arr:
+            return max(arr)
+        else:
+            return None
+
     def handleNone(self, func, none_survives=False):
         def newFunc(a, b):
             if a == None:

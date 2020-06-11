@@ -2,13 +2,12 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<script>
-/*<![CDATA[*/
-  function confirm_unsubscribe() {
-    return confirm("Wollen Sie wirklich diese Übungsgruppe verlassen?");
-  }
-/*]]>*/
-</script>
+<div tal:condition="uboo">
+    Bitte nehmen Sie sich die Zeit zu überprüfen, ob noch alle Ihre Angaben korrekt sind. Dies ist insbesondere wichtig,
+    wenn Sie den Studiengang gewechselt haben.<br>
+    Bestätigen/Korrigieren Sie <a tal:attributes="href request.route_path('user_check')">hier</a> Ihre Informationen,
+    um diese Erinnerung für den Rest des Semesters nicht mehr zu sehen.
+</div>
 
 <h2>Übersicht Ihrer Veranstaltungen in diesem Semester</h2>
 
@@ -39,7 +38,7 @@
 <div tal:condition="tutorials">
   <h3>Feste Eintragungen in Übungsgruppen</h3>
   <table>
-    <tr><th></th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th>Übungsleiter</th><th></th><th></th></tr>
+    <tr><th></th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th>Übungsleiter</th><th></th></tr>
 
     <tr tal:repeat="tutorial tutorials">
       <td>${tutorial.lecture.term}</td>
@@ -48,11 +47,7 @@
       <td>${tutorial.place}</td>
       <td>
         <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a></td>
-      <td><a tal:attributes="href request.route_path('lecture_view_points', lecture_id=tutorial.lecture.id)">[&nbsp;Details&nbsp;]</a></td>
-      <td>
-        <a tal:condition="tutorial.lecture.mode != 'static'" onclick="return confirm_unsubscribe()"
-           tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">[&nbsp;Austreten&nbsp;]</a>
-      </td>
+      <td><a tal:attributes="href request.route_path('lecture_view_points', lecture_id=tutorial.lecture.id)">Punkte und Klausuren</a></td>
     </tr>
   </table>
 </div>
@@ -86,8 +81,19 @@
 
 </div>
 <p tal:condition="request.GET.get('show_all', '0')=='0'">Es werden nur aktuelle Veranstaltungen angezeigt.
-  <a tal:attributes="href request.route_path('start', _query= {'show_all': '1'})">Alle anzeigen</a>.</p>
-<p tal:condition="request.GET.get('show_all', '0')=='1'">Es werden alle Veranstaltungen angezeigt. <a tal:attributes="href request.route_path('start')">Nur aktuelle anzeigen</a>.</p>
+  <a tal:attributes="href request.route_path('overview', _query= {'show_all': '1'})">Alle anzeigen</a>.</p>
+<p tal:condition="request.GET.get('show_all', '0')=='1'">Es werden alle Veranstaltungen angezeigt. <a tal:attributes="href request.route_path('overview')">Nur aktuelle anzeigen</a>.</p>
+
+<a tal:condition="request.GET.get('help', '0')=='0'" tal:attributes="href request.route_path('overview', _query= {'help': '1'})">Hilfe</a>
+<div tal:condition="request.GET.get('help', '0')=='1'">
+<a tal:attributes="href request.route_path('overview')">Hilfe verbergen</a>
+<ul>
+    <li>${tooltips.lecture}</li>
+    <li>${tooltips.email}</li>
+    <li>${tooltips.details}</li>
+    <li tal:condition="tutorials_as_tutor">${tooltips.tutor}</li>
+</ul>
+</div>
 
   </metal:main>
 </metal:main>

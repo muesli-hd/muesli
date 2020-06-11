@@ -43,6 +43,9 @@ class BaseTests(functionalTests.BaseTests):
     def test_user_update(self):
         res = self.testapp.get('/user/update', status=403)
 
+    def test_user_check(self):
+        res = self.testapp.get('/user/check', status=403)
+
     def test_user_register(self):
         res = self.testapp.get('/user/register', status=200)
         form = res.form
@@ -50,8 +53,6 @@ class BaseTests(functionalTests.BaseTests):
         form['first_name'] = 'Matthias'
         form['subject'] = 'Mathematik (Dipl.)'
         form['matrikel'] = '1234567'
-        form['birth_date'] = '01.12.1999'
-        form['birth_place'] = 'Hintertupfingen'
         res = form.submit()
         self.assertTrue(res.status.startswith('200'))
         self.assertResContains(res, 'formerror')
@@ -61,8 +62,6 @@ class BaseTests(functionalTests.BaseTests):
         form['last_name'] = 'Kümmerer'
         form['subject'] = 'Mathematik (Dipl.)'
         form['matrikel'] = 'ui123'
-        form['birth_date'] = '01.12.1999'
-        form['birth_place'] = 'Hintertupfingen'
         res = form.submit()
         self.assertTrue(res.status.startswith('200'))
         self.assertResContains(res, 'formerror')
@@ -72,8 +71,6 @@ class BaseTests(functionalTests.BaseTests):
         form['last_name'] = 'Kümmerer'
         form['subject'] = 'Mathematik (Dipl.)'
         form['matrikel'] = '1234567'
-        form['birth_date'] = '01.12.1999'
-        form['birth_place'] = 'Hintertupfingen'
         res = form.submit()
         self.assertTrue(res.status.startswith('302'))
 
@@ -177,8 +174,6 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
         form['last_name'] = 'Kümmerer'
         form['subject'] = 'Mathematik (Dipl.)'
         form['matrikel'] = '1234567'
-        form['birth_date'] = '01.12.1999'
-        form['birth_place'] = 'Hintertupfingen'
         res = form.submit()
         self.assertTrue(res.status.startswith('200'))
         self.assertResContains(res, 'existiert bereits')
@@ -189,8 +184,6 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
         form['last_name'] = 'Kümmerer'
         form['subject'] = 'Mathematik (Dipl.)'
         form['matrikel'] = '1234567'
-        form['birth_date'] = '01.12.1999'
-        form['birth_place'] = 'Hintertupfingen'
         res = form.submit()
         self.assertTrue(res.status.startswith('200'))
         self.assertResContains(res, 'existiert bereits')
@@ -200,7 +193,7 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
 class UnicodeTests(functionalTests.UnicodeUserTests):
     def test_unicodepassword(self):
-        res = self.testapp.get('/start', status=200)
+        res = self.testapp.get('/overview', status=200)
 
 class UserLoggedInTests(UnloggedTests):
     def setUp(self):
@@ -213,6 +206,9 @@ class UserLoggedInTests(UnloggedTests):
     def test_user_update(self):
         res = self.testapp.get('/user/update', status=200)
         self.assertForm(res, 'matrikel', '2613945')
+
+    def test_user_check(self):
+        res = self.testapp.get('/user/check', status=200)
 
     def test_user_change_email(self):
         res = self.testapp.get('/user/change_email', status=200)

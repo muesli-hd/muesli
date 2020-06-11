@@ -18,20 +18,43 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+from markdown import markdown
+
 from sqlalchemy import create_engine
+from sqlalchemy.pool import NullPool
 
 from .utils import Configuration
 
-import os
-
-
-config = Configuration(os.getenv('MUESLI_PATH','/opt/muesli4') + '/muesli.yml')
+config = Configuration(
+    os.getenv('MUESLI_PATH', '/opt/muesli4') + '/muesli.yml')
 
 import muesli.mail
 muesli.mail.server = config['contact']['server']
 
 databaseName = config['database']['connection']
-productive=True
+PRODUCTION_INSTANCE = config.get("production", True)
+
+# Read in the dataprotection and changelog so they are static to the instance
+dataprotection_path = os.path.join(os.path.dirname(__file__), "web", "static", "datenschutzerklaerung.md")
+with open(dataprotection_path) as f:
+    dataprotection = f.read()
+DATAPROTECTION_HTML = markdown(dataprotection)
+
+changelog_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "CHANGELOG.md"))
+with open(changelog_path) as f:
+    changelog = f.read()
+CHANGELOG_HTML = markdown(changelog)
 
 def engine():
-    return create_engine(databaseName)
+    if not PRODUCTION_INSTANCE:
+        return create_engine(databaseName, max_overflow=-1)
+    else:
+        return create_engine(databaseName)
+
+
+def testengine():
+    if not PRODUCTION_INSTANCE:
+        return create_engine(databaseName + "test", max_overflow=-1)
+    else:
+        return create_engine(databaseName + "test")

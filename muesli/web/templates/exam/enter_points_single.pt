@@ -3,6 +3,8 @@
   <metal:main metal:fill-slot="content">
 
 
+<p style="display: flex" name="savestatus"></p>
+
 <h2>Punkte eintragen</h2>
 
 <h3>${exam.name} der Vorlesung ${exam.lecture.name}</h3>
@@ -12,91 +14,305 @@
   </p>
 
 
-<script>/* <![CDATA[ */
-  function update_total(row)
-  {
-    var objs = $$("#row-" + row + " input.points");
-    var total = 0;
-    var current = 0;
+<script>
+jQuery.noConflict();
+window.student_results_json = '${student_results}';
+window.exercise_ids_json = '${exercise_ids}';
+window.latest_row_id = 0;
 
-    for (i = 0; i < objs.length; i++) {
-      current = parseFloat(objs[i].value.replace(/,/, "."));
-      if (!isNaN(current)) {
-        total += current;
-      }
+jQuery(document).ready(function() {
+    window.student_results = JSON.parse(student_results_json);
+    window.exercise_ids = JSON.parse(exercise_ids_json);
+
+    jQuery('.student_select').select2({
+        width: "16em"
+    }).on('change', function (e) {
+        var selectedStudents = getSelectedStudents(0);
+        var points_captions = Array(${len(exercises) + 1}).fill('');
+        var preselected_points = Array(${len(exercises) + 1});
+        for(i = 0; i < selectedStudents.length; i++) {
+            for(j = 0; j < points_captions.length; j++) {
+                var points = student_results[selectedStudents[i]]['points'][j];
+                if (typeof(preselected_points[j]) === 'undefined') {
+                    preselected_points[j] = {};
+                    preselected_points[j].value = points;
+                    preselected_points[j].alert = false;
+                }
+                if (preselected_points[j].value !== points) {
+                    preselected_points[j].value = points;
+                    preselected_points[j].alert = true;
+                }
+                var caption = points;
+                if (points === 'None'){
+                    caption = '-';
+                }
+                points_captions[j] += caption + '<br/>';
+            }
+        }
+
+        jQuery('.current-points').each(function (i, obj) {
+            obj.innerHTML = (points_captions[i]);
+            if (selectedStudents.length > 0) {
+                if (i < preselected_points.length - 1 && preselected_points[i].alert) {
+                    obj.style.color = 'red';
+                } else {
+                    obj.style.color = null;
+                }
+            }
+        });
+        jQuery('.points').each(function (i, obj) {
+            if (selectedStudents.length > 0) {
+                if (obj.value === '') {
+                    if (preselected_points[i].value !== 'None') {
+                        obj.value = (preselected_points[i].value);
+                    }
+                }
+            } else {
+                obj.value = '';
+            }
+        });
+        update_total(0);
+    }).trigger('change');
+
+    jQuery(document).on('keydown', 'form', function(event) {
+        var row_id;
+        row_id = Number(jQuery(document.activeElement).closest('tr').attr('id').replace('row-', ''));
+        if (event.key === "Enter") {
+            if (row_id === 0) {
+                return submit_all_points(row_id);
+            } else {
+                save_corrected_row(row_id)
+            }
+        }
+        return true;
+    });
+
+    jQuery(".select2-search__field").focus().select();
+});
+
+function update_total(row_id) {
+    var row;
+    row = jQuery('#row-' + row_id);
+
+    var total;
+    var current;
+    total = 0;
+    row.find('.points').each(function(index) {
+        current = parseFloat(jQuery(this)[0].value.replace(/,/, "."));
+        if (!isNaN(current)) {
+            total += current;
+        }
+    });
+    return row.find("#total")[0].value = Number(total).toFixed(2);
+}
+
+function getSelectedStudents(row_id) {
+    if (row_id === 0) {
+        var selectedStudents = [];
+        jQuery('.student_select > option:selected').each(function() {
+            selectedStudents.push(jQuery(this).val())
+        });
+        return selectedStudents;
+    } else {
+        return jQuery('#row-' + row_id + ' button').attr('data-students').split(',')
+    }
+}
+
+function update_student_names(row_id) {
+    var row = jQuery('#row-' + row_id);
+    var students_str = row.find('button').attr('data-students');
+
+    if (students_str === '') {
+        row.remove();
+        return true;
     }
 
-    return $("total-" + row).value = Number(total).toFixed(2);
-  }
-/* ]]> */
+    var students = students_str.split(',');
+    var student_names = [];
+    var student_names_field = row.find('#student-names');
+    var student_names_html = '<table><tr>';
+
+    students.forEach(function (student_id) {
+        var current_student = '<td>';
+        if (${'true' if show_tutor else 'false'}) {
+            current_student += student_results[student_id]['tutorial_tutor'] + '</td><td>';
+        }
+        if (${'true' if show_time else 'false'}) {
+            current_student += student_results[student_id]['tutorial_time'] + '</td><td>';
+        }
+        current_student += student_results[student_id]['name'];
+        current_student += '</td>';
+        student_names.push(current_student);
+    });
+    student_names_html += student_names.join('</tr><tr>');
+    student_names_html += '</tr></table>';
+
+    student_names_field.html(student_names_html);
+}
+
+function correct_row(row_id) {
+    var row;
+    row = jQuery('#row-' + row_id);
+    row.find('td[data-exercise]').each(function(index) {
+        var cell = jQuery(this);
+        var value = cell.html();
+        var exercise = cell.data('exercise');
+        if (value === '-') {
+            value = ''
+        }
+        cell.html('<input type="text" class="points" name="points-' + exercise + '" value="' + value + '" size="3" onchange="update_total(' + row_id + ') ">')
+    });
+    row.find('#totalcol').html('<input id="total" readonly="readonly" size="4" value="0">');
+    update_total(row_id);
+    var button;
+    button = row.find('button');
+    button.text('Speichern');
+    button.attr('onclick', 'save_corrected_row(' + row_id + ')');
+}
+
+function save_corrected_row(row_id) {
+    submit_all_points(row_id);
+    jQuery('#row-' + row_id).remove();
+}
+
+function remove_students_from_previous_submittions(students) {
+    var row_id;
+    for (row_id = 1; row_id < latest_row_id; row_id++) {
+        var button;
+        var row_students;
+        var new_row_students;
+        var is_in_row;
+        new_row_students = [];
+
+        button = jQuery('#row-' + row_id + ' button');
+        if (button.length === 0) {
+            continue;
+        }
+        row_students = button.attr('data-students').split(',');
+        row_students.forEach(function(row_student) {
+            is_in_row = false;
+            students.forEach(function(student) {
+                if (row_student === String(student)) {
+                    is_in_row = true;
+                }
+            });
+            if (!is_in_row) {
+                new_row_students.push(row_student)
+            }
+        });
+        button.attr('data-students', new_row_students.join(','));
+        update_student_names(row_id)
+    }
+
+}
+
+function submit_all_points(row_id) {
+    var selectedStudents = getSelectedStudents(row_id);
+    var savestatus = document.getElementsByName('savestatus')[0];
+
+    if ( selectedStudents.length === 0 ) {
+        return true;
+    }
+
+    var parameterHash = new Hash();
+
+    parameterHash.set('student_id', selectedStudents.join(','));
+
+    for (i = 0; i < exercise_ids.length; i++){
+        var current_input = jQuery('#row-' + row_id).find('input[name=points-' + exercise_ids[i][1] + ']')[0];
+        parameterHash.set('points-' + exercise_ids[i][1], current_input.value);
+    }
+
+    var new_row_id = latest_row_id += 1;
+
+    new Ajax.Request('${request.route_path('exam_ajax_save_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)}', {
+                parameters: parameterHash,
+                onSuccess:function(response){
+                    var status = response.responseText.evalJSON();
+                    if (status['format_error']) {
+                        savestatus.innerHTML = status['msg'];
+                        savestatus.className = "error";
+                    } else {
+                        savestatus.innerHTML = "Punkte erfolgreich abgespeichert!";
+                        savestatus.className = "message";
+                    }
+
+                    var insert_data = "<tr id=\'row-" + new_row_id + "\'>";
+
+                    // add student names
+                    insert_data += '<td id=\'student-names\'></td>';
+
+                    var pointsum = 0;
+                    for (var i=0; i < exercise_ids.length; i++) {
+                        var p = status['submitted_points'][exercise_ids[i][1]];
+                        pointsum += p;
+                        for (var j = 0; j < status['students'].length; j++) {
+                            window.student_results[status['students'][j]]['points'][i] = (p === null) ? 'None' : p.toFixed(1);
+                            student_results[status['students'][j]]['points'][exercise_ids.length] = pointsum.toFixed(1);
+                        }
+                        if (p === null) {
+                            p = '-';
+                        } else {
+                            p = p.toFixed(1)
+                        }
+                        insert_data += '<td style="text-align: center" data-exercise="' + exercise_ids[i][1] +'">' + p + '</td>';
+                    }
+                    insert_data += '<td style="text-align: center" id="totalcol">' + pointsum.toFixed(2) + '</td>';
+                    insert_data += '<td><button data-students="' + status['students'].join(',') + '" onclick="correct_row(' + new_row_id +')" type="button">Korrigieren</button></td>';
+                    remove_students_from_previous_submittions(status['students']);
+                    jQuery('#row-0').before(insert_data);
+                    update_student_names(new_row_id);
+                },
+                onFailure:function(response){
+                    savestatus.innerHTML = "Fehler beim Speichern!";
+                    savestatus.className = "error";
+                }
+            }
+    );
+
+    //deselect all students if a new row is submitted
+    var student_select;
+    student_select = jQuery(".student_select");
+    if (row_id === 0) {
+        var inputPunkte = document.getElementsByClassName('points');
+        for (i = 0; i < inputPunkte.length; i++) {
+            inputPunkte[i].value = "";
+        }
+        student_select.val(null);
+        update_total(0);
+    }
+
+    student_select.trigger('change');
+    jQuery(".select2-search__field").focus().select();
+
+    return true;
+}
 </script>
 
-<script>
-${code}
-</script>
-
-<style type="text/css">/* <![CDATA[ */
-div.autocomplete {
-  position:absolute;
-  width:250px;
-  background-color:white;
-  border:1px solid #888;
-  margin:0;
-  padding:0;
-}
-div.autocomplete ul {
-  list-style-type:none;
-  margin:0;
-  padding:0;
-}
-div.autocomplete ul li.selected { background-color: #ffb;}
-div.autocomplete ul li {
-  list-style-type:none;
-  display:block;
-  margin:0;
-  padding:2px;
-  height:32px;
-  cursor:pointer;
-}
-/* ]]> */
-</style>
-
-<form id="enter_points_form" onsubmit="{submit_points(currentrow);return false;}" onkeypressss="{if(event.keycode==1300)this.form.submit();}">
+<form id="enter_points_form" onsubmit="submit_all_points(0); return false;">
 <input type="hidden" id="student_id" name="student_id" />
-<table id="enter_points_table">
+<table class="points_table" id="enter_points_table">
   <tr>
-    <th tal:condition="show_tutor">Tutor</th>
-    <th tal:condition="show_time">Zeit</th>
-    <th>Name</th>
+    <th>Namen</th>
     <th tal:repeat="e exercises">${e.nr}</th>
     <th>Σ</th>
     <th></th>
     <th></th>
   </tr>
+  <tr id="row-0">
+    <td>
+        <select class="student_select" name="students" multiple="multiple">
+            <option tal:repeat="student students" value=${student.id}>${student.last_name}, ${student.first_name}</option>
+        </select>
+    </td>
+    <td tal:repeat="e exercises"><p style="text-align: center" class="current-points"></p><input type="text" class="points" name="points-${e.id}" size="3" onchange="update_total(0) "></td>
+    <td><p style="text-align: center" class="current-points"></p><input id="total" readonly="readonly" size="4" value="0"></td>
+    <td></td>
+    <td></td>
+  </tr>
 </table>
-</form>
-
-<form id="select_student_form" onsubmit="{student_selected(); return false;}">
-Name:
-<input type="text" id="student" name="student" size="40" value="" autocomplete="off" class="autocomplete" />
-
-<input type="hidden" id="student_hidden" name="student_id" />
-
-<div id="autocomplete_choices" class="autocomplete"></div>
-
 <input type="submit" value="Punkte eintragen" />
 </form>
-
-<script>/* <![CDATA[ */
-function getSelectionId(text, li) {
-    $('student_hidden').value = li.id;
-}
-
-new Ajax.Autocompleter("student", "autocomplete_choices", "${request.route_path('user_ajax_complete', lecture_id=exam.lecture_id, tutorial_ids=tutorial_ids)}", {paramName: "name",
-afterUpdateElement : getSelectionId
-});
-/* ]]> */
-</script>
 
 <div tal:omit-tag="">
   <!-- This is a very dirty hack to have always enough space to show the whole list-->

@@ -20,43 +20,60 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from muesli import models, utils
+from muesli import models, utils, DATAPROTECTION_HTML, CHANGELOG_HTML
 from muesli.web.forms import *
 from muesli.web.context import *
 from muesli.mail import Message, sendMail
-from muesli.changelog import changelog as changelog_str
+from muesli.web.tooltips import overview_tooltips
 
 from pyramid import security
 from pyramid.view import view_config
 from pyramid.response import Response, FileResponse
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPInternalServerError, HTTPFound
+from pyramid.renderers import render_to_response as render
 import pyramid.exceptions
 from pyramid.url import route_url
 from sqlalchemy.orm import exc, joinedload
 from hashlib import sha1
+from markdown import markdown
 
 import re
 import os
 import datetime
 import traceback
 
-@view_config(route_name='start', renderer='muesli.web:templates/start.pt')
-def start(request):
+
+@view_config(route_name='overview', renderer='muesli.web:templates/overview.pt')
+def overview(request):
     if not request.user:
         return HTTPFound(location = request.route_url('user_login'))
     tutorials_as_tutor = request.user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
     tutorials = request.user.tutorials.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
     lectures_as_assistant = request.user.lectures_as_assistant
+    has_updated = request.db.query(models.UserHasUpdated).get(request.user.id)
+    if has_updated is None:
+        has_updated = models.UserHasUpdated(request.user.id, '0')
+    uhu = has_updated.has_updated_info
+    limit = muesli.utils.getSemesterLimit()
+    if uhu == limit:
+        uboo = False
+    else:
+        uboo = True
+    if not has_updated in request.db:
+        request.db.add(has_updated)
+    request.db.commit()
     if request.GET.get('show_all', '0')=='0':
         semesterlimit = utils.getSemesterLimit()
         tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
         tutorials = tutorials.filter(Lecture.term >= semesterlimit)
         lectures_as_assistant = lectures_as_assistant.filter(Lecture.term >= semesterlimit)
-    return {'time_preferences': request.user.prepareTimePreferences(),
+    return {'uboo': uboo,
+            'time_preferences': request.user.prepareTimePreferences(),
             'penalty_names': utils.penalty_names,
             'tutorials_as_tutor': tutorials_as_tutor.all(),
             'tutorials': tutorials.all(),
-            'lectures_as_assistant': lectures_as_assistant.all()}
+            'lectures_as_assistant': lectures_as_assistant.all(),
+            'tooltips': overview_tooltips}
 
 @view_config(route_name='admin', renderer='muesli.web:templates/admin.pt', context=GeneralContext, permission='admin')
 def admin(request):
@@ -66,9 +83,12 @@ def admin(request):
 def contact(request):
     return {}
 
-@view_config(route_name='index', renderer='muesli.web:templates/index.pt')
+@view_config(route_name='index')
 def index(request):
-    return {}
+    if request.user:
+        return HTTPFound(location = request.route_url('overview'))
+    else:
+        return HTTPFound(location = request.route_url('user_login'))
 
 @view_config(route_name='email_all_users', renderer='muesli.web:templates/email_all_users.pt', context=GeneralContext, permission='admin')
 def emailAllUsers(request):
@@ -125,16 +145,6 @@ def emailUsers(request):
                     bad_students.append(student)
         for s in bad_students:
             table.append((s,s.subject, s.second_subject))
-    elif ttype=='wrong_birthday':
-        headers = ["Geburtstag"]
-        validator = DateString()
-        for student in students:
-            try:
-                date = validator.to_python(student.birth_date)
-            except formencode.Invalid:
-                bad_students.append(student)
-        for s in bad_students:
-            table.append((s,s.birth_date))
     elif ttype == 'unconfirmed':
         headers = ['Anmeldedatum']
         bad_students = request.db.query(models.User).filter(models.User.password == None).all()
@@ -162,41 +172,90 @@ def emailUsers(request):
 
 @view_config(route_name='changelog', renderer='muesli.web:templates/changelog.pt')
 def changelog(request):
-    entries = []
-    for part in changelog_str.split('====')[1:]:
-        date = part.split('\n',1)[0]
-        text = []
-        for line in part.split('\n')[1:]:
-            if line.startswith('topic:'):
-                pass
-            elif line.startswith('concerns:'):
-                pass
-            else: text.append(line)
-        text = '\n'.join(text)
-        entries.append({'date': date, 'description': text})
-    return {'entries': entries}
+    return {'CHANGELOG_HTML': CHANGELOG_HTML}
 
 
-@view_config(context=pyramid.exceptions.HTTPForbidden, renderer='muesli.web:templates/forbidden.pt')
+@view_config(context=pyramid.exceptions.HTTPForbidden)
 def forbidden(exc, request):
-    request.response.status=403
-    return {}
+    if "application/json" in request.headers.environ.get("HTTP_ACCEPT", ""):
+        response = render(
+            "json",
+            {
+                'error': "Sie haben nicht die noetigen Rechte um auf diese Seite zuzugreifen!",
+                'route': request.path,
+                'code': 403,
+            },
+        )
+        response.status = 403
+        response.content_type = "application/json"
+        return response
+    response = render('muesli.web:templates/HTTPForbidden.pt',
+                      {},
+                      request=request)
+    response.status = 403
+    return response
 
-###################################
-###################################
-###################################
-@view_config(context = Exception, renderer='muesli.web:templates/error.pt')
-def internalServerError(exc, request):
-    if not muesli.productive:
+@view_config(context=pyramid.exceptions.HTTPBadRequest)
+def badRequest(e, request):
+    if not muesli.PRODUCTION_INSTANCE:
         print("TRYING TO RECONSTRUCT EXCEPTION")
         traceback.print_exc()
         print("RAISING ANYHOW")
         raise exc
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().strftime("%d. %B %Y, %H:%M Uhr")
     traceback.print_exc()
     email = request.user.email if request.user else '<nobody>'
-    return {'now': now,
-            'email': email}
+    if "application/json" in request.headers.environ.get("HTTP_ACCEPT", ""):
+        response = render(
+            "json",
+            {
+                'time': now, 'user': email,
+                'contact': request.config['contact']['email'],
+                'error': e.detail,
+                'route': request.path,
+                'code': e.code,
+            },
+        )
+        response.content_type = "application/json"
+        response.status = e.code
+        return response
+    response = render(
+        'muesli.web:templates/HTTPBadRequest.pt',
+        {'now': now, 'email': email, 'error': e.detail},
+        request=request
+    )
+    response.status = e.code
+    return response
+
+@view_config(context=Exception)
+def internalServerError(e, request):
+    if not muesli.PRODUCTION_INSTANCE:
+        print("TRYING TO RECONSTRUCT EXCEPTION")
+        traceback.print_exc()
+        print("RAISING ANYHOW")
+        raise e
+    now = datetime.datetime.now().strftime("%d. %B %Y, %H:%M Uhr")
+    traceback.print_exc()
+    email = request.user.email if hasattr(request, 'user') and request.user else '<nobody>'
+    if "application/json" in request.headers.environ.get("HTTP_ACCEPT", ""):
+        response = render(
+            "json",
+            {
+                'time': now, 'user': email,
+                'contact': request.config['contact']['email'],
+                'error': "Bei der Beabeitung ist ein interner Fehler aufgetreten!",
+                'route': request.path,
+                'code': 500,
+            },
+        )
+        response.content_type = "application/json"
+        response.status = 500
+        return response
+    response = render('muesli.web:templates/HTTPInternalServerError.pt',
+                      {'now': now, 'email': email},
+                      request=request)
+    response.status = 500
+    return response
 
 
 @view_config(name="favicon.ico")
@@ -208,7 +267,4 @@ def favicon_view(request):
 
 @view_config(name='datenschutzerklaerung.html', renderer='muesli.web:templates/dataprotection.pt')
 def datenschutzerklaerung_view(request):
-    here = os.path.dirname(__file__)
-    dataprotection_path = os.path.join(here, "static", "datenschutzerklaerung.html")
-    dataprotection = open(dataprotection_path, mode='r')
-    return {'dataprotection': dataprotection.read()}
+    return {'DATAPROTECTION_HTML': DATAPROTECTION_HTML}

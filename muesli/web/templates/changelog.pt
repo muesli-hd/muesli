@@ -3,12 +3,7 @@
   <metal:main metal:fill-slot="content">
 <h2>Neuigkeiten bei MÜSLI</h2>
 
-<table>
-  <tr tal:repeat="entry entries">
-    <td class="changelog_date">${entry['date']}</td>
-    <td class="changelog_description">${entry['description']}</td>
-  </tr>
-</table>
+    ${structure: CHANGELOG_HTML}
 
   </metal:main>
 </metal:main>
