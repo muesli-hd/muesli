@@ -1,7 +1,7 @@
 branch     | build status                                                                                                                 | codecoverage                                                                                                                                                |
 -----------|------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-master     | [![travis master](https://travis-ci.org/muesli-hd/muesli.svg?branch=master)](https://travis-ci.org/muesli-hd/muesli)         | [![codecov master](https://codecov.io/gh/muesli-hd/muesli/branch/master/graph/badge.svg)](https://codecov.io/gh/muesli-hd/muesli/branch/master)             |
-production | [![travis production](https://travis-ci.org/muesli-hd/muesli.svg?branch=production)](https://travis-ci.org/muesli-hd/muesli) | [![codecov production](https://codecov.io/gh/muesli-hd/muesli/branch/production/graph/badge.svg)](https://codecov.io/gh/muesli-hd/muesli/branch/production) |
+master     | [![travis master](https://travis-ci.com/muesli-hd/muesli.svg?branch=master)](https://travis-ci.com/muesli-hd/muesli)         | [![codecov master](https://codecov.io/gh/muesli-hd/muesli/branch/master/graph/badge.svg)](https://codecov.io/gh/muesli-hd/muesli/branch/master)             |
+production | [![travis production](https://travis-ci.com/muesli-hd/muesli.svg?branch=production)](https://travis-ci.com/muesli-hd/muesli) | [![codecov production](https://codecov.io/gh/muesli-hd/muesli/branch/production/graph/badge.svg)](https://codecov.io/gh/muesli-hd/muesli/branch/production) |
 
 Needed Packages:
 ================
