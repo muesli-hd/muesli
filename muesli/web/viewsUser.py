@@ -464,9 +464,13 @@ def confirmEmail(request):
 def changePassword(request):
     form = forms.UserChangePassword(request)
     if request.method == 'POST' and form.processPostData(request.POST):
-        request.user.password = sha1(form['new_password'].encode('utf-8')).hexdigest()
-        request.session.flash('Neues Passwort gesetzt', queue='messages')
-        request.db.commit()
+        # check if old_password is correct
+        if request.user.password == sha1(form['old_password'].encode('utf-8')).hexdigest():
+            request.user.password = sha1(form['new_password'].encode('utf-8')).hexdigest()
+            request.session.flash('Neues Passwort gesetzt', queue='messages')
+            request.db.commit()
+        else:
+            request.session.flash('Altes Passwort ist falsch!', queue='errors')
     return {'form': form}
 
 
