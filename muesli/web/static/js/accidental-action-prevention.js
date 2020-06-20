@@ -1,6 +1,7 @@
-function onActionClicked(event) {
+function accidentalClickPrevention(event) {
     let WAIT = "wait-for-confirmation";
-    let actionLink = event.target;
+    let actionLink = event.target; 
+    console.log(actionLink);
 
     if(actionLink.classList.contains(WAIT)) {
         // The action link has been already clicked, this click is the final confirm
@@ -12,12 +13,3 @@ function onActionClicked(event) {
     }
 }
 
-function addAccidentalClickPreventionListener() {
-    for(action of document.getElementsByClassName("action")) {
-        if(action.tagName == "A" && action.classList.contains("needs-confirmation")) {
-            action.onclick = onActionClicked;
-        }
-    }
-}
-
-document.addEventListener("DOMContentLoaded", addAccidentalClickPreventionListener);

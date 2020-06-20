@@ -53,11 +53,11 @@
             <a class="action" tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)" tal:condition="not subscribed_tutorial">
               Beitreten
             </a>
-            <a class="action needs-confirmation" tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)" tal:condition="subscribed_tutorial">
+            <a class="action" onclick="return accidentalClickPrevention(event)" tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)" tal:condition="subscribed_tutorial">
               Wechseln
             </a>
           </div>
-          <a class="action needs-confirmation" tal:condition="tutorial == subscribed_tutorial"
+          <a class="action" onclick="return accidentalClickPrevention(event)" tal:condition="tutorial == subscribed_tutorial"
              tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">
             Austreten
           </a>
