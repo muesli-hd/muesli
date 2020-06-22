@@ -164,6 +164,7 @@ def main(global_config=None, testmode=False, **settings):
     config.set_jwt_authentication_policy(jwt_authentication_policy)
     config.add_static_view('static', 'muesli.web:static')
 
+    config.add_route('start', '/start', factory = GeneralContext)
     config.add_route('overview', '/overview', factory = GeneralContext)
     config.add_route('contact', '/contact')
     config.add_route('changelog', '/changelog')

@@ -75,13 +75,21 @@ def overview(request):
             'lectures_as_assistant': lectures_as_assistant.all(),
             'tooltips': overview_tooltips}
 
+
+@view_config(route_name='start')
+def start(request):
+    return HTTPFound(location=request.route_url('overview'))
+
+
 @view_config(route_name='admin', renderer='muesli.web:templates/admin.pt', context=GeneralContext, permission='admin')
 def admin(request):
     return {}
 
+
 @view_config(route_name='contact', renderer='muesli.web:templates/contact.pt')
 def contact(request):
     return {}
+
 
 @view_config(route_name='index')
 def index(request):
