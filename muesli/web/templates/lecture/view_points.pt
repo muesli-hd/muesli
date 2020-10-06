@@ -2,7 +2,7 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<h2>Resultate für ${lecture.name}</h2>
+<h2>Ergebnisse für ${lecture.name}</h2>
 
 <h3>Punkte</h3>
 

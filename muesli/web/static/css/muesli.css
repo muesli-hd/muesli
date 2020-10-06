@@ -313,3 +313,37 @@ a.action:active {
     box-shadow: none;
     margin: 2px 0 0 2px;
 }
+
+a.action.wait-for-confirmation {
+    animation: pulse-yellow 4s;
+    animation-iteration-count: infinite;
+}
+
+a.action.critical.wait-for-confirmation {
+    animation: pulse-red 4s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes pulse-red {
+    0% {
+        background-color: #f33;
+    }
+    50% {
+        background-color: #fd7777;
+    }
+    100% {
+        background-color: #f33;
+    }
+}
+
+@keyframes pulse-yellow {
+    0% {
+        background-color: #B8860B;
+    }
+    50% {
+        background-color: #e4bc59;
+    }
+    100% {
+        background-color: #B8860B;
+    }
+}

@@ -12,6 +12,7 @@
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/fancybox/jquery.fancybox.css')"></link>
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/select2.css')"></link>
   <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
+  <script tal:attributes="src request.static_url('muesli.web:static/js/accidental-action-prevention.js')"></script>
 </head>
 <body onload="aprilFool()">
 <div id="header">
@@ -99,6 +100,7 @@ queries: ${request.queries}
 </div>
 
 </div>
+
 </body>
 </html>
 </metal:main>

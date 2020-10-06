@@ -47,7 +47,7 @@
       <td>${tutorial.place}</td>
       <td>
         <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a></td>
-      <td><a tal:attributes="href request.route_path('lecture_view_points', lecture_id=tutorial.lecture.id)">Punkte und Klausuren</a></td>
+      <td><a tal:attributes="href request.route_path('lecture_view_points', lecture_id=tutorial.lecture.id)">Ergebnisse</a></td>
     </tr>
   </table>
 </div>
