@@ -47,7 +47,24 @@ import collections
 def login(request):
     form = forms.FormValidator(forms.UserLogin())
     if request.method == 'POST' and form.validate(request.POST):
-        user = request.db.query(models.User).filter_by(email=form['email'].strip(), password=sha1(form['password'].encode('utf-8')).hexdigest()).first()
+        query = request.db.query(models.User).filter(func.lower(models.User.email) == form['email'].strip().lower(),
+                                                       models.User.password == sha1(
+                                                           form['password'].encode('utf-8')).hexdigest())
+
+        # Due to historically case sensitive email addresses, do a case insensitive first and switch to case sensitivity
+        # on email addresses, if the user is ambiguous.
+        user = None
+        if query.count() == 1:
+            # case insensitive
+            user = query.first()
+        else:
+            # case sensitive
+            for res in query:
+                if res.email == form['email'].strip():
+                    # In case two users with the exact same email casing and password exist, take the first one
+                    user = res
+                    break
+
         if user is not None:
             security.remember(request, user.id)
             request.user = user
