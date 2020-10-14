@@ -191,6 +191,17 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
     def test_user_delete(self):
         res = self.testapp.get('/user/delete/%s' % (self.user2.id), status=403)
 
+    def test_insensitive_login(self):
+        user2 = muesli.models.User()
+        user2.first_name = 'Stefan'
+        user2.last_name = 'Student'
+        user2.email = 'User@muesli.org'
+        user2.subject = self.config['subjects'][0]
+        functionalTests.setUserPassword(user2, 'userpassword2')
+        self.session.add(user2)
+
+        self.setUser(user2)
+
 class UnicodeTests(functionalTests.UnicodeUserTests):
     def test_unicodepassword(self):
         res = self.testapp.get('/overview', status=200)
