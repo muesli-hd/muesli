@@ -188,10 +188,7 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
         self.assertTrue(res.status.startswith('200'))
         self.assertResContains(res, 'existiert bereits')
 
-    def test_user_delete(self):
-        res = self.testapp.get('/user/delete/%s' % (self.user2.id), status=403)
-
-    def test_insensitive_login(self):
+    def test_user_case_insensitive_login(self):
         user2 = muesli.models.User()
         user2.first_name = 'Stefan'
         user2.last_name = 'Student'
@@ -199,8 +196,11 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
         user2.subject = self.config['subjects'][0]
         functionalTests.setUserPassword(user2, 'userpassword2')
         self.session.add(user2)
-
+        self.session.commit()
         self.setUser(user2)
+
+    def test_user_delete(self):
+        res = self.testapp.get('/user/delete/%s' % (self.user2.id), status=403)
 
 class UnicodeTests(functionalTests.UnicodeUserTests):
     def test_unicodepassword(self):
