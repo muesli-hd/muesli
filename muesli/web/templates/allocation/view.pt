@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+    <h2>${allocation.name}</h2>
+
+    <h3>Beschreibung</h3>
+    <p tal:condition="allocation.description">
+      ${allocation.description}
+    </p>
+
+    <p tal:condition="request.permissionInfo.has_permission('edit')">
+      Sie können <a tal:attributes='href request.route_path("allocation_edit", allocation_id=allocation.id)'>diese Zuteilung bearbeiten</a>.
+    </p>
+
+    <h3>Anmeldung</h3>
+
+    <div tal:condition="not allocation.can_register">
+      <p>Es ist derzeit nicht möglich, sich zu folgenden Veranstaltungen anzumelden. Bitte versuchen Sie es später noch einmal.</p>
+      <ul>
+        <li tal:repeat="lecture allocation.lectures()">${lecture.name}</li>
+      </ul>
+    </div>
+
+    <div tal:condition="allocation.can_register">
+      <p>Ich möchte mich zu folgenden Veranstaltungen anmelden:</p>
+      <form method='post' tal:attributes='action request.route_path("allocation_register", allocation_id=allocation.id)'>
+        <table>
+          <tr>
+            <th>Veranstaltung</th>
+            <th>Anmeldung</th>
+          </tr>
+          <tr tal:repeat="lecture allocation.lectures()">
+            <td>${lecture.name}</td>
+            <td>
+              <input type="checkbox" name="lecture-${lecture.id}" tal:attributes="checked 'checked' if lecture.id in lecture_registrations else None">
+            </td>
+          </tr>
+        </table>
+
+        <div tal:condition="allocation.criteria.count()">
+          <table>
+            <tr>
+              <th>Frage</th>
+              <th>Antwort</th>
+            </tr>
+            <tr tal:repeat="criterion allocation.criteria">
+              <td>${criterion.name}</td>
+              <td>
+                <select name="criterion-${criterion.id}">
+                  <option tal:repeat="option criterion.options" tal:attributes="selected 'selected' if criterion.id in selected_options and option.id == selected_options[criterion.id] else None" value="${option.id}">${option.name}</option>
+                </select>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <input type='submit' value='Zu ausgewählten Veranstaltungen anmelden'/>
+      </form>
+
+      <div tal:condition="request.user.allocation_registered_lectures(allocation).count()">
+        <h3>Übungsbetrieb</h3>
+        <p tal:condition="allocation.state != 'open'">Es ist noch nicht möglich, Präferenzen zu dieser Veranstaltung abzugeben. Sie werden eine E-Mail erhalten, sobald die Termine feststehen und Sie Präferenzen abgeben können.</p>
+
+        <div tal:condition="allocation.state == 'open'">
+
+          <strong tal:condition="not request.user.hasPreferencesInAllocation(allocation)">Ohne Abgabe von Präferenzen können Sie nicht am Übungsbetrieb teilnehmen!</strong>
+
+          <p>
+            Die Zeiten, zu denen Übungsgruppen angeboten werden, sind in der folgenden Tabelle aufgelistet.
+            Damit MÜSLI Sie in Übungsgruppen eintragen kann, müssen Sie eine bestimmte Teilmenge dieser Termine in den Modi
+            "Gut" oder "Mittel" ausgewählt haben.
+            Probieren Sie es einfach aus!
+          </p>
+
+          <form method='post' tal:attributes='action request.route_path("allocation_set_preferences", allocation_id=allocation.id)'>
+            <table>
+              <tr>
+                <th>Zeit</th>
+                <th>Präferenz</th>
+              </tr>
+              <tr tal:repeat='(count,time) enumerate(times,1)'>
+                <td>${time['time']}</td>
+                <td>
+                  <input type='hidden' name="time-${count}" value="${str(time['time'])}" />
+                  <select name='pref-${count}'>
+                    <option tal:repeat="pref prefs" value="${pref['penalty']}" tal:attributes="selected 'selected' if pref['penalty']==time['penalty'] else None">
+                        ${pref['name']}
+                    </option>
+                  </select>
+                </td>
+              </tr>
+            </table>
+            <input type='submit' value='Ausgewählte Präferenzen speichern'/>
+          </form>
+
+          <form tal:condition="request.user.hasPreferencesInAllocation(allocation)"
+              method="post" tal:attributes="action request.route_path('allocation_remove_preferences', allocation_id=allocation.id)">
+            <input type="submit" value="Präferenzen vergessen"/>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </metal:main>
+</metal:main>

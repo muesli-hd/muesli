@@ -113,6 +113,38 @@ class LectureContext:
         if lecture_root.children:
             request.navigationTree.prepend(lecture_root)
 
+
+class AllocationContext:
+    def __init__(self, request):
+        allocation_id = request.matchdict['allocation_id']
+        self.allocation = request.db.query(Allocation).get(allocation_id)
+        if self.allocation is None:
+            raise HTTPNotFound(detail='Allocation not found')
+        self.__acl__ = [
+                           (Allow, Authenticated, ('view',)),
+                           (Allow, 'group:administrators', ALL_PERMISSIONS),
+                       ]
+        for lecture in self.allocation.lectures():
+            self.__acl__.extend(
+                [(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in lecture.assistants]
+            )
+
+
+class AllocationCriterionContext:
+    def __init__(self, request):
+        criterion_id = request.matchdict['criterion_id']
+        self.criterion = request.db.query(AllocationCriterion).get(criterion_id)
+        if self.criterion is None:
+            raise HTTPNotFound(detail='Allocation criterion not found')
+        self.allocation = self.criterion.allocation
+        self.__acl__ = [
+            (Allow, 'group:administrators', ALL_PERMISSIONS),
+        ]
+        for lecture in self.allocation.lectures():
+            self.__acl__.extend(
+                [(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in lecture.assistants]
+            )
+
 class TutorialContext:
     def __init__(self, request):
         self.tutorial_ids_str = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', ''))
@@ -332,7 +364,7 @@ class ExerciseEndpointContext:
         user_id = request.matchdict.get('user_id', None)
         self.exercise = request.db.query(Exercise).get(exercise_id)
         if self.exercise is None:
-            raise HTTPBadRequest("Die Angeforderte Übung existiert nicht!")
+            raise HTTPNotFound(detail="Die Angeforderte Übung existiert nicht!")
         self.lecture = self.exercise.exam.lecture
         student = None
         self.user = None

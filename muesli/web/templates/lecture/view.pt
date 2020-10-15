@@ -16,8 +16,18 @@
   Sie können eine <a tal:attributes='href request.route_path("lecture_email_tutors", lecture_id=lecture.id)'>E-Mail an alle Übungsleiter schreiben</a>.
   </p>
 
-  <h3>Übungsgruppen</h3>
-  <p tal:condition='lecture.mode=="off"'>
+  <div tal:condition="lecture.allocations_visible()">
+    <h3>Anmeldung</h3>
+    <p>Die Anmeldung zu dieser Veranstaltung erfolgt über ein Präferenzbasiertes Zuweisungsverfahren. Bitte melden Sie sich hier an:</p>
+    <ul>
+      <li tal:repeat="allocation lecture.allocations_visible()">
+        <a tal:attributes='href request.route_path("allocation_view", allocation_id=allocation.id)'>${allocation.name}</a>
+      </li>
+    </ul>
+  </div>
+
+  <h3 tal:condition='not lecture.allocations_visible() or request.userInfo.is_assistant() or request.userInfo.is_admin() or request.permissionInfo.has_permission("take_tutorial")'>Übungsgruppen</h3>
+  <p tal:condition='lecture.mode=="off" and not lecture.allocations_visible()'>
     Es ist derzeit nicht möglich sich zu Übungsgruppen in dieser Vorlesung anzumelden.
   </p>
 
@@ -27,8 +37,8 @@
     </p>
 
     <table>
-      <tr tal:condition='lecture.type == "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Kommentar</th><th></th><th></th></tr>
-      <tr tal:condition='lecture.type != "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Titel</th><th></th><th></th></tr>
+      <tr tal:condition='lecture.type == "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Kommentar</th><th></th><th></th><th></th></tr>
+      <tr tal:condition='lecture.type != "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Titel</th><th></th><th></th><th></th></tr>
 
       <tr tal:repeat='tutorial lecture.tutorials'>
         <td>${tutorial.time}</td>
@@ -45,6 +55,7 @@
           </span>
         </td>
         <td>${tutorial.comment}</td>
+        <td><a href="${tutorial.video_call}" tal:condition="tutorial.video_call">Videoanruf</a></td>
         <td tal:condition="request.permissionInfo.has_permission('view_tutorials')">
           <a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">Details</a>
         </td>
@@ -97,7 +108,7 @@
   <input type='submit' value='Ausgewählte Präferenzen speichern'/>
   </form>
 
-  <form tal:condition="request.user.hasPreferences(lecture)"
+  <form tal:condition="request.user.hasPreferencesInLecture(lecture)"
     method="post" tal:attributes="action request.route_path('lecture_remove_preferences', lecture_id=lecture.id)">
     <input type="submit" value="Präferenzen vergessen"/>
   </form>

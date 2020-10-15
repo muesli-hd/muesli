@@ -2,16 +2,22 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<h2>${names['tutorial']} bearbeiten</h2>
+    <h2>${names['tutorial']} bearbeiten</h2>
 
-<p>${names['name']} <a tal:attributes="href request.route_path('lecture_edit', lecture_id=tutorial.lecture.id)">${tutorial.lecture.name}</a></p>
+    <p>${names['name']} <a tal:attributes="href request.route_path('lecture_edit', lecture_id=tutorial.lecture.id)">${tutorial.lecture.name}</a></p>
 
-<p tal:condition="error_msg" class="error">${error_msg}</p>
+    <p tal:condition="error_msg" class="error">${error_msg}</p>
 
 
-<form action="/tutorial/edit" tal:attributes="action request.route_path('tutorial_edit', tutorial_id=tutorial.id)" method="POST">
-<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
-</form>
+    <form action="/tutorial/edit" tal:attributes="action request.route_path('tutorial_edit', tutorial_id=tutorial.id)" method="POST">
+    <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+    </form>
+
+    <p>
+      <a tal:attributes="href request.route_path('tutorial_move_students_allocation', tutorial_id=tutorial.id)" tal:condition="tutorial is not None and tutorial.allocation is not None and tutorial.students.count()">
+        Bisher angemeldete Studierende in Zuteilungsvorhaben übertragen
+      </a>
+    </p>
 
   </metal:main>
 </metal:main>

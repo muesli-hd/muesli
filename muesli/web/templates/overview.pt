@@ -38,18 +38,29 @@
 <div tal:condition="tutorials">
   <h3>Feste Eintragungen in Übungsgruppen</h3>
   <table>
-    <tr><th></th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th>Übungsleiter</th><th></th></tr>
+    <tr><th></th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th>Übungsleiter</th><th></th><th></th></tr>
 
     <tr tal:repeat="tutorial tutorials">
       <td>${tutorial.lecture.term}</td>
       <td><a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">${tutorial.lecture.name}</a></td>
       <td>${tutorial.time}</td>
       <td>${tutorial.place}</td>
+      <td><a href="${tutorial.video_call}" tal:condition="tutorial.video_call">Videoanruf</a></td>
       <td>
         <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a></td>
       <td><a tal:attributes="href request.route_path('lecture_view_points', lecture_id=tutorial.lecture.id)">Ergebnisse</a></td>
     </tr>
   </table>
+</div>
+
+<div tal:condition="request.user.visible_allocations().count()">
+  <h3>Anmeldungen bei Zuteilungverfahren:</h3>
+  <ul>
+    <li tal:repeat="allocation request.user.visible_allocations()">
+      <a tal:attributes="href request.route_path('allocation_view', allocation_id=allocation.id)">${allocation.name}</a>
+      <p style="color:red;;" tal:condition="allocation.state == 'open' and not request.user.hasPreferencesInAllocation(allocation)"> Präferenzabgabe ist offen. Bitte tragen Sie ihre Terminpräferenzen ein.</p>
+    </li>
+  </ul>
 </div>
 
 <div tal:condition="time_preferences">

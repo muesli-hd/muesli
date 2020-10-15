@@ -209,7 +209,7 @@ def badRequest(e, request):
         print("TRYING TO RECONSTRUCT EXCEPTION")
         traceback.print_exc()
         print("RAISING ANYHOW")
-        raise exc
+        raise e
     now = datetime.datetime.now().strftime("%d. %B %Y, %H:%M Uhr")
     traceback.print_exc()
     email = request.user.email if request.user else '<nobody>'
