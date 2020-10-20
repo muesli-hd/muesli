@@ -677,6 +677,10 @@ class Tutorial(Base):
         return session.query(User).filter(User.lecture_students.any(LectureStudent.tutorial==self))
 
     @property
+    def is_visible(self):
+        return self.allocation is None
+
+    @property
     def tutor_name(self):
         if self.tutor:
             return self.tutor.last_name

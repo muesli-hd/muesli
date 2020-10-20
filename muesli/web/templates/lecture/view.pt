@@ -40,7 +40,7 @@
       <tr tal:condition='lecture.type == "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Kommentar</th><th></th><th></th><th></th></tr>
       <tr tal:condition='lecture.type != "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Titel</th><th></th><th></th><th></th></tr>
 
-      <tr tal:repeat='tutorial lecture.tutorials'>
+      <tr tal:repeat='tutorial [t for t in lecture.tutorials if t.is_visible]'>
         <td>${tutorial.time}</td>
         <td>${tutorial.place}</td>
         <td>
