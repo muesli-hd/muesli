@@ -85,12 +85,17 @@
     <ul>
       <li><a tal:attributes="href request.route_path('allocation_email_students', allocation_id=allocation.id)">Email an Studierende schreiben</a></li>
     </ul>
-<ul>
-  <li><p>TODO: Anmeldelisten</p></li>
-  <li><p>TODO: Physiker angemeldet?</p></li>
-  <li><p>TODO: Tutorium Beziehung zu Kriterien?</p></li>
-  <li><p>TODO: Vorlesung Beziehung zu Kriterien?</p></li>
-</ul>
+
+    <!--
+    <ul>
+      <li><p>TODO: Anmeldelisten</p></li>
+      <li><p>TODO: Vorlesung bei Terminliste in allocation_edit anzeigen</p></li>
+      <li><p>TODO: Synchrone Veranstaltungen, Termin angeben</p></li>
+      <li><p>TODO: Physiker angemeldet?</p></li>
+      <li><p>TODO: Tutorium Beziehung zu Kriterien?</p></li>
+      <li><p>TODO: Vorlesung Beziehung zu Kriterien?</p></li>
+    </ul>
+    -->
 
   </metal:main>
 </metal:main>

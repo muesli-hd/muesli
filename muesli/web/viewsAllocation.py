@@ -38,7 +38,17 @@ def email_registration_opened(request, students=None):
                       sender=request.config['contact']['email'],
                       to=[],
                       bcc=bcc,
-                      body='https://muesli.mathi.uni-heidelberg.de{}\nSomething, something. Nehmt euch einen Keks und meldet euch schnell an. Ohne Präferenzen keine Übungsgruppe.\nTODO: Besseren Blah Text erfinden.'.format(request.route_path('allocation_view', allocation_id=allocation.id)))
+                      body='''Hallo {},
+                      
+                      Sie haben sich für eine der Veranstaltungen des Zuteilungsverfahrens "{}" angemeldet. Bitte geben Sie nun Ihre Terminpräferenzen an:
+                      
+                      https://muesli.mathi.uni-heidelberg.de{}
+                      
+                      Ohne Angabe von Terminpräferenzen kann Ihnen zum Zeitpunkt der Auswertung keine Übungsgruppe zugewiesen werden.
+                      
+                      Mit freundlichen Grüßen
+                      MÜSLI-Team
+                      '''.format(request.user.name(), allocation.name, request.route_path('allocation_view', allocation_id=allocation.id)))
     try:
         sendMail(message, request)
     except:
