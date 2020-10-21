@@ -29,6 +29,7 @@ import muesli
 import sqlalchemy
 import sqlalchemy as sa
 import sqlalchemy.ext.declarative
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, String, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table, text
 from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
 from muesli.types import Term, TutorialTime, ColumnWrapper
@@ -237,11 +238,11 @@ class Allocation(Base):
     #  'archived'          - No modifications are possible
     state = Column(Text)
 
-    @property
+    @hybrid_property
     def can_register(self):
         return self.state == 'registration-only' or self.state == 'open'
 
-    @property
+    @hybrid_property
     def is_visible(self):
         return self.state == 'closed' or self.state == 'registration-only' or self.state == 'open'
 
@@ -455,7 +456,7 @@ class Lecture(Base):
             Allocation.id)
 
     def allocations_visible(self):
-        return self.allocations().filter(bool(Allocation.is_visible) == True)
+        return [a for a in self.allocations() if a.is_visible]
 
     def getLectureResults(self, tutorials=[], students=None):
         session = Session.object_session(self)
