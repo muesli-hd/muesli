@@ -268,6 +268,14 @@ class Allocation(Base):
     def assistants(self):
         return [assistant for lecture in self.lectures() for assistant in lecture.assistants]
 
+    def tutorials_at_time(self, time):
+        tutorials = []
+        for lecture in self.lectures():
+            tutorials.extend(
+                [t for t in lecture.tutorials if t.allocation == self and t.time == time]
+            )
+        return tutorials
+
     def times(self, lecture=None, user=None):
         session = Session.object_session(self)
         times_query = session.query(Tutorial.time).filter(Tutorial.allocation == self)

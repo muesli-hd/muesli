@@ -61,7 +61,9 @@
       <tr tal:repeat='time times'>
         <td>${time['time']}</td>
         <td>
-          <p>Zu implementieren</p>
+          <ul>
+            <li tal:repeat="tutorial allocation.tutorials_at_time(time['time'])"><a tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">${tutorial.lecture.name}</a></li>
+          </ul>
         </td>
       </tr>
     </table>
