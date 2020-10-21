@@ -154,10 +154,10 @@ class User(Base):
 
     def allocation_registered_lectures(self, allocation=None):
         session = Session.object_session(self)
-        query = session.query(Lecture).join(AllocationStudent.lecture).join(User).filter(AllocationStudent.student == self)
+        query = session.query(Lecture).join(AllocationStudent.lecture).filter(AllocationStudent.student == self)
         if allocation:
             query = query.filter(AllocationStudent.allocation == allocation)
-        return query
+        return query.group_by(Lecture.id)
 
     def visible_allocations(self):
         session = Session.object_session(self)
@@ -298,6 +298,15 @@ class Allocation(Base):
         session = Session.object_session(self)
         return session.query(User).join(AllocationStudent.student).filter(AllocationStudent.allocation == self).group_by(User.id)
 
+    def student_preferences_unnecessary(self, student):
+        for criterion in self.criteria:
+            if criterion.preferences_unnecessary:
+                session = Session.object_session(self)
+                sac = session.query(StudentAllocationCriterion).get({"student_id": student.id, "criterion_id": criterion.id})
+                if sac is not None and sac.option is not None:
+                    return bool(sac.option.penalty)
+        return False
+
 
 # Global allocation time preferences
 class AllocationTimePreference(Base):
@@ -329,6 +338,7 @@ class AllocationCriterion(Base):
     name = Column(Text)
     penalty = Column(Integer)
     options = relationship('AllocationCriterionOption', order_by='AllocationCriterionOption.order_number.asc()')
+    preferences_unnecessary = Column(Boolean, nullable=False, default=False)
 
 
 class AllocationCriterionOption(Base):
@@ -720,15 +730,6 @@ class TimePreference(Base):
             self.penalty = penalty
 
 
-class TutorialAllocationCriteria(Base):
-    __tablename__ = 'tutorial_allocation_criteria'
-    criterion_id = Column('criterion', Integer, ForeignKey(AllocationCriterion.id, ondelete="CASCADE"), primary_key=True)
-    criterion = relationship(AllocationCriterion, backref=backref('tutorial_allocation_criteria', lazy='dynamic'))
-    tutorial_id = Column('tutorial', Integer, ForeignKey(Tutorial.id, ondelete="CASCADE"), primary_key=True)
-    tutorial = relationship(Tutorial, backref='tutorial_allocation_criteria')
-    penalty = Column(Integer)
-
-
 class LectureStudent(Base):
     __tablename__ = 'lecture_students'
     lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)
@@ -763,6 +764,42 @@ class AllocationStudent(Base):
             self.allocation = allocation
             self.student = student
             self.lecture = lecture
+
+
+class LectureAllocationCriterion(Base):
+    __tablename__ = 'lecture_allocation_criteria'
+    criterion_id = Column('criterion', Integer, ForeignKey(AllocationCriterion.id, ondelete="CASCADE"), primary_key=True)
+    criterion = relationship(AllocationCriterion, backref=backref('lecture_allocation_criteria', lazy='dynamic'))
+    lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id, ondelete="CASCADE"), primary_key=True)
+    lecture = relationship(Lecture, backref='lecture_allocation_criteria')
+    penalty = Column(Integer)
+
+    def __init__(self, criterion=None, lecture=None, penalty=None, primary_key=None):
+        if primary_key:
+            self.criterion_id = primary_key[0]
+            self.lecture_id = primary_key[1]
+        else:
+            self.criterion = criterion
+            self.lecture = lecture
+            self.penalty = penalty
+
+
+class TutorialAllocationCriterion(Base):
+    __tablename__ = 'tutorial_allocation_criteria'
+    criterion_id = Column('criterion', Integer, ForeignKey(AllocationCriterion.id, ondelete="CASCADE"), primary_key=True)
+    criterion = relationship(AllocationCriterion, backref=backref('tutorial_allocation_criteria', lazy='dynamic'))
+    tutorial_id = Column('tutorial', Integer, ForeignKey(Tutorial.id, ondelete="CASCADE"), primary_key=True)
+    tutorial = relationship(Tutorial, backref='tutorial_allocation_criteria')
+    penalty = Column(Integer)
+
+    def __init__(self, criterion=None, tutorial=None, penalty=None, primary_key=None):
+        if primary_key:
+            self.criterion_id = primary_key[0]
+            self.tutorial_id = primary_key[1]
+        else:
+            self.criterion = criterion
+            self.tutorial = tutorial
+            self.penalty = penalty
 
 
 class LectureRemovedStudent(Base):

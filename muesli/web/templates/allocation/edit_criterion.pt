@@ -15,27 +15,31 @@
     </form>
 
     <h3>Optionen</h3>
-      <table>
-        <tr>
-          <th>Name</th>
-          <th>Gewichtung</th>
-          <th></th>
-          <th></th>
-        </tr>
+    <p>Falls die Option „Macht Abgabe von Präferenzen unnötig“ gewählt ist, bedeutet eine Option mit Gewicht 0, dass
+      weiterhin Präferenzen abgegeben werden müssen. Die Auswahl einer Option mit Gewicht ungleich 0 lässt das System
+      keine Präferenzen abfragen.</p>
+
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>Gewichtung</th>
+        <th></th>
+        <th></th>
+      </tr>
+      <tr tal:repeat="option criterion.options">
         <form tal:attributes="action request.route_path('allocation_criterion_edit_option', criterion_id=criterion.id)" method="POST">
-          <tr tal:repeat="option criterion.options">
-            <td>
-              <input type="hidden" name="option-id" value="${option.id}">
-              <input type="text" name="option-name" value="${option.name}">
-            </td>
-            <td>
-              <input type="text" name="option-penalty" value="${option.penalty}">
-            </td>
-            <td><input type="submit" name="submit" value="Ändern"></td>
-            <td><input type="submit" name="submit" value="Löschen"></td>
-          </tr>
+          <td>
+            <input type="hidden" name="option-id" value="${option.id}">
+            <input type="text" name="option-name" value="${option.name}">
+          </td>
+          <td>
+            <input type="text" name="option-penalty" value="${option.penalty}">
+          </td>
+          <td><input type="submit" name="submit" value="Ändern"></td>
+          <td><input type="submit" name="submit" value="Löschen"></td>
         </form>
-      </table>
+      </tr>
+    </table>
 
 
     <h4>Neue Option hinzufügen:</h4>

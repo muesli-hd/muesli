@@ -58,7 +58,12 @@
         <input type='submit' value='Zu ausgewählten Veranstaltungen anmelden'/>
       </form>
 
-      <div tal:condition="request.user.allocation_registered_lectures(allocation).count()">
+      <div tal:condition="allocation.student_preferences_unnecessary(request.user)">
+        <h3>Fertig</h3>
+        <p>Für Ihre Zuteilung ist keine Abgabe von Präferenzen notwendig. Dies liegt an Ihren Antworten zu den obigen Fragen. Seien sie daher nicht verwirrt, wenn Sie von anderen Studierenden hören, dass diese Präferenzen abgeben mussten.</p>
+      </div>
+
+      <div tal:condition="request.user.allocation_registered_lectures(allocation).count() and not allocation.student_preferences_unnecessary(request.user)">
         <h3>Übungsbetrieb</h3>
         <p tal:condition="allocation.state != 'open'">Es ist noch nicht möglich, Präferenzen zu dieser Veranstaltung abzugeben. Sie werden eine E-Mail erhalten, sobald die Termine feststehen und Sie Präferenzen abgeben können.</p>
 

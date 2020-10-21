@@ -3,9 +3,11 @@
   <metal:main metal:fill-slot="content">
     <h2>Zuteilung bearbeiten</h2>
 
-    <form action="/allocation/edit" tal:attributes="action request.route_path('allocation_edit', allocation_id=allocation.id)" method="POST">
+    <form tal:attributes="action request.route_path('allocation_edit', allocation_id=allocation.id)" method="POST">
       <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
     </form>
+
+    <p><a tal:attributes="href request.route_path('allocation_view', allocation_id=allocation.id)">Anmeldeseite (Ansicht für Studierende)</a></p>
 
     <h3>Teilnehmende Veranstaltungen:</h3>
     <ul>
@@ -88,10 +90,10 @@
 
     <!--
     <ul>
+      <li><p>TODO: Physiker angemeldet?</p></li>
       <li><p>TODO: Anmeldelisten</p></li>
       <li><p>TODO: Vorlesung bei Terminliste in allocation_edit anzeigen</p></li>
       <li><p>TODO: Synchrone Veranstaltungen, Termin angeben</p></li>
-      <li><p>TODO: Physiker angemeldet?</p></li>
       <li><p>TODO: Tutorium Beziehung zu Kriterien?</p></li>
       <li><p>TODO: Vorlesung Beziehung zu Kriterien?</p></li>
     </ul>

@@ -100,10 +100,10 @@ class OccupancyBar:
 
 
 def mail_allocation_new_time(request, allocation):
-    bcc = [s.email for s in allocation.students()]
+    bcc = [s.email for s in allocation.students() if not allocation.student_preferences_unnecessary(s)]
     message = Message(subject='[MÜSLI] Neue Termine für "{}" verfügbar'.format(allocation.name),
                       sender=request.config['contact']['email'],
-                      to=[],
+                      to=[request.user.email],
                       bcc=bcc,
                       body='''Guten Tag,
                       

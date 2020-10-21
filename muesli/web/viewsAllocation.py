@@ -33,10 +33,10 @@ def email_registration_opened(request, students=None):
 
     if students is None:
         students = allocation.students()
-    bcc = [s.email for s in students]
+    bcc = [s.email for s in students if not allocation.student_preferences_unnecessary(s)]
     message = Message(subject='[MÜSLI] Abgabe von Präferenzen für "{}" ist eröffnet'.format(allocation.name),
                       sender=request.config['contact']['email'],
-                      to=[],
+                      to=[request.user.email],
                       bcc=bcc,
                       body='''Hallo {},
                       

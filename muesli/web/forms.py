@@ -279,9 +279,18 @@ class AllocationCriterionEdit(ObjectForm):
                       label='Gewichtung (0-100)',
                       value=criterion.penalty if criterion else None,
                       validator=validators.Int),
+            # If the selected option has penalty != 0 and the below option is enabled, no preferences will be asked
+            FormField('preferences_unnecessary',
+                      label='Macht Abgabe von Präferenzen unnötig',
+                      type = 'radio',
+                      options = [[1, 'Ja'], [0, 'Nein']],
+                      value = boolToValue(criterion.preferences_unnecessary) if criterion else None
+            ),
         ]
         ObjectForm.__init__(self, criterion, formfields, request, send='Ändern' if criterion else 'Anlegen')
     def saveField(self, fieldName):
+        if fieldName == 'preferences_unnecessary':
+            self.obj.preferences_unnecessary = valueToBool(self['preferences_unnecessary'])
         ObjectForm.saveField(self, fieldName)
 
 
