@@ -247,10 +247,13 @@ class Allocation(Base):
 
     def pref_subjects(self, lecture=None):
         session = Session.object_session(self)
-        query = session.query(func.count(User.id), User.subject). \
-            filter(User.allocation_students.any(AllocationStudent.allocation == self))
-        if lecture is not None:
-            query = query.filter(AllocationStudent.lecture == lecture)
+        query = session.query(func.count(User.id), User.subject)
+        if lecture is None:
+            query = query.filter(User.allocation_students.any(AllocationStudent.allocation == self))
+        else:
+            query = query.filter(User.allocation_students.any(
+                sqlalchemy.and_(AllocationStudent.allocation == self, AllocationStudent.lecture == lecture)
+            ))
         return query.group_by(User.subject).order_by(User.subject)
 
     def pref_subjects_by_lecture(self):
