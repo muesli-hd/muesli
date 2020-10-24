@@ -38,7 +38,7 @@ def email_registration_opened(request, students=None):
                       sender=request.config['contact']['email'],
                       to=[request.user.email],
                       bcc=bcc,
-                      body='''Hallo {},
+                      body='''Liebe Studierende,
                       
                       Sie haben sich für eine der Veranstaltungen des Zuteilungsverfahrens "{}" angemeldet. Bitte geben Sie nun Ihre Terminpräferenzen an:
                       
@@ -48,7 +48,7 @@ def email_registration_opened(request, students=None):
                       
                       Mit freundlichen Grüßen
                       MÜSLI-Team
-                      '''.format(request.user.name(), allocation.name, request.route_path('allocation_view', allocation_id=allocation.id)))
+                      '''.format(allocation.name, request.route_path('allocation_view', allocation_id=allocation.id)))
     try:
         sendMail(message, request)
     except:
@@ -152,7 +152,7 @@ def set_preferences(request):
         row +=  1
 
     valid = True
-    for lecture in allocation.lectures():
+    for lecture in request.user.allocation_registered_lectures(allocation):
         # Reduce selected preferences to times available in this lecture
         selected_time_prefs_lecture = [tp for tp in time_prefs if
                                        tp.time in {avail_tp['time'] for avail_tp in allocation.times(lecture=lecture)}]

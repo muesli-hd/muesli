@@ -268,9 +268,14 @@ class Allocation(Base):
     def assistants(self):
         return [assistant for lecture in self.lectures() for assistant in lecture.assistants]
 
-    def tutorials_at_time(self, time):
+    def tutorials_at_time(self, time, user=None):
         tutorials = []
-        for lecture in self.lectures():
+        if user is None:
+            lectures = self.lectures()
+        else:
+            lectures = user.allocation_registered_lectures(self)
+
+        for lecture in lectures:
             tutorials.extend(
                 [t for t in lecture.tutorials if t.allocation == self and t.time == time]
             )

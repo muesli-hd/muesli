@@ -5,7 +5,7 @@
     <h2>${allocation.name}</h2>
 
     <h3>Beschreibung</h3>
-    <p tal:condition="allocation.description">
+    <p tal:condition="allocation.description" style="white-space: pre-line">
       ${allocation.description}
     </p>
 
@@ -83,6 +83,7 @@
               <tr>
                 <th>Zeit</th>
                 <th>Präferenz</th>
+                <th>Mögliche Veranstaltungen</th>
               </tr>
               <tr tal:repeat='(count,time) enumerate(times,1)'>
                 <td>${time['time']}</td>
@@ -93,6 +94,11 @@
                         ${pref['name']}
                     </option>
                   </select>
+                </td>
+                <td>
+                  <ul>
+                    <li tal:repeat="tutorial allocation.tutorials_at_time(time['time'], request.user)">${tutorial.lecture.name}</li>
+                  </ul>
                 </td>
               </tr>
             </table>
