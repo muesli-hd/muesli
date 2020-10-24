@@ -68,6 +68,14 @@
       </tr>
     </table>
 
+    <h3>Verteilung der Präferenzen</h3>
+    <ul tal:repeat="time times">
+      <li>
+      ${time['time']}:
+        <img style="vertical-align:text-top" tal:attributes="src request.route_path('allocation_histogram', allocation_id=allocation.id, time=time['time'])"/>
+      </li>
+    </ul>
+
 
     <div tal:condition="request.permissionInfo.has_permission('do_allocation')" tal:omit-tag="">
       <h3>Einteilung vornehmen</h3>

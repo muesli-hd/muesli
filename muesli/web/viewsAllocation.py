@@ -19,13 +19,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from muesli import models, utils
+from muesli import models, utils, types
 from muesli.web.context import GeneralContext, AllocationContext, AllocationCriterionContext
 from muesli.web.forms import AllocationAdd, AllocationEdit, AllocationCriterionEdit, AllocationEmailStudents
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTPForbidden
 from muesli.types import TutorialTime
 from muesli.mail import Message, sendMail
+from muesli.web.viewsExam import MatplotlibView
+from muesli.models import AllocationTimePreference
+import sqlalchemy as sa
 
 
 def email_registration_opened(request, students=None):
@@ -316,3 +319,28 @@ def email_students(request):
             return HTTPFound(location=request.route_url('allocation_edit', allocation_id=allocation.id))
     return {'allocation': allocation,
             'form': form}
+
+@view_config(route_name='allocation_histogram', context=AllocationContext, permission='edit')
+class PrefHistogram(MatplotlibView):
+    def __init__(self, request):
+        MatplotlibView.__init__(self)
+        self.request=request
+        allocation = self.request.context.allocation
+        time = self.request.matchdict['time']
+        preferences = self.request.db.query(sa.func.count(models.AllocationTimePreference.penalty),AllocationTimePreference.penalty).filter(AllocationTimePreference.allocation_id==allocation.id) \
+            .filter(AllocationTimePreference.time==time).group_by(AllocationTimePreference.penalty).order_by(AllocationTimePreference.penalty).all()
+        prefdict = {}
+        for count, penalty in preferences:
+            prefdict[penalty]=count
+        self.bars = [prefdict.get(p['penalty'],0) for p in utils.preferences]
+        self.inds = list(range(len(utils.preferences)))
+        self.xticks = [p['name'] for p in utils.preferences]
+        self.label=TutorialTime(time).__html__()
+    def __call__(self):
+        ax = self.fig.add_subplot(111)
+        if self.bars:
+            ax.bar(self.inds, self.bars, color='red')
+            ax.set_xticks([i+0.4 for i in self.inds])
+            ax.set_xticklabels(self.xticks)
+        ax.set_title(self.label)
+        return self.createResponse()

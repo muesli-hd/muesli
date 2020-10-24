@@ -240,6 +240,7 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('allocation_criterion_add', '/allocation/criterion_add/{allocation_id}', factory = AllocationContext)
     config.add_route('allocation_do_allocation', '/allocation/do/{allocation_id}', factory = AllocationContext)
     config.add_route('allocation_email_students', '/allocation/email_students/{allocation_id}', factory = AllocationContext)
+    config.add_route('allocation_histogram', '/allocation/histogram/{allocation_id}/{time}', factory = AllocationContext)
 
     config.add_route('allocation_criterion_edit', '/allocation/criterion/{criterion_id}', factory = AllocationCriterionContext)
     config.add_route('allocation_criterion_delete', '/allocation/criterion_delete/{criterion_id}', factory = AllocationCriterionContext)
