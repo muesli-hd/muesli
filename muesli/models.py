@@ -99,8 +99,6 @@ class User(Base):
     last_name = Column(Text, nullable=False)
     password = Column(Text)
     matrikel = Column(Text)
-    birth_date = Column(Text)
-    birth_place = Column(Text)
     subject = Column(Text)
     second_subject = Column(Text)
     title = Column(Text)

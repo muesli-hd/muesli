@@ -27,7 +27,6 @@ from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTP
 from muesli.types import TutorialTime
 from muesli.mail import Message, sendMail
 from muesli.web.viewsExam import MatplotlibView
-from muesli.models import AllocationTimePreference
 import sqlalchemy as sa
 
 
@@ -327,8 +326,8 @@ class PrefHistogram(MatplotlibView):
         self.request=request
         allocation = self.request.context.allocation
         time = self.request.matchdict['time']
-        preferences = self.request.db.query(sa.func.count(models.AllocationTimePreference.penalty),AllocationTimePreference.penalty).filter(AllocationTimePreference.allocation_id==allocation.id) \
-            .filter(AllocationTimePreference.time==time).group_by(AllocationTimePreference.penalty).order_by(AllocationTimePreference.penalty).all()
+        preferences = self.request.db.query(sa.func.count(models.AllocationTimePreference.penalty),models.AllocationTimePreference.penalty).filter(models.AllocationTimePreference.allocation_id==allocation.id) \
+            .filter(models.AllocationTimePreference.time==time).group_by(models.AllocationTimePreference.penalty).order_by(models.AllocationTimePreference.penalty).all()
         prefdict = {}
         for count, penalty in preferences:
             prefdict[penalty]=count
