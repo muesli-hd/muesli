@@ -239,6 +239,8 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('allocation_remove_preferences', '/lecture/allocation_preferences/{allocation_id}', factory=AllocationContext)
     config.add_route('allocation_criterion_add', '/allocation/criterion_add/{allocation_id}', factory = AllocationContext)
     config.add_route('allocation_do_allocation', '/allocation/do/{allocation_id}', factory = AllocationContext)
+    config.add_route('allocation_preview', '/allocation/preview/{allocation_id}', factory = AllocationContext)
+    config.add_route('allocation_graph', '/allocation/graph/{allocation_id}', factory = AllocationContext)
     config.add_route('allocation_email_students', '/allocation/email_students/{allocation_id}', factory = AllocationContext)
     config.add_route('allocation_histogram', '/allocation/histogram/{allocation_id}/{time}', factory = AllocationContext)
 
@@ -257,6 +259,7 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('tutorial_resign_as_tutor', '/tutorial/resign_as_tutor/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_assign_student', '/tutorial/assign_student', factory = AssignStudentContext)
     config.add_route('tutorial_move_students_allocation', '/allocation/move_students_allocation/{tutorial_id}', factory = TutorialContext)
+    config.add_route('tutorial_set_criteria_penalties', '/tutorial/set_criteria_penalties/{tutorial_id}', factory = TutorialContext)
 
 
     config.add_route('tutorial_edit', '/tutorial/edit/{tutorial_id}', factory=TutorialContext)

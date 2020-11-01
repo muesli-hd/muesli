@@ -27,7 +27,12 @@ from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTP
 from muesli.types import TutorialTime
 from muesli.mail import Message, sendMail
 from muesli.web.viewsExam import MatplotlibView
+from muesli.global_allocation import solve_allocation_problem, build_graph
 import sqlalchemy as sa
+from pyramid.response import Response
+import io
+import networkx as nx
+from matplotlib import pyplot
 
 
 def email_registration_opened(request, students=None):
@@ -201,6 +206,31 @@ def remove_preferences(request):
     request.session.flash('Präferenzen wurden entfernt.', queue='messages')
     return HTTPFound(location=request.route_url('allocation_view', allocation_id = allocation.id))
 
+
+@view_config(route_name='allocation_preview', renderer='muesli.web:templates/allocation/preview.pt',
+             context=AllocationContext, permission='allocate')
+def preview(request):
+    graph = solve_allocation_problem(request)
+
+    criteria = request.context.allocation.criteria.all()
+
+    return {
+        'criteria': criteria,
+        'graph': graph
+    }
+
+@view_config(route_name='allocation_graph', context=AllocationContext, permission='edit')
+class AllocationGraph(MatplotlibView):
+    def __init__(self, request):
+        MatplotlibView.__init__(self)
+        self.request=request
+        self.graph = build_graph(self.request)
+
+    def __call__(self):
+        ax = self.fig.add_subplot(111)
+        nx.draw(self.graph)
+        ax.set_title('Allocation graph')
+        return self.createResponse()
 
 @view_config(route_name='allocation_do_allocation', renderer='muesli.web:templates/lecture/do_allocation.pt',
              context=AllocationContext, permission='allocate')

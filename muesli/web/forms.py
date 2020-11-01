@@ -286,11 +286,21 @@ class AllocationCriterionEdit(ObjectForm):
                       options = [[1, 'Ja'], [0, 'Nein']],
                       value = boolToValue(criterion.preferences_unnecessary) if criterion else None
             ),
+            # If a tutorial has penalty > 0, this indicates an online class which does not count into contacts of
+            # students
+            FormField('indicates_online',
+                      label='Tutorien > 0 sind online (Kein Contact tracing)',
+                      type='radio',
+                      options=[[1, 'Ja'], [0, 'Nein']],
+                      value=boolToValue(criterion.indicates_online) if criterion else None
+                      ),
         ]
         ObjectForm.__init__(self, criterion, formfields, request, send='Ändern' if criterion else 'Anlegen')
     def saveField(self, fieldName):
         if fieldName == 'preferences_unnecessary':
             self.obj.preferences_unnecessary = valueToBool(self['preferences_unnecessary'])
+        if fieldName == 'indicates_online':
+            self.obj.indicates_online = valueToBool(self['indicates_online'])
         ObjectForm.saveField(self, fieldName)
 
 

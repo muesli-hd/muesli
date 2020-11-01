@@ -210,6 +210,8 @@ class Edit:
     def __call__(self):
         error_msg = ''
         tutorial = self.db.query(models.Tutorial).get(self.tutorial_id)
+        criteria_penalty_query = self.request.db.query(TutorialAllocationCriterion).filter(TutorialAllocationCriterion.tutorial == tutorial)
+        criteria_penalties = {cpenalty.criterion_id: cpenalty.penalty for cpenalty in criteria_penalty_query}
         form = TutorialEdit(self.request, tutorial)
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
             old_times = get_old_times(self.request)
@@ -219,6 +221,7 @@ class Edit:
             form.message = "Änderungen gespeichert"
         return {'tutorial': tutorial,
                 'names': self.request.config['lecture_types'][tutorial.lecture.type],
+                'criteria_penalties': criteria_penalties,
                 'form': form,
                 'error_msg': error_msg}
 
@@ -476,4 +479,19 @@ def move_students_to_allocation(request):
             request.db.delete(ls)
         request.db.commit()
     request.session.flash('Studierende wurden in das Zuteilungsvorhaben übertragen', queue='messages')
+    return HTTPFound(location=request.referrer)
+
+@view_config(route_name='tutorial_set_criteria_penalties', context=TutorialContext, permission='view')
+def set_criteria_penalties(request):
+    tutorials = request.context.tutorials
+    for tutorial in tutorials:
+        row = 0
+        while 'criterion-{}'.format(row) in request.POST:
+            tutorial_criterion = models.getOrCreate(models.TutorialAllocationCriterion, request.db,
+                                                    (int(request.POST['criterion-{}'.format(row)]), tutorial.id))
+            tutorial_criterion.penalty = int(request.POST['penalty-{}'.format(row)])
+            row +=  1
+
+        request.db.commit()
+        request.session.flash('Gewichtungen für Tutorium gespeichert.', queue='messages')
     return HTTPFound(location=request.referrer)

@@ -263,8 +263,7 @@ class Allocation(Base):
 
     def lectures(self):
         session = Session.object_session(self)
-        return session.query(Lecture).join(Tutorial.lecture).filter(Tutorial.allocation_id == self.id).group_by(
-            Lecture.id)
+        return session.query(Lecture).filter(Lecture.tutorials.any(Tutorial.allocation == self))
 
     def assistants(self):
         return [assistant for lecture in self.lectures() for assistant in lecture.assistants]
@@ -310,7 +309,7 @@ class Allocation(Base):
 
     def students(self):
         session = Session.object_session(self)
-        return session.query(User).join(AllocationStudent.student).filter(AllocationStudent.allocation == self).group_by(User.id)
+        return session.query(User).filter(User.allocation_students.any(AllocationStudent.allocation == self))
 
     def student_preferences_unnecessary(self, student):
         for criterion in self.criteria:
@@ -351,6 +350,7 @@ class AllocationCriterion(Base):
     allocation = relationship(Allocation, backref=backref('criteria', lazy='dynamic'))
     name = Column(Text)
     penalty = Column(Integer)
+    indicates_online = Column(Boolean)
     options = relationship('AllocationCriterionOption', order_by='AllocationCriterionOption.order_number.asc()')
     preferences_unnecessary = Column(Boolean, nullable=False, default=False)
 
@@ -417,6 +417,8 @@ class Lecture(Base):
     tutor_rights = Column(Text, nullable=False, default=editOwnTutorials)
     tutorials = relationship('Tutorial', order_by='Tutorial.time,Tutorial.comment')
     tutors = relationship(User, secondary=lecture_tutors_table, backref = "lectures_as_tutor")
+
+    lecture_allocation_criteria = relationship('LectureAllocationCriterion', order_by='LectureAllocationCriterion.priority.desc()')
 
     @property
     def students(self):
@@ -785,8 +787,9 @@ class LectureAllocationCriterion(Base):
     criterion_id = Column('criterion', Integer, ForeignKey(AllocationCriterion.id, ondelete="CASCADE"), primary_key=True)
     criterion = relationship(AllocationCriterion, backref=backref('lecture_allocation_criteria', lazy='dynamic'))
     lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id, ondelete="CASCADE"), primary_key=True)
-    lecture = relationship(Lecture, backref='lecture_allocation_criteria')
-    penalty = Column(Integer)
+    # lecture backref is defined in lecture because of ordering by priority
+    priority = Column(Integer, nullable=False)
+    min_penalty = Column(Integer, nullable=False)
 
     def __init__(self, criterion=None, lecture=None, penalty=None, primary_key=None):
         if primary_key:
