@@ -27,7 +27,7 @@ from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTP
 from muesli.types import TutorialTime
 from muesli.mail import Message, sendMail
 from muesli.web.viewsExam import MatplotlibView
-from muesli.global_allocation import solve_allocation_problem, build_graph, apply_allocation_graph
+from muesli.global_allocation import solve_allocation_problem, build_graph, apply_allocation_graph, hacky_pre_processing
 import sqlalchemy as sa
 from pyramid.response import Response
 import io
@@ -236,8 +236,7 @@ class AllocationGraph(MatplotlibView):
              context=AllocationContext, permission='allocate')
 def do_allocation(request):
     request.context.allocation.state = 'closed'
-    graph = solve_allocation_problem(request)
-    apply_allocation_graph(graph)
+    solve_allocation_problem(request, dry_run=False)
     request.session.flash('Studierende wurden tutorien zugewiesen.', queue='messages')
     return HTTPFound(location=request.referrer)
 

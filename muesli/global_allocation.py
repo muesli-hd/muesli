@@ -36,7 +36,9 @@ def students_matching_requirements(g, lecture, requirements):
     for student in g.graph["lecture_students"][lecture]:
         student_fulfills_requirements = True
         for criterion, min_penalty in requirements.items():
-            if criterion is not None and g.graph['student_criteria'][student][criterion.id] < min_penalty:
+            if criterion is None:
+                continue
+            elif g.graph['student_criteria'][student][criterion.id] < min_penalty:
                 student_fulfills_requirements = False
                 break
         if student_fulfills_requirements:
@@ -50,6 +52,7 @@ def remove_lecture_student(g, lecture, student):
         g.graph["student_lectures"][student].remove(lecture)
         if not len(g.graph["student_lectures"][student]):
             del g.graph["student_lectures"][student]
+            del g.graph["student_criteria"][student]
     if "student_tutorials" in g.graph and student in g.graph["student_tutorials"]:
         tutorial = g.graph["student_tutorials"][student]
         if tutorial in g.graph["tutorial_students"]:
@@ -367,14 +370,15 @@ def calculate_edge_weights(g):
                     calculate_edge_weight(g, (start, end))
 
 def remove_students_with_external_allocation(g):
-    for student in g.graph["student_criteria"].keys():
+    for student in list(g.graph["student_criteria"].keys()).copy():
         for criterion in g.graph["criteria"]:
             if criterion.preferences_unnecessary and g.graph["student_criteria"][student][criterion.id] >= 100:
                 for lecture in g.graph["student_lectures"][student].copy():
                     remove_lecture_student(g, lecture, student)
 
-def solve_allocation_problem(request):
+def solve_allocation_problem(request, dry_run=True):
     graph = build_graph(request)
+    hacky_pre_processing(graph, dry_run)
     remove_students_with_external_allocation(graph)
     graph = process_admission_priorities(graph)
     iteration_nr = 1
@@ -384,6 +388,9 @@ def solve_allocation_problem(request):
         detect_time_collisions(graph)
         calculate_edge_weights(graph)
         iteration_nr += 1
+
+    if not dry_run:
+        apply_allocation_graph(graph)
 
     return graph
 
@@ -429,5 +436,26 @@ def apply_allocation_graph(g):
     print("Zuteilung erfolgreich gespeichert")
 
 
-def hacky_pre_processing(g, request):
-    pass
+def hacky_pre_processing(g, dry_run = True):
+    # Covid 19 Allocation has special requirements
+    if g.graph["allocation"].id == 1:
+        # Einführung in die Praktische Informatik
+        lecture = g.graph["database"].query(m.Lecture).get(1236)
+        # Tutorial for students with existing programming skills
+        tutorial = g.graph["database"].query(m.Tutorial).get(7279)
+        criterion_id = 2
+
+        # Empty this tutorial
+        print("Emptying special IPI tutorial")
+        for old_student in tutorial.students:
+            if not dry_run:
+                viewsTutorial.unsubscribe(user=old_student, tutorial=tutorial, db=g.graph["database"])
+
+        special_student_counter = 0
+        for student in g.graph["lecture_students"][lecture].copy():
+            if g.graph["student_criteria"][student][criterion_id] == 100:
+                special_student_counter += 1
+                remove_lecture_student(g, lecture, student)
+                if not dry_run:
+                    viewsTutorial.subscribe(user=student, tutorial=tutorial, db=g.graph["database"])
+        print("Adding {} students to special tutorial.".format(special_student_counter))
