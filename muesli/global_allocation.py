@@ -29,7 +29,7 @@ from sqlalchemy.orm import joinedload, contains_eager
 from muesli import models as m
 from muesli import utils
 import math
-import statistics
+from muesli.web import viewsTutorial
 
 def students_matching_requirements(g, lecture, requirements):
     relevant_applicants = set()
@@ -377,17 +377,21 @@ def solve_allocation_problem(request):
     graph = build_graph(request)
     remove_students_with_external_allocation(graph)
     graph = process_admission_priorities(graph)
-    for i in range(1, 10):
+    iteration_nr = 1
+    while not check_solution_okay(graph, iteration_nr):
         solve_min_cost_flow(graph)
         calculate_contact_weights(graph)
         detect_time_collisions(graph)
         calculate_edge_weights(graph)
+        iteration_nr += 1
 
     return graph
 
-    #return count_contacts(
-    #    pre_processing(entities)
-    #)
+def check_solution_okay(g, iteration_nr):
+    if "time_collisions" in g.graph and g.graph["time_collisions"] == 0 and iteration_nr > 9:
+        g.graph["solution_okay"] = True
+        return True
+    return False
 
 def detect_time_collisions(g):
     n_collisions = 0
@@ -410,4 +414,20 @@ def detect_time_collisions(g):
                         collision_weight = 0
                     g[(tutorial.lecture, student)][tutorial]['weight_components']['time_collision'] = collision_weight
 
+    g.graph["time_collisions"] = n_collisions
     print("Collisions: {}".format(n_collisions))
+
+def apply_allocation_graph(g):
+    assert "solution_okay" in g.graph
+
+    for tutorial in g.graph["tutorial_students"].keys():
+        for old_student in tutorial.students:
+            viewsTutorial.unsubscribe(user=old_student, tutorial=tutorial, db=g.graph["database"])
+
+        for new_student in g.graph["tutorial_students"][tutorial]:
+            viewsTutorial.subscribe(user=new_student, tutorial=tutorial, db=g.graph["database"])
+    print("Zuteilung erfolgreich gespeichert")
+
+
+def hacky_pre_processing(g, request):
+    pass
