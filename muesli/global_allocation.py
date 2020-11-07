@@ -262,7 +262,7 @@ def build_graph(request):
     return g
 
 def calculate_edge_weight(graph, edge):
-    for component, max_influence in (('time_preference', 100), ('criteria', 90), ('contacts', 90), ('time_collision', 200)):
+    for component, max_influence in (('time_preference', 90), ('criteria', 100), ('contacts', 100), ('time_collision', 200)):
         # Each component is only allowed to set a score up to a certain value
         graph.edges[edge]['weight'] = max(graph.edges[edge].get('weight', 0), min(graph.edges[edge]['weight_components'].get(component, 0), max_influence))
 
@@ -332,25 +332,29 @@ def calculate_contact_weights(g):
                         if not tutorial_online(g, tutorial):
                             for fellow_student in g.graph["tutorial_students"][tutorial]:
                                 tutorial_contacts.add(fellow_student)
-                    contact_difference = len(current_contacts) - len((current_contacts - lecture_contacts[lecture]) | tutorial_contacts)
-
-                    min_contact_difference = min(min_contact_difference, contact_difference)
-                    max_contact_difference = max(max_contact_difference, contact_difference)
-                    g[(lecture, student)][tutorial]['contact_difference'] = contact_difference
+#                    contact_difference = len(current_contacts) - len((current_contacts - lecture_contacts[lecture]) | tutorial_contacts)
+#
+#                    min_contact_difference = min(min_contact_difference, contact_difference)
+#                    max_contact_difference = max(max_contact_difference, contact_difference)
+#                    g[(lecture, student)][tutorial]['contact_difference'] = contact_difference
                     g[(lecture, student)][tutorial]['contacts'] = len((current_contacts - lecture_contacts[lecture]) | tutorial_contacts)
 
-        for lecture in g.graph["student_lectures"][student]:
-            for edge in g.out_edges((lecture, student)):
-                if edge[1] != "ghost":
-                    b = float(max_contact_difference)
-                    a = float(min_contact_difference)
-                    x = float(g.edges[edge]['contact_difference'])
-                    if (b - a) > 0:
-                        score = int(min(100 * ((x - a) / (b - a)), math.pow((b - a), 2)))
-                    else:
-                        score = 0
-                    score = g.edges[edge]['contacts']
-                    g.edges[edge]['weight_components']['contacts'] = score
+                    # Scratch that. Simply take the contact number and divide by lecture count
+                    score = int(g[(lecture, student)][tutorial]['contacts'] / len(g.graph["student_lectures"][student]))
+                    g[(lecture, student)][tutorial]['weight_components']['contacts'] = score
+
+#        for lecture in g.graph["student_lectures"][student]:
+#            for edge in g.out_edges((lecture, student)):
+#                if edge[1] != "ghost":
+#                    b = float(max_contact_difference)
+#                    a = float(min_contact_difference)
+#                    x = float(g.edges[edge]['contact_difference'])
+#                    if (b - a) > 0:
+#                        score = int(min(100 * ((x - a) / (b - a)), math.pow((b - a), 2)))
+#                    else:
+#                        score = 0
+#                    score = int(g.edges[edge]['contacts'] / len(g.graph["student_lectures"][student]))
+#                    g.edges[edge]['weight_components']['contacts'] = score
 
 def tutorial_online(g, tutorial):
     for criterion in g.graph["criteria"]:
@@ -395,7 +399,7 @@ def solve_allocation_problem(request, dry_run=True):
     return graph
 
 def check_solution_okay(g, iteration_nr):
-    if "time_collisions" in g.graph and g.graph["time_collisions"] == 0 and iteration_nr > 9:
+    if "time_collisions" in g.graph and g.graph["time_collisions"] == 0 and iteration_nr > 10:
         g.graph["solution_okay"] = True
         return True
     return False
