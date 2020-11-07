@@ -788,7 +788,7 @@ class LectureAllocationCriterion(Base):
     criterion = relationship(AllocationCriterion, backref=backref('lecture_allocation_criteria', lazy='dynamic'))
     lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id, ondelete="CASCADE"), primary_key=True)
     # lecture backref is defined in lecture because of ordering by priority
-    priority = Column(Integer, nullable=False)
+    priority = Column(Integer, nullable=False, primary_key=True)
     min_penalty = Column(Integer, nullable=False)
 
     def __init__(self, criterion=None, lecture=None, penalty=None, primary_key=None):
