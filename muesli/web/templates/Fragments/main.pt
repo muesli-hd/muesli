@@ -81,6 +81,8 @@ function set_navigation(nav) {
 <div id="history">
 </div>
 <div id="content">
+  <h2 style="color: red">Mailversand wegen Spamaktivität deaktiviert.</h2>
+  <p>Wegen akuter Spamaktivität ist der Versand von Emails durch das MÜSLI System seit dem 07.11.2020 ab etwa 03:00 Uhr deaktiviert.</p>
 
 <p tal:condition="request.session.peek_flash('errors')" tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('errors'))" class="error"></p>
 <p tal:condition="request.session.peek_flash('messages')" tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('messages'))" class="message"></p>
