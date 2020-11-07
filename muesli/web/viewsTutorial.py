@@ -275,7 +275,7 @@ def resignAsTutor(request):
     return HTTPFound(location=request.route_url('lecture_view', lecture_id = request.context.lecture.id))
 
 @view_config(route_name='tutorial_subscribe', context=TutorialContext, permission='subscribe')
-def subscribe(request = None, tutorial=None, user=None, db=None):
+def subscribe(context=None, request=None, tutorial=None, user=None, db=None):
     tutorial = request.context.tutorials[0] if tutorial is None else tutorial
     user = request.user if user is None else user
     db = request.db if db is None else db
@@ -306,7 +306,7 @@ def subscribe(request = None, tutorial=None, user=None, db=None):
         return HTTPFound(location=request.route_url('lecture_view', lecture_id=lecture.id))
 
 @view_config(route_name='tutorial_unsubscribe', context=TutorialContext, permission='unsubscribe')
-def unsubscribe(request=None, tutorial=None, user=None, db=None):
+def unsubscribe(context=None, request=None, tutorial=None, user=None, db=None):
     tutorial = request.context.tutorials[0] if tutorial is None else tutorial
     user = request.user if user is None else user
     db = request.db if db is None else db
