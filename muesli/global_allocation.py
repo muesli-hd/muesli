@@ -29,14 +29,16 @@ from sqlalchemy.orm import joinedload, contains_eager
 from muesli import models as m
 from muesli import utils
 import math
-import statistics
+from muesli.web import viewsTutorial
 
 def students_matching_requirements(g, lecture, requirements):
     relevant_applicants = set()
     for student in g.graph["lecture_students"][lecture]:
         student_fulfills_requirements = True
         for criterion, min_penalty in requirements.items():
-            if criterion is not None and g.graph['student_criteria'][student][criterion.id] < min_penalty:
+            if criterion is None:
+                continue
+            elif g.graph['student_criteria'][student][criterion.id] < min_penalty:
                 student_fulfills_requirements = False
                 break
         if student_fulfills_requirements:
@@ -50,6 +52,7 @@ def remove_lecture_student(g, lecture, student):
         g.graph["student_lectures"][student].remove(lecture)
         if not len(g.graph["student_lectures"][student]):
             del g.graph["student_lectures"][student]
+            del g.graph["student_criteria"][student]
     if "student_tutorials" in g.graph and student in g.graph["student_tutorials"]:
         tutorial = g.graph["student_tutorials"][student]
         if tutorial in g.graph["tutorial_students"]:
@@ -367,27 +370,35 @@ def calculate_edge_weights(g):
                     calculate_edge_weight(g, (start, end))
 
 def remove_students_with_external_allocation(g):
-    for student in g.graph["student_criteria"].keys():
+    for student in list(g.graph["student_criteria"].keys()).copy():
         for criterion in g.graph["criteria"]:
             if criterion.preferences_unnecessary and g.graph["student_criteria"][student][criterion.id] >= 100:
                 for lecture in g.graph["student_lectures"][student].copy():
                     remove_lecture_student(g, lecture, student)
 
-def solve_allocation_problem(request):
+def solve_allocation_problem(request, dry_run=True):
     graph = build_graph(request)
+    hacky_pre_processing(graph, dry_run)
     remove_students_with_external_allocation(graph)
     graph = process_admission_priorities(graph)
-    for i in range(1, 10):
+    iteration_nr = 1
+    while not check_solution_okay(graph, iteration_nr):
         solve_min_cost_flow(graph)
         calculate_contact_weights(graph)
         detect_time_collisions(graph)
         calculate_edge_weights(graph)
+        iteration_nr += 1
+
+    if not dry_run:
+        apply_allocation_graph(graph)
 
     return graph
 
-    #return count_contacts(
-    #    pre_processing(entities)
-    #)
+def check_solution_okay(g, iteration_nr):
+    if "time_collisions" in g.graph and g.graph["time_collisions"] == 0 and iteration_nr > 9:
+        g.graph["solution_okay"] = True
+        return True
+    return False
 
 def detect_time_collisions(g):
     n_collisions = 0
@@ -410,4 +421,41 @@ def detect_time_collisions(g):
                         collision_weight = 0
                     g[(tutorial.lecture, student)][tutorial]['weight_components']['time_collision'] = collision_weight
 
+    g.graph["time_collisions"] = n_collisions
     print("Collisions: {}".format(n_collisions))
+
+def apply_allocation_graph(g):
+    assert "solution_okay" in g.graph
+
+    for tutorial in g.graph["tutorial_students"].keys():
+        for old_student in tutorial.students:
+            viewsTutorial.unsubscribe(user=old_student, tutorial=tutorial, db=g.graph["database"])
+
+        for new_student in g.graph["tutorial_students"][tutorial]:
+            viewsTutorial.subscribe(user=new_student, tutorial=tutorial, db=g.graph["database"])
+    print("Zuteilung erfolgreich gespeichert")
+
+
+def hacky_pre_processing(g, dry_run = True):
+    # Covid 19 Allocation has special requirements
+    if g.graph["allocation"].id == 1:
+        # Einführung in die Praktische Informatik
+        lecture = g.graph["database"].query(m.Lecture).get(1236)
+        # Tutorial for students with existing programming skills
+        tutorial = g.graph["database"].query(m.Tutorial).get(7279)
+        criterion_id = 2
+
+        # Empty this tutorial
+        print("Emptying special IPI tutorial")
+        for old_student in tutorial.students:
+            if not dry_run:
+                viewsTutorial.unsubscribe(user=old_student, tutorial=tutorial, db=g.graph["database"])
+
+        special_student_counter = 0
+        for student in g.graph["lecture_students"][lecture].copy():
+            if g.graph["student_criteria"][student][criterion_id] == 100:
+                special_student_counter += 1
+                remove_lecture_student(g, lecture, student)
+                if not dry_run:
+                    viewsTutorial.subscribe(user=student, tutorial=tutorial, db=g.graph["database"])
+        print("Adding {} students to special tutorial.".format(special_student_counter))

@@ -83,9 +83,7 @@
 
       <h3>Einteilung vornehmen</h3>
       <strong>Dies überschreibt vorherige Einteilungen!</strong>
-      <form method="post" tal:attributes="action request.route_path('allocation_do_allocation', allocation_id=allocation.id)">
-        <input type="submit" value="Einteilung vornehmen (noch nicht implementiert)"/>
-      </form>
+      <p><a class="action" onclick="return accidentalClickPrevention(event)" tal:attributes="href request.route_path('allocation_do_allocation', allocation_id=allocation.id)">Zuteilung ausführen</a></p>
     </div>
 
     <h3>Kriterien</h3>
