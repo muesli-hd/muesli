@@ -37,8 +37,8 @@
     </p>
 
     <table>
-      <tr tal:condition='lecture.type == "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Kommentar</th><th></th><th></th><th></th></tr>
-      <tr tal:condition='lecture.type != "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Titel</th><th></th><th></th><th></th></tr>
+      <tr tal:condition='lecture.type == "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Kommentar</th><th></th><th></tr>
+      <tr tal:condition='lecture.type != "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Titel</th><th></th><th></th></tr>
 
       <tr tal:repeat='tutorial [t for t in lecture.tutorials if t.is_visible]'>
         <td>${tutorial.time}</td>
@@ -55,7 +55,6 @@
           </span>
         </td>
         <td>${tutorial.comment}</td>
-        <td><a href="${tutorial.video_call}" tal:condition="tutorial.video_call">Videoanruf</a></td>
         <td tal:condition="request.permissionInfo.has_permission('view_tutorials')">
           <a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">Details</a>
         </td>
