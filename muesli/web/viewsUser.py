@@ -313,6 +313,9 @@ def registerOther(request):
 
 
 def registerCommon(request, form):
+    request.session.flash('Registration is disabled due to ongoing spam activity.', queue='messages')
+    return False
+
     mails = request.db.query(models.User.email).all()
     mails = [m.email.lower() for m in mails]
     if form['email'].lower() in mails:
