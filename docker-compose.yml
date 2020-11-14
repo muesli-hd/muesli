@@ -5,7 +5,9 @@ services:
   postgres:
     image: 'postgres:latest'
     environment:
-      - POSTGRES_DB=muesli
+      POSTGRES_DB: mueslidb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mueslipw
     ports:
       - '127.0.0.1:5433:5432'
     volumes:
@@ -21,3 +23,7 @@ services:
       - postgres
     environment:
       MUESLI_TESTMODE: 1
+      MUESLI_DB_HOST: postgres
+      MUESLI_DB: mueslidb
+      MUESLI_DB_USER: postgres
+      MUESLI_DB_PASSWORD: mueslipw
