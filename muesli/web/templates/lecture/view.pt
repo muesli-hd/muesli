@@ -54,7 +54,6 @@
         <th scope="col">Tutor</th>
         <th scope="col">Kommentar</th>
         <th scope="col"></th>
-        <th scope="col"></th>
       </thead>
 
       <thead class="thead-dark" tal:condition='lecture.type != "lecture"'>
@@ -63,7 +62,6 @@
         <th scope="col">Auslastung</th>
         <th scope="col">Tutor</th>
         <th scope="col">Titel</th>
-        <th scope="col"></th>
         <th scope="col"></th>
       </thead>
 
@@ -86,14 +84,12 @@
           <td class="font-italic" tal:condition="not tutorial.comment">Keine Beschreibung</td>
           <td tal:condition="request.permissionInfo.has_permission('view_tutorials')">
             <a role="button"
-               class="btn-sm btn-info"
+               class="btn-sm btn-info mr-2"
               tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">
               Details
             </a>
-          </td>
-          <td>
             <a role="button"
-               class="btn-sm btn-primary"
+               class="btn-sm btn-primary mr-2"
                tal:condition="(tutorial.student_count &lt; tutorial.max_students) and tutorial != subscribed_tutorial"
                tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)">
               ${'Beitreten' if not subscribed_tutorial else 'Wechseln'}
