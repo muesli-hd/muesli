@@ -151,13 +151,23 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   </div>
 </h3>
 
-<table>
-  <tr tal:repeat="tutor lecture.tutors">
-    <td>
-      <a tal:attributes="href 'mailto:'+tutor.email">${tutor.name}</a>
-      <a class="btn-sm btn-danger" tal:attributes="href request.route_path('lecture_remove_tutor', lecture_id=lecture.id, tutor_id=tutor.id)">entfernen</a>
-    </td>
-  </tr>
+<table class="table table-striped" style="width: auto !important">
+  <thead class="thead-dark">
+    <tr>
+      <th>Übungsleiter</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr tal:repeat="tutor lecture.tutors">
+      <td>
+        <a tal:attributes="href 'mailto:'+tutor.email">${tutor.name}</a>
+      </td>
+      <td>
+        <a class="btn-sm btn-danger" tal:attributes="href request.route_path('lecture_remove_tutor', lecture_id=lecture.id, tutor_id=tutor.id)">entfernen</a>
+      </td>
+    </tr>
+  </tbody>
 </table>
 
 <h3>Testate</h3>
