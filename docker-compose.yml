@@ -5,7 +5,7 @@ services:
   postgres:
     image: 'postgres:latest'
     environment:
-      POSTGRES_DB: mueslidb
+      POSTGRES_DB: muesli
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mueslipw
     ports:
@@ -14,8 +14,7 @@ services:
       - './travis-muesli-origDb.sql:/docker-entrypoint-initdb.d/travis-muesli-origDb.sql'
   muesli:
     build: .
-    volumes:
-      - './:/opt/muesli4'
+    image: muesli:tests
     ports:
       - '8080:8080'
       - '127.0.0.1:8081:8081'
@@ -24,6 +23,6 @@ services:
     environment:
       MUESLI_TESTMODE: 1
       MUESLI_DB_HOST: postgres
-      MUESLI_DB: mueslidb
+      MUESLI_DB: muesli
       MUESLI_DB_USER: postgres
       MUESLI_DB_PASSWORD: mueslipw

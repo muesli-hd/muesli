@@ -30,3 +30,4 @@ CMD ["/opt/muesli4/docker_run_tests/docker-run-tests.sh"]
 RUN pip3 install --upgrade pip
 COPY --chown=muesli:muesli ./requirements.txt /opt/muesli4/
 RUN pip3 install -r requirements.txt
+COPY --chown=muesli:muesli ./ /opt/muesli4/
