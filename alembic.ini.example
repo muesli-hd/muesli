@@ -7,7 +7,7 @@ script_location = alembic
 # template used to generate migration files
 # file_template = %%(rev)s_%%(slug)s
 
-sqlalchemy.url = postgres:///muesli
+sqlalchemy.url = postgres:///
 #sqlalchemy.url = postgres:///mueslitest
 
 
