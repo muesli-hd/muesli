@@ -125,7 +125,12 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
   <input role="button" class="btn btn-primary" type="submit" value="Korrelation"/>
 </form>
   </li>
-  <li><a tal:attributes="href request.route_path('exam_correlation', _query={'type1': 'assignments', 'id1': exam.lecture.id, 'type2': 'exam', 'id2': exam.id})">Korrelation Testat/Übungszettel gesamt</a></li>
+  <li>
+    <!-- TODO: Please check this carefully on review! -->
+    <a tal:attributes="href request.route_path('exam_correlation', _query={'source1': 'lecture_' + str(exam.lecture.id), 'source2': 'exam_' + str(exam.id)})">
+      Korrelation Testat/Übungszettel gesamt
+    </a>
+  </li>
 </ul>
 
 
