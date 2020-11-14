@@ -211,27 +211,27 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   <input role="button" class="btn btn-primary" type="submit" value="Korrelation"/>
 </form>
 
-<h3>
+<h3 class="mt-3">
   Benotungen
   <div class="tooltip_questionmark"><p>
     ${tooltips['grading']}
   </p></div>
 </h3>
 
-<p>
-  <a tal:attributes="href request.route_path('lecture_add_grading', lecture_id=lecture.id)">
-    Benotung hinzufügen
-  </a>
-</p>
 
-<ul>
+<ol>
   <li tal:repeat="grading lecture.gradings">
     <a tal:attributes="href request.route_path('grading_edit', grading_id=grading.id)">
       ${grading.name}
     </a>
   </li>
-</ul>
+</ol>
 
+<p>
+  <a class="btn btn-primary" tal:attributes="href request.route_path('lecture_add_grading', lecture_id=lecture.id)">
+    Benotung hinzufügen
+  </a>
+</p>
 
 <h3>Teilnehmer nach Studiengängen</h3>
 
