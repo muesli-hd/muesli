@@ -44,7 +44,7 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
 
 <form method="post">
 <input type="hidden" name="submit" value="1"/>
-<table class="table" style="width: auto !important">
+<table class="table w-auto">
   <thead class="thead-dark">
     <th scope="col" tal:condition="not tutorial_ids">Tutor</th>
     <th scope="col">Name</th>
@@ -108,16 +108,16 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
   <!-- <input type="hidden" name="type1" value="exercise"/> -->
   <!-- <input type="hidden" name="type2" value="exercise"/> -->
   <div class="form-group pr-1">
-    <select class="custom-select" name="source1" tal:repeat="e exam.exercises">
-      <option
+    <select class="custom-select" name="source1">
+      <option tal:repeat="e exam.exercises"
               tal:attributes="value 'exercise_%s' % e.id">
         Aufgabe ${e.nr}
       </option>
     </select>
   </div>
   <div class="form-group pr-1">
-    <select class="custom-select" name="source2" tal:repeat="e exam.exercises">
-      <option
+    <select class="custom-select" name="source2">
+      <option tal:repeat="e exam.exercises"
               tal:attributes="value 'exercise_%s' % e.id">
         Aufgabe ${e.nr}
       </option>
