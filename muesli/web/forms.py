@@ -1139,7 +1139,7 @@ class GradingEdit(ObjectForm):
         ]
         ObjectForm.__init__(self, grading, formfields, request, send='Ändern')
 
-class TutorLectureSignIn(ObjectForm):
+class TutorLectureAuthSignIn(ObjectForm):
     def __init__(self, request):
         formfields = [
             FormField(

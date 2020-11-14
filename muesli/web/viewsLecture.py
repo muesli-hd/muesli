@@ -85,7 +85,7 @@ class View:
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
         times = lecture.prepareTimePreferences(user=self.request.user)
         subscribed_tutorial = self.request.user.tutorials.filter(LectureStudent.lecture_id == self.lecture_id).first()
-        form = TutorLectureSignIn(self.request)
+        form = TutorLectureAuthSignIn(self.request)
         return {'lecture': lecture,
                 'subscribed_tutorial': subscribed_tutorial,
                 'times': times,
