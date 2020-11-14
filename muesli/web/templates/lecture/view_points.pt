@@ -6,7 +6,7 @@
 
 <div tal:define="fF lambda f: '%.1f' % f if f != None else '-'" >
   <div tal:repeat="catexams exams_by_category" tal:omit-tag="">
-    <table class="table table-striped table-sm" style="width: auto !important">
+    <table class="table table-striped table-sm w-auto">
       <thead class="thead-dark">
         <th scope="col">
           ${catexams['name']}

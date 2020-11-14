@@ -4,7 +4,7 @@
 
 <h2>Liste aller eingetragenen Studiengänge</h2>
 
-<table class="table table-striped" style="width: auto !important">
+<table class="table table-striped w-auto">
   <thead class="thead-dark">
     <tr>
       <th scope="col">Studiengang</th>

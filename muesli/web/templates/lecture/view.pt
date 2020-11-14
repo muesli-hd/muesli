@@ -115,7 +115,7 @@
   </p>
 
   <form method='post' tal:attributes='action request.route_path("lecture_set_preferences", lecture_id=lecture.id)'>
-    <table class="table" style="width: auto !important">
+    <table class="table w-auto">
       <thead class="thead-dark">
         <tr>
           <th scope="col">Zeit</th>

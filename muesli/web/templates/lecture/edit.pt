@@ -12,7 +12,7 @@
   <form tal:attributes="action request.route_path('lecture_change_assistants', lecture_id=lecture.id)" method="POST">
   <div class="form-group">
     <div class="input-group mb-2" tal:repeat="assistant lecture.assistants">
-       <select class="custom-select" style="width: auto !important" tal:attributes="name 'assistant-%i' % assistant.id">
+       <select class="custom-select w-auto" tal:attributes="name 'assistant-%i' % assistant.id">
          <span tal:repeat="assistant2 assistants" tal:omit-tag="">
          <option tal:attributes="value assistant2.id; selected 'selected' if assistant.id == assistant2.id else None">
            ${assistant2}
@@ -151,7 +151,7 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   </div>
 </h3>
 
-<table class="table table-striped" style="width: auto !important">
+<table class="table table-striped w-auto">
   <thead class="thead-dark">
     <tr>
       <th>Übungsleiter</th>
@@ -234,7 +234,7 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
 
 <h3>Teilnehmer nach Studiengängen</h3>
 
-<table class="table" style="width: auto !important">
+<table class="table w-auto">
   <thead class="thead-dark">
     <tr>
       <th>Studiengang</th>

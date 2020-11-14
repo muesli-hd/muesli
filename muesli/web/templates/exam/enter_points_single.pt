@@ -291,7 +291,7 @@ function submit_all_points(row_id) {
 
 <form id="enter_points_form" onsubmit="submit_all_points(0); return false;">
   <input type="hidden" id="student_id" name="student_id" />
-  <table class="points_table table" id="enter_points_table" style="width: auto !important">
+  <table class="points_table table w-auto" id="enter_points_table">
     <thead class="thead-dark">
       <tr>
         <th scope="col">Namen</th>
