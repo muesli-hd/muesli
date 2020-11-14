@@ -172,8 +172,6 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
 
 <h3>Testate</h3>
 
-<p><a tal:attributes="href request.route_path('lecture_add_exam', lecture_id=lecture.id)">Testat hinzufügen</a></p>
-
 <div tal:repeat="category categories" tal:omit-tag="">
   <h4 tal:condition="exams[category['id']]">${category['name']}</h4>
   <ul>
@@ -185,7 +183,6 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
         <a tal:attributes="href request.route_path('exam_delete', exam_id=exam.id)">Löschen</a>)</li>
   </ul>
 </div>
-
 
 <form class="form-inline" method="get" tal:attributes="action request.route_path('exam_correlation')">
   <div class="form-group pr-1">
@@ -210,6 +207,8 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   </div>
   <input role="button" class="btn btn-primary" type="submit" value="Korrelation"/>
 </form>
+
+<p><a class="btn btn-primary mt-3" tal:attributes="href request.route_path('lecture_add_exam', lecture_id=lecture.id)">Testat hinzufügen</a></p>
 
 <h3 class="mt-3">
   Benotungen
