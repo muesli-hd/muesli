@@ -48,6 +48,11 @@ def ColumnWrapper(type):
 class Term(WrappedColumn):
     def __html__(self):
         return self.value[0:4]+' '+('SS' if self.value[4] == '1' else 'WS') if self.value else '-'
+    def __eq__(self, other):
+        if isinstance(other, Term):
+            return self.value == other.value
+        else:
+            return self.__html__() == other
 
 class TutorialTime(WrappedColumn):
     weekdays = {'0': 'Mo', '1': 'Di', '2': 'Mi',\

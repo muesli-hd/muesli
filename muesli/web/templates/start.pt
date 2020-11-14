@@ -77,7 +77,8 @@
           </tr>
           <tr class="row">
             <th scope="row" class="col-sm-2 table-active">Semester</th>
-            <td class="col">${tutorial.lecture.term}</td>
+            <td class="font-italic" tal:condition="tutorial.lecture.term == '-'">Keinem Semester zugeordnet!</td>
+            <td tal:condition="tutorial.lecture.term != '-'"> ${tutorial.lecture.term} </td>
           </tr>
           <tr class="row">
             <th scope="row" class="col-sm-2 table-active">Zeit</th>
@@ -123,7 +124,8 @@
           <th></th>
         </tr>
           <tr tal:repeat="tutorial tutorials">
-            <td>${tutorial.lecture.term}</td>
+            <td class="font-italic" tal:condition="tutorial.lecture.term == '-'">Keinem Semester zugeordnet!</td>
+            <td tal:condition="tutorial.lecture.term != '-'"> ${tutorial.lecture.term} </td>
             <td>
               <a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
                 ${tutorial.lecture.name}
@@ -177,15 +179,30 @@
     <h3 class="card-title">
       Von Ihnen verwaltete Vorlesungen
     </h3>
-    <table class="table">
-    <ul>
-      <li tal:repeat="lecture lectures_as_assistant">
-        (${lecture.term})
-        <a tal:attributes="href request.route_path('lecture_view', lecture_id=lecture.id)">
-          ${lecture.name}</a>
-        (<a tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">bearbeiten</a>)
-      </li>
-    </ul>
+    <div class="m-3">
+      <table class="table">
+        <thead class="thead-light">
+          <th>Semester</th>
+          <th>Vorlesung</th>
+          <th></th>
+        </thead>
+        <tbody>
+          <tr tal:repeat="lecture lectures_as_assistant">
+
+            <td class="font-italic" tal:condition="lecture.term == '-'">Keinem Semester zugeordnet!</td>
+            <td tal:condition="lecture.term != '-'"> ${repr(lecture.term)} </td>
+            <td>
+              <a tal:attributes="href request.route_path('lecture_view', lecture_id=lecture.id)">
+                ${lecture.name}
+              </a>
+            </td>
+            <td>
+              (<a tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">bearbeiten</a>)
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
