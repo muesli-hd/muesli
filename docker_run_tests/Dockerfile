@@ -13,18 +13,18 @@ RUN useradd muesli && \
     apt-get install -y \
         python3.6 python3.6-dev lp-solve postgresql-server-dev-10 wget \
         python3-pip libjs-prototype libjs-select2.js libjs-jquery-fancybox \
-        libjs-jquery-tablesorter locales && \
-    # apt-get install -y --no-install-recommends chromium-chromedriver && \
+        libjs-jquery-tablesorter locales libpcre3 libpcre3-dev && \
     rm -rf /var/lib/apt/lists/* && \
     wget https://www.mathi.uni-heidelberg.de/~jvisintini/lp_solve -O /usr/bin/lp_solve && \
     wget https://www.mathi.uni-heidelberg.de/~jvisintini/libxli_DIMACS.so -O /usr/lib/lp_solve/libxli_DIMACS.so && \
     locale-gen de_DE.UTF-8
+
 ENV LANG de_DE.UTF-8
 ENV LANGUAGE de_DE:de
 ENV LC_ALL de_DE.UTF-8
 
-CMD ["/opt/muesli4/docker_run_tests/docker-run-tests.sh"]
-
 COPY --chown=muesli:muesli ./requirements.txt /opt/muesli4/
 RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install -r requirements.txt
+
+CMD ["/opt/muesli4/docker_run_tests/docker-run-tests.sh"]
