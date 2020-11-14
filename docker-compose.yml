@@ -1,5 +1,5 @@
 ---
-version: '2.1'
+version: '3.2'
 
 services:
   postgres:
@@ -11,6 +11,9 @@ services:
       - '127.0.0.1:5433:5432'
     volumes:
       - './travis-muesli-origDb.sql:/docker-entrypoint-initdb.d/travis-muesli-origDb.sql'
+      - type: volume
+        source: db-data
+        target: /var/lib/postgresql/data
   muesli:
     build: .
     volumes:
@@ -22,3 +25,6 @@ services:
       - postgres
     environment:
       MUESLI_TESTMODE: 1
+
+volumes:
+  db-data:
