@@ -104,8 +104,9 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
   <li>
 
 <form class="form-inline" method="get" tal:attributes="action request.route_path('exam_correlation')">
-  <input type="hidden" name="type1" value="exercise"/>
-  <input type="hidden" name="type2" value="exercise"/>
+  <!-- TODO: Same here, we did not find any place where this was used! -->
+  <!-- <input type="hidden" name="type1" value="exercise"/> -->
+  <!-- <input type="hidden" name="type2" value="exercise"/> -->
   <div class="form-group pr-1">
     <select class="custom-select" name="source1" tal:repeat="e exam.exercises">
       <option
