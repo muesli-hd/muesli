@@ -226,6 +226,7 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('lecture_export_totals', '/lecture/export_totals/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory = GeneralContext)
     config.add_route('lecture_export_yaml_details','/lecture/export_yaml_details',factory = GeneralContext) #Canh added
+    config.add_route('lecture_export_yaml_emails', '/lecture/export_yaml_emails', factory = GeneralContext)
     config.add_route('lecture_export_excel','/lecture/export_excel/downloadDetailTutorials.xlsx',factory = GeneralContext)
 
     config.add_route('lecture_view_points', '/lecture/view_points/{lecture_id}', factory = LectureContext)

@@ -90,6 +90,9 @@ class BaseTests(functionalTests.BaseTests):
     def test_lecture_export_yaml(self):
         res = self.testapp.get('/lecture/export_yaml', status=403)
 
+    def test_lecture_export_yaml_email(self):
+        res = self.testapp.get('/lecture/export_yaml_email', status=403)
+
     def test_all_lecture_export_excel(self):
         res = self.testapp.get('/lecture/export_excel/downloadDetailTutorials.xlsx', status=403)
 
@@ -344,6 +347,11 @@ class AdminLoggedInTests(AssistantLoggedInTests):
     def test_lecture_export_yaml(self):
         res = self.testapp.get('/lecture/export_yaml', status=200)
         self.assertEqual(res.content_type, 'application/x-yaml')
+
+    def test_lecture_export_yaml_email(self):
+        res = self.testapp.get('/lecture/export_yaml_email', status=200)
+        self.assertEqual(res.content_type, 'application/x-yaml')
+
 
     def test_all_lecture_export_excel(self):
         res = self.testapp.get('/lecture/export_excel/downloadDetailTutorials.xlsx', status=200)

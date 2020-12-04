@@ -700,6 +700,34 @@ def exportYaml_details(request):
     response.text = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
     return response
 
+@view_config(route_name='lecture_export_yaml_emails',context = GeneralContext, permission = 'export_yaml')
+def exportYaml_emails(request):
+    lectures = request.db.query(models.Lecture)
+    if not "show_all" in request.GET:
+        lectures = lectures.filter(models.Lecture.is_visible == True)
+    out = [{
+            'name': lecture.name,
+            'lecturer': lecture.lecturer,
+            'student_count': lecture.lecture_students.count(),
+            'term': lecture.term.__html__(),
+            'tutorials': [{
+                    'tutor': tutorial.tutor.name() if tutorial.tutor else '',
+                    'email': tutorial.tutor.email if tutorial.tutor else '',
+                    'place': tutorial.place,
+                    'time': tutorial.time.__html__(),
+                    'comment': tutorial.comment if tutorial.comment else '',
+                    'students': [{
+                        'name': student.name(),
+                        'email': student.email
+                    } for student in tutorial.students]
+                } for tutorial in lecture.tutorials
+            ]
+        } for lecture in lectures.all()
+    ]
+    response = Response(content_type='application/x-yaml')
+    response.text = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
+    return response
+
 
 class ExcelExport:
     def __init__(self, request):

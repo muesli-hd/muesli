@@ -14,6 +14,9 @@
  <li><a tal:attributes="href request.route_path('lecture_export_yaml_details')">Aktuelle Vorlesungen und Tutorien als YAML exportieren</a>
     (<a tal:attributes="href request.route_path('lecture_export_yaml_details', _query={'show_all': 1})">Alle exportieren</a>)
   </li>
+  <li><a tal:attributes="href request.route_path('lecture_export_yaml_emails')">Aktuelle Vorlesungsen Emails der Teilnehmenden als YAML exportieren</a>
+    (<a tal:attributes="href request.route_path('lecture_export_yaml_emails', _query={'show_all': 1})">Alle exportieren</a>)
+  </li>
   <li> <a tal:attributes="href request.route_path('lecture_export_excel')">Aktuelle Vorlesungen und Tutorien als Excel Exportieren</a> </li>
   <li><a tal:attributes="href request.route_path('lecture_add')">Neue Vorlesung</a></li>
   <li><a tal:attributes="href request.route_path('email_users')">Studenten mit Problems mailen</a></li>
