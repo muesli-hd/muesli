@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-sed "s/\/\/\//\/\/postgres@postgres\/muesli/" muesli.yml.example | sed 's/localhost/0.0.0.0/' > muesli.yml
-sed "s/\/\/\//\/\/postgres@postgres\/mueslitest/" alembic.ini.example > alembic.ini
+sed "s/\/\/\/muesli/\/\/postgres@postgres\/muesli/" muesli.yml.example | sed 's/localhost/0.0.0.0/' > muesli.yml
+sed "s/\/\/\/muesli/\/\/postgres@postgres\/mueslitest/" alembic.ini.example > alembic.ini
 echo "Sleeping for 3s ..."; sleep 3;
 echo "Generating configs ..."
 echo "Upgrading the databases ..."

@@ -20,6 +20,8 @@ services:
       - '127.0.0.1:8081:8081'
     depends_on:
       - postgres
+    volumes:
+      - '../:/opt/muesli4'
     environment:
       MUESLI_TESTMODE: 1
       MUESLI_DB_HOST: postgres
