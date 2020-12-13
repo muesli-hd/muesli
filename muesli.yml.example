@@ -1,6 +1,6 @@
 ---
 database:
-    connection: postgresql:///
+    connection: postgresql:///muesli
 
 listen:
     host: 0.0.0.0
