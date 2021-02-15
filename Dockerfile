@@ -1,3 +1,8 @@
+FROM node:current
+COPY muesli/web/yarn .
+RUN yarn dockerbuild
+
+
 FROM ubuntu:bionic
 
 RUN mkdir -p /opt/muesli4
@@ -31,3 +36,4 @@ RUN pip3 install --upgrade pip
 COPY --chown=muesli:muesli ./requirements.txt /opt/muesli4/
 RUN pip3 install -r requirements.txt
 COPY --chown=muesli:muesli . /opt/muesli4/
+COPY --from=0 captcha.min.js muesli/web/static/js/

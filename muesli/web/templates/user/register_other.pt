@@ -2,29 +2,23 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<h2>Bei MÜSLI registrieren</h2>
+    <h2>Bei MÜSLI registrieren</h2>
 
-<p>
-Um sich anzumelden füllen Sie bitte das Formular unten aus. Bitte beachten Sie, dass die Daten später <strong>nicht mehr verändert werden können</strong>.
-</p>
+    <p>
+      Um sich anzumelden füllen Sie bitte das Formular unten aus. Bitte beachten Sie, dass die Daten später <strong>nicht
+      mehr verändert werden können</strong>.
+    </p>
 
-<p>
-Studenten, die Scheine benötigen, müssen sich <a tal:attributes="href request.route_path('user_register')">mit mehr Angaben anmelden</a>.
-Werden Rechte zum Eintragen von Vorlesungen benötigt so <a tal:attributes="href request.route_path('contact')">melden Sie sich bitte bei uns</a> nach der Anmeldung.
-</p>
+    <p>
+      Studenten, die Scheine benötigen, müssen sich <a tal:attributes="href request.route_path('user_register')">mit
+      mehr Angaben anmelden</a>.
+      Werden Rechte zum Eintragen von Vorlesungen benötigt so <a tal:attributes="href request.route_path('contact')">melden
+      Sie sich bitte bei uns</a> nach der Anmeldung.
+    </p>
 
-    <h2 style="color: red">Mailversand wegen Spamaktivität deaktiviert.</h2>
-    <p>Wegen akuter Spamaktivität ist die Registrierung neuer Accounts im MÜSLI System aktuell deaktiviert. Falls Sie
-      einen Account benötigen, <a tal:attributes="href 'mailto:'+request.config['contact']['email']">schreiben Sie uns bitte
-        eine Email</a>.</p>
-
-    <!--
-
-<form action="/user/register_other" tal:attributes="action request.route_path('user_register_other')" method="POST">
-  <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
-</form>
-
--->
+    <form action="/user/register_other" tal:attributes="action request.route_path('user_register_other')" method="POST">
+      <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+    </form>
 
   </metal:main>
 </metal:main>

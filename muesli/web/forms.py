@@ -28,6 +28,8 @@ from muesli import models
 from muesli import utils
 from muesli.types import TutorialTime
 import re
+import requests
+import json
 
 def boolToValue(boolean):
     if boolean==True:
@@ -201,6 +203,25 @@ class ObjectForm(CSRFSecureForm):
         for name in self.named_fields:
             if name != 'csrf_token':
                 self.saveField(name)
+
+class CaptchaResult(validators.FancyValidator):
+    def _validate_python(self, value, state):
+        r = requests.post(muesli.config['captcha']['verification_url'], json = {
+            "message": value,
+            "application_token": muesli.config['captcha']['application_token']
+        })
+        if r.json()["message"] != "verified":
+            raise formencode.Invalid("Captcha verifizierung fehlgeschlagen.", value, state)
+
+
+class CaptchaSecuredObjectForm(ObjectForm):
+    def __init__(self, obj, formfields, request, send="Ändern", chained_validators=[]):
+        if muesli.config['captcha']['enable']:
+            self.captcha = True
+            captcha_field = FormField('frc-captcha-solution', type="hidden", validator=CaptchaResult())
+            formfields += [captcha_field]
+        ObjectForm.__init__(self, obj, formfields, request, send=send, chained_validators=chained_validators)
+
 
 
 class UserLogin(formencode.Schema):
@@ -583,7 +604,7 @@ class UserUpdate(ObjectForm):
         else:
             ObjectForm.saveField(self, fieldName)
 
-class UserRegister(ObjectForm):
+class UserRegister(CaptchaSecuredObjectForm):
     def __init__(self, request):
         formfields = [
                 FormField('email',
@@ -620,7 +641,7 @@ class UserRegister(ObjectForm):
                    label='Studiengang', size=30, comment='Genauer Studiengang (falls Sonstiges gewählt). Bitte in der Form "Fach (Studiengang)".',
                    value='')
                 ]
-        ObjectForm.__init__(self, None, formfields, request, send='Registrieren')
+        CaptchaSecuredObjectForm.__init__(self, None, formfields, request, send='Registrieren')
     def saveField(self, fieldName):
         if fieldName == 'subject':
             if self['subject']=='Sonstiges':
@@ -635,9 +656,9 @@ class UserRegister(ObjectForm):
             else:
                 self.obj.matrikel = self['matrikel']
         else:
-            ObjectForm.saveField(self, fieldName)
+            CaptchaSecuredObjectForm.saveField(self, fieldName)
 
-class UserRegisterOther(ObjectForm):
+class UserRegisterOther(CaptchaSecuredObjectForm):
     def __init__(self, request):
         formfields = [
                 FormField('email',
@@ -658,9 +679,9 @@ class UserRegisterOther(ObjectForm):
                    #value=user.last_name,
                    required=True),
                 ]
-        ObjectForm.__init__(self, None, formfields, request, send='Registrieren')
+        CaptchaSecuredObjectForm.__init__(self, None, formfields, request, send='Registrieren')
     def saveField(self, fieldName):
-        ObjectForm.saveField(self, fieldName)
+        CaptchaSecuredObjectForm.saveField(self, fieldName)
 
 class UserConfirm(ObjectForm):
     def __init__(self, request, confirmation):
@@ -746,7 +767,7 @@ class UserChangePassword(ObjectForm):
         ObjectForm.__init__(self, None, formfields, request, send='Neues Passwort setzen',
                 chained_validators=[validators.FieldsMatch('new_password', 'new_password_repeat')])
 
-class UserResetPassword(ObjectForm):
+class UserResetPassword(CaptchaSecuredObjectForm):
     def __init__(self, request):
         formfields = [
                 FormField('email',
@@ -754,7 +775,7 @@ class UserResetPassword(ObjectForm):
                    required=True,
                    validator=validators.Email()),
                 ]
-        ObjectForm.__init__(self, None, formfields, request,  send='Passwort zurücksetzen')
+        CaptchaSecuredObjectForm.__init__(self, None, formfields, request,  send='Passwort zurücksetzen', captcha=True)
 
 class UserResetPassword3(ObjectForm):
     def __init__(self, request, confirmation):
