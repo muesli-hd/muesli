@@ -28,7 +28,7 @@ import requests
 from header import authenticate
 
 STATIC_HEADERS = {'Accept': 'application/json'}
-MUESLI_URL = "http://localhost:8080"
+MUESLI_URL = "https://muesli.mathi.uni-heidelberg.de"
 
 
 def get(endpoint, header):
