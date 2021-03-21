@@ -27,7 +27,7 @@ import coloredlogs
 from header import authenticate, STATIC_HEADERS, MUESLI_URL
 
 # This could be replaced by cmd input vars
-WAIT_TIME_SECONDS = 10
+WAIT_TIME_SECONDS = 60 * 60 # 1h
 USERNAME = "test@example.com"
 SEMESTER = "2021 SS"
 
