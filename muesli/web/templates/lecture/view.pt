@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
-  <metal:main metal:fill-slot="content">
+  <metal:main metal:fill-slot="content" tal:define='physics_tutorial_map {1335: 7510, 1327: 7509}'>
 
   <h2>${lecture.name}</h2>
 
@@ -31,7 +31,103 @@
     Es ist derzeit nicht möglich sich zu Übungsgruppen in dieser Vorlesung anzumelden.
   </p>
 
-  <div tal:omit-tag='' tal:condition="lecture.mode=='direct' or request.userInfo.is_assistant() or request.userInfo.is_admin() or request.permissionInfo.has_permission('take_tutorial')">
+
+    <div tal:condition='lecture.id in physics_tutorial_map.keys()'>
+      <!--
+        This is horribly hacky. If you see this message after the first half of summer term 2021, find the corresponding
+        commit and revert it please. This is just for the summer term during the pandemic.
+
+        The idea is to let physics students register in a separate lecture and do some manual importing of results later.
+        The map above is Lecture Id (LA2 or Ana2) -> the tutorial in the separate lecture copy
+      -->
+
+      <script id="physics_hack_script"
+              type="text/javascript" tal:attributes="data-state 'physics' if physics_tutorial_map[lecture.id] in [x.id for x in request.user.tutorials] else 'maths' if request.user.hasPreferencesInLecture(lecture=lecture) or lecture.id in [t.lecture.id for t in request.user.tutorials] else 'not_registered'">
+        function show_physics_hack_elements(state) {
+          switch (state) {
+            case "not_registered":
+              document.querySelector("#physics_hack_question").style.display = 'block';
+              document.querySelector("#physics_hack_physics").style.display = 'none';
+              document.querySelector("#regular_registration").style.display = 'none';
+              document.querySelector("#physics_hack_maths").style.display = 'none';
+              break;
+            case "physics":
+              document.querySelector("#physics_hack_question").style.display = 'none';
+              document.querySelector("#physics_hack_physics").style.display = 'block';
+              document.querySelector("#regular_registration").style.display = 'none';
+              document.querySelector("#physics_hack_maths").style.display = 'none';
+              break;
+            case "maths":
+              document.querySelector("#physics_hack_question").style.display = 'none';
+              document.querySelector("#physics_hack_physics").style.display = 'none';
+              document.querySelector("#regular_registration").style.display = 'block';
+              document.querySelector("#physics_hack_maths").style.display = 'block';
+              break;
+          }
+        }
+
+        function exit_math_mode_physics_hack(){
+          let x = document.querySelector("input[value=\"Präferenzen vergessen\"]");
+          if (x != null) {
+              x.form.submit()
+          }
+          for (const a of document.querySelectorAll("a")) {
+              if (a.textContent.includes("Austreten")) {
+                  window.open(a.href, "_top")
+              }
+          }
+          show_physics_hack_elements("not_registered")
+        }
+
+        function docReady(fn) {
+          // see if DOM is already available
+          if (document.readyState === "complete" || document.readyState === "interactive") {
+            // call on next available tick
+            setTimeout(fn, 1);
+          } else {
+            document.addEventListener("DOMContentLoaded", fn);
+          }
+        }
+
+        function apply_current_physics_hack_state() {
+          let hack_state = document.querySelector("#physics_hack_script").dataset.state;
+          show_physics_hack_elements(hack_state)
+        }
+
+        docReady(apply_current_physics_hack_state)
+      </script>
+
+      <div id="physics_hack_question">
+        <p>Studieren Sie Physik?</p>
+        <a class="action" tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=physics_tutorial_map[lecture.id])">
+          Ich studiere Physik und melde mich hiermit zu dieser Veranstaltung an.
+        </a> (Die Zuteilung wird über die Präferenzen im Übungsgruppensystem der Physik vorgenommen)
+        <br/>
+        <a class="action" onclick="show_physics_hack_elements('maths')">Ich studiere etwas anderes, z.B.
+          Mathematik/Informatik und möchte
+          mich anmelden</a>
+      </div>
+
+      <div id="physics_hack_physics" style="display: none;;">
+        <p>Sie sind aktuell für diese Veranstaltung angemeldet und werden von der Physikfakultät in Ihre Bubble
+          eingeteilt.</p>
+        <a class="action" tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=physics_tutorial_map[lecture.id])">
+          Ich habe mich vertan und möchte mich wieder abmelden</a>
+        <br/>
+        <p>Sie können sich anschließend wieder für die Veranstaltung anmelden.</p>
+      </div>
+
+      <div id="physics_hack_maths" style="display: none;;">
+        <a class="action" onclick='exit_math_mode_physics_hack()'>
+          Ich habe mich vertan und möchte mich wieder abmelden</a>
+        <br/>
+        <p>Sie können sich anschließend wieder für die Veranstaltung anmelden.</p>
+      </div>
+    </div>
+
+    <div id="regular_registration" tal:attributes='style "display: none;;" if lecture.id in physics_tutorial_map.keys() else None'>
+
+    <div tal:omit-tag='' tal:condition="lecture.mode=='direct' or request.userInfo.is_assistant() or request.userInfo.is_admin() or request.permissionInfo.has_permission('take_tutorial')">
     <p>
     Zu dieser Vorlesung werden die folgenden Übungsgruppen angeboten:
     </p>
@@ -76,13 +172,14 @@
    </table>
   </div>
 
-  <div tal:omit-tag='' tal:condition='lecture.mode == "prefs"'>
-  <p>
-  Die Zeiten, zu denen Übungsgruppen angeboten werden, sind in der folgenden Tabelle aufgelistet.
-  Damit MÜSLI Sie in Übungsgruppen eintragen kann, müssen Sie eine bestimmte Anzahl von Übungsgruppen in den Modi "Gut" oder "Mittel" ausgewählt haben.
-  Diese kann je nach Zahl der vorhandenen Übungsgruppen variieren.
-  Probieren Sie es einfach aus!
-  </p>
+
+  <div tal:condition='lecture.mode == "prefs"'>
+    <p>
+      Die Zeiten, zu denen Übungsgruppen angeboten werden, sind in der folgenden Tabelle aufgelistet.
+      Damit MÜSLI Sie in Übungsgruppen eintragen kann, müssen Sie eine bestimmte Anzahl von Übungsgruppen in den Modi "Gut" oder "Mittel" ausgewählt haben.
+      Diese kann je nach Zahl der vorhandenen Übungsgruppen variieren.
+      Probieren Sie es einfach aus!
+    </p>
 
   <form method='post' tal:attributes='action request.route_path("lecture_set_preferences", lecture_id=lecture.id)'>
   <table>
@@ -135,6 +232,7 @@
   </form>
 
   </div>
+    </div>
 
 
 
