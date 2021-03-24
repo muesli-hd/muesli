@@ -21,7 +21,7 @@ services:
     depends_on:
       - postgres
     volumes:
-      - '../:/opt/muesli4'
+      - './:/opt/muesli4'
     environment:
       MUESLI_TESTMODE: 1
       MUESLI_DB_HOST: postgres
