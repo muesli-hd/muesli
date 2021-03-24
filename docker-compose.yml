@@ -14,7 +14,7 @@ services:
       - './travis-muesli-origDb.sql:/docker-entrypoint-initdb.d/travis-muesli-origDb.sql'
   muesli:
     build: .
-    image: muesli:tests
+    image: muesli:latest
     ports:
       - '8080:8080'
       - '127.0.0.1:8081:8081'
