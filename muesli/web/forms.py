@@ -775,7 +775,7 @@ class UserResetPassword(CaptchaSecuredObjectForm):
                    required=True,
                    validator=validators.Email()),
                 ]
-        CaptchaSecuredObjectForm.__init__(self, None, formfields, request,  send='Passwort zurücksetzen', captcha=True)
+        CaptchaSecuredObjectForm.__init__(self, None, formfields, request,  send='Passwort zurücksetzen')
 
 class UserResetPassword3(ObjectForm):
     def __init__(self, request, confirmation):

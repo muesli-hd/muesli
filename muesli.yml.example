@@ -116,7 +116,7 @@ api:
   MAX_KEYS: 10
 
 captcha:
-  enable: False
+  enable: false
   puzzle_url: "https://your_puzzle_server/v1/puzzle"
   verification_url: "https://your_verification_server/v1/verify"
   application_token: "supersecret"
