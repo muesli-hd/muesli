@@ -1,5 +1,6 @@
 FROM node:current
 COPY muesli/web/yarn .
+RUN yarn install
 RUN yarn dockerbuild
 
 
