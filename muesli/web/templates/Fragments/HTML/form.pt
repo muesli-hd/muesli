@@ -1,5 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:define-macro="formmacro">
+  <script tal:condition="hasattr(form, 'captcha')" tal:attributes="src request.static_url('muesli.web:static/js/captcha.min.js')"></script>
     <p tal:condition="form.message">
       ${form.message}
     </p>
@@ -46,7 +47,7 @@
         </td>
         <td><span class="formerror" tal:condition="field.name in form.errors" tal:content="form.errors[field.name]"></span></td>
       </div>
-      <div tal:condition="field.type=='hidden'" tal:omit-tag="">
+      <div tal:condition="field.type=='hidden' and field.name!='frc-captcha-solution'" tal:omit-tag="">
           <input type="hidden" tal:attributes="name field.name; size str(field.size); value field.value; readonly 'readonly' if field.readonly else None"/>
           <tr tal:condition="field.name in form.errors">
             <td>${field.name}</td>
@@ -54,9 +55,17 @@
           </tr>
       </div>
     </tr>
+    <tr tal:condition="hasattr(form, 'captcha')">
+      <td></td>
+      <td>
+        <div class="frc-captcha" id="captcha-widget" data-lang="de"
+             data-sitekey="TEST" tal:attributes="data-puzzle_url request.config['captcha']['puzzle_url']"></div>
+      </td>
+      <td></td>
+    </tr>
 <tr>
   <td></td>
-  <td><input type="submit" tal:attributes="value form.send" /></td>
+  <td><input type="submit" id="form-submit-button" tal:attributes="value form.send ; disabled True if hasattr(form, 'captcha') else None"/></td>
   <td></td>
 </tr>
   </table>

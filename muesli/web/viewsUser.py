@@ -313,9 +313,6 @@ def registerOther(request):
 
 
 def registerCommon(request, form):
-    request.session.flash('Registration is disabled due to ongoing spam activity.', queue='messages')
-    return False
-
     mails = request.db.query(models.User.email).all()
     mails = [m.email.lower() for m in mails]
     if form['email'].lower() in mails:
@@ -374,10 +371,7 @@ def resendConfirmationMail(request):
     body = """
 Hallo!
 
-Sie haben sich am %s bei MÜSLI mit den folgenden Daten angemeldet:
-
-Name:   %s
-E-Mail: %s
+Sie haben sich am %s bei MÜSLI angemeldet:
 
 Um die Anmeldung abzuschließen, gehen Sie bitte auf die Seite
 
@@ -388,7 +382,7 @@ einfach.
 
 Mit freudlichen Grüßen,
 Das MÜSLI-Team
-    """ % (confirmation.created_on, user.name(), user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
+    """ % (confirmation.created_on, request.route_url('user_confirm', confirmation=confirmation.hash))
     message = Message(subject='MÜSLI: Ihre Registrierung bei MÜSLI',
                       sender=('%s <%s>' % (request.config['contact']['name'],
                                            request.config['contact']['email'])),
