@@ -272,6 +272,8 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('tutorial_occupancy_bar', '/tutorial/occupancy_bar/{count}/{max_count}')
     config.add_route('tutorial_ajax_get_tutorial', '/tutorial/ajax_get_tutorial/{lecture_id}', factory=LectureContext)
 
+    config.add_route('exam_auto_admit', '/exam/auto_admit/{exam_id}', factory = ExamContext)
+    config.add_route('exam_interactive_admission', '/exam/interactive_admission/{exam_id}', factory = ExamContext)
     config.add_route('exam_add_or_edit_exercise', '/exam/add_or_edit_exercise/{exam_id}/{exercise_id:[^/]*}', factory=ExamContext)
     config.add_route('exam_delete_exercise', '/exam/delete_exercise/{exam_id}/{exercise_id}', factory=ExamContext)
     config.add_route('exam_edit', '/exam/edit/{exam_id}', factory=ExamContext)

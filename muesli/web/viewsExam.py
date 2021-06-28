@@ -684,3 +684,37 @@ def ajaxGetPoints(request):
     for ep in exercise_points:
         points[ep.exercise_id] = float(ep.points) if ep.points else None
     return {'points': points}
+
+
+@view_config(route_name='exam_interactive_admission', renderer='muesli.web:templates/exam/admission_interactive.pt',
+             context=ExamContext, permission='edit')
+def interactive_admission(request):
+    exam = request.context.exam
+    assignments = exam.lecture.exams.filter(models.Exam.category == "assignment").all()
+    admission_limit = int(request.params['admission_limit'])
+    student_pointsum = request.db.query(models.User, func.sum(models.ExerciseStudent.points)).filter(models.User.lecture_students.any(models.LectureStudent.lecture_id == exam.lecture_id)).join(models.User.exercise_points).join(models.ExerciseStudent.exercise).filter(models.Exercise.exam_id.in_([a.id for a in assignments])).group_by(models.User.id).all()
+    sum_of_points_dict = {sp[0].id: str(sp[1]) for sp in student_pointsum if sp[1] and sp[1] >= admission_limit}
+
+    return {
+        "exam": exam,
+        "assignments": [a.id for a in assignments],
+        "n-students-admitted": len(sum_of_points_dict),
+        "sum_of_points": sum_of_points_dict
+    }
+
+
+@view_config(route_name='exam_auto_admit', renderer='json', context=ExamContext, permission='edit')
+def autoadmit(request):
+    exam = request.context.exam
+    assignments = exam.lecture.exams.filter(models.Exam.category == "assignment").all()
+    admission_limit = int(request.params['admission_limit'])
+    admitted_students = exam.lecture.students.join(models.User.exercise_points).join(models.ExerciseStudent.exercise).filter(models.Exercise.exam_id.in_([a.id for a in assignments])).group_by(models.User.id).having(func.sum(models.ExerciseStudent.points) >= admission_limit).all()
+    for student in admitted_students:
+        student_admission = models.getOrCreate(models.ExamAdmission, request.db, (exam.id, student.id))
+        student_admission.admission = True
+    request.db.commit()
+
+    return {
+        "n-students-admitted": len(admitted_students),
+    }
+
