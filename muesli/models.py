@@ -864,9 +864,13 @@ class ExamAdmission(Base):
     registration = Column(Boolean)
     medical_certificate = Column(Boolean)
 
-    def __init__(self, exam=None, student=None):
-        self.exam = exam
-        self.student = student
+    def __init__(self, exam=None, student=None, primary_key=None):
+        if primary_key:
+            self.exam_id = primary_key[0]
+            self.student_id = primary_key[1]
+        else:
+            self.exam = exam
+            self.student = student
 
 
 class Grading(Base):
