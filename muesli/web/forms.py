@@ -23,6 +23,7 @@
 import formencode
 from formencode import validators
 
+import muesli
 from muesli import models
 from muesli import utils
 from muesli.types import TutorialTime
