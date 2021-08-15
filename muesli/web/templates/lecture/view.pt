@@ -32,7 +32,7 @@
       -->
 
       <script id="physics_hack_script"
-              type="text/javascript" tal:attributes="data-state 'physics' if physics_tutorial_map[lecture.id] in [x.id for x in request.user.tutorials] else 'maths' if request.user.hasPreferencesInLecture(lecture=lecture) or lecture.id in [t.lecture.id for t in request.user.tutorials] else 'not_registered'">
+              type="text/javascript" tal:attributes="data-state 'physics' if physics_tutorial_map[lecture.id] in [x.id for x in request.user.tutorials] else 'maths' if request.user.hasPreferences(lecture=lecture) or lecture.id in [t.lecture.id for t in request.user.tutorials] else 'not_registered'">
         function show_physics_hack_elements(state) {
           switch (state) {
             case "not_registered":

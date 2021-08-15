@@ -498,6 +498,7 @@ class Tutorial(Base):
     place = Column(Text)
     max_students = Column(Integer, nullable=False, default=0)
     comment = Column(Text)
+    video_call = Column(Text)
 
     @property
     def students(self):
