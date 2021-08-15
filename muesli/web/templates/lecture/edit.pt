@@ -42,16 +42,6 @@
   (Änderbar von den <a tal:attributes="href request.route_path('contact')">Administratoren</a>).
 </div>
 
-<div tal:condition="lecture.allocations()">
-  <h4>Ihre Veranstaltung nimmt an folgenden vorlesungsübergreifenden Zuteilungsvorhaben für Studierende Teil:</h4>
-  <ul>
-    <li tal:repeat="allocation lecture.allocations()">
-      <a tal:attributes="href request.route_path('allocation_edit', allocation_id=allocation.id)">${allocation.name}</a>
-    </li>
-  </ul>
-  <p>Um dies zu ändern, setzen Sie bitte das ausgewählte Zuteilungsvorhaben jedes einzelnen Tutoriums auf „Keines“.</p>
-</div>
-
 <div tal:condition="lecture.mode=='prefs'" tal:omit-tag="">
   <h3>Einteilung vornehmen</h3>
   <p>

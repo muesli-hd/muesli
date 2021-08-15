@@ -189,15 +189,3 @@ class AutoVivification(dict):
 def autovivify(levels=1, final=dict):
     return (defaultdict(final) if levels < 2 else
             defaultdict(lambda: autovivify(levels - 1, final)))
-
-
-def pref_selection_valid(lecture, time_prefs):
-    if lecture.minimum_preferences:
-        return len([tp for tp in time_prefs if tp.penalty < 100]) >= lecture.minimum_preferences
-    elif len(time_prefs) == 1:
-        return time_prefs[0].penalty < 50
-    else:
-        # Works not for just one tutorial!
-        min_number_of_times = len(time_prefs) / 100.0 + 1
-        penalty_count = sum([1.0 / tp.penalty for tp in time_prefs])
-        return penalty_count > min_number_of_times

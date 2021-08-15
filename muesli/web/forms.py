@@ -23,7 +23,6 @@
 import formencode
 from formencode import validators
 
-import muesli
 from muesli import models
 from muesli import utils
 from muesli.types import TutorialTime
@@ -228,129 +227,6 @@ class UserLogin(formencode.Schema):
     email = validators.String(not_empty=True)
     password = validators.String(not_empty=True)
 
-
-class AllocationAdd(ObjectForm):
-    def __init__(self, request):
-        self.request =  request
-        formfields = [
-            FormField('name',
-                      label='Name',
-                      type='text',
-                      size=100,
-                      required=True),
-            FormField('description',
-                      label='Beschreibung',
-                      type='textarea',
-                      cols=100, rows=7),
-            FormField('state',
-                      label='Typ',
-                      type='select',
-                      options=[
-                          ['configuration', 'In Konfiguration'],
-                          ['closed', 'Geschlossen'],
-                          ['open', 'Offen'],
-                          ['archived', 'Archiviert']
-                      ])
-        ]
-        ObjectForm.__init__(self, None, formfields, request, send='Anlegen')
-    def saveField(self, fieldName):
-        ObjectForm.saveField(self, fieldName)
-
-
-class AllocationEdit(ObjectForm):
-    def __init__(self, request, allocation):
-        self.request = request
-        formfields = [
-            FormField('name',
-                      label='Name',
-                      type='text',
-                      size=100,
-                      value=allocation.name,
-                      required=True),
-            FormField('description',
-                      label='Beschreibung',
-                      type='textarea',
-                      value=allocation.description,
-                      cols=100, rows=7),
-            FormField('state',
-                      label='Typ',
-                      type='select',
-                      value=allocation.state,
-                      options=[
-                          ['configuration', 'In Konfiguration, versteckt'],
-                          ['closed', 'Geschlossen, aber sichtbar'],
-                          ['registration-only', 'Nur Anmeldung und keine Präferenzen'],
-                          ['open', 'Offen (Studierende werden benachrichtigt)'],
-                          ['archived', 'Archiviert, versteckt']
-                      ])
-        ]
-        ObjectForm.__init__(self, allocation, formfields, request, send='Ändern')
-    def saveField(self, fieldName):
-        ObjectForm.saveField(self, fieldName)
-
-
-class AllocationCriterionEdit(ObjectForm):
-    def __init__(self, request, criterion=None):
-        formfields = [
-            FormField('name',
-                      label='Name', size=100,
-                      value=criterion.name if criterion else None,
-                      required=True),
-            FormField('penalty',
-                      label='Gewichtung (0-100)',
-                      value=criterion.penalty if criterion else None,
-                      validator=validators.Int),
-            # If the selected option has penalty != 0 and the below option is enabled, no preferences will be asked
-            FormField('preferences_unnecessary',
-                      label='Macht Abgabe von Präferenzen unnötig',
-                      type = 'radio',
-                      options = [[1, 'Ja'], [0, 'Nein']],
-                      value = boolToValue(criterion.preferences_unnecessary) if criterion else None
-            ),
-            # If a tutorial has penalty > 0, this indicates an online class which does not count into contacts of
-            # students
-            FormField('indicates_online',
-                      label='Tutorien > 0 sind online (Kein Contact tracing)',
-                      type='radio',
-                      options=[[1, 'Ja'], [0, 'Nein']],
-                      value=boolToValue(criterion.indicates_online) if criterion else None
-                      ),
-        ]
-        ObjectForm.__init__(self, criterion, formfields, request, send='Ändern' if criterion else 'Anlegen')
-    def saveField(self, fieldName):
-        if fieldName == 'preferences_unnecessary':
-            self.obj.preferences_unnecessary = valueToBool(self['preferences_unnecessary'])
-        if fieldName == 'indicates_online':
-            self.obj.indicates_online = valueToBool(self['indicates_online'])
-        ObjectForm.saveField(self, fieldName)
-
-
-class AllocationEmailStudents(CSRFSecureForm):
-    def __init__(self, request):
-        formfields = [
-            FormField('subject',
-                      label='Betreff', size=64,
-                      required=True),
-            FormField('body',
-                      label='Nachricht', cols=64, rows=24,
-                      type='textarea'),
-            FileField('attachments',
-                      label='Anhänge', size=64,
-                      growable=False,
-                      validator=validators.FieldStorageUploadConverter()
-                      ),
-            FormField('lecture',
-                      label='Studierendengruppe',
-                      type='select',
-                      options=[[0, 'Alle angemeldeten Studierende']] + [
-                          [lecture.id, 'Angemeldet bei {}'.format(lecture.name)] for lecture in
-                          request.context.allocation.lectures()],
-                      value=0
-                      ),
-        ]
-        CSRFSecureForm.__init__(self, formfields, request, send='Senden')
-
-
 class LectureEdit(ObjectForm):
     def __init__(self, request, lecture):
         self.request = request
@@ -427,8 +303,6 @@ class LectureEdit(ObjectForm):
     def saveField(self, fieldName):
         if fieldName == 'is_visible':
             self.obj.is_visible = valueToBool(self['is_visible'])
-        elif fieldName == 'allocation':
-            self.obj.allocation_id = self['allocation'] if self['allocation'] else None
         else:
             ObjectForm.saveField(self, fieldName)
 
@@ -840,7 +714,7 @@ class LectureEditExam(ObjectForm):
             ObjectForm.saveField(self, fieldName)
 
 class TutorialEdit(ObjectForm):
-    def __init__(self, request, tutorial, connectable_allocations=None):
+    def __init__(self, request, tutorial):
         # TODO: Übungsleiter angeben. Aber wurde das jemals genutzt?
         formfields = [
                 #FormField('tutor',
@@ -873,17 +747,9 @@ class TutorialEdit(ObjectForm):
                    label='Spezial',
                    type='radio',
                    options=[[1, 'Ja'], [0, 'Nein']],
-                   value=boolToValue(tutorial.is_special) if tutorial else 0),
-                FormField('allocation',
-                          label='Teilnahme an Zuteilungsvorhaben',
-                          type='select',
-                          options=[[0, 'Keines']] + [[a.id, a.name] for a in request.context.lecture.getConnectableAllocations()],
-                          value=tutorial.allocation_id if tutorial is not None and tutorial.allocation_id else 0),
-                FormField('video_call',
-                          label='URL Videoanruf', size=150,
-                          value=tutorial.video_call if tutorial else None),
+                   value=boolToValue(tutorial.is_special) if tutorial else 0)
                 ]
-        ObjectForm.__init__(self, tutorial, formfields, request, send='Ändern' if tutorial is not None else 'Anlegen')
+        ObjectForm.__init__(self, tutorial, formfields, request, send='Ändern')
     def saveField(self, fieldName):
         if fieldName == 'is_special':
             setattr(self.obj, fieldName, valueToBool(self[fieldName]))
@@ -898,8 +764,6 @@ class TutorialEdit(ObjectForm):
             timeString = '%s %s' % (self['wday'], timeofday)
             time = TutorialTime(timeString)
             setattr(self.obj, 'time', time)
-        elif fieldName == 'allocation':
-            self.obj.allocation_id = self['allocation'] if self['allocation'] else None
         else:
             ObjectForm.saveField(self, fieldName)
 

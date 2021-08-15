@@ -53,16 +53,6 @@
   </table>
 </div>
 
-<div tal:condition="request.user.visible_allocations().count()">
-  <h3>Anmeldungen bei Zuteilungverfahren:</h3>
-  <ul>
-    <li tal:repeat="allocation request.user.visible_allocations()">
-      <a tal:attributes="href request.route_path('allocation_view', allocation_id=allocation.id)">${allocation.name}</a>
-      <p style="color:red;;" tal:condition="allocation.state == 'open' and not request.user.hasPreferencesInAllocation(allocation) and not allocation.student_preferences_unnecessary(request.user)"> Präferenzabgabe ist offen. Bitte tragen Sie ihre Terminpräferenzen ein.</p>
-    </li>
-  </ul>
-</div>
-
 <div tal:condition="time_preferences">
 <h3>Vorläufige Eintragungen in Übungsgruppen</h3>
 <table>

@@ -576,8 +576,14 @@ def setPreferences(request):
         tp.penalty = int(request.POST['pref-%i' % row])
         tps.append(tp)
         row +=  1
-
-    if not utils.pref_selection_valid(lecture, tps):
+    if lecture.minimum_preferences:
+        valid = len([tp for tp in tps if tp.penalty < 100]) >= lecture.minimum_preferences
+    else:
+        #TODO: Works not for just one tutorial!
+        min_number_of_times = len(tps)/100.0+1
+        penalty_count = sum([1.0/tp.penalty for tp in tps])
+        valid = penalty_count > min_number_of_times
+    if not valid:
         request.db.rollback()
         request.session.flash('Fehler: Sie haben zu wenige Zeiten ausgewählt', queue='errors')
     else:

@@ -1,6 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:define-macro="input_tristate">
 
+
 <span tal:repeat="option [{'value': 1, 'name': 'J'}, {'value': 0, 'name': 'N'}, {'value': '', 'name': '?'}]">
   <span tal:define="checked (value if value is not None else '')==option['value']; disabled readonly">
     <input tal:attributes="id '%s_%s' % (name, option['value']); name name; value option['value']; checked checked if checked else None; disabled disabled if disabled else None" type="radio" />

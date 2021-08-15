@@ -23,7 +23,6 @@
   <li><a tal:attributes="href request.route_path('email_all_users')">Alles Studenten mailen</a></li>
   <li><a tal:attributes="href request.route_path('user_delete_unconfirmed')">Karteileichen sichten und löschen</a></li>
   <li><a tal:attributes="href request.route_path('user_doublets')">Mehrfache Anmeldungen</a></li>
-  <li><a tal:attributes="href request.route_path('allocation_list')">Liste globaler Zuteilungen</a></li>
 </ul>
 
   </metal:main>

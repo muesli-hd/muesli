@@ -2,41 +2,16 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-    <h2>${names['tutorial']} bearbeiten</h2>
+<h2>${names['tutorial']} bearbeiten</h2>
 
-    <p>${names['name']} <a tal:attributes="href request.route_path('lecture_edit', lecture_id=tutorial.lecture.id)">${tutorial.lecture.name}</a></p>
+<p>${names['name']} <a tal:attributes="href request.route_path('lecture_edit', lecture_id=tutorial.lecture.id)">${tutorial.lecture.name}</a></p>
 
-    <p tal:condition="error_msg" class="error">${error_msg}</p>
+<p tal:condition="error_msg" class="error">${error_msg}</p>
 
 
-    <form action="/tutorial/edit" tal:attributes="action request.route_path('tutorial_edit', tutorial_id=tutorial.id)" method="POST">
-    <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
-    </form>
-
-    <div tal:condition="tutorial.allocation">
-      <h3>Gewichtung für Kriterien festlegen</h3>
-      <p>Der Wert 0 drückt einen neutralen Zusammenhang zum Kriterium aus. Meist wollen Sie einen Wert von 0-100 verwenden.</p>
-      <form tal:attributes="action request.route_path('tutorial_set_criteria_penalties', tutorial_id=tutorial.id)" method="POST">
-        <table>
-          <tr>
-            <th>Kriterium</th>
-            <th>Gewichtung</th>
-          </tr>
-          <tr tal:repeat="(item, criterion) enumerate(tutorial.allocation.criteria)">
-            <td>${criterion.name}</td>
-            <input type="hidden" name="criterion-${item}" value="${criterion.id}">
-            <td><input type="text" name="penalty-${item}" value="${criteria_penalties.get(criterion.id, 0)}"></td>
-          </tr>
-        </table>
-        <p><input type="submit" value="Gewichtungen für Kriterien speichern"></p>
-      </form>
-    </div>
-
-    <p>
-      <a tal:attributes="href request.route_path('tutorial_move_students_allocation', tutorial_id=tutorial.id)" tal:condition="tutorial is not None and tutorial.allocation is not None and tutorial.students.count()">
-        Bisher angemeldete Studierende in Zuteilungsvorhaben übertragen
-      </a>
-    </p>
+<form action="/tutorial/edit" tal:attributes="action request.route_path('tutorial_edit', tutorial_id=tutorial.id)" method="POST">
+<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+</form>
 
   </metal:main>
 </metal:main>

@@ -34,7 +34,6 @@ from muesli.web.navigation_tree import create_navigation_tree
 from muesli.web.context import *
 from muesli.models import *
 from muesli.web.views import *
-from muesli.web.viewsAllocation import *
 from muesli.web.viewsLecture import *
 from muesli.web.viewsUser import *
 from muesli.web.viewsTutorial import *
@@ -231,24 +230,6 @@ def main(global_config=None, testmode=False, **settings):
 
     config.add_route('lecture_view_points', '/lecture/view_points/{lecture_id}', factory = LectureContext)
 
-    config.add_route('allocation_list', '/allocation/list', factory = GeneralContext)
-    config.add_route('allocation_add', '/allocation/add', factory = GeneralContext)
-    config.add_route('allocation_edit', '/allocation/edit/{allocation_id}', factory = AllocationContext)
-    config.add_route('allocation_view', '/allocation/view/{allocation_id}', factory = AllocationContext)
-    config.add_route('allocation_register', '/allocation/register/{allocation_id}', factory = AllocationContext)
-    config.add_route('allocation_set_preferences', '/allocation/set_preferences/{allocation_id}', factory=AllocationContext)
-    config.add_route('allocation_remove_preferences', '/lecture/allocation_preferences/{allocation_id}', factory=AllocationContext)
-    config.add_route('allocation_criterion_add', '/allocation/criterion_add/{allocation_id}', factory = AllocationContext)
-    config.add_route('allocation_do_allocation', '/allocation/do/{allocation_id}', factory = AllocationContext)
-    config.add_route('allocation_preview', '/allocation/preview/{allocation_id}', factory = AllocationContext)
-    config.add_route('allocation_graph', '/allocation/graph/{allocation_id}', factory = AllocationContext)
-    config.add_route('allocation_email_students', '/allocation/email_students/{allocation_id}', factory = AllocationContext)
-    config.add_route('allocation_histogram', '/allocation/histogram/{allocation_id}/{time}', factory = AllocationContext)
-
-    config.add_route('allocation_criterion_edit', '/allocation/criterion/{criterion_id}', factory = AllocationCriterionContext)
-    config.add_route('allocation_criterion_delete', '/allocation/criterion_delete/{criterion_id}', factory = AllocationCriterionContext)
-    config.add_route('allocation_criterion_add_option', '/allocation/criterion_add_option/{criterion_id}', factory = AllocationCriterionContext)
-    config.add_route('allocation_criterion_edit_option', '/allocation/criterion_edit_option/{criterion_id}', factory = AllocationCriterionContext)
 
     config.add_route('tutorial_add', '/tutorial/add/{lecture_id}', factory=LectureContext)
     config.add_route('tutorial_duplicate', '/tutorial/duplicate/{lecture_id}/{tutorial_id}', factory=LectureContext)
@@ -259,8 +240,6 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('tutorial_email_preference', '/tutorial/email_preference/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_resign_as_tutor', '/tutorial/resign_as_tutor/{tutorial_ids}', factory = TutorialContext)
     config.add_route('tutorial_assign_student', '/tutorial/assign_student', factory = AssignStudentContext)
-    config.add_route('tutorial_move_students_allocation', '/allocation/move_students_allocation/{tutorial_id}', factory = TutorialContext)
-    config.add_route('tutorial_set_criteria_penalties', '/tutorial/set_criteria_penalties/{tutorial_id}', factory = TutorialContext)
 
 
     config.add_route('tutorial_edit', '/tutorial/edit/{tutorial_id}', factory=TutorialContext)

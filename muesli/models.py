@@ -150,26 +150,7 @@ class User(Base):
                     tps[tp.lecture.id] = [tp]
         return tps
 
-    def allocation_registered_lectures(self, allocation=None):
-        session = Session.object_session(self)
-        query = session.query(Lecture).join(AllocationStudent.lecture).filter(AllocationStudent.student == self)
-        if allocation:
-            query = query.filter(AllocationStudent.allocation == allocation)
-        return query.group_by(Lecture.id)
-
-    def visible_allocations(self):
-        session = Session.object_session(self)
-        return session.query(Allocation).join(AllocationStudent.allocation).filter(
-            AllocationStudent.student == self).filter(bool(Allocation.is_visible) == True).group_by(Allocation.id)
-
-    def hasPreferencesInAllocation(self, allocation=None):
-        session = Session.object_session(self)
-        query = session.query(AllocationTimePreference).filter(AllocationTimePreference.student == self)
-        if allocation:
-            query = query.filter(AllocationTimePreference.allocation == allocation)
-        return query.count() > 0
-
-    def hasPreferencesInLecture(self, lecture=None):
+    def hasPreferences(self, lecture=None):
         session = Session.object_session(self)
         query = session.query(TimePreference).filter(TimePreference.student_id == self.id)
         if lecture:
@@ -222,168 +203,6 @@ class Confirmation(Base):
         self.hash = hashlib.sha1(bytes("%s-%s" % (time.time(), random.random()), "utf-8")).hexdigest()
 
 
-class Allocation(Base):
-    __tablename__ = 'allocations'
-    id = Column(Integer, primary_key=True)
-    name = Column(Text)
-    description = Column(Text)
-    # state
-    #  'configuration'     - Lectures can be joined
-    #  'closed'            - Lectures can not be joined
-    #  'registration-only' - Only the registration is open. No preferences can be set.
-    #  'open'              - Setting preferences is allowed
-    #  'archived'          - No modifications are possible
-    state = Column(Text)
-
-    @property
-    def can_register(self):
-        return self.state == 'registration-only' or self.state == 'open'
-
-    @property
-    def is_visible(self):
-        return self.state == 'closed' or self.state == 'registration-only' or self.state == 'open'
-
-    def pref_subjects(self, lecture=None):
-        session = Session.object_session(self)
-        query = session.query(func.count(User.id), User.subject)
-        if lecture is None:
-            query = query.filter(User.allocation_students.any(AllocationStudent.allocation == self))
-        else:
-            query = query.filter(User.allocation_students.any(
-                sqlalchemy.and_(AllocationStudent.allocation == self, AllocationStudent.lecture == lecture)
-            ))
-        return query.group_by(User.subject).order_by(User.subject)
-
-    def pref_subjects_by_lecture(self):
-        pref_subject_dict = {0: self.pref_subjects()}
-        for lecture in self.lectures():
-            pref_subject_dict[lecture.id] = self.pref_subjects(lecture)
-
-        return pref_subject_dict
-
-    def lectures(self):
-        session = Session.object_session(self)
-        return session.query(Lecture).filter(Lecture.tutorials.any(Tutorial.allocation == self))
-
-    def assistants(self):
-        return [assistant for lecture in self.lectures() for assistant in lecture.assistants]
-
-    def tutorials_at_time(self, time, user=None):
-        tutorials = []
-        if user is None:
-            lectures = self.lectures()
-        else:
-            lectures = user.allocation_registered_lectures(self)
-
-        for lecture in lectures:
-            tutorials.extend(
-                [t for t in lecture.tutorials if t.allocation == self and t.time == time]
-            )
-        return tutorials
-
-    def times(self, lecture=None, user=None):
-        session = Session.object_session(self)
-        times_query = session.query(Tutorial.time).filter(Tutorial.allocation == self)
-        if user is not None:
-            lectures = user.allocation_registered_lectures(self)
-            times_query = times_query.join(User.lecture_students).filter(Tutorial.lecture_id.in_([l.id for l in lectures]))
-        if lecture is not None:
-            times_query = times_query.filter(Tutorial.lecture == lecture)
-        times_query = times_query.group_by(Tutorial.time)
-
-        result = [{'weekday': result[0].weekday(),
-                   'timeofday': result[0].time(),
-                   'time': result[0],
-                   'penalty': 100
-                   } for result in times_query]
-
-        if user is not None:
-            for time in result:
-                pref = session.query(AllocationTimePreference).get((self.id, user.id, time['time'].value))
-                if pref:
-                    time['penalty'] = pref.penalty
-            if session.new or session.dirty or session.deleted:
-                session.commit()
-
-        return result
-
-    def students(self):
-        session = Session.object_session(self)
-        return session.query(User).filter(User.allocation_students.any(AllocationStudent.allocation == self))
-
-    def student_preferences_unnecessary(self, student):
-        for criterion in self.criteria:
-            if criterion.preferences_unnecessary:
-                session = Session.object_session(self)
-                sac = session.query(StudentAllocationCriterion).get({"student_id": student.id, "criterion_id": criterion.id})
-                if sac is not None and sac.option is not None:
-                    return bool(sac.option.penalty)
-        return False
-
-
-# Global allocation time preferences
-class AllocationTimePreference(Base):
-    __tablename__ = 'allocation_time_preferences'
-    allocation_id = Column('allocation', Integer, ForeignKey(Allocation.id, ondelete="CASCADE"), primary_key=True)
-    allocation = relationship(Allocation, backref=backref('allocation_time_preferences', lazy='dynamic'))
-    student_id = Column('student', Integer, ForeignKey(User.id, ondelete="CASCADE"), primary_key=True)
-    student = relationship(User, backref='allocation_time_preferences')
-    time = Column(ColumnWrapper(TutorialTime)(length=7), primary_key=True)
-    penalty = Column(Integer)
-
-    def __init__(self, allocation=None, student=None, time=None, penalty=None, primary_key=None):
-        if primary_key:
-            self.allocation_id = primary_key[0]
-            self.student_id = primary_key[1]
-            self.time = primary_key[2]
-        else:
-            self.allocation = allocation
-            self.student = student
-            self.time = time
-            self.penalty = penalty
-
-
-class AllocationCriterion(Base):
-    __tablename__ = 'allocation_criteria'
-    id = Column(Integer, primary_key=True)
-    allocation_id = Column('allocation', Integer, ForeignKey(Allocation.id, ondelete="CASCADE"))
-    allocation = relationship(Allocation, backref=backref('criteria', lazy='dynamic'))
-    name = Column(Text)
-    penalty = Column(Integer)
-    indicates_online = Column(Boolean)
-    options = relationship('AllocationCriterionOption', order_by='AllocationCriterionOption.order_number.asc()')
-    preferences_unnecessary = Column(Boolean, nullable=False, default=False)
-
-
-class AllocationCriterionOption(Base):
-    __tablename__ = 'allocation_criteria_options'
-    id = Column(Integer, primary_key=True)
-    criterion_id = Column('criterion', Integer, ForeignKey(AllocationCriterion.id, ondelete="CASCADE"))
-    criterion = relationship(AllocationCriterion)
-    name = Column(Text)
-    order_number = Column(Integer)
-    penalty = Column(Integer)
-
-
-class StudentAllocationCriterion(Base):
-    __tablename__ = 'student_allocation_criteria'
-    criterion_id = Column('criterion', Integer, ForeignKey(AllocationCriterion.id, ondelete="CASCADE"), primary_key=True)
-    criterion = relationship(AllocationCriterion, backref=backref('student_allocation_criteria', lazy='dynamic'))
-    student_id = Column('student', Integer, ForeignKey(User.id, ondelete="CASCADE"), primary_key=True)
-    student = relationship(User, backref='student_allocation_criteria')
-    option_id = Column('option', Integer, ForeignKey(AllocationCriterionOption.id, ondelete="CASCADE"))
-    option = relationship(AllocationCriterionOption, backref='student_allocation_criteria')
-
-    def __init__(self, criterion=None, student=None, option=None, primary_key=None):
-        if primary_key:
-            self.criterion_id = primary_key[0]
-            self.student_id = primary_key[1]
-        else:
-            self.criterion = criterion
-            self.student = student
-            self.option = option
-
-
 class Lecture(Base):
     __tablename__ = 'lectures'
     id = Column(Integer, primary_key=True)
@@ -417,8 +236,6 @@ class Lecture(Base):
     tutor_rights = Column(Text, nullable=False, default=editOwnTutorials)
     tutorials = relationship('Tutorial', order_by='Tutorial.time,Tutorial.comment')
     tutors = relationship(User, secondary=lecture_tutors_table, backref = "lectures_as_tutor")
-
-    lecture_allocation_criteria = relationship('LectureAllocationCriterion', order_by='LectureAllocationCriterion.priority.desc()')
 
     @property
     def students(self):
@@ -475,14 +292,6 @@ class Lecture(Base):
                 filter(User.lecture_students.any(LectureStudent.lecture_id == self.id)).\
                 group_by(User.subject).order_by(User.subject)
 
-    def allocations(self):
-        session = Session.object_session(self)
-        return session.query(Allocation).join(Tutorial.allocation).filter(Tutorial.lecture_id == self.id).group_by(
-            Allocation.id)
-
-    def allocations_visible(self):
-        return [a for a in self.allocations() if a.is_visible]
-
     def getLectureResults(self, tutorials=[], students=None):
         session = Session.object_session(self)
         if not students:
@@ -516,10 +325,6 @@ class Lecture(Base):
     def getGradingResults(self, tutorials=[], students=None):
         session = Session.object_session(self)
         return session.query(StudentGrade).filter(StudentGrade.grading_id.in_([g.id for g in self.gradings]))
-
-    def getConnectableAllocations(self):
-        session = Session.object_session(self)
-        return session.query(Allocation).filter(Allocation.state != 'archived')
 
 
 class Exam(Base):
@@ -693,18 +498,11 @@ class Tutorial(Base):
     place = Column(Text)
     max_students = Column(Integer, nullable=False, default=0)
     comment = Column(Text)
-    allocation_id = Column('allocation', Integer, ForeignKey(Allocation.id))
-    allocation = relationship(Allocation, backref=backref('tutorials', lazy='dynamic'))
-    video_call = Column(Text)
 
     @property
     def students(self):
         session = Session.object_session(self)
         return session.query(User).filter(User.lecture_students.any(LectureStudent.tutorial==self))
-
-    @property
-    def is_visible(self):
-        return self.allocation is None
 
     @property
     def tutor_name(self):
@@ -724,7 +522,6 @@ class Tutorial(Base):
     # student_count defined below, after LectureStudent is defined
 
 
-# Single lecture allocation time preferences
 class TimePreference(Base):
     __tablename__ = 'time_preferences'
     lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)
@@ -746,6 +543,17 @@ class TimePreference(Base):
             self.penalty = penalty
 
 
+class TutorialPreference(Base):
+    __tablename__ = 'tutorial_preferences'
+    lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)
+    lecture = relationship(Lecture, backref='tutorial_preferences')
+    student_id = Column('student', Integer, ForeignKey(User.id), primary_key=True)
+    student = relationship(User, backref='tutorial_preferences')
+    tutorial_id = Column('tutorial', Integer, ForeignKey(Tutorial.id), primary_key=True)
+    tutorial = relationship(Tutorial, backref='tutorial_preferences')
+    penalty = Column(Integer)
+
+
 class LectureStudent(Base):
     __tablename__ = 'lecture_students'
     lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)
@@ -760,63 +568,6 @@ Tutorial.student_count = column_property(
                         where(LectureStudent.tutorial_id==Tutorial.id),
                 deferred=True
                 )
-
-
-class AllocationStudent(Base):
-    __tablename__ = 'allocation_students'
-    allocation_id = Column('allocation', Integer, ForeignKey(Allocation.id), primary_key=True)
-    allocation = relationship(Allocation, backref=backref('allocation_students', lazy='dynamic'))
-    student_id = Column('student', Integer, ForeignKey(User.id), primary_key=True)
-    student = relationship(User, backref=backref('allocation_students', lazy='dynamic'))
-    lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)
-    lecture = relationship(Lecture, backref=backref('allocation_students'))
-
-    def __init__(self, allocation=None, student=None, lecture=None, primary_key=None):
-        if primary_key:
-            self.allocation_id = primary_key[0]
-            self.student_id = primary_key[1]
-            self.lecture_id = primary_key[2]
-        else:
-            self.allocation = allocation
-            self.student = student
-            self.lecture = lecture
-
-
-class LectureAllocationCriterion(Base):
-    __tablename__ = 'lecture_allocation_criteria'
-    criterion_id = Column('criterion', Integer, ForeignKey(AllocationCriterion.id, ondelete="CASCADE"), primary_key=True)
-    criterion = relationship(AllocationCriterion, backref=backref('lecture_allocation_criteria', lazy='dynamic'))
-    lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id, ondelete="CASCADE"), primary_key=True)
-    # lecture backref is defined in lecture because of ordering by priority
-    priority = Column(Integer, nullable=False, primary_key=True)
-    min_penalty = Column(Integer, nullable=False)
-
-    def __init__(self, criterion=None, lecture=None, penalty=None, primary_key=None):
-        if primary_key:
-            self.criterion_id = primary_key[0]
-            self.lecture_id = primary_key[1]
-        else:
-            self.criterion = criterion
-            self.lecture = lecture
-            self.penalty = penalty
-
-
-class TutorialAllocationCriterion(Base):
-    __tablename__ = 'tutorial_allocation_criteria'
-    criterion_id = Column('criterion', Integer, ForeignKey(AllocationCriterion.id, ondelete="CASCADE"), primary_key=True)
-    criterion = relationship(AllocationCriterion, backref=backref('tutorial_allocation_criteria', lazy='dynamic'))
-    tutorial_id = Column('tutorial', Integer, ForeignKey(Tutorial.id, ondelete="CASCADE"), primary_key=True)
-    tutorial = relationship(Tutorial, backref='tutorial_allocation_criteria')
-    penalty = Column(Integer)
-
-    def __init__(self, criterion=None, tutorial=None, penalty=None, primary_key=None):
-        if primary_key:
-            self.criterion_id = primary_key[0]
-            self.tutorial_id = primary_key[1]
-        else:
-            self.criterion = criterion
-            self.tutorial = tutorial
-            self.penalty = penalty
 
 
 class LectureRemovedStudent(Base):

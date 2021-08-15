@@ -21,7 +21,7 @@
 
 from muesli import models
 from muesli import utils
-from muesli.mail import Message, sendMail
+from muesli.mail import Message
 import muesli.mail
 from muesli.web.forms import *
 from muesli.web.context import *
@@ -98,42 +98,6 @@ class OccupancyBar:
         output.close()
         return response
 
-
-def mail_allocation_new_time(request, allocation):
-    bcc = [s.email for s in allocation.students() if not allocation.student_preferences_unnecessary(s)]
-    message = Message(subject='[MÜSLI] Neue Termine für "{}" verfügbar'.format(allocation.name),
-                      sender=request.config['contact']['email'],
-                      to=[request.user.email],
-                      bcc=bcc,
-                      body='''Guten Tag,
-                      
-                      Es sind weitere Termine im Zuweisungsverfahren verfügbar. Bitte passen Sie ihre Präferenzen hier an:
-                      https://muesli.mathi.uni-heidelberg.de{}
-                      
-                      Mit freundlichen Grüßen
-                      MÜSLI-Team'''.format(request.route_path('allocation_view', allocation_id=allocation.id)))
-    try:
-        sendMail(message, request)
-    except:
-        pass
-    else:
-        request.session.flash('Ankündigungsmail über neu verfügbare Termine wurde an alle bisher registrierten Studierende verschickt.', queue='messages')
-        return HTTPFound(location=request.route_url('allocation_edit', allocation_id=allocation.id))
-
-def get_old_times(request):
-    if request.method == 'POST' and 'allocation' in request.POST:
-        allocation = request.db.query(Allocation).get(int(request.POST['allocation']))
-        if allocation is not None:
-            return allocation.times()
-
-def check_allocation_new_time(request, tutorial, old_times):
-    allocation = tutorial.allocation
-    time = tutorial.time
-    if allocation is not None and old_times is not None:
-        if allocation.state == 'open' and time not in [t['time'] for t in old_times]:
-            mail_allocation_new_time(request, allocation)
-
-
 @view_config(route_name='tutorial_add', renderer='muesli.web:templates/tutorial/add.pt', context=LectureContext, permission='edit')
 class Add:
     def __init__(self, request):
@@ -145,13 +109,11 @@ class Add:
         lecture = self.db.query(models.Lecture).get(self.lecture_id)
         form = TutorialEdit(self.request, None)
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
-            old_times = get_old_times(self.request)
             tutorial = models.Tutorial()
             tutorial.lecture = lecture
             form.obj = tutorial
             form.saveValues()
             self.request.db.commit()
-            check_allocation_new_time(self.request, tutorial, old_times)
             form.message = "Neue Übungsgruppe angelegt."
         return {'lecture': lecture,
                 'names': self.request.config['lecture_types'][lecture.type],
@@ -210,18 +172,13 @@ class Edit:
     def __call__(self):
         error_msg = ''
         tutorial = self.db.query(models.Tutorial).get(self.tutorial_id)
-        criteria_penalty_query = self.request.db.query(TutorialAllocationCriterion).filter(TutorialAllocationCriterion.tutorial == tutorial)
-        criteria_penalties = {cpenalty.criterion_id: cpenalty.penalty for cpenalty in criteria_penalty_query}
         form = TutorialEdit(self.request, tutorial)
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
-            old_times = get_old_times(self.request)
             form.saveValues()
             self.request.db.commit()
-            check_allocation_new_time(self.request, tutorial, old_times)
             form.message = "Änderungen gespeichert"
         return {'tutorial': tutorial,
                 'names': self.request.config['lecture_types'][tutorial.lecture.type],
-                'criteria_penalties': criteria_penalties,
                 'form': form,
                 'error_msg': error_msg}
 
@@ -473,30 +430,3 @@ def assign_student(request):
     #sendChangesMailSubscribe(request, tutorial, request.user, fromTutorial=oldtutorial)
     return {'student': student,
             'new_tutorial': new_tutorial}
-
-@view_config(route_name='tutorial_move_students_allocation', context=TutorialContext, permission='edit')
-def move_students_to_allocation(request):
-    tutorials = request.context.tutorials
-    for tutorial in tutorials:
-        lecture_students = request.db.query(LectureStudent).join(User).filter(LectureStudent.tutorial == tutorial)
-        for ls in lecture_students:
-            models.getOrCreate(models.AllocationStudent, request.db, (tutorial.allocation.id, ls.student.id, tutorial.lecture.id))
-            request.db.delete(ls)
-        request.db.commit()
-    request.session.flash('Studierende wurden in das Zuteilungsvorhaben übertragen', queue='messages')
-    return HTTPFound(location=request.referrer)
-
-@view_config(route_name='tutorial_set_criteria_penalties', context=TutorialContext, permission='view')
-def set_criteria_penalties(request):
-    tutorials = request.context.tutorials
-    for tutorial in tutorials:
-        row = 0
-        while 'criterion-{}'.format(row) in request.POST:
-            tutorial_criterion = models.getOrCreate(models.TutorialAllocationCriterion, request.db,
-                                                    (int(request.POST['criterion-{}'.format(row)]), tutorial.id))
-            tutorial_criterion.penalty = int(request.POST['penalty-{}'.format(row)])
-            row +=  1
-
-        request.db.commit()
-        request.session.flash('Gewichtungen für Tutorium gespeichert.', queue='messages')
-    return HTTPFound(location=request.referrer)
