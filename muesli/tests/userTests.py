@@ -395,18 +395,21 @@ class AdminLoggedInTests(AssistantLoggedInTests):
         self.assertResContains(res, 'wurden gelöscht')
         self.assertNotIn(self.tutor, self.lecture.tutors)
 
-        # Delete assistants
+        # Delete assistants and check if it affects other users
+        e = ExerciseStudent()
+        e.student = self.user_without_lecture
+        e.exercise = self.exercise
+        self.session.add(e)
+        self.session.commit()
         res = self.testapp.get('/user/delete_gdpr/%s' % (self.assistant.id), status=302)
         self.assertIn('/admin', res.headers['location'])
         res = res.follow()
         self.assertResContains(res, 'wurden gelöscht')
         self.assertNotIn(self.tutor, self.lecture.assistants)
+        self.assertTrue(self.session.query(self.session.query(ExerciseStudent).filter(
+            ExerciseStudent.student_id == self.user_without_lecture.id).exists()).scalar())
 
         # Delete students who have points and grades in Müsli
-        e = ExerciseStudent()
-        e.student = self.user_without_lecture
-        e.exercise = self.exercise
-        self.session.add(e)
         g = StudentGrade()
         g.student = self.user_without_lecture
         g.grading = self.grading

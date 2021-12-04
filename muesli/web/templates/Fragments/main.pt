@@ -19,10 +19,12 @@
   <h1>MÜSLI</h1>
   <h2>Mathematisches Übungsgruppen- und Scheinlisten-Interface</h2>
 </div>
-<p style="color: red">Aufgrund eines Bugs sind alle Eingaben, die am 04.12.2021 zwischen 18:00 und 18:50 Uhr gemacht
-  wurden, verloren gegangen. Falls Sie in diesem Zeitraum Änderungen durchgeführt haben, z.B. als TutorIn Punkte
-  eingetragen oder sich als studierende zu Übungsgruppen neu eingeschrieben haben, führen Sie dies bitte nochmal durch. Wir
-  entschuldigen uns für die Unannehmlichkeiten.</p>
+<div>
+  <p style="color: red">Aufgrund eines Bugs sind alle Eingaben, die am 04.12.2021 zwischen 18:00 und 18:50 Uhr erfolgt sind
+    , verloren gegangen. Falls Sie in diesem Zeitraum Änderungen durchgeführt haben, z.B. als TutorIn Punkte
+    eingetragen oder sich als Studierende zu Übungsgruppen neu eingeschrieben haben, führen Sie dies bitte ein weiteres Mal durch. Wir
+    entschuldigen uns für die Unannehmlichkeiten.</p>
+</div>
 <metal:main metal:use-macro="templates('Fragments/menu.pt').macros['menu']" />
 
 <script>
