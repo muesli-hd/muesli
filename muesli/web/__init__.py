@@ -181,6 +181,7 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('user_list', '/user/list', factory = GeneralContext)
     config.add_route('user_edit', '/user/edit/{user_id}', factory = UserContext)
     config.add_route('user_delete', '/user/delete/{user_id}', factory = UserContext)
+    config.add_route('user_delete_gdpr', '/user/delete_gdpr/{user_id}', factory = UserContext)
     config.add_route('user_delete_unconfirmed', '/user/delete_unconfirmed', factory = GeneralContext)
     config.add_route('user_doublets', '/user/doublets', factory = GeneralContext)
     config.add_route('user_resend_confirmation_mail', '/user/resend_confirmation_mail/{user_id}', factory = UserContext)

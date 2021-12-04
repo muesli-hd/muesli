@@ -234,6 +234,29 @@ def delete(request):
         return HTTPFound(location=request.route_url('admin'))
 
 
+@view_config(route_name='user_delete_gdpr', context=context.UserContext, permission='delete')
+def delete_gdpr(request):
+    user = request.context.user
+    request.db.query(models.TimePreference.student_id == user.id).delete()
+    request.db.query(models.LectureStudent.student_id == user.id).delete()
+    request.db.query(models.LectureRemovedStudent.student_id == user.id).delete()
+    request.db.query(models.ExerciseStudent.student_id == user.id).delete()
+    request.db.query(models.ExamAdmission.student_id == user.id).delete()
+    request.db.query(models.StudentGrade.student_id == user.id).delete()
+    request.db.query(models.EmailPreferences.user_id == user.id).delete()
+    request.db.query(models.UserHasUpdated.user_id == user.id).delete()
+    request.db.query(models.BearerToken.user_id == user.id).delete()
+    for e in user.lectures_as_tutor:
+        request.db.delete(e)
+    for e in user.lectures_as_assistant:
+        request.db.delete(e)
+    request.db.query(models.Confirmation.user_id == user.id).delete()
+    request.db.delete(user)
+    request.db.commit()
+    request.session.flash('Benutzer %s und alle zugehörigen Daten wurden gelöscht!' % user, queue='messages')
+    return HTTPFound(location=request.route_url('admin'))
+
+
 @view_config(route_name='user_delete_unconfirmed', renderer='muesli.web:templates/user/delete_unconfirmed.pt', context=context.GeneralContext, permission='admin')
 def deleteUnconfirmed(request):
     potentially_bad_students = request.db.query(models.User).filter(models.User.password == None).all()

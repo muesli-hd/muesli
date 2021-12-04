@@ -544,17 +544,6 @@ class TimePreference(Base):
             self.penalty = penalty
 
 
-class TutorialPreference(Base):
-    __tablename__ = 'tutorial_preferences'
-    lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)
-    lecture = relationship(Lecture, backref='tutorial_preferences')
-    student_id = Column('student', Integer, ForeignKey(User.id), primary_key=True)
-    student = relationship(User, backref='tutorial_preferences')
-    tutorial_id = Column('tutorial', Integer, ForeignKey(Tutorial.id), primary_key=True)
-    tutorial = relationship(Tutorial, backref='tutorial_preferences')
-    penalty = Column(Integer)
-
-
 class LectureStudent(Base):
     __tablename__ = 'lecture_students'
     lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)
