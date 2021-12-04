@@ -381,6 +381,51 @@ class AdminLoggedInTests(AssistantLoggedInTests):
         res = res.follow()
         self.assertResContains(res, 'wurde gelöscht')
 
+    def test_user_delete_dgpr(self):
+        res = self.testapp.get('/user/delete_gdpr/%s' % (self.user2.id), status=302)
+        self.assertIn('/admin', res.headers['location'])
+        res = res.follow()
+        self.assertResContains(res, 'wurden gelöscht')
+        self.assertNotIn(self.user2, self.lecture.students)
+
+        ##Delete tutors
+        res = self.testapp.get('/user/delete_gdpr/%s' % (self.tutor.id), status=302)
+        self.assertIn('/admin', res.headers['location'])
+        res = res.follow()
+        self.assertResContains(res, 'wurden gelöscht')
+        self.assertNotIn(self.tutor, self.lecture.tutors)
+
+        # Delete assistants
+        res = self.testapp.get('/user/delete_gdpr/%s' % (self.assistant.id), status=302)
+        self.assertIn('/admin', res.headers['location'])
+        res = res.follow()
+        self.assertResContains(res, 'wurden gelöscht')
+        self.assertNotIn(self.tutor, self.lecture.assistants)
+
+        # Delete students who have points and grades in Müsli
+        e = ExerciseStudent()
+        e.student = self.user_without_lecture
+        e.exercise = self.exercise
+        self.session.add(e)
+        g = StudentGrade()
+        g.student = self.user_without_lecture
+        g.grading = self.grading
+        self.session.add(g)
+        self.session.commit()
+        res = self.testapp.get('/user/delete_gdpr/%s' % (self.user_without_lecture.id), status=302)
+        self.assertIn('/admin', res.headers['location'])
+        res = res.follow()
+        self.assertResContains(res, 'wurden gelöscht')
+        self.assertFalse(self.session.query(self.session.query(ExerciseStudent).filter(
+            ExerciseStudent.student_id == self.user_without_lecture.id).exists()).scalar())
+        self.assertFalse(self.session.query(self.session.query(StudentGrade).filter(
+            StudentGrade.student_id == self.user_without_lecture.id).exists()).scalar())
+
+        res = self.testapp.get('/user/delete_gdpr/%s' % (self.user_unconfirmed.id), status=302)
+        self.assertIn('/admin', res.headers['location'])
+        res = res.follow()
+        self.assertResContains(res, 'wurden gelöscht')
+
     def test_user_delete_unconfirmed(self):
         student_count = self.session.query(muesli.models.User).count()
         res = self.testapp.get('/user/delete_unconfirmed', status=200)
