@@ -64,11 +64,6 @@ function set_navigation(nav) {
 <div id="history">
 </div>
 <div id="content">
-  <div style="background-color: black; padding: 5pt; text-shadow: white 0px 0px 10px;">
-    <p style="color: red">Aufgrund eines Bugs sind alle Eingaben, die am 04.12.2021 zwischen 18:00 und 18:50 Uhr erfolgt sind, verloren gegangen. Falls Sie in diesem Zeitraum Änderungen durchgeführt haben, wie z.B. als TutorIn Punkte eingetragen oder sich als Studierende zu Übungsgruppen neu eingeschrieben haben, führen Sie dies bitte ein weiteres Mal durch. Wir
-      entschuldigen uns für die Unannehmlichkeiten.</p>
-  </div>
-  <br>
 
 <p tal:condition="request.session.peek_flash('errors')" tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('errors'))" class="error"></p>
 <p tal:condition="request.session.peek_flash('messages')" tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('messages'))" class="message"></p>
