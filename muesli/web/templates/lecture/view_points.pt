@@ -25,8 +25,11 @@
     <tr>
       <th>Insgesamt</th>
       <td colspan="3"><strong>${fF(catexams['sum'])}/${fF(catexams['max'])}</strong>
-        <span tal:condition="catexams['max']>0">
+        <span tal:condition="catexams['max']>0 and catexams['max']!=catexams['max_rel']">
          (${'%2.f' % (catexams['sum']/catexams['max']*100)}%, ${'%2.f' % (catexams['sum']/catexams['max_rel']*100)}% rel.)
+        </span>
+        <span tal:condition="catexams['max']>0 and catexams['max']==catexams['max_rel']">
+         (${'%2.f' % (catexams['sum']/catexams['max']*100)}%)
         </span>
      </td>
     </tr>
