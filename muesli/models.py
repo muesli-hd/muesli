@@ -371,7 +371,11 @@ class Exam(Base):
         for points in pointsQuery.all():
             results[points.exercise_id] = {'points': points.points,
                                            'exercise': points.exercise}
-        results['sum'] = sum([x for x in [r['points'] for r in list(results.values())] if x])
+        nonNullPoints = [x for x in [r['points'] for r in list(results.values())] if x]
+        if len(nonNullPoints) > 0:
+            results['sum'] = sum(nonNullPoints)
+        else:
+            results['sum'] = None
         for e in self.exercises:
             if e.id not in results:
                 results[e.id] = {'points': None, 'exercise': e}

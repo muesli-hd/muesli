@@ -621,8 +621,10 @@ def viewPoints(request):
     for exams in exams_by_category:
         sum_all = sum([x for x in [results[e.id]['sum'] for e in exams['exams']] if x])
         max_all = sum([x for x in [e.getMaxpoints() for e in exams['exams']] if x])
+        max_rel = sum([x for x in [e.getMaxpoints() for e in exams['exams'] if results[e.id]['sum']] if x])
         exams['sum'] = sum_all
         exams['max'] = max_all
+        exams['max_rel'] = max_rel
     exams_with_registration = [e for e in lecture.exams.all() if e.registration != None]
     registrations = {}
     for reg in request.db.query(models.ExamAdmission).filter(models.ExamAdmission.exam_id.in_([e.id for e in exams_with_registration])).filter(models.ExamAdmission.student_id == ls.student_id).all():
