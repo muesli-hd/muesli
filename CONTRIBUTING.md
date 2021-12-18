@@ -10,7 +10,7 @@ $ git clone git@github.com:<your_username>/muesli.git
 $ git checkout -b <your_very_special_branchname>
 ```
 * develop the changes you want to do
-* try to use the correct styling / formatting for your code ([Google Stylguidelines](https://github.com/google/styleguide/blob/gh-pages/pyguide.md)([Summary](https://github.com/TheEbolaDoc/google_python_styleguidelines/blob/master/README.md)))
+* try to use the correct styling / formatting for your code ([Google Stylguidelines](https://github.com/google/styleguide/blob/gh-pages/pyguide.md)([Summary](https://github.com/christian-heusel/google_python_styleguidelines/blob/master/README.md)))
 * push your changes
 ```bash
 $ git push --set-upstream origin <your_very_special_branchname>
@@ -159,7 +159,7 @@ production: True
 
 #### Contact (for API related stuff)
 
-Just tag [Chris (@TheEbolaDoc)](https://github.com/TheEbolaDoc) or [@Philipp-g](https://github.com/Philipp-g) in your corresponding issue or PR. :smile:
+Just tag [Chris (@christian-heusel)](https://github.com/christian-heusel) or [@Philipp-g](https://github.com/Philipp-g) in your corresponding issue or PR. :smile:
 
 
 ### --> Happy Hacking and Godspeed! <--
