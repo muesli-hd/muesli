@@ -371,8 +371,8 @@ class Exam(Base):
         for points in pointsQuery.all():
             results[points.exercise_id] = {'points': points.points,
                                            'exercise': points.exercise}
-        nonNullPoints = [x for x in [r['points'] for r in list(results.values())] if x]
-        if len(nonNullPoints) > 0:
+        nonNullPoints = [x for x in [r['points'] for r in results.values()] if x]
+        if nonNullPoints:
             results['sum'] = sum(nonNullPoints)
         else:
             results['sum'] = None
