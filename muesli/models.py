@@ -675,7 +675,11 @@ class UserSchema(Schema):
     subject = fields.String()
 
     @post_load()
-    def get_user(self, data):
+    def get_user(self, data, many=False, partial=False):
+        # See Issue #144 and linked PRs:
+        # We just ignore the Values of many and partial as we do not (yet)
+        # implement any specific behaviour there
+
         usr = self.context['session'].query(User).filter(User.email == data["email"]).one()
         if usr is None:
             raise ValidationError("User not found")
@@ -684,7 +688,11 @@ class UserSchema(Schema):
 
 class AssistantSchema(UserSchema):
     @post_load()
-    def get_user(self, data):
+    def get_user(self, data, many=False, partial=False):
+        # See Issue #144 and linked PRs:
+        # We just ignore the Values of many and partial as we do not (yet)
+        # implement any specific behaviour there
+
         usr = self.context['session'].query(User).filter(User.email == data["email"]).one()
         if usr is None or not usr.is_assistant:
             raise ValidationError("User not found or is not assistant")
