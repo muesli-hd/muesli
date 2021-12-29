@@ -211,7 +211,6 @@ class SwitchStudents(object):
         self.request = request
         self.db = self.request.db
         self.lecture_id = request.matchdict['lecture_id']
-        request.javascript.append('jquery/jquery.min.js')
         request.javascript.append('select2.min.js')
 
     def __call__(self):

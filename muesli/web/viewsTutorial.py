@@ -173,7 +173,6 @@ def results(request):
     cat_maxpoints = dict([cat['id'], 0] for cat in utils.categories)
     for exam in lecture.exams:
         cat_maxpoints[exam.category] += exam.getMaxpoints()
-    request.javascript.append('jquery/jquery.min.js')
     request.javascript.append('jquery/jquery.tablesorter.min.js')
     return {'tutorials': tutorials,
             'tutorial_ids': request.context.tutorial_ids_str,
