@@ -23,7 +23,7 @@ RUN useradd muesli && \
     DEBIAN_FRONTEND="noninteractive" apt-get update && \
     DEBIAN_FRONTEND="noninteractive" apt-get install -y \
         python3.6 python3.6-dev lp-solve postgresql-server-dev-10 wget unzip \
-        python3-pip libjs-prototype locales libpcre3 libpcre3-dev && \
+        python3-pip libjs-prototype locales libpcre3 libpcre3-dev wait-for-it rsync && \
     rm -rf /var/lib/apt/lists/* && \
     wget https://www.mathi.uni-heidelberg.de/~jvisintini/lp_solve -O /usr/bin/lp_solve && \
     wget https://www.mathi.uni-heidelberg.de/~jvisintini/libxli_DIMACS.so -O /usr/lib/lp_solve/libxli_DIMACS.so && \
@@ -37,7 +37,7 @@ RUN python3 -m pip install --upgrade pip && \
 COPY --chown=muesli:muesli --from=0 captcha.min.js muesli/web/static/js/
 COPY --chown=muesli:muesli --from=0 node_modules/jquery/dist/jquery.min.js muesli/web/static/js/
 COPY --chown=muesli:muesli --from=0 node_modules/select2/dist/js/select2.min.js muesli/web/static/js/
-COPY --chown=muesli:muesli --from=0 node_modules/select2/dist/css/select2.css muesli/web/static/css/
+COPY --chown=muesli:muesli --from=0 node_modules/select2/dist/css/select2.min.css muesli/web/static/css/
 COPY --chown=muesli:muesli --from=0 node_modules/tablesorter/dist/js/jquery.tablesorter.min.js muesli/web/static/js/jquery/
 COPY --chown=muesli:muesli --from=0 node_modules/@fancyapps/fancybox/dist/jquery.fancybox.min.js muesli/web/static/js/jquery/
 COPY --chown=muesli:muesli --from=0 node_modules/@fancyapps/fancybox/dist/jquery.fancybox.min.css muesli/web/static/css/
