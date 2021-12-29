@@ -17,5 +17,7 @@ services:
     build:
       context: ..
       dockerfile: ./docker_run_tests/Dockerfile
+    volumes:
+      - '../:/opt/muesli4'
     depends_on:
       - postgres

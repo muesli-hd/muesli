@@ -25,8 +25,7 @@ RUN useradd muesli && \
     wget https://www.mathi.uni-heidelberg.de/~jvisintini/libxli_DIMACS.so -O /usr/lib/lp_solve/libxli_DIMACS.so && \
     locale-gen de_DE.UTF-8
 
-RUN python3 -m pip install --upgrade pip && \
-    python3 -m pip install -r requirements.txt \
-
 COPY --chown=muesli:muesli ./requirements.txt /opt/muesli4/
 
+RUN python3 -m pip install --upgrade pip && \
+    python3 -m pip install -r requirements.txt
