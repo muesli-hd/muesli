@@ -78,34 +78,6 @@ class View:
                 'old_tutorial_id': None  #see move_student
                 }
 
-@view_config(route_name='tutorial_occupancy_bar')
-class OccupancyBar:
-    def __init__(self, request):
-        self.request = request
-        self.count = int(request.matchdict['count'])
-        self.max_count = int(request.matchdict['max_count'])
-        self.width = 60
-        self.height = 10
-        self.color1 = (0,0,255)
-        self.color2 = (140,140,255)
-    def __call__(self):
-        image = PIL.Image.new('RGB', (self.width,self.height),(255,255,255))
-        draw = PIL.ImageDraw.Draw(image)
-        # prevent 0-division error
-        if self.max_count > 0:
-            draw.rectangle([(0,0),(float(self.width)*self.max_count/self.max_count,10)], fill=self.color2)
-            draw.rectangle([(0,0),(float(self.width)*self.count/self.max_count,10)], fill=self.color1)
-        else:
-            draw.rectangle([(0,0),(float(self.width),10)], fill=self.color1)
-        output = io.BytesIO()
-        image.save(output, format='PNG')
-        response = Response()
-        response.content_type = 'image/png'
-        response.cache_control = 'max-age=86400'
-        response.body = output.getvalue()
-        output.close()
-        return response
-
 @view_config(route_name='tutorial_add', renderer='muesli.web:templates/tutorial/add.pt', context=LectureContext, permission='edit')
 class Add:
     def __init__(self, request):
