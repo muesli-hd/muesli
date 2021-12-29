@@ -194,7 +194,7 @@
           <tr tal:repeat="lecture lectures_as_assistant">
 
             <td class="font-italic" tal:condition="lecture.term == '-'">Keinem Semester zugeordnet!</td>
-            <td tal:condition="lecture.term != '-'"> ${repr(lecture.term)} </td>
+            <td tal:condition="lecture.term != '-'"> ${lecture.term} </td>
             <td>
               <a tal:attributes="href request.route_path('lecture_view', lecture_id=lecture.id)">
                 ${lecture.name}
