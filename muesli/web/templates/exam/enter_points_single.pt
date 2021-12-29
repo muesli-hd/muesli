@@ -15,7 +15,6 @@
 
 
 <script>
-jQuery.noConflict();
 window.student_results_json = '${student_results}';
 window.exercise_ids_json = '${exercise_ids}';
 window.latest_row_id = 0;

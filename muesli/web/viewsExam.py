@@ -397,7 +397,6 @@ def statistics(request):
         for i,q in enumerate(exam.getQuantils(students=tutorialstudents)):
             quantils[i]['tutorial'] = q
         #quantils['tutorials'] = exam.getQuantils(students=tutorialstudents)
-    request.javascript.append('prototype.js')
     #pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
     #points = DictOfObjects(lambda: {})
     #for point in pointsQuery:
