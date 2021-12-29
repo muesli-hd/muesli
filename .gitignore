@@ -13,4 +13,17 @@ venv
 .pytest_cache
 maintainance_scripts
 **/header.txt
-captcha.min.js
+
+# External JS files
+muesli/web/static/js/captcha.min.js
+muesli/web/static/js/jquery.min.js
+muesli/web/static/js/select2.min.js
+muesli/web/static/js/jquery.tablesorter.min.js
+muesli/web/static/js/jquery.fancybox.min.js
+muesli/web/static/js/popper.min.js
+muesli/web/static/js/bootstrap.min.js
+
+# External CSS files
+muesli/web/static/css/select2.css
+muesli/web/static/css/jquery.fancybox.min.css
+muesli/web/static/css/bootstrap.min.css

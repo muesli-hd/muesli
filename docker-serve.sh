@@ -3,6 +3,7 @@ if [[ -v MUESLI_TESTMODE ]] && [[ ! -f muesli.yml ]]
 then
     sed "s/postgresql:\/\/\/muesli/postgresql:\/\/${MUESLI_DB_USER:-postgres}:${MUESLI_DB_PASSWORD}@${MUESLI_DB_HOST}\/${MUESLI_DB}/" muesli.yml.example | sed 's/production: True/production: False/' | sed 's/server: 0.0.0.0/server: mailcatcher:1025/' > muesli.yml
     sed "s/postgres:\/\/\/muesli/postgres:\/\/${MUESLI_DB_USER:-postgres}:${MUESLI_DB_PASSWORD}@${MUESLI_DB_HOST}\/${MUESLI_DB}/" alembic.ini.example > alembic.ini
+    rsync -a /opt/muesli_static_libs/ muesli/web/static/
     echo "Sleeping for 3s ..."; sleep 3;
     echo "Generating configs ... "
     python3 -m smtpd -n -c DebuggingServer localhost:25 &
