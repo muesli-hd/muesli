@@ -32,5 +32,11 @@ services:
       MUESLI_DB_USER: postgres
       MUESLI_DB_PASSWORD: mueslipw
 
+  mailcatcher:
+    container_name: muesli_mailcatcher
+    image: 'schickling/mailcatcher'
+    ports:
+      - '127.0.0.1:8082:1080'
+
 volumes:
   db-data:
