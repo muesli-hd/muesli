@@ -26,9 +26,6 @@
           </span>
         </td>
       </tr>
-      <tr tal:condition="sticky_lectures">
-       <td></td>
-      </tr>
       <tr tal:repeat="lecture lectures">
         <td>
           ${lecture.term}
