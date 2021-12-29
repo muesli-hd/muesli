@@ -733,13 +733,13 @@ def exportYaml_emails(request):
             'student_count': lecture.lecture_students.count(),
             'term': lecture.term.__html__(),
             'tutorials': [{
-                    'tutor': tutorial.tutor.name() if tutorial.tutor else '',
+                    'tutor': tutorial.tutor.name if tutorial.tutor else '',
                     'email': tutorial.tutor.email if tutorial.tutor else '',
                     'place': tutorial.place,
                     'time': tutorial.time.__html__(),
                     'comment': tutorial.comment if tutorial.comment else '',
                     'students': [{
-                        'name': student.name(),
+                        'name': student.name,
                         'email': student.email
                     } for student in tutorial.students]
                 } for tutorial in lecture.tutorials

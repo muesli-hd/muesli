@@ -37,8 +37,7 @@
 <div class="row">
   <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml_emails')">Aktuelle Vorlesungsen Emails der Teilnehmenden als YAML exportieren</a>
     (<a tal:attributes="href request.route_path('lecture_export_yaml_emails', _query={'show_all': 1})">Alle exportieren</a>)
-  </li>
-  <li> <a tal:attributes="href request.route_path('lecture_export_excel')"><span class="align-self-center mx-auto">Aktuelle Vorlesungen und Tutorien als Excel Exportieren</span></a>
+  <a tal:attributes="href request.route_path('lecture_export_excel')"><span class="align-self-center mx-auto">Aktuelle Vorlesungen und Tutorien als Excel Exportieren</span></a>
   <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_add')"><span class="align-self-center mx-auto">Neue Vorlesung</span></a>
 </div>
 <div class="row">

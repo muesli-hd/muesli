@@ -234,6 +234,8 @@ def delete(request):
         request.session.flash('{} wurde gelöscht!'.format(user.name), queue='messages')
         return HTTPFound(location=request.route_url('admin'))
 
+    return HTTPFound(location=request.route_url("user_edit", user_id=user.id))
+
 
 @view_config(route_name='user_delete_gdpr', context=context.UserContext, permission='delete')
 def delete_gdpr(request):
