@@ -3,16 +3,10 @@
   <?python
     percentage = 0
     str_percentage = "0"
+    color_attr = "bg-info"
     if tutorial.student_count != 0:
       percentage = (tutorial.student_count/tutorial.max_students) * 100
       str_percentage = "%5.2f" % percentage
-
-    if percentage < 50:
-      color_attr = "bg-success"
-    elif percentage >= 50 and percentage < 75:
-      color_attr = "bg-warning"
-    elif percentage >= 75:
-      color_attr = "bg-danger"
   ?>
   <div class="row">
     <div class="col">
