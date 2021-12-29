@@ -16,6 +16,7 @@
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/select2.css')"></link>
   <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
   <script tal:attributes="src request.static_url('muesli.web:static/js/april_fool.js')"></script>
+  <script tal:attributes="src request.static_url('muesli.web:static/js/accidental-action-prevention.js')"></script>
   <!-- Bootstrap -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
@@ -62,7 +63,6 @@ function set_navigation(nav) {
 </div>
 
 <metal:main metal:use-macro="templates('Fragments/footer.pt').macros['footer']">
-
 </body>
 </html>
 </metal:main>

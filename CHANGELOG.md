@@ -1,3 +1,24 @@
+### 2020-04-14
+
+Aktionen werden auf dem UI jetzt als Buttons dargestellt, Links zur Navigation als Links.
+
+### 2019-12-31
+
+* Mails können jetzt auch nur an die anderen Tutoren (nicht nur an Tutoren und Assistenten geschickt) werden.
+* Das Feld für Matrikelnummern akzeptiert (clientseitig) nur noch Zahlen, um z.B. zu verhindern, dass dort versehentlich die Uni-ID eingetragen wird.
+
+### 2019-11-25
+
+Hinter einer belegten Übungsgruppe wird jetzt korrekterweise "austreten" (statt fälschlicherweise "wechseln") als Aktion angeboten.
+
+### 2019-09-30
+
+Erklärung zur E-Mail-Adresse auf der "Registrieren"-Seite verbessert.
+
+### 2019-05-24
+
+Es wird angezeigt, an welche Übungsgruppen eine Mail geschickt wird.
+
 ### 2019-03-12
 
 Durch das Softwareprakikum bei Prof. Andrzejak haben verschiedenen Gruppen neue

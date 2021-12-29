@@ -2,7 +2,7 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<h2 class="display-4">Resultate <small class="text-muted">für ${lecture.name}</small></h2>
+<h2 class="display-4">Ergebnisse <small class="text-muted">für ${lecture.name}</small></h2>
 
 <div tal:define="fF lambda f: '%.1f' % f if f != None else '-'" >
   <div tal:repeat="catexams exams_by_category" tal:omit-tag="">
@@ -32,8 +32,11 @@
       </tr>
       <tfoot>
         <th scope="row">Insgesamt: </th>
-        <td colspan="2"><strong>${fF(catexams['sum'])}/${fF(catexams['max'])}</strong>
-          <span tal:condition="catexams['max']>0">
+        <td colspan="3"><strong>${fF(catexams['sum'])}/${fF(catexams['max'])}</strong>
+          <span tal:condition="catexams['max']>0 and catexams['max_rel']>0 and catexams['max']!=catexams['max_rel']">
+         (${'%2.f' % (catexams['sum']/catexams['max']*100)}%, ${'%2.f' % (catexams['sum']/catexams['max_rel']*100)}% rel.)
+        </span>
+        <span tal:condition="catexams['max']>0 and catexams['max']==catexams['max_rel']">
             (${'%2.f' % (catexams['sum']/catexams['max']*100)}%)
           </span>
         </td>
@@ -63,8 +66,8 @@
       <h3 class="card-title">Klausuranmeldungen</h3>
       <p>
       Bitte melden Sie sich ggf. für die Klausuren an.
-      <strong>J</strong> bedeutet, daß Sie an der Klausur teilnehmen möchten;
-      <strong>N</strong>, daß Sie <strong>nicht</strong> an der Klausur teilnehmen möchten.
+      <strong>J</strong> bedeutet, dass Sie an der Klausur teilnehmen möchten;
+      <strong>N</strong>, dass Sie <strong>nicht</strong> an der Klausur teilnehmen möchten.
       Falls Sie sich noch nicht entschieden haben, können Sie <strong>?</strong> angeben.
       </p>
       <p>

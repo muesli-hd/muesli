@@ -24,7 +24,7 @@ from muesli import models, utils, DATAPROTECTION_HTML, CHANGELOG_HTML
 from muesli.web.forms import *
 from muesli.web.context import *
 from muesli.mail import Message, sendMail
-from muesli.web.tooltips import start_tooltips
+from muesli.web.tooltips import overview_tooltips
 
 from pyramid import security
 from pyramid.view import view_config
@@ -43,8 +43,8 @@ import datetime
 import traceback
 
 
-@view_config(route_name='start', renderer='muesli.web:templates/start.pt')
-def start(request):
+@view_config(route_name='overview', renderer='muesli.web:templates/overview.pt')
+def overview(request):
     if not request.user:
         return HTTPFound(location=request.route_url('index'))
     tutorials_as_tutor = request.user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
@@ -73,7 +73,13 @@ def start(request):
             'tutorials_as_tutor': tutorials_as_tutor.all(),
             'tutorials': tutorials.all(),
             'lectures_as_assistant': lectures_as_assistant.all(),
-            'tooltips': start_tooltips}
+            'tooltips': overview_tooltips}
+
+
+@view_config(route_name='start')
+def start(request):
+    return HTTPFound(location=request.route_url('overview'))
+
 
 @view_config(route_name='admin', renderer='muesli.web:templates/admin.pt', context=GeneralContext, permission='admin')
 def admin(request):
@@ -95,13 +101,18 @@ def test_exceptions(request):
             raise HTTPForbidden("Du kommsch hier ned rein!")
     return {}
 
+
 @view_config(route_name='contact', renderer='muesli.web:templates/contact.pt')
 def contact(request):
     return {}
 
-@view_config(route_name='index', renderer='muesli.web:templates/index.pt')
+
+@view_config(route_name='index')
 def index(request):
-    return {}
+    if request.user:
+        return HTTPFound(location = request.route_url('overview'))
+    else:
+        return HTTPFound(location = request.route_url('user_login'))
 
 @view_config(route_name='email_all_users', renderer='muesli.web:templates/email_all_users.pt', context=GeneralContext, permission='admin')
 def emailAllUsers(request):
@@ -214,7 +225,7 @@ def badRequest(e, request):
         print("TRYING TO RECONSTRUCT EXCEPTION")
         traceback.print_exc()
         print("RAISING ANYHOW")
-        raise exc
+        raise e
     now = datetime.datetime.now().strftime("%d. %B %Y, %H:%M Uhr")
     traceback.print_exc()
     email = request.user.email if request.user else '<nobody>'

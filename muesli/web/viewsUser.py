@@ -43,15 +43,38 @@ import datetime
 import collections
 
 
+def lookup_user(request, form):
+    assert request.method == 'POST'
+    query = request.db.query(models.User).filter(func.lower(models.User.email) == form['email'].strip().lower(),
+                                                 models.User.password == sha1(
+                                                     form['password'].encode('utf-8')).hexdigest())
+
+    # Due to historically case sensitive email addresses, do a case insensitive first and switch to case sensitivity
+    # on email addresses, if the user is ambiguous.
+    user = None
+    if query.count() == 1:
+        # case insensitive
+        user = query.first()
+    else:
+        # case sensitive
+        for res in query:
+            if res.email == form['email'].strip():
+                # In case two users with the exact same email casing and password exist, take the first one
+                user = res
+                break
+
+    return user
+
+
 @view_config(route_name='user_login', renderer='muesli.web:templates/user/login.pt')
 def login(request):
     form = forms.UserLoginForm(request)
     if request.method == 'POST' and form.processPostData(request.POST):
-        user = request.db.query(models.User).filter_by(email=form['email'].strip(), password=sha1(form['password'].encode('utf-8')).hexdigest()).first()
+        user = lookup_user(request, form)
         if user is not None:
             security.remember(request, user.id)
             request.user = user
-            url = request.route_url('start')
+            url = request.route_url('overview')
             return HTTPFound(location=url)
         request.session.flash('Benutzername oder Passwort sind falsch.', queue='errors')
     return {'form': form, 'user': security.authenticated_userid(request)}
@@ -211,6 +234,32 @@ def delete(request):
         request.session.flash('{} wurde gelöscht!'.format(user.name), queue='messages')
         return HTTPFound(location=request.route_url('admin'))
 
+
+@view_config(route_name='user_delete_gdpr', context=context.UserContext, permission='delete')
+def delete_gdpr(request):
+    user = request.context.user
+    request.db.query(models.TimePreference).filter(models.TimePreference.student_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.LectureStudent).filter(models.LectureStudent.student_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.LectureRemovedStudent).filter(models.LectureRemovedStudent.student_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.ExerciseStudent).filter(models.ExerciseStudent.student_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.ExamAdmission).filter(models.ExamAdmission.student_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.StudentGrade).filter(models.StudentGrade.student_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.EmailPreferences).filter(models.EmailPreferences.user_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.UserHasUpdated).filter(models.UserHasUpdated.user_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.BearerToken).filter(models.BearerToken.user_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.Confirmation).filter(models.Confirmation.user_id == user.id).delete(synchronize_session=False)
+
+    for l in user.lectures_as_tutor:
+        l.tutors.remove(user)
+    for l in user.lectures_as_assistant:
+        l.assistants.remove(user)
+    for t in user.tutorials_as_tutor:
+        t.tutor = None
+    request.db.delete(user)
+    request.db.commit()
+    request.session.flash('Benutzer %s und alle zugehörigen Daten wurden gelöscht!' % user, queue='messages')
+    return HTTPFound(location=request.route_url('admin'))
+
     return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
 
 
@@ -351,10 +400,7 @@ def resendConfirmationMail(request):
     body = """
 Hallo!
 
-Sie haben sich am %s bei MÜSLI mit den folgenden Daten angemeldet:
-
-Name:   %s
-E-Mail: %s
+Sie haben sich am %s bei MÜSLI angemeldet:
 
 Um die Anmeldung abzuschließen, gehen Sie bitte auf die Seite
 
@@ -365,7 +411,7 @@ einfach.
 
 Mit freudlichen Grüßen,
 Das MÜSLI-Team
-    """ % (confirmation.created_on, user.name, user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
+    """ % (confirmation.created_on, request.route_url('user_confirm', confirmation=confirmation.hash))
     message = Message(subject='MÜSLI: Ihre Registrierung bei MÜSLI',
                       sender=('%s <%s>' % (request.config['contact']['name'],
                                            request.config['contact']['email'])),
@@ -468,9 +514,13 @@ def confirmEmail(request):
 def changePassword(request):
     form = forms.UserChangePassword(request)
     if request.method == 'POST' and form.processPostData(request.POST):
-        request.user.password = sha1(form['new_password'].encode('utf-8')).hexdigest()
-        request.session.flash('Neues Passwort gesetzt', queue='messages')
-        request.db.commit()
+        # check if old_password is correct
+        if request.user.password == sha1(form['old_password'].encode('utf-8')).hexdigest():
+            request.user.password = sha1(form['new_password'].encode('utf-8')).hexdigest()
+            request.session.flash('Neues Passwort gesetzt', queue='messages')
+            request.db.commit()
+        else:
+            request.session.flash('Altes Passwort ist falsch!', queue='errors')
     return {'form': form}
 
 
@@ -587,7 +637,7 @@ def removeKey(request):
         request.session.flash('API Key nicht gefunden', queue='errors')
     if request.referrer:
         return HTTPFound(location=request.referrer)
-    return HTTPFound(location=request.route_url('start'))
+    return HTTPFound(location=request.route_url('overview'))
 
 
 @view_config(route_name='user_ajax_complete', renderer='muesli.web:templates/user/ajax_complete.pt', context=context.TutorialContext, permission='viewOverview')

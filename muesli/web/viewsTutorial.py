@@ -240,53 +240,58 @@ def resignAsTutor(request):
     return HTTPFound(location=request.route_url('lecture_view', lecture_id = request.context.lecture.id))
 
 @view_config(route_name='tutorial_subscribe', context=TutorialContext, permission='subscribe')
-def subscribe(request):
-    tutorials = request.context.tutorials
-    tutorial = tutorials[0]
+def subscribe(context=None, request=None, tutorial=None, user=None, db=None):
+    tutorial = request.context.tutorials[0] if tutorial is None else tutorial
+    user = request.user if user is None else user
+    db = request.db if db is None else db
     lecture = tutorial.lecture
     if tutorial.max_students > tutorial.students.count():
-        lrs = request.db.query(models.LectureRemovedStudent).get((lecture.id, request.user.id))
-        if lrs: request.db.delete(lrs)
-        ls = request.db.query(models.LectureStudent).get((lecture.id, request.user.id))
+        lrs = db.query(models.LectureRemovedStudent).get((lecture.id, user.id))
+        if lrs: db.delete(lrs)
+        ls = db.query(models.LectureStudent).get((lecture.id, user.id))
         if ls:
             oldtutorial = ls.tutorial
         else:
             ls = models.LectureStudent()
             ls.lecture = lecture
-            ls.student = request.user
+            ls.student = user
             oldtutorial = None
         ls.tutorial = tutorial
-        if not ls in request.db: request.db.add(ls)
-        request.db.commit()
-        if oldtutorial:
-            sendChangesMailUnsubscribe(request, oldtutorial, request.user, toTutorial=tutorial)
-        sendChangesMailSubscribe(request, tutorial, request.user, fromTutorial=oldtutorial)
-        request.session.flash('Erfolgreich in Übungsgruppe eingetragen', queue='messages')
+        if not ls in db: db.add(ls)
+        db.commit()
+        if request is not None:
+            if oldtutorial:
+                sendChangesMailUnsubscribe(request, oldtutorial, user, toTutorial=tutorial)
+            sendChangesMailSubscribe(request, tutorial, user, fromTutorial=oldtutorial)
+            request.session.flash('Erfolgreich in Übungsgruppe eingetragen', queue='messages')
     else:
-        request.session.flash('Maximale Teilnehmerzahl bereits erreicht', queue='errors')
-        pass
-    return HTTPFound(location=request.route_url('lecture_view', lecture_id=lecture.id))
+        if request is not None:
+            request.session.flash('Maximale Teilnehmerzahl bereits erreicht', queue='errors')
+    if request is not None:
+        return HTTPFound(location=request.route_url('lecture_view', lecture_id=lecture.id))
 
 @view_config(route_name='tutorial_unsubscribe', context=TutorialContext, permission='unsubscribe')
-def unsubscribe(request):
-    tutorials = request.context.tutorials
-    tutorial = tutorials[0]
+def unsubscribe(context=None, request=None, tutorial=None, user=None, db=None):
+    tutorial = request.context.tutorials[0] if tutorial is None else tutorial
+    user = request.user if user is None else user
+    db = request.db if db is None else db
     lecture = tutorial.lecture
-    ls = request.db.query(models.LectureStudent).get((lecture.id, request.user.id))
+    ls = db.query(models.LectureStudent).get((lecture.id, user.id))
     if not ls or ls.tutorial_id != tutorial.id:
         return HTTPForbidden('Sie sind zu dieser Übungsgruppe nicht angemeldet')
-    lrs = request.db.query(models.LectureRemovedStudent).get((lecture.id, request.user.id))
+    lrs = db.query(models.LectureRemovedStudent).get((lecture.id, user.id))
     if not lrs:
         lrs = models.LectureRemovedStudent()
         lrs.lecture = lecture
-        lrs.student = request.user
+        lrs.student = user
     lrs.tutorial = tutorial
-    if not lrs in request.db: request.db.add(lrs)
-    request.db.delete(ls)
-    request.db.commit()
-    sendChangesMailUnsubscribe(request, tutorial, request.user)
-    request.session.flash('Erfolgreich aus Übungsgruppe ausgetragen', queue='messages')
-    return HTTPFound(location=request.route_url('start'))
+    if not lrs in db: db.add(lrs)
+    db.delete(ls)
+    db.commit()
+    if request is not None:
+        sendChangesMailUnsubscribe(request, tutorial, user)
+        request.session.flash('Erfolgreich aus Übungsgruppe ausgetragen', queue='messages')
+        return HTTPFound(location=request.route_url('overview'))
 
 @view_config(route_name='tutorial_remove_student', context=TutorialContext, permission='remove_student')
 def removeStudent(request):
@@ -306,7 +311,7 @@ def removeStudent(request):
     if request.referrer:
         return HTTPFound(location=request.referrer)
     else:
-        return HTTPFound(location=request.route_url('start'))
+        return HTTPFound(location=request.route_url('overview'))
 
 def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
     mail_preference = request.db.query(models.EmailPreferences).get((tutorial.tutor_id, tutorial.lecture.id))

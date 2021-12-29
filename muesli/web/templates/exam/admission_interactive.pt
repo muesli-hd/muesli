@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
+  <metal:main metal:fill-slot="content">
+
+    <h2>Zulassung zu ${exam.name} interaktiv bearbeiten</h2>
+    <p>
+      Diese Seite bietet Ihnen die Möglichkeit, halbautomatisiert die Zulassung für Ihre Veranstaltung zu vergeben. Dabei
+      hilft Ihnen MÜSLI mit Hilfe von Statistiken eine passende Punktegrenze für eine garantierte Zulassung zu ermitteln.
+    </p>
+    <p>
+      Mit dieser Punktegrenze können Sie Studierenden die Zulassung automatisch vergeben, sollten diese aktuell
+      ausreichend Punkte gesammelt haben.
+    </p>
+    <p>
+      Anschließend können Sie Studierende auswählen, welche trotz der Punktzahl eine Zulassung bekommen sollen. Beispielsweise
+    </p>
+
+    <div tal:condition="False">
+
+    <form method="POST" tal:attributes="action request.route_path('exam_autoadmit', exam_id=exam.id)">
+
+    </form>
+
+<form method="POST">
+<table>
+<thead>
+  <tr>
+    <th>Tutor</th>
+    <th>Name</th>
+    <th>Zulassung</th>
+    <th>Anmeldung</th>
+    <th>Attest</th>
+  </tr>
+</thead>
+<tbody>
+
+  <tr tal:repeat="ls students">
+    <span tal:omit-tag="" tal:define="student ls.student; tutor ls.tutorial.tutor">
+    <td tal:condition="not tutorial_ids">${tutor.last_name if tutor!=None else '-'}</td>
+    <td>${student.last_name}, ${student.first_name}</td>
+    <td tal:define="name     'admission-%s' % student.id;
+                    value     admissions[ls.student_id].admission;
+                    readonly  exam.admission!=True">
+        <metal:main metal:use-macro="templates('Fragments/HTML/input_tristate.pt').macros['input_tristate']" />
+    </td>
+    <td tal:define="name     'registration-%s' % student.id;
+                    value     admissions[ls.student_id].registration;
+                    readonly  exam.registration!=True">
+        <metal:main metal:use-macro="templates('Fragments/HTML/input_tristate.pt').macros['input_tristate']" />
+    </td>
+    <td tal:define="name     'medical_certificate-%s' % student.id;
+                    value     admissions[ls.student_id].medical_certificate;
+                    readonly  exam.medical_certificate!=True">
+        <metal:main metal:use-macro="templates('Fragments/HTML/input_tristate.pt').macros['input_tristate']" />
+    </td>
+    </span>
+  </tr>
+  <tr><td>&nbsp;</td></tr>
+  <tr>
+    <td>
+      GESAMT
+    </td>
+    <td>
+      <span tal:content="len(students)"></span>
+    </td>
+    <td>
+      <span tal:content="str(counter['admission'][True])+' J'"></span><br>
+      <span tal:content="str(counter['admission'][False])+' N'"></span><br>
+      <span tal:content="str(counter['admission'][None])+' ?'"></span>
+    </td>
+</tbody>
+</table>
+
+<input type="submit" value="Speichern"/>
+</form>
+
+
+    </div>
+  </metal:main>
+</metal:main>

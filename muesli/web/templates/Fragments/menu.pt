@@ -19,7 +19,7 @@
 
 <metal:main metal:define-macro="menu">
   <nav class="navbar navbar-dark navbar-expand-md bg-dark justify-content-md-center justify-content-start">
-      <a class="navbar-brand display-1" tal:attributes="href request.route_path('start')">
+      <a class="navbar-brand display-1" tal:attributes="href request.route_path('overview')">
         <img class="mr-1" style="height: 1em;" tal:attributes="src '/favicon.ico'">
         MÜSLI
       </a>

@@ -1,5 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:define-macro="formmacro">
+  <script tal:condition="hasattr(form, 'captcha')" tal:attributes="src request.static_url('muesli.web:static/js/captcha.min.js')"></script>
 <p tal:condition="form.message">
   ${form.message}
 </p>
@@ -96,12 +97,18 @@
       </div>
     </div>
 
-    <div tal:condition="field.type == 'hidden'" tal:omit-tag="">
+    <div tal:condition="field.type == 'hidden' and field.name!='frc-captcha-solution'" tal:omit-tag="">
       <!-- HIDDEN INPUT -->
       <input type="hidden" tal:attributes="name field.name; size str(field.size); value field.value; readonly 'readonly' if field.readonly else None"/>
     </div>
 
+    <div tal:condition="hasattr(form, 'captcha')" tal:omit-tag="">
+      <!-- CAPTCHA -->
+      <div class="frc-captcha" id="captcha-widget" data-lang="de"
+           data-sitekey="TEST" tal:attributes="data-puzzle_url request.config['captcha']['puzzle_url']"></div>
+    </div>
+
   </div>
-  <input role="button" class="btn btn-primary" type="submit" tal:attributes="value form.send" />
+  <input role="button" class="btn btn-primary" type="submit" id="form-submit-button" tal:attributes="value form.send ; disabled True if hasattr(form, 'captcha') else None" />
 </div>
 </metal:main>

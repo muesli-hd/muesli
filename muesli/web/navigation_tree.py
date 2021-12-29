@@ -55,7 +55,7 @@ def create_navigation_tree(request, user):
     from muesli.models import Tutorial, Lecture
 
     # create tree-root, this item is currently not shown
-    root = NavigationTree("Übersicht", request.route_url('start'))
+    root = NavigationTree("Übersicht", request.route_url('overview'))
 
     if user is None:
         return root
@@ -68,7 +68,7 @@ def create_navigation_tree(request, user):
 
     # add tutorials the user subsrcibed to
     tutorials = tutorials.filter(Lecture.term >= semesterlimit)
-    tutorial_root_node = NavigationTree("Belegte Übungsgruppen", request.route_url('start'))
+    tutorial_root_node = NavigationTree("Belegte Übungsgruppen", request.route_url('overview'))
     root.append(tutorial_root_node)
     for t in tutorials:
         tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
@@ -80,7 +80,7 @@ def create_navigation_tree(request, user):
     # add tutorials the user tutors
     tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
 
-    tutor_node = NavigationTree("Eigene Übungsgruppen", request.route_url('start'))
+    tutor_node = NavigationTree("Eigene Übungsgruppen", request.route_url('overview'))
     for t in tutorials_as_tutor:
         tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
             t.time.__html__(), t.place),
@@ -93,7 +93,7 @@ def create_navigation_tree(request, user):
     # add lectures for which the user is assistant
     lectures_as_assistant = lectures_as_assistant.filter(Lecture.term >= semesterlimit)
 
-    assistant_node = NavigationTree("Eigene Vorlesungen", request.route_url('start'))
+    assistant_node = NavigationTree("Eigene Vorlesungen", request.route_url('overview'))
     for l in lectures_as_assistant:
         lecture_node = NavigationTree(l.name,
             request.route_url('lecture_edit', lecture_id=l.id))

@@ -338,7 +338,7 @@ class ExerciseEndpointContext:
         user_id = request.matchdict.get('user_id', None)
         self.exercise = request.db.query(Exercise).get(exercise_id)
         if self.exercise is None:
-            raise HTTPBadRequest("Die Angeforderte Übung existiert nicht!")
+            raise HTTPNotFound(detail="Die Angeforderte Übung existiert nicht!")
         self.lecture = self.exercise.exam.lecture
         student = None
         self.user = None

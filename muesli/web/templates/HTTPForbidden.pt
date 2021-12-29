@@ -8,7 +8,7 @@
     </p>
 
     <p tal:condition="request.user">
-    Wenn Sie der Meinung sind, daß Sie auf diese Seite zugreifen können sollten,
+  Wenn Sie der Meinung sind, dass Sie auf diese Seite zugreifen können sollten,
     <a tal:attributes="href request.route_path('contact')">melden Sie sich bitte bei uns</a>.
     </p>
     <p tal:condition="not request.user">

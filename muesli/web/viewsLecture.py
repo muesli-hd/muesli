@@ -463,7 +463,7 @@ def emailTutors(request):
 
     if request.method == 'POST' and form.processPostData(request.POST):
         tutors = lecture.tutors
-        message = Message(subject=form['subject'],
+        message = Message(subject='[{}][Tutoren] {}'.format(lecture.name, form['subject']),
                 sender=request.user.email,
                 to=[t.email for t in tutors],
                 cc=[assistant.email for assistant in lecture.assistants if form['copytoassistants'] == 0],
@@ -494,7 +494,7 @@ def emailStudents(request):
         bcc = [s.email for s in students]
         if form['copytotutors']==0:
             bcc.extend([t.email for t in lecture.tutors])
-        message = Message(subject=form['subject'],
+        message = Message(subject='[{}] {}'.format(lecture.name, form['subject']),
                 sender=request.user.email,
                 to= [assistant.email for assistant in lecture.assistants],
                 bcc=bcc,
@@ -635,8 +635,10 @@ def viewPoints(request):
     for exams in exams_by_category:
         sum_all = sum([x for x in [results[e.id]['sum'] for e in exams['exams']] if x])
         max_all = sum([x for x in [e.getMaxpoints() for e in exams['exams']] if x])
+        max_rel = sum([x for x in [e.getMaxpoints() for e in exams['exams'] if results[e.id]['sum']] if x])
         exams['sum'] = sum_all
         exams['max'] = max_all
+        exams['max_rel'] = max_rel
     exams_with_registration = [e for e in lecture.exams.all() if e.registration != None]
     registrations = {}
     for reg in request.db.query(models.ExamAdmission).filter(models.ExamAdmission.exam_id.in_([e.id for e in exams_with_registration])).filter(models.ExamAdmission.student_id == ls.student_id).all():
@@ -717,6 +719,34 @@ def exportYaml_details(request):
         lecture_dict['term'] = lecture.term.__html__()
         out.append(lecture_dict)
         response = Response(content_type='application/x-yaml')
+    response.text = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
+    return response
+
+@view_config(route_name='lecture_export_yaml_emails',context = GeneralContext, permission = 'export_yaml')
+def exportYaml_emails(request):
+    lectures = request.db.query(models.Lecture)
+    if not "show_all" in request.GET:
+        lectures = lectures.filter(models.Lecture.is_visible == True)
+    out = [{
+            'name': lecture.name,
+            'lecturer': lecture.lecturer,
+            'student_count': lecture.lecture_students.count(),
+            'term': lecture.term.__html__(),
+            'tutorials': [{
+                    'tutor': tutorial.tutor.name() if tutorial.tutor else '',
+                    'email': tutorial.tutor.email if tutorial.tutor else '',
+                    'place': tutorial.place,
+                    'time': tutorial.time.__html__(),
+                    'comment': tutorial.comment if tutorial.comment else '',
+                    'students': [{
+                        'name': student.name(),
+                        'email': student.email
+                    } for student in tutorial.students]
+                } for tutorial in lecture.tutorials
+            ]
+        } for lecture in lectures.all()
+    ]
+    response = Response(content_type='application/x-yaml')
     response.text = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
     return response
 

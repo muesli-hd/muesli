@@ -5,8 +5,9 @@ services:
   postgres:
     image: 'postgres:latest'
     environment:
-      - POSTGRES_DB=muesli
-      - POSTGRES_HOST_AUTH_METHOD=trust
+      POSTGRES_DB: muesli
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mueslipw
     ports:
       - '127.0.0.1:5433:5432'
     volumes:
@@ -16,15 +17,20 @@ services:
         target: /var/lib/postgresql/data
   muesli:
     build: .
-    volumes:
-      - './:/opt/muesli4'
+    image: muesli:latest
     ports:
       - '8080:8080'
       - '127.0.0.1:8081:8081'
     depends_on:
       - postgres
+    volumes:
+      - './:/opt/muesli4'
     environment:
       MUESLI_TESTMODE: 1
+      MUESLI_DB_HOST: postgres
+      MUESLI_DB: muesli
+      MUESLI_DB_USER: postgres
+      MUESLI_DB_PASSWORD: mueslipw
 
 volumes:
   db-data:

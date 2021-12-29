@@ -1,3 +1,9 @@
+FROM node:current
+COPY muesli/web/yarn .
+RUN yarn install
+RUN yarn dockerbuild
+
+
 FROM ubuntu:bionic
 
 RUN mkdir -p /opt/muesli4
@@ -7,10 +13,15 @@ ENV PYTHONUNBUFFERED=1
 ENV MUESLI_PATH=/opt/muesli4
 
 EXPOSE 8080
+CMD ["/opt/muesli4/docker-serve.sh"]
+
+ENV LANG de_DE.UTF-8
+ENV LANGUAGE de_DE:de
+ENV LC_ALL de_DE.UTF-8
 
 RUN useradd muesli && \
-    apt-get update && \
-    apt-get install -y \
+    DEBIAN_FRONTEND="noninteractive" apt-get update && \
+    DEBIAN_FRONTEND="noninteractive" apt-get install -y \
         python3.6 python3.6-dev lp-solve postgresql-server-dev-10 wget \
         python3-pip libjs-prototype libjs-select2.js libjs-jquery-fancybox \
         libjs-jquery-tablesorter locales libpcre3 libpcre3-dev && \
@@ -19,12 +30,9 @@ RUN useradd muesli && \
     wget https://www.mathi.uni-heidelberg.de/~jvisintini/libxli_DIMACS.so -O /usr/lib/lp_solve/libxli_DIMACS.so && \
     locale-gen de_DE.UTF-8
 
-ENV LANG de_DE.UTF-8
-ENV LANGUAGE de_DE:de
-ENV LC_ALL de_DE.UTF-8
-
 COPY --chown=muesli:muesli ./requirements.txt /opt/muesli4/
+COPY --from=0 captcha.min.js muesli/web/static/js/
 RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install -r requirements.txt
+COPY --chown=muesli:muesli . /opt/muesli4/
 
-CMD ["/opt/muesli4/docker-serve.sh"]

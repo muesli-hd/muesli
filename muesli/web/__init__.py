@@ -165,6 +165,7 @@ def main(global_config=None, testmode=False, **settings):
     config.add_static_view('static', 'muesli.web:static')
 
     config.add_route('start', '/start', factory = GeneralContext)
+    config.add_route('overview', '/overview', factory = GeneralContext)
     config.add_route('contact', '/contact')
     config.add_route('changelog', '/changelog')
     config.add_route('admin', '/admin', factory = GeneralContext)
@@ -182,6 +183,7 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('user_list', '/user/list', factory = GeneralContext)
     config.add_route('user_edit', '/user/edit/{user_id}', factory = UserContext)
     config.add_route('user_delete', '/user/delete/{user_id}', factory = UserContext)
+    config.add_route('user_delete_gdpr', '/user/delete_gdpr/{user_id}', factory = UserContext)
     config.add_route('user_delete_unconfirmed', '/user/delete_unconfirmed', factory = GeneralContext)
     config.add_route('user_doublets', '/user/doublets', factory = GeneralContext)
     config.add_route('user_resend_confirmation_mail', '/user/resend_confirmation_mail/{user_id}', factory = UserContext)
@@ -201,7 +203,6 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('remove_api_key', '/user/remove_api_key/{key_id}',factory=GeneralContext)
 
     config.add_route('user_ajax_complete', '/user/ajax_complete/{lecture_id}/{tutorial_ids:[^/]*}', factory = TutorialContext)
-    config.add_route('overview', '/')
     config.add_route('lecture_add', '/lecture/add', factory = GeneralContext)
     config.add_route('lecture_list', '/lecture/list', factory = GeneralContext)
     config.add_route('lecture_edit', '/lecture/edit/{lecture_id}', factory = LectureContext)
@@ -227,6 +228,7 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('lecture_export_totals', '/lecture/export_totals/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory = GeneralContext)
     config.add_route('lecture_export_yaml_details','/lecture/export_yaml_details',factory = GeneralContext) #Canh added
+    config.add_route('lecture_export_yaml_emails', '/lecture/export_yaml_emails', factory = GeneralContext)
     config.add_route('lecture_export_excel','/lecture/export_excel/downloadDetailTutorials.xlsx',factory = GeneralContext)
 
     config.add_route('lecture_view_points', '/lecture/view_points/{lecture_id}', factory = LectureContext)
@@ -252,6 +254,8 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('tutorial_occupancy_bar', '/tutorial/occupancy_bar/{count}/{max_count}')
     config.add_route('tutorial_ajax_get_tutorial', '/tutorial/ajax_get_tutorial/{lecture_id}', factory=LectureContext)
 
+    config.add_route('exam_auto_admit', '/exam/auto_admit/{exam_id}', factory = ExamContext)
+    config.add_route('exam_interactive_admission', '/exam/interactive_admission/{exam_id}', factory = ExamContext)
     config.add_route('exam_add_or_edit_exercise', '/exam/add_or_edit_exercise/{exam_id}/{exercise_id:[^/]*}', factory=ExamContext)
     config.add_route('exam_delete_exercise', '/exam/delete_exercise/{exam_id}/{exercise_id}', factory=ExamContext)
     config.add_route('exam_edit', '/exam/edit/{exam_id}', factory=ExamContext)

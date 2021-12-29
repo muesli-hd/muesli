@@ -13,7 +13,7 @@
   Dies ist insbesondere wichtig,
   wenn Sie den Studiengang gewechselt haben.<br>
   Bestätigen/Korrigieren Sie <a tal:attributes="href request.route_path('user_check')">hier</a> Ihre Informationen,
-  um diese Erinnerung dieses Semester nicht mehr zu sehen.
+  um diese Erinnerung für den Rest des Semesters nicht mehr zu sehen.
 </div>
 
 <div class="card mb-2" tal:condition="tutorials_as_tutor">
@@ -29,6 +29,7 @@
           <th scope="col">Vorlesung</th>
           <th scope="col">Zeit</th>
           <th scope="col">Raum</th>
+          <th scope="col"></th>
           <th scope="col"></th>
         </thead>
         <tr tal:repeat="tutorial tutorials_as_tutor">
@@ -53,7 +54,8 @@
                  tal:attributes="href request.route_path('tutorial_view', tutorial_ids=','.join([str(t.id) for t in multi_tutorials[tutorial.lecture.id]]))"
                  title="Alle eigenen Übungsgruppen zu dieser Vorlesung verwalten">+</a>
           </td>
-      </tr>
+          <td><a href="${tutorial.video_call}" tal:condition="tutorial.video_call">Videoanruf</a></td>
+        </tr>
       </table>
     </div>
   </div>
@@ -134,13 +136,14 @@
             <td>${tutorial.time}</td>
             <td>${tutorial.place}</td>
             <td>
-              <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name}</a>
+              <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a>
             </td>
+            <td><a href="${tutorial.video_call}" tal:condition="tutorial.video_call">Videoanruf</a></td>
             <td>
               <a role="button"
                  class="btn-sm btn-info"
                 tal:attributes="href request.route_path('lecture_view_points',
-                lecture_id=tutorial.lecture.id)">Details</a>
+                lecture_id=tutorial.lecture.id)">Ergebnisse</a>
             </td>
             <td>
               <a role="button" class="btn-sm btn-danger text-white" data-toggle="modal" data-target="#confirm_unsubscribe">
@@ -208,16 +211,16 @@
 
 <p class="alert alert-info" tal:condition="request.GET.get('show_all', '0') == '0'">
   Es werden nur aktuelle Veranstaltungen angezeigt.
-  <a tal:attributes="href request.route_path('start', _query={'show_all': '1'})">Alle anzeigen</a>.
+  <a tal:attributes="href request.route_path('overview', _query={'show_all': '1'})">Alle anzeigen</a>.
 </p>
 <p class="alert alert-info" role="alert" tal:condition="request.GET.get('show_all', '0') == '1'">
   Es werden alle Veranstaltungen angezeigt.
-  <a tal:attributes="href request.route_path('start')">Nur aktuelle anzeigen</a>.
+  <a tal:attributes="href request.route_path('overview')">Nur aktuelle anzeigen</a>.
 </p>
 
-<a tal:condition="request.GET.get('help', '0') == '0'" tal:attributes="href request.route_path('start', _query={'help': '1'})">Hilfe</a>
+<a tal:condition="request.GET.get('help', '0')=='0'" tal:attributes="href request.route_path('overview', _query= {'help': '1'})">Hilfe</a>
 <div tal:condition="request.GET.get('help', '0') == '1'">
-<a tal:attributes="href request.route_path('start')">Hilfe verbergen</a>
+<a tal:attributes="href request.route_path('overview')">Hilfe verbergen</a>
 <ul>
     <li>${tooltips.lecture}</li>
     <li>${tooltips.email}</li>

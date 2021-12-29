@@ -99,8 +99,6 @@ class User(Base):
     last_name = Column(Text, nullable=False)
     password = Column(Text)
     matrikel = Column(Text)
-    birth_date = Column(Text)
-    birth_place = Column(Text)
     subject = Column(Text)
     second_subject = Column(Text)
     title = Column(Text)
@@ -387,7 +385,11 @@ class Exam(Base):
         for points in pointsQuery.all():
             results[points.exercise_id] = {'points': points.points,
                                            'exercise': points.exercise}
-        results['sum'] = sum([x for x in [r['points'] for r in list(results.values())] if x])
+        nonNullPoints = [x for x in [r['points'] for r in results.values()] if x]
+        if nonNullPoints:
+            results['sum'] = sum(nonNullPoints)
+        else:
+            results['sum'] = None
         for e in self.exercises:
             if e.id not in results:
                 results[e.id] = {'points': None, 'exercise': e}
@@ -514,6 +516,7 @@ class Tutorial(Base):
     place = Column(Text)
     max_students = Column(Integer, nullable=False, default=0)
     comment = Column(Text)
+    video_call = Column(Text)
 
     @property
     def students(self):
@@ -557,17 +560,6 @@ class TimePreference(Base):
             self.student = student
             self.time = time
             self.penalty = penalty
-
-
-class TutorialPreference(Base):
-    __tablename__ = 'tutorial_preferences'
-    lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id), primary_key=True)
-    lecture = relationship(Lecture, backref='tutorial_preferences')
-    student_id = Column('student', Integer, ForeignKey(User.id), primary_key=True)
-    student = relationship(User, backref='tutorial_preferences')
-    tutorial_id = Column('tutorial', Integer, ForeignKey(Tutorial.id), primary_key=True)
-    tutorial = relationship(Tutorial, backref='tutorial_preferences')
-    penalty = Column(Integer)
 
 
 class LectureStudent(Base):
@@ -631,9 +623,13 @@ class ExamAdmission(Base):
     registration = Column(Boolean)
     medical_certificate = Column(Boolean)
 
-    def __init__(self, exam=None, student=None):
-        self.exam = exam
-        self.student = student
+    def __init__(self, exam=None, student=None, primary_key=None):
+        if primary_key:
+            self.exam_id = primary_key[0]
+            self.student_id = primary_key[1]
+        else:
+            self.exam = exam
+            self.student = student
 
 
 class Grading(Base):
@@ -688,11 +684,16 @@ class UserSchema(Schema):
     email = fields.Email()
     first_name = fields.String()
     last_name = fields.String()
+    title = fields.String()
     matrikel = fields.String()
     subject = fields.String()
 
     @post_load()
-    def get_user(self, data):
+    def get_user(self, data, many=False, partial=False):
+        # See Issue #144 and linked PRs:
+        # We just ignore the Values of many and partial as we do not (yet)
+        # implement any specific behaviour there
+
         usr = self.context['session'].query(User).filter(User.email == data["email"]).one()
         if usr is None:
             raise ValidationError("User not found")
@@ -701,7 +702,11 @@ class UserSchema(Schema):
 
 class AssistantSchema(UserSchema):
     @post_load()
-    def get_user(self, data):
+    def get_user(self, data, many=False, partial=False):
+        # See Issue #144 and linked PRs:
+        # We just ignore the Values of many and partial as we do not (yet)
+        # implement any specific behaviour there
+
         usr = self.context['session'].query(User).filter(User.email == data["email"]).one()
         if usr is None or not usr.is_assistant:
             raise ValidationError("User not found or is not assistant")
