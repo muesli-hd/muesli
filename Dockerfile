@@ -1,7 +1,9 @@
-FROM node:current
+FROM node:current AS node-build
+
 COPY muesli/web/yarn .
-RUN yarn install
-RUN yarn dockerbuild
+
+RUN yarn install && \
+    yarn dockerbuild
 
 
 FROM ubuntu:bionic
@@ -29,22 +31,21 @@ RUN useradd muesli && \
     wget https://www.mathi.uni-heidelberg.de/~jvisintini/libxli_DIMACS.so -O /usr/lib/lp_solve/libxli_DIMACS.so && \
     locale-gen de_DE.UTF-8
 
-COPY --chown=muesli:muesli ./requirements.txt /opt/muesli4/
+
+COPY ./requirements.txt /opt/muesli4/
 
 RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install -r requirements.txt
 
-COPY --chown=muesli:muesli --from=0 captcha.min.js muesli/web/static/js/
-COPY --chown=muesli:muesli --from=0 node_modules/jquery/dist/jquery.min.js muesli/web/static/js/
-COPY --chown=muesli:muesli --from=0 node_modules/select2/dist/js/select2.min.js muesli/web/static/js/
-COPY --chown=muesli:muesli --from=0 node_modules/select2/dist/css/select2.min.css muesli/web/static/css/
-COPY --chown=muesli:muesli --from=0 node_modules/tablesorter/dist/js/jquery.tablesorter.min.js muesli/web/static/js/jquery/
-COPY --chown=muesli:muesli --from=0 node_modules/@fancyapps/fancybox/dist/jquery.fancybox.min.js muesli/web/static/js/jquery/
-COPY --chown=muesli:muesli --from=0 node_modules/@fancyapps/fancybox/dist/jquery.fancybox.min.css muesli/web/static/css/
-COPY --chown=muesli:muesli --from=0 node_modules/popper.js/dist/umd/popper.min.js muesli/web/static/js/
-COPY --chown=muesli:muesli --from=0 node_modules/bootstrap/dist/js/bootstrap.min.js muesli/web/static/js/
-COPY --chown=muesli:muesli --from=0 node_modules/bootstrap/dist/css/bootstrap.min.css muesli/web/static/css/
+COPY --from=node-build captcha.min.js muesli/web/static/js/
+COPY --from=node-build node_modules/jquery/dist/jquery.min.js muesli/web/static/js/
+COPY --from=node-build node_modules/select2/dist/js/select2.min.js muesli/web/static/js/
+COPY --from=node-build node_modules/select2/dist/css/select2.min.css muesli/web/static/css/
+COPY --from=node-build node_modules/tablesorter/dist/js/jquery.tablesorter.min.js muesli/web/static/js/jquery/
+COPY --from=node-build node_modules/@fancyapps/fancybox/dist/jquery.fancybox.min.js muesli/web/static/js/jquery/
+COPY --from=node-build node_modules/@fancyapps/fancybox/dist/jquery.fancybox.min.css muesli/web/static/css/
+COPY --from=node-build node_modules/@popperjs/core/dist/cjs/popper-base.js muesli/web/static/js/
+COPY --from=node-build node_modules/bootstrap/dist/js/bootstrap.min.js muesli/web/static/js/
+COPY --from=node-build node_modules/bootstrap/dist/css/bootstrap.min.css muesli/web/static/css/
 RUN cp -r muesli/web/static/ /opt/muesli_static_libs
-COPY --chown=muesli:muesli . /opt/muesli4/
-USER muesli
-
+COPY . /opt/muesli4/
