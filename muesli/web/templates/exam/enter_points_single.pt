@@ -19,11 +19,11 @@ window.student_results_json = '${student_results}';
 window.exercise_ids_json = '${exercise_ids}';
 window.latest_row_id = 0;
 
-jQuery(document).ready(function() {
+$(document).ready(function() {
     window.student_results = JSON.parse(student_results_json);
     window.exercise_ids = JSON.parse(exercise_ids_json);
 
-    jQuery('.student_select').select2({
+    $('.student_select').select2({
         width: "16em"
     }).on('change', function (e) {
         let selectedStudents = getSelectedStudents(0);
@@ -49,7 +49,7 @@ jQuery(document).ready(function() {
             }
         }
 
-        jQuery('.current-points').each(function (i, obj) {
+        $('.current-points').each(function (i, obj) {
             obj.innerHTML = (points_captions[i]);
             if (selectedStudents.length > 0) {
                 if (i < preselected_points.length - 1 && preselected_points[i].alert) {
@@ -59,7 +59,7 @@ jQuery(document).ready(function() {
                 }
             }
         });
-        jQuery('.points').each(function (i, obj) {
+        $('.points').each(function (i, obj) {
             if (selectedStudents.length > 0) {
                 if (obj.value === '') {
                     if (preselected_points[i].value !== 'None') {
@@ -73,9 +73,9 @@ jQuery(document).ready(function() {
         update_total(0);
     }).trigger('change');
 
-    jQuery(document).on('keydown', 'form', function(event) {
+    $(document).on('keydown', 'form', function(event) {
         let row_id;
-        row_id = Number(jQuery(document.activeElement).closest('tr').attr('id').replace('row-', ''));
+        row_id = Number($(document.activeElement).closest('tr').attr('id').replace('row-', ''));
         if (event.key === "Enter") {
             if (row_id === 0) {
                 return submit_all_points(row_id);
@@ -86,18 +86,18 @@ jQuery(document).ready(function() {
         return true;
     });
 
-    jQuery(".select2-search__field").focus().select();
+    $(".select2-search__field").focus().select();
 });
 
 function update_total(row_id) {
     let row;
-    row = jQuery('#row-' + row_id);
+    row = $('#row-' + row_id);
 
     let total;
     let current;
     total = 0;
     row.find('.points').each(function(index) {
-        current = parseFloat(jQuery(this)[0].value.replace(/,/, "."));
+        current = parseFloat($(this)[0].value.replace(/,/, "."));
         if (!isNaN(current)) {
             total += current;
         }
@@ -108,17 +108,17 @@ function update_total(row_id) {
 function getSelectedStudents(row_id) {
     if (row_id === 0) {
         let selectedStudents = [];
-        jQuery('.student_select > option:selected').each(function() {
-            selectedStudents.push(jQuery(this).val())
+        $('.student_select > option:selected').each(function() {
+            selectedStudents.push($(this).val())
         });
         return selectedStudents;
     } else {
-        return jQuery('#row-' + row_id + ' button').attr('data-students').split(',')
+        return $('#row-' + row_id + ' button').attr('data-students').split(',')
     }
 }
 
 function update_student_names(row_id) {
-    let row = jQuery('#row-' + row_id);
+    let row = $('#row-' + row_id);
     let students_str = row.find('button').attr('data-students');
 
     if (students_str === '') {
@@ -151,9 +151,9 @@ function update_student_names(row_id) {
 
 function correct_row(row_id) {
     let row;
-    row = jQuery('#row-' + row_id);
+    row = $('#row-' + row_id);
     row.find('td[data-exercise]').each(function(index) {
-        let cell = jQuery(this);
+        let cell = $(this);
         let value = cell.html();
         let exercise = cell.data('exercise');
         if (value === '-') {
@@ -171,7 +171,7 @@ function correct_row(row_id) {
 
 function save_corrected_row(row_id) {
     submit_all_points(row_id);
-    jQuery('#row-' + row_id).remove();
+    $('#row-' + row_id).remove();
 }
 
 function remove_students_from_previous_submittions(students) {
@@ -183,7 +183,7 @@ function remove_students_from_previous_submittions(students) {
         let is_in_row;
         new_row_students = [];
 
-        button = jQuery('#row-' + row_id + ' button');
+        button = $('#row-' + row_id + ' button');
         if (button.length === 0) {
             continue;
         }
@@ -218,7 +218,7 @@ function submit_all_points(row_id) {
     parameterHash.set('student_id', selectedStudents.join(','));
 
     for (i = 0; i < exercise_ids.length; i++){
-        let current_input = jQuery('#row-' + row_id).find('input[name=points-' + exercise_ids[i][1] + ']')[0];
+        let current_input = $('#row-' + row_id).find('input[name=points-' + exercise_ids[i][1] + ']')[0];
         parameterHash.set('points-' + exercise_ids[i][1], current_input.value);
     }
 
@@ -259,7 +259,7 @@ function submit_all_points(row_id) {
                     insert_data += '<td style="text-align: center" id="totalcol">' + pointsum.toFixed(2) + '</td>';
                     insert_data += '<td><button class="btn btn-primary" data-students="' + status['students'].join(',') + '" onclick="correct_row(' + new_row_id +')" type="button">Korrigieren</button></td>';
                     remove_students_from_previous_submittions(status['students']);
-                    jQuery('#row-0').before(insert_data);
+                    $('#row-0').before(insert_data);
                     update_student_names(new_row_id);
                 },
                 onFailure:function(response){
@@ -271,7 +271,7 @@ function submit_all_points(row_id) {
 
     //deselect all students if a new row is submitted
     let student_select;
-    student_select = jQuery(".student_select");
+    student_select = $(".student_select");
     if (row_id === 0) {
         let inputPunkte = document.getElementsByClassName('points');
         for (let i = 0; i < inputPunkte.length; i++) {
@@ -282,7 +282,7 @@ function submit_all_points(row_id) {
     }
 
     student_select.trigger('change');
-    jQuery(".select2-search__field").focus().select();
+    $(".select2-search__field").focus().select();
 
     return true;
 }
