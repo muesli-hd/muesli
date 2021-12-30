@@ -25,7 +25,7 @@ RUN useradd muesli && \
     DEBIAN_FRONTEND="noninteractive" apt-get update && \
     DEBIAN_FRONTEND="noninteractive" apt-get install -y \
         python3.6 python3.6-dev lp-solve postgresql-server-dev-10 wget unzip \
-        python3-pip libjs-prototype locales libpcre3 libpcre3-dev wait-for-it rsync && \
+        python3-pip locales libpcre3 libpcre3-dev wait-for-it rsync && \
     rm -rf /var/lib/apt/lists/* && \
     wget https://www.mathi.uni-heidelberg.de/~jvisintini/lp_solve -O /usr/bin/lp_solve && \
     wget https://www.mathi.uni-heidelberg.de/~jvisintini/libxli_DIMACS.so -O /usr/lib/lp_solve/libxli_DIMACS.so && \
@@ -44,8 +44,10 @@ COPY --from=node-build node_modules/select2/dist/css/select2.min.css muesli/web/
 COPY --from=node-build node_modules/tablesorter/dist/js/jquery.tablesorter.min.js muesli/web/static/js/jquery/
 COPY --from=node-build node_modules/@fancyapps/fancybox/dist/jquery.fancybox.min.js muesli/web/static/js/jquery/
 COPY --from=node-build node_modules/@fancyapps/fancybox/dist/jquery.fancybox.min.css muesli/web/static/css/
-COPY --from=node-build node_modules/@popperjs/core/dist/cjs/popper-base.js muesli/web/static/js/
+COPY --from=node-build node_modules/popper.js/dist/umd/popper.min.js muesli/web/static/js/
 COPY --from=node-build node_modules/bootstrap/dist/js/bootstrap.min.js muesli/web/static/js/
 COPY --from=node-build node_modules/bootstrap/dist/css/bootstrap.min.css muesli/web/static/css/
+COPY --from=node-build node_modules/bs4-toast/dist/toast.min.css muesli/web/static/css/
+COPY --from=node-build node_modules/bs4-toast/dist/toast.min.js muesli/web/static/js/
 RUN cp -r muesli/web/static/ /opt/muesli_static_libs
 COPY . /opt/muesli4/

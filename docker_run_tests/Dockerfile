@@ -17,8 +17,7 @@ RUN useradd muesli && \
     DEBIAN_FRONTEND="noninteractive" apt-get update && \
     DEBIAN_FRONTEND="noninteractive" apt-get install -y \
         python3.6 python3.6-dev lp-solve postgresql-server-dev-10 wget \
-        python3-pip libjs-prototype libjs-select2.js libjs-jquery-fancybox \
-        libjs-jquery-tablesorter locales libpcre3 libpcre3-dev && \
+        python3-pip locales libpcre3 libpcre3-dev && \
     apt-get install -y --no-install-recommends chromium-chromedriver && \
     rm -rf /var/lib/apt/lists/* && \
     wget https://www.mathi.uni-heidelberg.de/~jvisintini/lp_solve -O /usr/bin/lp_solve && \

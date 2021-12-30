@@ -3,9 +3,7 @@
   <metal:main metal:fill-slot="content">
 
 
-<p style="display: flex" name="savestatus"></p>
-
-<h2>Punkte eintragen</h2>
+    <h2>Punkte eintragen</h2>
 
 <h3>${exam.name} der Vorlesung ${exam.lecture.name}</h3>
 
@@ -14,23 +12,25 @@
   </p>
 
 
-<script>
-window.student_results_json = '${student_results}';
-window.exercise_ids_json = '${exercise_ids}';
-window.latest_row_id = 0;
+<script type="text/javascript">
+let student_results_json = '${student_results}';
+let exercise_ids_json = '${exercise_ids}';
+let student_results;
+let exercise_ids;
+let latest_row_id = 0;
 
 $(document).ready(function() {
-    window.student_results = JSON.parse(student_results_json);
-    window.exercise_ids = JSON.parse(exercise_ids_json);
+    student_results = JSON.parse(student_results_json);
+    exercise_ids = JSON.parse(exercise_ids_json);
 
     $('.student_select').select2({
         width: "16em"
-    }).on('change', function (e) {
+    }).on('change', function () {
         let selectedStudents = getSelectedStudents(0);
         let points_captions = Array(${len(exercises) + 1}).fill('');
         let preselected_points = Array(${len(exercises) + 1});
-        for(i = 0; i < selectedStudents.length; i++) {
-            for(j = 0; j < points_captions.length; j++) {
+        for(let i = 0; i < selectedStudents.length; i++) {
+            for(let j = 0; j < points_captions.length; j++) {
                 let points = student_results[selectedStudents[i]]['points'][j];
                 if (typeof(preselected_points[j]) === 'undefined') {
                     preselected_points[j] = {};
@@ -90,19 +90,16 @@ $(document).ready(function() {
 });
 
 function update_total(row_id) {
-    let row;
-    row = $('#row-' + row_id);
-
-    let total;
-    let current;
-    total = 0;
-    row.find('.points').each(function(index) {
-        current = parseFloat($(this)[0].value.replace(/,/, "."));
+    let total = 0;
+    let current = 0;
+    let row = $(`#row-$${row_id}`);
+    row.find(".points").each(function() {
+        current = parseFloat(this.value.replace(/,/, "."));
         if (!isNaN(current)) {
             total += current;
         }
     });
-    return row.find("#total")[0].value = Number(total).toFixed(2);
+    return row.find(".total").val(Number(total).toFixed(2));
 }
 
 function getSelectedStudents(row_id) {
@@ -118,7 +115,7 @@ function getSelectedStudents(row_id) {
 }
 
 function update_student_names(row_id) {
-    let row = $('#row-' + row_id);
+    let row = $(`#row-$${row_id}`);
     let students_str = row.find('button').attr('data-students');
 
     if (students_str === '') {
@@ -150,10 +147,9 @@ function update_student_names(row_id) {
 }
 
 function correct_row(row_id) {
-    let row;
-    row = $('#row-' + row_id);
-    row.find('td[data-exercise]').each(function(index) {
-        let cell = $(this);
+    let row = $(`#row-$${row_id}`);
+    row.find('td[data-exercise]').each(function() {
+        let cell = this;
         let value = cell.html();
         let exercise = cell.data('exercise');
         if (value === '-') {
@@ -166,7 +162,7 @@ function correct_row(row_id) {
     let button;
     button = row.find('button');
     button.text('Speichern');
-    button.attr('onclick', 'save_corrected_row(' + row_id + ')');
+    button.attr('onclick', `save_corrected_row($${row_id})`);
 }
 
 function save_corrected_row(row_id) {
@@ -207,66 +203,66 @@ function remove_students_from_previous_submittions(students) {
 
 function submit_all_points(row_id) {
     let selectedStudents = getSelectedStudents(row_id);
-    let savestatus = document.getElementsByName('savestatus')[0];
 
     if ( selectedStudents.length === 0 ) {
         return true;
     }
 
-    let parameterHash = new Hash();
+    let submissionData = {};
+    submissionData['student_id'] = selectedStudents.join(',');
 
-    parameterHash.set('student_id', selectedStudents.join(','));
-
-    for (i = 0; i < exercise_ids.length; i++){
-        let current_input = $('#row-' + row_id).find('input[name=points-' + exercise_ids[i][1] + ']')[0];
-        parameterHash.set('points-' + exercise_ids[i][1], current_input.value);
-    }
+    $(`#row-$${row_id} .points`).each(function() {
+       submissionData[this.getAttribute("name").replace("points-","")] = this.value;
+    });
 
     let new_row_id = latest_row_id += 1;
+    console.log(submissionData);
 
-    new Ajax.Request('${request.route_path('exam_ajax_save_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)}', {
-                parameters: parameterHash,
-                onSuccess:function(response){
-                    let status = response.responseText.evalJSON();
-                    if (status['format_error']) {
-                        savestatus.innerHTML = status['msg'];
-                        savestatus.className = "alert alert-danger";
-                    } else {
-                        savestatus.innerHTML = "Punkte erfolgreich abgespeichert!";
-                        savestatus.className = "alert alert-success";
-                    }
-
-                    let insert_data = "<tr id=\'row-" + new_row_id + "\'>";
-
-                    // add student names
-                    insert_data += '<td id=\'student-names\'></td>';
-
-                    let pointsum = 0;
-                    for (let i=0; i < exercise_ids.length; i++) {
-                        let p = status['submitted_points'][exercise_ids[i][1]];
-                        pointsum += p;
-                        for (let j = 0; j < status['students'].length; j++) {
-                            window.student_results[status['students'][j]]['points'][i] = (p === null) ? 'None' : p.toFixed(1);
-                            student_results[status['students'][j]]['points'][exercise_ids.length] = pointsum.toFixed(1);
-                        }
-                        if (p === null) {
-                            p = '-';
-                        } else {
-                            p = p.toFixed(1)
-                        }
-                        insert_data += '<td style="text-align: center" data-exercise="' + exercise_ids[i][1] +'">' + p + '</td>';
-                    }
-                    insert_data += '<td style="text-align: center" id="totalcol">' + pointsum.toFixed(2) + '</td>';
-                    insert_data += '<td><button class="btn btn-primary" data-students="' + status['students'].join(',') + '" onclick="correct_row(' + new_row_id +')" type="button">Korrigieren</button></td>';
-                    remove_students_from_previous_submittions(status['students']);
-                    $('#row-0').before(insert_data);
-                    update_student_names(new_row_id);
-                },
-                onFailure:function(response){
-                    savestatus.innerHTML = "Fehler beim Speichern!";
-                    savestatus.className = "error";
-                }
+    $.ajax('${request.route_path('exam_ajax_save_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)}',
+      {
+        data: submissionData,
+        method: "POST",
+        dataType: "json",
+        success: function(response){
+            console.log(response);
+            if (response['format_error']) {
+                $.snack("error", response['msg'], 10000);
             }
+
+            let insert_data = "<tr id=\'row-" + new_row_id + "\'>";
+
+            // add student names
+            insert_data += '<td id=\'student-names\'></td>';
+
+            let pointsum = 0;
+            for (let i=0; i < exercise_ids.length; i++) {
+                let p = response['submitted_points'][exercise_ids[i][1]];
+                if (p === undefined) {
+                  $.snack("error", `Konnte Punkte von Aufgabe $${exercise_ids[i][0]} nicht speichern`, 10000);
+                  continue;
+                }
+                pointsum += p;
+                for (let j = 0; j < response['students'].length; j++) {
+                    student_results[response['students'][j]]['points'][i] = (p === null) ? 'None' : p.toFixed(1);
+                    student_results[response['students'][j]]['points'][exercise_ids.length] = pointsum.toFixed(1);
+                }
+                if (p === null) {
+                    p = '-';
+                } else {
+                    p = p.toFixed(1)
+                }
+                insert_data += '<td style="text-align: center" data-exercise="' + exercise_ids[i][1] +'">' + p + '</td>';
+            }
+            insert_data += '<td style="text-align: center" id="totalcol">' + pointsum.toFixed(2) + '</td>';
+            insert_data += '<td><button class="btn btn-primary" data-students="' + response['students'].join(',') + '" onclick="correct_row(' + new_row_id +')" type="button">Korrigieren</button></td>';
+            remove_students_from_previous_submittions(response['students']);
+            $('#row-0').before(insert_data);
+            update_student_names(new_row_id);
+        },
+        error: function(response){
+            $.snack("error", "Fehler beim Speichern!", 10000);
+        }
+      }
     );
 
     //deselect all students if a new row is submitted
@@ -286,6 +282,7 @@ function submit_all_points(row_id) {
 
     return true;
 }
+
 </script>
 
 <form id="enter_points_form" onsubmit="submit_all_points(0); return false;">
@@ -308,11 +305,11 @@ function submit_all_points(row_id) {
       </td>
       <td tal:repeat="e exercises">
         <div style="text-align: center" class="current-points"></div>
-        <input class="form-control" type="text" class="points" name="points-${e.id}" size="3" onchange="update_total(0) ">
+        <input class="form-control points" type="text" name="points-${e.id}" size="3" onchange="update_total(0) ">
       </td>
       <td>
         <div style="text-align: center" class="current-points"></div>
-        <input class="form-control" id="total" readonly="readonly" size="4" value="0">
+        <input class="form-control total" readonly="readonly" size="4" value="0">
       </td>
       <td></td>
       <td></td>
@@ -320,21 +317,6 @@ function submit_all_points(row_id) {
   </table>
   <input class="btn btn-primary" type="submit" value="Punkte eintragen" />
 </form>
-
-<div tal:omit-tag="">
-  <!-- This is a very dirty hack to have always enough space to show the whole list-->
-</div>
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
 
   </metal:main>
 </metal:main>

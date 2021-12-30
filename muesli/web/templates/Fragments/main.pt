@@ -20,6 +20,7 @@
   <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/accidental-action-prevention.js')"></script>
   <!-- Bootstrap -->
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/bootstrap.min.css')"></link>
+  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/toast.min.css')"></link>
   <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/popper.min.js')"></script>
   <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/bootstrap.min.js')"></script>
 
