@@ -257,7 +257,7 @@ function submit_all_points(row_id) {
                         insert_data += '<td style="text-align: center" data-exercise="' + exercise_ids[i][1] +'">' + p + '</td>';
                     }
                     insert_data += '<td style="text-align: center" id="totalcol">' + pointsum.toFixed(2) + '</td>';
-                    insert_data += '<td><button data-students="' + status['students'].join(',') + '" onclick="correct_row(' + new_row_id +')" type="button">Korrigieren</button></td>';
+                    insert_data += '<td><button class="btn btn-primary" data-students="' + status['students'].join(',') + '" onclick="correct_row(' + new_row_id +')" type="button">Korrigieren</button></td>';
                     remove_students_from_previous_submittions(status['students']);
                     jQuery('#row-0').before(insert_data);
                     update_student_names(new_row_id);
@@ -318,7 +318,7 @@ function submit_all_points(row_id) {
       <td></td>
     </tr>
   </table>
-  <input role="button" class="btn btn-primary" type="submit" value="Punkte eintragen" />
+  <input class="btn btn-primary" type="submit" value="Punkte eintragen" />
 </form>
 
 <div tal:omit-tag="">
