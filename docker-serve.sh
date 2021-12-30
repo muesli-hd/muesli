@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+echo "Waiting for database to start ..."; sleep 3;
+wait-for-it ${MUESLI_DB_HOST}:5432 -t 30 || exit 1
+
 if [[ -v MUESLI_TESTMODE ]] && [[ ! -f muesli.yml ]]
 then
     echo "Generating configs ... "
@@ -6,8 +10,6 @@ then
     sed "s/postgres:\/\/\/muesli/postgres:\/\/${MUESLI_DB_USER:-postgres}:${MUESLI_DB_PASSWORD}@${MUESLI_DB_HOST}\/${MUESLI_DB}/" alembic.ini.example > alembic.ini
     echo "Deploying JS and CSS libs"
     rsync -av /opt/muesli_static_libs/ muesli/web/static/
-    echo "Waiting for database to start ..."; sleep 3;
-    wait-for-it ${MUESLI_DB_HOST}:5432 -t 30 || exit 1
     python3 -m smtpd -n -c DebuggingServer localhost:25 &
     export PYRAMID_DEBUG_TEMPLATES=1
 fi
