@@ -9,9 +9,6 @@ Needed Packages:
 The following packages are needed in order to run Müsli:
 
     postgresql-server-dev-all
-    libjs-jquery-tablesorter
-    libjs-jquery-fancybox
-    libjs-scriptaculous
     lp-solve
 
     pip3 install -r requirements.txt

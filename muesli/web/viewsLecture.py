@@ -212,6 +212,7 @@ class SwitchStudents(object):
         self.db = self.request.db
         self.lecture_id = request.matchdict['lecture_id']
         request.javascript.append('select2.min.js')
+        request.css.append('select2.min.css')
 
     def __call__(self):
         lecture = self.db.query(models.Lecture).get(self.lecture_id)

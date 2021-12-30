@@ -601,7 +601,9 @@ def enterPointsSingle(request):
     exam = request.context.exam
     exercises = exam.exercises
     request.javascript.append('select2.min.js')
+    request.css.append('select2.min.css')
     request.javascript.append('toast.min.js')
+    request.css.append('toast.min.css')
     show_tutor = not request.context.tutorials
     show_time = (not request.context.tutorials) or len(request.context.tutorials) > 1
 

@@ -227,6 +227,7 @@ class EnterGradesBasic:
         grades, error_msgs = self.apply_formula(grades, formula, lecture_students, grading, varsForExam, error_msgs)
 
         self.request.javascript.append('jquery/jquery.fancybox.min.js')
+        self.request.css.append('jquery/jquery.fancybox.min.css')
         #grades = {key: value for key,value in grades.items()}
 
         return {'grading': grading,
