@@ -2,7 +2,7 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<script>
+<script type="text/javascript">
 set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture_view", lecture_id=exam.lecture.id)}']
                 ${",['Uebungsgruppe','"+request.route_path('tutorial_view', tutorial_ids=tutorial_ids)+"']" if tutorial_ids else ''}
      ]);
@@ -23,23 +23,20 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
   <p class="error" tal:condition="error_msg">${error_msg}</p>
 
 
-<script>/* <![CDATA[ */
+<script type="text/javascript">
   function update_total(row)
   {
-    var objs = $$("#row-" + row + " input.points");
-    var total = 0;
-    var current = 0;
-
-    for (i = 0; i < objs.length; i++) {
-      current = parseFloat(objs[i].value.replace(/,/, "."));
-      if (!isNaN(current)) {
-        total += current;
-      }
-    }
-
-    return $("total-" + row).value = Number(total).toFixed(2);
+    let total = 0;
+    let current = 0;
+    $("#row-" + row + " input[name^='points-']").map(function() {
+        current = parseFloat(this.value.replace(/,/, "."));
+        if (!isNaN(current)) {
+          total += current;
+        }
+    });
+    console.log(total)
+    return $("#total-" + row).val(Number(total).toFixed(2));
   }
-/* ]]> */
 </script>
 
 <form method="post">

@@ -14,14 +14,14 @@
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/muesli.css')"></link>
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/jquery.fancybox.min.css')"></link>
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/select2.min.css')"></link>
-  <script tal:attributes="src request.static_url('muesli.web:static/js/jquery.min.js')"></script>
-  <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
-  <script tal:attributes="src request.static_url('muesli.web:static/js/april_fool.js')"></script>
-  <script tal:attributes="src request.static_url('muesli.web:static/js/accidental-action-prevention.js')"></script>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/jquery.min.js')"></script>
+  <script type="text/javascript" tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/april_fool.js')"></script>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/accidental-action-prevention.js')"></script>
   <!-- Bootstrap -->
   <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/bootstrap.min.css')"></link>
-  <script tal:attributes="src request.static_url('muesli.web:static/js/popper.min.js')"></script>
-  <script tal:attributes="src request.static_url('muesli.web:static/js/bootstrap.min.js')"></script>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/popper.min.js')"></script>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/bootstrap.min.js')"></script>
 
 </head>
 <body onload="aprilFool()">

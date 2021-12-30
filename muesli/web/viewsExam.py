@@ -221,8 +221,6 @@ class EnterPointsBasic:
             statistics.update(exam.getStatistics(students=students, prefix='tut'))
         else:
             statistics = exam.getStatistics(students=students)
-        if not self.raw:
-            self.request.javascript.append('prototype.js')
         return {'exam': exam,
                 'tutorial_ids': self.request.matchdict['tutorial_ids'],
                 'students': students,
