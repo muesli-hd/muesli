@@ -11,18 +11,19 @@
   Released under the terms of the GNU GPL 3 or later
   -->
   <title>MÜSLI</title>
-  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/muesli.css')"></link>
+  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/muesli.css')"/>
   <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/jquery.min.js')"></script>
   <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/april_fool.js')"></script>
   <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/accidental-action-prevention.js')"></script>
   <!-- Bootstrap -->
-  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/bootstrap.min.css')"></link>
+  <link rel="stylesheet"
+        type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/bootstrap.min.css')"/>
   <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/popper.min.js')"></script>
   <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/bootstrap.min.js')"></script>
 
   <!-- Manually added scripts and stylesheets -->
   <link rel="stylesheet" type="text/css" tal:repeat="filename request.css"
-          tal:attributes="href request.static_url('muesli.web:static/css/%s' % (filename))"></link>
+       tal:attributes="href request.static_url('muesli.web:static/css/%s' % (filename))"/>
   <script type="text/javascript" tal:repeat="filename request.javascript"
           tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
 

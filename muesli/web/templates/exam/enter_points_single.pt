@@ -12,286 +12,16 @@
   </p>
 
 
-<script type="text/javascript">
-let student_results_json = '${student_results}';
-let exercise_ids_json = '${exercise_ids}';
-let student_results;
-let exercise_ids;
-let latest_row_id = 0;
-
-$(document).ready(function() {
-    student_results = JSON.parse(student_results_json);
-    exercise_ids = JSON.parse(exercise_ids_json);
-
-    $('.student_select').select2({
-        width: "16em"
-    }).on('change', function () {
-        let selectedStudents = getSelectedStudents(0);
-        let points_captions = Array(${len(exercises) + 1}).fill('');
-        let preselected_points = Array(${len(exercises) + 1});
-        for(let i = 0; i < selectedStudents.length; i++) {
-            for(let j = 0; j < points_captions.length; j++) {
-                let points = student_results[selectedStudents[i]]['points'][j];
-                if (typeof(preselected_points[j]) === 'undefined') {
-                    preselected_points[j] = {};
-                    preselected_points[j].value = points;
-                    preselected_points[j].alert = false;
-                }
-                if (preselected_points[j].value !== points) {
-                    preselected_points[j].value = points;
-                    preselected_points[j].alert = true;
-                }
-                let caption = points;
-                if (points === 'None'){
-                    caption = '-';
-                }
-                points_captions[j] += caption + '<br/>';
-            }
-        }
-
-        $('.current-points').each(function (i, obj) {
-            obj.innerHTML = (points_captions[i]);
-            if (selectedStudents.length > 0) {
-                if (i < preselected_points.length - 1 && preselected_points[i].alert) {
-                    obj.style.color = 'red';
-                } else {
-                    obj.style.color = null;
-                }
-            }
-        });
-        $('.points').each(function (i, obj) {
-            if (selectedStudents.length > 0) {
-                if (obj.value === '') {
-                    if (preselected_points[i].value !== 'None') {
-                        obj.value = (preselected_points[i].value);
-                    }
-                }
-            } else {
-                obj.value = '';
-            }
-        });
-        update_total(0);
-    }).trigger('change');
-
-    $(document).on('keydown', 'form', function(event) {
-        let row_id;
-        row_id = Number($(document.activeElement).closest('tr').attr('id').replace('row-', ''));
-        if (event.key === "Enter") {
-            return submit_all_points(row_id);
-        }
-        return true;
-    });
-
-    $(".select2-search__field").focus().select();
-});
-
-function update_total(row_id) {
-    let total = 0;
-    let current = 0;
-    let row = $(`#row-$${row_id}`);
-    row.find(".points").each(function() {
-        current = parseFloat(this.value.replace(/,/, "."));
-        if (!isNaN(current)) {
-            total += current;
-        }
-    });
-    return row.find(".total").val(Number(total).toFixed(2));
-}
-
-function getSelectedStudents(row_id) {
-    if (row_id === 0) {
-        let selectedStudents = [];
-        $('.student_select > option:selected').each(function() {
-            selectedStudents.push($(this).val())
-        });
-        return selectedStudents;
-    } else {
-        return $('#row-' + row_id + ' button').attr('data-students').split(',')
-    }
-}
-
-function update_student_names(row_id) {
-    let row = $(`#row-$${row_id}`);
-    let students_str = row.find('button').attr('data-students');
-
-    if (students_str === '') {
-        row.remove();
-        return true;
-    }
-
-    let students = students_str.split(',');
-    let student_names = [];
-    let student_names_field = row.find('#student-names');
-    let student_names_html = '<table><tr>';
-
-    students.forEach(function (student_id) {
-        let current_student = '<td>';
-        if (${'true' if show_tutor else 'false'}) {
-            current_student += student_results[student_id]['tutorial_tutor'] + '</td><td>';
-        }
-        if (${'true' if show_time else 'false'}) {
-            current_student += student_results[student_id]['tutorial_time'] + '</td><td>';
-        }
-        current_student += student_results[student_id]['name'];
-        current_student += '</td>';
-        student_names.push(current_student);
-    });
-    student_names_html += student_names.join('</tr><tr>');
-    student_names_html += '</tr></table>';
-
-    student_names_field.html(student_names_html);
-}
-
-function correct_row(row_id) {
-    let row = $(`#row-$${row_id}`);
-    row.find('td[data-exercise]').each(function() {
-        let cell = $(this);
-        let value = cell.html();
-        let exercise = cell.data('exercise');
-        if (value === '-') {
-            value = ''
-        }
-        cell.html('<input type="text" class="points" name="points-' + exercise + '" value="' + value + '" size="3" onchange="update_total(' + row_id + ') ">')
-    });
-    row.find('#totalcol').html('<input id="total" readonly="readonly" size="4" value="0">');
-    update_total(row_id);
-    let button;
-    button = row.find('button');
-    button.text('Speichern');
-    button.attr('onclick', `submit_all_points($${row_id})`);
-}
-
-function remove_students_from_previous_submittions(students) {
-    let row_id;
-    for (row_id = 1; row_id < latest_row_id; row_id++) {
-        let button;
-        let row_students;
-        let new_row_students;
-        let is_in_row;
-        new_row_students = [];
-
-        button = $('#row-' + row_id + ' button');
-        if (button.length === 0) {
-            continue;
-        }
-        row_students = button.attr('data-students').split(',');
-        row_students.forEach(function(row_student) {
-            is_in_row = false;
-            students.forEach(function(student) {
-                if (row_student === String(student)) {
-                    is_in_row = true;
-                }
-            });
-            if (!is_in_row) {
-                new_row_students.push(row_student)
-            }
-        });
-        button.attr('data-students', new_row_students.join(','));
-        update_student_names(row_id)
-    }
-
-}
-
-function submit_all_points(row_id) {
-    let selectedStudents = getSelectedStudents(row_id);
-
-    if ( selectedStudents.length === 0 ) {
-        return true;
-    }
-
-    let submissionData = {};
-    submissionData['student_id'] = selectedStudents.join(',');
-
-    $(`#row-$${row_id} .points`).each(function() {
-       submissionData[this.getAttribute("name").replace("points-","")] = this.value;
-    });
-
-    let new_row_id = latest_row_id += 1;
-
-    $.ajax('${request.route_path('exam_ajax_save_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)}',
-      {
-        data: submissionData,
-        method: "POST",
-        dataType: "json",
-        success: function(response){
-          let save_successful = true;
-          if (response['format_error']) {
-              save_successful = false;
-          }
-
-          let insert_data = "<tr id=\'row-" + new_row_id + "\'>";
-
-          // add student names
-          insert_data += '<td id=\'student-names\'></td>';
-
-          let pointsum = 0;
-          for (let i=0; i < exercise_ids.length; i++) {
-              let p = response['submitted_points'][exercise_ids[i][1]];
-              if (p === undefined) {
-                $.toast({
-                  type: "error",
-                  title: `Konnte Punkte von Aufgabe $${exercise_ids[i][0]} nicht speichern`,
-                  content: response["msg"],
-                  delay: 10000
-                });
-                save_successful = false;
-                continue;
-              }
-              pointsum += p;
-              // Update cached points to the new server state
-              for (let j = 0; j < response['students'].length; j++) {
-                  student_results[response['students'][j]]['points'][i] = (p === null) ? 'None' : p.toFixed(1);
-                  student_results[response['students'][j]]['points'][exercise_ids.length] = pointsum.toFixed(1);
-              }
-              if (p === null) {
-                  p = '-';
-              } else {
-                  p = p.toFixed(1)
-              }
-              insert_data += '<td style="text-align: center" data-exercise="' + exercise_ids[i][1] +'">' + p + '</td>';
-          }
-          insert_data += '<td style="text-align: center" id="totalcol">' + pointsum.toFixed(2) + '</td>';
-          insert_data += '<td><button class="btn btn-primary" data-students="' + response['students'].join(',') + '" onclick="correct_row(' + new_row_id +')" type="button">Korrigieren</button></td>';
-          if (!save_successful) {
-              return false;
-          }
-          remove_students_from_previous_submittions(response['students']);
-          $('#row-0').before(insert_data);
-          update_student_names(new_row_id);
-          if (row_id !== 0) {
-            $('#row-' + row_id).remove();
-          }
-
-          //deselect all students if a new row is submitted
-          let student_select;
-          student_select = $(".student_select");
-          if (row_id === 0) {
-            let inputPunkte = document.getElementsByClassName('points');
-            for (let i = 0; i < inputPunkte.length; i++) {
-              inputPunkte[i].value = "";
-            }
-            student_select.val(null);
-            update_total(0);
-          }
-
-          student_select.trigger('change');
-          $(".select2-search__field").focus().select();
-          return true;
-        },
-        error: function(response){
-          // Generic error message, if non 200 response is received
-          $.snack("error", "Fehler: Konnte Punkte nicht speichern!", 10000)
-        }
-      }
-    );
-
-    return true;
-}
-
-</script>
+    <script type="text/javascript"
+         tal:attributes="src request.static_url('muesli.web:static/js/enter_points_single.js');
+           show_tutor 1 if show_tutor else None;
+           show_time 1 if show_time else None;
+           student_results_json student_results;
+           exercise_ids_json exercise_ids;
+           ajax_submission_endpoint request.route_path('exam_ajax_save_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)"></script>
 
 <form id="enter_points_form" onsubmit="submit_all_points(0); return false;">
-  <input type="hidden" id="student_id" name="student_id" />
+  <input type="hidden" name="student_id" />
   <table class="points_table table w-auto" id="enter_points_table">
     <thead class="thead-dark">
       <tr>
@@ -304,17 +34,23 @@ function submit_all_points(row_id) {
     </thead>
     <tr id="row-0">
       <td>
+        <label>
           <select class="student_select" name="students" multiple="multiple">
               <option tal:repeat="student students" value=${student.id}>${student.last_name}, ${student.first_name}</option>
           </select>
+        </label>
       </td>
       <td tal:repeat="e exercises">
         <div style="text-align: center" class="current-points"></div>
-        <input class="form-control points" type="text" name="points-${e.id}" size="3" onchange="update_total(0) ">
+        <label>
+          <input class="form-control points" type="text" name="points-${e.id}" size="3" onchange="update_total(0) ">
+        </label>
       </td>
       <td>
         <div style="text-align: center" class="current-points"></div>
-        <input class="form-control total" readonly="readonly" size="4" value="0">
+        <label>
+          <input class="form-control total" readonly="readonly" size="4" value="0">
+        </label>
       </td>
       <td></td>
       <td></td>
