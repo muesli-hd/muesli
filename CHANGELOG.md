@@ -1,3 +1,13 @@
+### 2021-12-31
+
+Ein großes Dankeschön an Christian Heusel für die Implementierung des Bootstrap Designs im MÜSLI.
+
+Einige andere kleinere Bugfixes sind inzwischen eingegangen, wie beispielsweise auf der Bearbeitungsseite für Noten oder
+der interaktiven Vergabe von Punkten auf Übungsblättern.
+
+Es wird eine neue MaintainerIn (m,w,d) fürs MÜSLI gesucht. Bei Interesse schreiben Sie bitte eine E-Mail an Herrn
+Vogel vom Mathematischen Institut
+
 ### 2020-04-14
 
 Aktionen werden auf dem UI jetzt als Buttons dargestellt, Links zur Navigation als Links.
