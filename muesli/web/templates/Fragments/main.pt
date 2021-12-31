@@ -55,6 +55,12 @@ function set_navigation(nav) {
 <metal:main metal:use-macro="templates('Fragments/message_queue.pt').macros['message_queue']">
 
 <div class="container-fluid">
+  <div class="alert alert-secondary" role="alert">
+    <div>Am Mathematischen Institut sind ab Januar zwei Hilfskraftstellen zu besetzen: eine Stelle in der
+      Systemadministration (40h) und eine Stelle für die MÜSLI-Programmierung (20h). Bei Interesse kontaktieren Sie
+      bitte Denis Vogel per Email unter vogel@mathi.uni-heidelberg.de.
+    </div>
+  </div>
   <main class="pt-3" role="main">
     <div class="jumbotron bg-mdb-color-lighten-6" id="content">
 
