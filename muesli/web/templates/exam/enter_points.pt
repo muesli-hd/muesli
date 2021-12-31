@@ -23,25 +23,31 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
   <p class="error" tal:condition="error_msg">${error_msg}</p>
 
 
-<script type="text/javascript">
-  function update_total(row)
-  {
-    let total = 0;
-    let current = 0;
-    $("#row-" + row + " input[name^='points-']").map(function() {
-        current = parseFloat(this.value.replace(/,/, "."));
-        if (!isNaN(current)) {
-          total += current;
-        }
-    });
-    console.log(total)
-    return $("#total-" + row).val(Number(total).toFixed(2));
-  }
-</script>
+  <script type="text/javascript">
+    function update_total(row)
+    {
+      let total = 0;
+      let current = 0;
+      $("#row-" + row + " input[name^='points-']").map(function() {
+          current = parseFloat(this.value.replace(/,/, "."));
+          if (!isNaN(current)) {
+            total += current;
+          }
+      });
+      console.log(total)
+      return $("#total-" + row).val(Number(total).toFixed(2));
+    }
+    $(document).ready(function()
+    {
+      $("#grading-table").tablesorter();
+    }
+    );
+  </script>
+  <p>Diese Tabelle ist durch Anklicken der Spalten sortierbar.</p>
 
 <form method="post">
 <input type="hidden" name="submit" value="1"/>
-<table class="table w-auto">
+<table id="grading-table" class="table w-auto">
   <thead class="thead-dark">
     <th scope="col" tal:condition="not tutorial_ids">Tutor</th>
     <th scope="col">Name</th>
