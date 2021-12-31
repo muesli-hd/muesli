@@ -95,6 +95,10 @@ def add_javascript_to_request(event):
     event.request.javascript = list()
 
 @subscriber(NewRequest)
+def add_css_to_request(event):
+    event.request.css = list()
+
+@subscriber(NewRequest)
 def add_config_to_request(event):
     event.request.config = muesli.config
 

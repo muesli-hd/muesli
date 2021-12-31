@@ -221,6 +221,8 @@ class EnterPointsBasic:
             statistics.update(exam.getStatistics(students=students, prefix='tut'))
         else:
             statistics = exam.getStatistics(students=students)
+        self.request.javascript.append('toast.min.js')
+        self.request.css.append('toast.min.css')
         return {'exam': exam,
                 'tutorial_ids': self.request.matchdict['tutorial_ids'],
                 'students': students,
@@ -637,13 +639,20 @@ def enterPointsSingle(request):
     }
 
 
+# Parse post data and retrieve a dict with parsed float point values
 def parse_points(post_data, exercises):
     e_points = {}
     json_data = {'msg': '', 'format_error_cells': []}
     for exercise in exercises:
-        get_param = 'points-%s' % exercise.id
-        if get_param in post_data:
-            p = post_data[get_param].replace(',','.')
+        exercise_dict_key = None
+        # I know some people use scripts to submit points right now. If you stumble upon this, you can remove the lookup
+        # migrate away from the points- lookup. People should not assume internal APIs to be constant.
+        if str(exercise.id) in post_data:
+            exercise_dict_key = str(exercise.id)
+        elif 'points-{}'.format(exercise.id) in post_data:
+            exercise_dict_key = 'points-{}'.format(exercise.id)
+        if exercise_dict_key:
+            p = post_data[exercise_dict_key].replace(',','.')
             if p:
                 try:
                     p = float(p)
@@ -654,7 +663,7 @@ def parse_points(post_data, exercises):
                     json_data['format_error_cells'].append(exercise.id)
             else:
                 e_points[exercise.id] = None
-    json_data['msg'] = json_data['msg'] or 'sucessfull'
+    json_data['msg'] = json_data['msg'] or 'successful'
     json_data['submitted_points'] = e_points
     return e_points, json_data
 

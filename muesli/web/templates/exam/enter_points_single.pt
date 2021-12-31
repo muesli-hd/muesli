@@ -77,11 +77,7 @@ $(document).ready(function() {
         let row_id;
         row_id = Number($(document.activeElement).closest('tr').attr('id').replace('row-', ''));
         if (event.key === "Enter") {
-            if (row_id === 0) {
-                return submit_all_points(row_id);
-            } else {
-                save_corrected_row(row_id)
-            }
+            return submit_all_points(row_id);
         }
         return true;
     });
@@ -149,7 +145,7 @@ function update_student_names(row_id) {
 function correct_row(row_id) {
     let row = $(`#row-$${row_id}`);
     row.find('td[data-exercise]').each(function() {
-        let cell = this;
+        let cell = $(this);
         let value = cell.html();
         let exercise = cell.data('exercise');
         if (value === '-') {
@@ -162,12 +158,7 @@ function correct_row(row_id) {
     let button;
     button = row.find('button');
     button.text('Speichern');
-    button.attr('onclick', `save_corrected_row($${row_id})`);
-}
-
-function save_corrected_row(row_id) {
-    submit_all_points(row_id);
-    $('#row-' + row_id).remove();
+    button.attr('onclick', `submit_all_points($${row_id})`);
 }
 
 function remove_students_from_previous_submittions(students) {
@@ -216,7 +207,6 @@ function submit_all_points(row_id) {
     });
 
     let new_row_id = latest_row_id += 1;
-    console.log(submissionData);
 
     $.ajax('${request.route_path('exam_ajax_save_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)}',
       {
@@ -224,61 +214,76 @@ function submit_all_points(row_id) {
         method: "POST",
         dataType: "json",
         success: function(response){
-            console.log(response);
-            if (response['format_error']) {
-                $.snack("error", response['msg'], 10000);
+          let save_successful = true;
+          if (response['format_error']) {
+              save_successful = false;
+          }
+
+          let insert_data = "<tr id=\'row-" + new_row_id + "\'>";
+
+          // add student names
+          insert_data += '<td id=\'student-names\'></td>';
+
+          let pointsum = 0;
+          for (let i=0; i < exercise_ids.length; i++) {
+              let p = response['submitted_points'][exercise_ids[i][1]];
+              if (p === undefined) {
+                $.toast({
+                  type: "error",
+                  title: `Konnte Punkte von Aufgabe $${exercise_ids[i][0]} nicht speichern`,
+                  content: response["msg"],
+                  delay: 10000
+                });
+                save_successful = false;
+                continue;
+              }
+              pointsum += p;
+              // Update cached points to the new server state
+              for (let j = 0; j < response['students'].length; j++) {
+                  student_results[response['students'][j]]['points'][i] = (p === null) ? 'None' : p.toFixed(1);
+                  student_results[response['students'][j]]['points'][exercise_ids.length] = pointsum.toFixed(1);
+              }
+              if (p === null) {
+                  p = '-';
+              } else {
+                  p = p.toFixed(1)
+              }
+              insert_data += '<td style="text-align: center" data-exercise="' + exercise_ids[i][1] +'">' + p + '</td>';
+          }
+          insert_data += '<td style="text-align: center" id="totalcol">' + pointsum.toFixed(2) + '</td>';
+          insert_data += '<td><button class="btn btn-primary" data-students="' + response['students'].join(',') + '" onclick="correct_row(' + new_row_id +')" type="button">Korrigieren</button></td>';
+          if (!save_successful) {
+              return false;
+          }
+          remove_students_from_previous_submittions(response['students']);
+          $('#row-0').before(insert_data);
+          update_student_names(new_row_id);
+          if (row_id !== 0) {
+            $('#row-' + row_id).remove();
+          }
+
+          //deselect all students if a new row is submitted
+          let student_select;
+          student_select = $(".student_select");
+          if (row_id === 0) {
+            let inputPunkte = document.getElementsByClassName('points');
+            for (let i = 0; i < inputPunkte.length; i++) {
+              inputPunkte[i].value = "";
             }
+            student_select.val(null);
+            update_total(0);
+          }
 
-            let insert_data = "<tr id=\'row-" + new_row_id + "\'>";
-
-            // add student names
-            insert_data += '<td id=\'student-names\'></td>';
-
-            let pointsum = 0;
-            for (let i=0; i < exercise_ids.length; i++) {
-                let p = response['submitted_points'][exercise_ids[i][1]];
-                if (p === undefined) {
-                  $.snack("error", `Konnte Punkte von Aufgabe $${exercise_ids[i][0]} nicht speichern`, 10000);
-                  continue;
-                }
-                pointsum += p;
-                for (let j = 0; j < response['students'].length; j++) {
-                    student_results[response['students'][j]]['points'][i] = (p === null) ? 'None' : p.toFixed(1);
-                    student_results[response['students'][j]]['points'][exercise_ids.length] = pointsum.toFixed(1);
-                }
-                if (p === null) {
-                    p = '-';
-                } else {
-                    p = p.toFixed(1)
-                }
-                insert_data += '<td style="text-align: center" data-exercise="' + exercise_ids[i][1] +'">' + p + '</td>';
-            }
-            insert_data += '<td style="text-align: center" id="totalcol">' + pointsum.toFixed(2) + '</td>';
-            insert_data += '<td><button class="btn btn-primary" data-students="' + response['students'].join(',') + '" onclick="correct_row(' + new_row_id +')" type="button">Korrigieren</button></td>';
-            remove_students_from_previous_submittions(response['students']);
-            $('#row-0').before(insert_data);
-            update_student_names(new_row_id);
+          student_select.trigger('change');
+          $(".select2-search__field").focus().select();
+          return true;
         },
         error: function(response){
-            $.snack("error", "Fehler beim Speichern!", 10000);
+          // Generic error message, if non 200 response is received
+          $.snack("error", "Fehler: Konnte Punkte nicht speichern!", 10000)
         }
       }
     );
-
-    //deselect all students if a new row is submitted
-    let student_select;
-    student_select = $(".student_select");
-    if (row_id === 0) {
-        let inputPunkte = document.getElementsByClassName('points');
-        for (let i = 0; i < inputPunkte.length; i++) {
-            inputPunkte[i].value = "";
-        }
-        student_select.val(null);
-        update_total(0);
-    }
-
-    student_select.trigger('change');
-    $(".select2-search__field").focus().select();
 
     return true;
 }
