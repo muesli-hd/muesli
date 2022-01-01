@@ -19,8 +19,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from muesli import utils
-
-from pyramid import security
+from muesli.web.context import LectureContext, TutorialContext, ExamContext, GradingContext
+from muesli.models import Tutorial, Lecture
 
 import sqlalchemy
 from sqlalchemy.orm import relationship, sessionmaker, backref, column_property, joinedload
@@ -49,63 +49,71 @@ class NavigationTree(object):
             ret += child.__repr__(level+1)
         return ret
 
+def append_node_if_permitted(request, context, permission, route, label, matchdict, nodelist):
+    if request.permissionInfo.has_permission_in_context(context, permission, matchdict):
+        nodelist.append(NavigationTree(label, request.route_path(route, **matchdict)))
 
-def create_navigation_tree(request, user):
+def owned_tutorials_in_lecture(user, lecture):
+    return user.tutorials_as_tutor.filter(Tutorial.lecture_id == lecture.id).all()
+
+def tutorial_str(tutorial):
+    return "{}, {}".format(tutorial.time.__html__(), tutorial.tutor_name)
+
+def create_navigation_tree(request):
     """Create the default navigation tree containing all current tutorials and
     lectures the user is participating in.
 
     Returns:
         The root of the new navigation tree
     """
-    # import inside function to prevent cyclic import
-    from muesli.models import Tutorial, Lecture
 
     # create tree-root, this item is currently not shown
     root = NavigationTree("Übersicht", request.route_url('overview'))
 
-    if user is None:
+    if request.user is None:
         return root
 
     semesterlimit = utils.getSemesterLimit()
 
 
     # add tutorials the user subscribed to
-    tutorials = user.tutorials.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture)).filter(Lecture.term >= semesterlimit)
+    tutorials = request.user.tutorials.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture)).filter(Lecture.term >= semesterlimit)
     if tutorials.count() > 0:
         tutorials_node = NavigationTree("Belegte Übungsgruppen", request.route_url('overview'))
         for t in tutorials:
-            t_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
-                t.time.__html__(), t.tutor_name), request.route_url('lecture_view_points',
+            t_node = NavigationTree(tutorial_str(t), request.route_url('lecture_view_points',
                     lecture_id=t.lecture.id))
+            t_node.children = get_tutorial_specific_nodes(request, t)
             tutorials_node.append(t_node)
         root.append(tutorials_node)
 
-
-    # add tutorials the user tutors
-    tutorials_as_tutor = user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture)).filter(Lecture.term >= semesterlimit)
-    if tutorials_as_tutor.count() > 0:
-        tutorials_as_tutor_node = NavigationTree("Eigene Übungsgruppen", request.route_url('overview'))
-        for t in tutorials_as_tutor:
-            t_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
-                t.time.__html__(), t.place),
-                request.route_url('tutorial_view', tutorial_ids=t.id))
-            tutorials_as_tutor_node.append(t_node)
-        root.append(tutorials_as_tutor_node)
-
-    # add lectures for which the user is assistant
-    lectures_as_assistant = user.lectures_as_assistant.filter(Lecture.term >= semesterlimit)
-    if lectures_as_assistant.count() > 0:
-        lectures_as_assistant_node = NavigationTree("Eigene Vorlesungen", request.route_url('overview'))
-        for l in lectures_as_assistant:
+    # add lectures for which the user is either assistant or tutor
+    tutorials_as_tutor = request.user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture)).filter(Lecture.term >= semesterlimit).all()
+    lectures_as_assistant = request.user.lectures_as_assistant.filter(Lecture.term >= semesterlimit).all()
+    lectures_involved_in = {t.lecture for t in tutorials_as_tutor}.union(lectures_as_assistant)
+    if lectures_involved_in:
+        involved_in_node = NavigationTree("Vorlesungsorganisation")
+        for l in lectures_involved_in:
             lecture_node = NavigationTree(l.name,
                 request.route_url('lecture_edit', lecture_id=l.id))
-            lectures_as_assistant_node.append(lecture_node)
-            root.append(lectures_as_assistant_node)
+            lecture_node.children = get_lecture_specific_nodes(request, l)
+            involved_in_node.append(lecture_node)
+        root.append(involved_in_node)
+
+
+    # add current lecture
+    if hasattr(request.context, 'lecture') and request.context.lecture:
+        lecture = request.context.lecture
+        this_lecture_node = NavigationTree(lecture.name, request.route_url('lecture_view', lecture_id=lecture.id))
+        this_lecture_node.children = get_lecture_specific_nodes(request, lecture)
+        # Only add this top level menu field, if makes sense
+        if this_lecture_node.children:
+            root.append(this_lecture_node)
 
     return root
 
 
-def get_lecture_specific_nodes(request, context, lecture_id):
+def get_lecture_specific_nodes(request, lecture):
     """Create navigation tree, to append to the main navigation tree containing
     the default lecture specific links
 
@@ -115,25 +123,47 @@ def get_lecture_specific_nodes(request, context, lecture_id):
     nodes = []
 
     data = [
+        ("Bearbeiten", "lecture_edit", "edit"),
+        ("Anmeldeseite", "lecture_view", "view"),
         ("E-Mail an alle Übungsleiter schreiben", "lecture_email_tutors", "mail_tutors"),
         ("E-Mail an alle Studenten schreiben", "lecture_email_students", "edit"),
         ("Liste aller Teilnehmer", "lecture_export_students_html", "edit"),
         ("Student als Teilnehmer eintragen", "lecture_add_student", "edit"),
         ("Liste der abgemeldeten/entfernten Teilnehmer", "lecture_view_removed_students", "edit"),
         ("Punktzahlen exportieren", "lecture_export_totals", "edit"),
+        ("Liste der Ergebnisse", "tutorial_results", "edit"),
     ]
 
     for label, route, permission in data:
-        if request.has_permission(permission, context):
-            nodes.append(NavigationTree(label, request.route_path(route, lecture_id=lecture_id)))
+        append_node_if_permitted(request, LectureContext, permission, route, label,
+                                 {'lecture_id': lecture.id, 'tutorial_ids': ''}, nodes)
 
-    if request.has_permission('edit', context):
-        NavigationTree("Liste der Ergebnisse", request.route_path('tutorial_results',
-            lecture_id=lecture_id, tutorial_ids='')),
+    # Add tutorials for this lecture
+    tutorials_node = NavigationTree("Übungsgruppen")
+    for tutorial in lecture.tutorials:
+        t_node = NavigationTree(tutorial_str(tutorial), request.route_url('tutorial_view', tutorial_ids=tutorial.id))
+        t_node.children = get_tutorial_specific_nodes(request, tutorial)
+        if t_node.children:
+            tutorials_node.children.append(t_node)
+    if tutorials_node.children:
+        nodes.insert(1, tutorials_node)
+
+    # Add exams for this lecture
+    exams_node = NavigationTree("Testate")
+    for exam in lecture.exams:
+        e_node = NavigationTree(exam.name, request.route_url('exam_edit', exam_id=exam.id))
+        e_node.children = get_exam_specific_nodes(request, exam)
+        if e_node.children:
+            exams_node.children.append(e_node)
+    if exams_node.children:
+        nodes.insert(2, exams_node)
+
+    if len(nodes) == 1 and nodes[0].label == "Anmeldeseite":
+        return []
 
     return nodes
 
-def get_tutorial_specific_nodes(request, context, tutorial_id, lecture_id):
+def get_tutorial_specific_nodes(request, tutorial):
     """Create navigation tree, to append to the main navigation tree containing
     the default tutorial specific links
 
@@ -142,21 +172,60 @@ def get_tutorial_specific_nodes(request, context, tutorial_id, lecture_id):
     """
     nodes = []
 
-    if request.has_permission('edit', context):
-        nodes.append(NavigationTree("Tutorial editieren",
-            request.route_path('tutorial_edit', tutorial_id=tutorial_id)))
+    data = [
+        ("Übersicht", "tutorial_view", "viewOverview"),
+        ("Ändern", "tutorial_edit", "edit"),
+        ("Punkteübersicht", "tutorial_results", "viewAll"),
+        ("E-Mail an Teilnehmer schreiben", "tutorial_email", "sendMail"),
+        ("Status-Emails bestellen/ abbestellen", "tutorial_email_preference", "viewAll"),
+    ]
 
-    if request.has_permission('viewAll', context):
-        nodes.append(NavigationTree("Punkteübersicht",
-            request.route_path('tutorial_results', lecture_id=lecture_id,
-                tutorial_ids=tutorial_id)))
+    for label, route, permission in data:
+        append_node_if_permitted(request, TutorialContext, permission, route, label,
+                                 {'lecture_id': tutorial.lecture.id, 'tutorial_ids': tutorial.id,
+                                  'tutorial_id': tutorial.id}, nodes)
 
-    if request.has_permission('sendMail', context):
-        nodes.append(NavigationTree("E-Mail an Teilnehmer schreiben",
-            request.route_path('tutorial_email', tutorial_ids=tutorial_id)))
+    return nodes
 
-    if request.has_permission('viewAll', context):
-        nodes.append(NavigationTree("Status-Emails bestellen/ abbestellen",
-            request.route_path('tutorial_email_preference', tutorial_ids=tutorial_id)))
+
+def get_exam_specific_nodes(request, exam):
+    """Create navigation tree with exam items
+
+    Returns:
+        A list of subtrees
+    """
+    nodes = []
+
+    data = [
+        ("Ändern", "exam_edit", "edit", True),
+        ("Punkte manuell eintragen", "exam_enter_points", "view_points", False),
+        ("Punkte interaktiv eintragen", "exam_enter_points_single", "view_points", False),
+        ("Zulassungen/Anmeldungen/Atteste", "exam_admission", "view_points", False),
+        ("Exportieren", "exam_export", "view_points", False),
+        ("Statistiken", "exam_statistics", "view_points", False),
+    ]
+
+    for label, route, permission, generic in data:
+        if generic:
+            append_node_if_permitted(request, ExamContext, permission, route, label,
+                                     {'exam_id': exam.id}, nodes)
+        else:
+            exam_node = NavigationTree(label)
+            own_tutorials = owned_tutorials_in_lecture(request.user, exam.lecture)
+            if own_tutorials:
+                append_node_if_permitted(request, ExamContext, permission, route, "Eigene Übungsgruppen",
+                                         {'exam_id': exam.id, 'tutorial_ids': ','.join([str(t.id) for t in own_tutorials])}, exam_node.children)
+            if request.user in exam.lecture.assistants or request.user.is_admin:
+                append_node_if_permitted(request, ExamContext, permission, route, "Alle Übungsgruppen",
+                                         {'exam_id': exam.id,
+                                          'tutorial_ids': ','.join([str(t.id) for t in exam.lecture.tutorials])},
+                                         exam_node.children)
+            for tutorial in exam.lecture.tutorials:
+                append_node_if_permitted(request, ExamContext, permission, route, tutorial_str(tutorial),
+                                         {'exam_id': exam.id,
+                                          'tutorial_ids': str(tutorial.id)},
+                                         exam_node.children)
+            if exam_node.children:
+                nodes.append(exam_node)
 
     return nodes

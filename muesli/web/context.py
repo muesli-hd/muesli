@@ -1,4 +1,3 @@
-from muesli.web.navigation_tree import *
 from muesli.models import *
 from pyramid.security import Allow, Deny, Everyone, Authenticated, DENY_ALL, ALL_PERMISSIONS
 from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden, HTTPBadRequest
@@ -11,12 +10,14 @@ from muesli.utils import editAllTutorials, editOwnTutorials, editNoTutorials
 def getTutorials(request):
     """returns tutorials and tutorial_ids for this request.
     Does also a check whether the tutorials belong to the same lecture."""
-    tutorial_ids = request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', '')).split(',')
-    if len(tutorial_ids)==1 and tutorial_ids[0]=='':
-        tutorial_ids = []
-        tutorials = []
-    else:
+    try:
+        tutorial_ids = str(request.matchdict.get('tutorial_ids', request.matchdict.get('tutorial_id', ''))).split(',')
+        if len(tutorial_ids) == 1 and tutorial_ids[0] == '':
+            raise ValueError
         tutorials = request.db.query(Tutorial).filter(Tutorial.id.in_(tutorial_ids)).all()
+    except ValueError:
+        # sqlalchemy.exc.DataError
+        return [], []
     checkTutorials(tutorials)
     return tutorials, tutorial_ids
 
@@ -77,6 +78,7 @@ class GradingContext:
     def __init__(self, request):
         grading_id = request.matchdict['grading_id']
         self.grading = request.db.query(Grading).get(grading_id)
+        self.lecture = self.grading.lecture
         if self.grading is None:
             raise HTTPNotFound(detail='Grading not found')
         self.__acl__ = [
@@ -99,19 +101,6 @@ class LectureContext:
         # add lecture specific links
         if self.lecture is None:
             return
-
-        if request.has_permission('edit', self):
-            lecture_root = NavigationTree('Vorlesung: {}'.format(self.lecture.name),
-                    request.route_url('lecture_edit', lecture_id=self.lecture.id))
-        else:
-            lecture_root = NavigationTree('Vorlesung: {}'.format(self.lecture.name),
-                    request.route_url('lecture_view', lecture_id=self.lecture.id))
-        nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
-        for node in nodes:
-            lecture_root.append(node)
-
-        if lecture_root.children:
-            request.navigationTree.prepend(lecture_root)
 
 class TutorialContext:
     def __init__(self, request):
@@ -151,28 +140,6 @@ class TutorialContext:
         if self.lecture is None:
             return
 
-        if request.has_permission('edit', self):
-            lecture_root = NavigationTree('Vorlesung: {}'.format(self.lecture.name),
-                    request.route_url('lecture_edit', lecture_id=self.lecture.id))
-        else:
-            lecture_root = NavigationTree('Vorlesung: {}'.format(self.lecture.name),
-                    request.route_url('lecture_view', lecture_id=self.lecture.id))
-        nodes = get_lecture_specific_nodes(request, self, self.lecture.id)
-        for node in nodes:
-            lecture_root.append(node)
-
-        for tutorial in self.tutorials:
-            tutorial_root = NavigationTree("{} ({})".format(tutorial.lecture.name, tutorial.time.__html__()),
-                                           request.route_url('tutorial_view', tutorial_ids=tutorial.id))
-            nodes = get_tutorial_specific_nodes(request, self, tutorial.id,
-                    self.lecture.id)
-            for node in nodes:
-                tutorial_root.append(node)
-            if tutorial_root.children:
-                request.navigationTree.prepend(tutorial_root)
-
-        if lecture_root.children:
-            request.navigationTree.prepend(lecture_root)
 
 class AssignStudentContext(object):
     def __init__(self, request):
@@ -180,6 +147,7 @@ class AssignStudentContext(object):
         tutorial_id = request.POST['new_tutorial']
         self.student = request.db.query(User).get(student_id)
         self.tutorial = request.db.query(Tutorial).get(tutorial_id)
+        self.lecture = self.tutorial.lecture
         if self.student is None:
             raise HTTPNotFound(detail='Student not found')
         if self.tutorial is None:
@@ -198,7 +166,8 @@ class ExamContext:
         if self.exam is None:
             raise HTTPNotFound(detail='Exam not found')
         self.tutorial_ids_str = request.matchdict.get('tutorial_ids', '')
-        self.tutorials, self.tutorial_ids =  getTutorials(request)
+        self.tutorials, self.tutorial_ids = getTutorials(request)
+        self.lecture = self.exam.lecture
         self.__acl__ = [
                 #(Allow, Authenticated, 'view_own_points'),
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
@@ -221,17 +190,6 @@ class ExamContext:
         if self.exam.lecture is None:
             return
 
-        if request.has_permission('edit', self):
-            lecture_root = NavigationTree(self.exam.lecture.name,
-                    request.route_url('lecture_edit', lecture_id=self.exam.lecture.id))
-        else:
-            lecture_root = NavigationTree(self.exam.lecture.name,
-                    request.route_url('lecture_view', lecture_id=self.exam.lecture.id))
-        nodes = get_lecture_specific_nodes(request, self, self.exam.lecture.id)
-        for node in nodes:
-            lecture_root.append(node)
-
-        request.navigationTree.prepend(lecture_root)
 
 class ExerciseContext:
     def __init__(self, request):
@@ -240,6 +198,7 @@ class ExerciseContext:
         if self.exercise is None:
             raise HTTPNotFound(detail='Exercise not found')
         self.exam = self.exercise.exam
+        self.lecture = self.exam.lecture
         if 'tutorial_ids' in request.matchdict:
             self.tutorial_ids = request.matchdict['tutorial_ids'].split(',')
             if len(self.tutorial_ids)==1 and self.tutorial_ids[0]=='':

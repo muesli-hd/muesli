@@ -729,6 +729,7 @@ def interactive_admission(request):
 
 @view_config(route_name='exam_auto_admit', renderer='json', context=ExamContext, permission='edit')
 def autoadmit(request):
+    """Unfortunately this is still not fully implemented. I have a script on my laptop calling this regularly for lectures that ask for this functionality"""
     exam = request.context.exam
     assignments = exam.lecture.exams.filter(models.Exam.category == "assignment").all()
     admission_limit = int(request.params['admission_limit'])

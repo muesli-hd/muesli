@@ -2,12 +2,6 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<script type="text/javascript">
-set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture_view", lecture_id=exam.lecture.id)}']
-                ${",['Uebungsgruppe','"+request.route_path('tutorial_view', tutorial_ids=tutorial_ids)+"']" if tutorial_ids else ''}
-     ]);
-</script>
-
 
 <h2>Punkte eintragen</h2>
 

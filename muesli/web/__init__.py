@@ -102,9 +102,9 @@ def add_css_to_request(event):
 def add_config_to_request(event):
     event.request.config = muesli.config
 
-@subscriber(BeforeTraversal)
-def add_navigationTree_to_request(event):
-    event.request.navigationTree = create_navigation_tree(event.request, event.request.user)
+@subscriber(BeforeRender)
+def add_navigation_tree_to_request(event):
+    event['navigation_tree'] = create_navigation_tree(event['request'])
 
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):
