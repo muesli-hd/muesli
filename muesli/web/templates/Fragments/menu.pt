@@ -34,13 +34,6 @@
                  class="nav-link" tal:attributes="href request.route_path('start')">Übersicht</a>
             </li>
 
-            <li class="nav-item active" tal:condition="request.userInfo.is_admin()">
-              <a class="nav-link" tal:attributes="href request.route_path('admin')">Administration</a>
-            </li>
-
-            <li class="nav-item active">
-              <a class="nav-link" tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a>
-            </li>
             <!-- Navigation tree -->
             <div tal:condition="request.user is not None and hasattr(request, 'navigationTree')" tal:omit-tag="">
               <div tal:define="nodes request.navigationTree.children" tal:omit-tag="">
@@ -81,6 +74,14 @@
           </ul>
 
           <ul class="nav navbar-nav flex-row justify-content-center">
+            <li class="nav-item active" tal:condition="request.userInfo.is_admin()">
+              <a class="nav-link" tal:attributes="href request.route_path('admin')">Administration</a>
+            </li>
+
+            <li class="nav-item active">
+              <a class="nav-link" tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a>
+            </li>
+
             <li class="nav-item dropdown text-center"
                 tal:condition="request.userInfo.is_loggedin()">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
