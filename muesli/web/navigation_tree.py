@@ -19,8 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from muesli import utils
-from muesli.web.context import LectureContext, TutorialContext, ExamContext, GradingContext
-from muesli.models import Tutorial, Lecture
+from muesli import models
 
 import sqlalchemy
 from sqlalchemy.orm import relationship, sessionmaker, backref, column_property, joinedload
@@ -70,7 +69,7 @@ def create_navigation_tree(request):
 
 
     # add tutorials the user subscribed to
-    tutorials = request.user.tutorials.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture)).filter(Lecture.term >= semesterlimit)
+    tutorials = request.user.tutorials.options(joinedload(models.Tutorial.tutor), joinedload(models.Tutorial.lecture)).filter(models.Lecture.term >= semesterlimit)
     if tutorials.count() > 0:
         tutorials_node = NavigationTree("Belegte Übungsgruppen", request.route_url('overview'))
         for t in tutorials:
@@ -80,8 +79,8 @@ def create_navigation_tree(request):
         root.append(tutorials_node)
 
     # add lectures for which the user is either assistant or tutor
-    tutorials_as_tutor = request.user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture)).filter(Lecture.term >= semesterlimit).all()
-    lectures_as_assistant = request.user.lectures_as_assistant.filter(Lecture.term >= semesterlimit).all()
+    tutorials_as_tutor = request.user.tutorials_as_tutor.options(joinedload(models.Tutorial.tutor), joinedload(models.Tutorial.lecture)).filter(models.Lecture.term >= semesterlimit).all()
+    lectures_as_assistant = request.user.lectures_as_assistant.filter(models.Lecture.term >= semesterlimit).all()
     lectures_involved_in = {t.lecture for t in tutorials_as_tutor}.union(lectures_as_assistant)
     if lectures_involved_in:
         involved_in_node = NavigationTree("Vorlesungsorganisation")
@@ -127,7 +126,7 @@ def get_lecture_specific_nodes(request, lecture):
     ]
 
     is_assistant = request.user in lecture.assistants or request.user.is_admin
-    tutorials_as_tutor = request.user.tutorials_as_tutor.filter(Tutorial.lecture_id == lecture.id).all()
+    tutorials_as_tutor = request.user.tutorials_as_tutor.filter(models.Tutorial.lecture_id == lecture.id).all()
 
     for label, route, permission, needs_assistant in data:
         if is_assistant or not needs_assistant:
