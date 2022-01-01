@@ -339,7 +339,6 @@ def change_assistants(request):
                     request.session.flash('{} konnte nicht zu Assistenten hinzugefügt werden!'.format(requested_assistant_str),
                                           queue='messages')
                     continue
-            print(requested_assistant)
             if requested_assistant in current_assistant_set:
                 current_assistant_set.remove(requested_assistant)
             else:

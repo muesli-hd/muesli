@@ -41,6 +41,43 @@
             <li class="nav-item active">
               <a class="nav-link" tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a>
             </li>
+            <!-- Navigation tree -->
+            <div tal:condition="request.user is not None and hasattr(request, 'navigationTree')" tal:omit-tag="">
+              <div tal:define="nodes request.navigationTree.children" tal:omit-tag="">
+                <div metal:define-macro="nav_tree_view" tal:omit-tag="">
+                  <div tal:repeat="node nodes" tal:omit-tag="">
+                    <div tal:condition="node.is_first_level()" tal:omit-tag="">
+                      <li class="nav-item active" tal:condition="not node.children">
+                        <a class="nav-link" tal:attributes="href node.url">${node.label}</a>
+                      </li>
+                      <li class="nav-item active dropdown" tal:condition="node.children" tal:attributes="href node.url">
+                        <a class="nav-link dropdown-toggle" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            ${node.label}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                          <div tal:define="nodes node.children" metal:use-macro="template.macros['nav_tree_view']" />
+                        </ul>
+                      </li>
+                    </div>
+                    <div tal:condition="not node.is_first_level()" tal:omit-tag="">
+                      <li tal:condition="not node.children">
+                        <a class="dropdown-item" tal:attributes="href node.url">${node.label}</a>
+                      </li>
+                      <li tal:condition="node.children" class="dropdown-submenu" aria-labelledby="navbarDropdownMenuLink">
+                        <a tal:attributes="href node.url" role="button" data-toggle="dropdown" class="dropdown-item dropdown-toggle"
+                           aria-haspopup="true" aria-expanded="false">
+                          ${node.label}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                          <div tal:define="nodes node.children" metal:use-macro="template.macros['nav_tree_view']" />
+                        </ul>
+                      </li>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </ul>
 
           <ul class="nav navbar-nav flex-row justify-content-center">

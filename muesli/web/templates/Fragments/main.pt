@@ -20,6 +20,10 @@
         type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/bootstrap.min.css')"/>
   <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/popper.min.js')"></script>
   <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/bootstrap.min.js')"></script>
+  <link rel="stylesheet"
+        type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/bt4-dropdown-submenu.css')"/>
+  <script
+      type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/bt4-dropdown-submenu.js')"></script>
 
   <!-- Manually added scripts and stylesheets -->
   <link rel="stylesheet" type="text/css" tal:repeat="filename request.css"
@@ -31,26 +35,6 @@
 <body onload="aprilFool()">
 
 <metal:main metal:use-macro="templates('Fragments/menu.pt').macros['menu']" />
-
-<script>
-/* <![CDATA[ */
-function set_navigation(nav) {
-  var str = "<ul>\n";
-  for (var i = 0; i<nav.length; i++) {
-    str += '<li><a href="';
-    str += nav[i][1];
-    str += '">';
-    str += nav[i][0];
-    str += '</a></li>\n';
-  }
-  str += '</ul>';
-  document.getElementById('history').innerHTML = str;
-}
-/* ]]> */
-</script>
-
-<div id="history">
-</div>
 
 <metal:main metal:use-macro="templates('Fragments/message_queue.pt').macros['message_queue']">
 
@@ -64,7 +48,6 @@ function set_navigation(nav) {
   <main class="pt-3" role="main">
     <div class="jumbotron bg-mdb-color-lighten-6" id="content">
 
-      <!-- <metal:main metal:use-macro="templates('Fragments/navigation.pt').macros['navigation']" /> -->
       <metal:content define-slot="content" />
 
     </div>

@@ -1,0 +1,10 @@
+/* https://stackoverflow.com/questions/44467377/bootstrap-4-multilevel-dropdown-inside-navigation */
+.dropdown-submenu {
+  position: relative;
+}
+
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+}
+

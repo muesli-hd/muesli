@@ -26,16 +26,22 @@ import sqlalchemy
 from sqlalchemy.orm import relationship, sessionmaker, backref, column_property, joinedload
 
 class NavigationTree(object):
-    def __init__(self, label, url=""):
+    def __init__(self, label, url="#"):
         self.children = []
         self.label = label
         self.url = url
+        self.parent = None
 
     def prepend(self, node):
+        node.parent = self
         self.children.insert(0, node)
 
     def append(self, node):
+        node.parent = self
         self.children.append(node)
+
+    def is_first_level(self):
+        return self.parent is not None and self.parent.parent is None
 
     def __repr__(self, level=0):
         ret = "{}{}({})\n".format("+"*level, self.label, self.url)
