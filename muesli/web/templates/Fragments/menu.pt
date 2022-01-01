@@ -18,7 +18,7 @@
 <!--! along with this program.  If not, see <http://www.gnu.org/licenses/>. -->
 
 <metal:main metal:define-macro="menu">
-  <nav class="navbar navbar-dark navbar-expand-md bg-dark justify-content-md-center justify-content-start">
+  <nav class="navbar navbar-dark navbar-expand-md bg-dark justify-content-md-center">
       <a class="navbar-brand display-1" tal:attributes="href request.route_path('overview')">
         <img class="mr-1" style="height: 1em;" tal:attributes="src '/favicon.ico'">
         MÜSLI
@@ -26,9 +26,9 @@
       <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#collapsingNavbar2">
           <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="navbar-collapse collapse justify-content-between align-items-center w-100" id="collapsingNavbar2">
+      <div class="navbar-collapse collapse w-100" id="collapsingNavbar2">
 
-          <ul class="navbar-nav mx-auto text-center">
+          <ul class="navbar-nav mx-auto text-center w-1000 justify-content-start">
             <li class="nav-item active">
               <a tal:condition="request.userInfo.is_loggedin()"
                  class="nav-link" tal:attributes="href request.route_path('start')">Übersicht</a>
@@ -71,7 +71,7 @@
             </div>
           </ul>
 
-          <ul class="nav navbar-nav flex-row justify-content-center">
+          <ul class="nav navbar-nav flex-row justify-content-end ml-auto w-100">
             <li class="nav-item active" tal:condition="request.userInfo.is_admin()">
               <a class="nav-link" tal:attributes="href request.route_path('admin')">Administration</a>
             </li>
