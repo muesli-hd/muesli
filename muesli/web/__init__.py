@@ -104,7 +104,8 @@ def add_config_to_request(event):
 
 @subscriber(BeforeRender)
 def add_navigation_tree_to_request(event):
-    event['navigation_tree'] = create_navigation_tree(event['request'])
+    if event['request']:
+        event['navigation_tree'] = create_navigation_tree(event['request'])
 
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):

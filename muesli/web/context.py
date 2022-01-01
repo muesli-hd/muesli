@@ -78,9 +78,9 @@ class GradingContext:
     def __init__(self, request):
         grading_id = request.matchdict['grading_id']
         self.grading = request.db.query(Grading).get(grading_id)
-        self.lecture = self.grading.lecture
         if self.grading is None:
             raise HTTPNotFound(detail='Grading not found')
+        self.lecture = self.grading.lecture
         self.__acl__ = [
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('view', 'edit')) for assistant in self.grading.lecture.assistants]

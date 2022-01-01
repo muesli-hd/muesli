@@ -93,7 +93,7 @@ def create_navigation_tree(request):
 
 
     # add current lecture
-    if hasattr(request.context, 'lecture') and request.context.lecture:
+    if hasattr(request, 'context') and hasattr(request.context, 'lecture') and request.context.lecture:
         lecture = request.context.lecture
         this_lecture_node = NavigationTree(lecture.name, request.route_url('lecture_view', lecture_id=lecture.id))
         this_lecture_node.children = get_lecture_specific_nodes(request, lecture)
