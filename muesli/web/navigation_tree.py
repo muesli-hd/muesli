@@ -68,45 +68,39 @@ def create_navigation_tree(request, user):
 
     semesterlimit = utils.getSemesterLimit()
 
-    tutorials_as_tutor = user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
-    tutorials = user.tutorials.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
-    lectures_as_assistant = user.lectures_as_assistant
 
-    # add tutorials the user subsrcibed to
-    tutorials = tutorials.filter(Lecture.term >= semesterlimit)
-    tutorial_root_node = NavigationTree("Belegte Übungsgruppen", request.route_url('overview'))
-    root.append(tutorial_root_node)
-    for t in tutorials:
-        tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
-            t.time.__html__(), t.tutor_name), request.route_url('lecture_view_points',
-                lecture_id=t.lecture.id))
-        tutorial_root_node.append(tutorial_node)
+    # add tutorials the user subscribed to
+    tutorials = user.tutorials.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture)).filter(Lecture.term >= semesterlimit)
+    if tutorials.count() > 0:
+        tutorials_node = NavigationTree("Belegte Übungsgruppen", request.route_url('overview'))
+        for t in tutorials:
+            t_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
+                t.time.__html__(), t.tutor_name), request.route_url('lecture_view_points',
+                    lecture_id=t.lecture.id))
+            tutorials_node.append(t_node)
+        root.append(tutorials_node)
 
 
     # add tutorials the user tutors
-    tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
-
-    tutor_node = NavigationTree("Eigene Übungsgruppen", request.route_url('overview'))
-    for t in tutorials_as_tutor:
-        tutorial_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
-            t.time.__html__(), t.place),
-            request.route_url('tutorial_view', tutorial_ids=t.id))
-        tutor_node.append(tutorial_node)
-
-    if tutor_node.children:
-        root.append(tutor_node)
+    tutorials_as_tutor = user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture)).filter(Lecture.term >= semesterlimit)
+    if tutorials_as_tutor.count() > 0:
+        tutorials_as_tutor_node = NavigationTree("Eigene Übungsgruppen", request.route_url('overview'))
+        for t in tutorials_as_tutor:
+            t_node = NavigationTree("{} ({}, {})".format(t.lecture.name,
+                t.time.__html__(), t.place),
+                request.route_url('tutorial_view', tutorial_ids=t.id))
+            tutorials_as_tutor_node.append(t_node)
+        root.append(tutorials_as_tutor_node)
 
     # add lectures for which the user is assistant
-    lectures_as_assistant = lectures_as_assistant.filter(Lecture.term >= semesterlimit)
-
-    assistant_node = NavigationTree("Eigene Vorlesungen", request.route_url('overview'))
-    for l in lectures_as_assistant:
-        lecture_node = NavigationTree(l.name,
-            request.route_url('lecture_edit', lecture_id=l.id))
-        assistant_node.append(lecture_node)
-
-    if assistant_node.children:
-        root.append(assistant_node)
+    lectures_as_assistant = user.lectures_as_assistant.filter(Lecture.term >= semesterlimit)
+    if lectures_as_assistant.count() > 0:
+        lectures_as_assistant_node = NavigationTree("Eigene Vorlesungen", request.route_url('overview'))
+        for l in lectures_as_assistant:
+            lecture_node = NavigationTree(l.name,
+                request.route_url('lecture_edit', lecture_id=l.id))
+            lectures_as_assistant_node.append(lecture_node)
+            root.append(lectures_as_assistant_node)
 
     return root
 
