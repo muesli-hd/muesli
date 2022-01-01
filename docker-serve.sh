@@ -3,12 +3,11 @@
 echo "Waiting for database to start ..."; sleep 3;
 wait-for-it "${MUESLI_DB_HOST}":5432 -t 30 || exit 1
 
-if [[ -v MUESLI_TESTMODE ]] && [[ ! -f muesli.yml ]]
+if [[ -v MUESLI_TESTMODE ]]
 then
     echo "Generating configs ... "
-    sed "s/postgresql:\/\/\/muesli/postgresql:\/\/${MUESLI_DB_USER:-postgres}:${MUESLI_DB_PASSWORD}@${MUESLI_DB_HOST}\/${MUESLI_DB}/" muesli.yml.example | sed 's/production: True/production: False/' | sed 's/server: 0.0.0.0/server: mailcatcher:1025/' > muesli.yml
-    sed "s/postgres:\/\/\/muesli/postgres:\/\/${MUESLI_DB_USER:-postgres}:${MUESLI_DB_PASSWORD}@${MUESLI_DB_HOST}\/${MUESLI_DB}/" alembic.ini.example > alembic.ini
-    python3 -m smtpd -n -c DebuggingServer localhost:25 &
+    sed "s/connection: \S\+/connection: postgresql:\/\/${MUESLI_DB_USER:-postgres}:${MUESLI_DB_PASSWORD}@${MUESLI_DB_HOST}\/${MUESLI_DB}/" muesli.yml.example | sed 's/production: \S\+/production: False/' | sed 's/server: \S\+/server: mailcatcher:1025/' > muesli.yml
+    sed "s/sqlalchemy.url = \S\+/sqlalchemy.url = postgres:\/\/${MUESLI_DB_USER:-postgres}:${MUESLI_DB_PASSWORD}@${MUESLI_DB_HOST}\/${MUESLI_DB}/" alembic.ini.example > alembic.ini
     export PYRAMID_DEBUG_TEMPLATES=1
 fi
 

@@ -1,15 +1,16 @@
 ---
-version: '3.6'
+version: '3.2'
 
 services:
   postgres:
     container_name: muesli_postgres_testrunner
     image: 'postgres:latest'
     environment:
-      - POSTGRES_HOST_AUTH_METHOD=trust
-      - POSTGRES_DB=mueslitest
+      POSTGRES_DB: muesli
+      POSTGRES_USER: muesli
+      POSTGRES_PASSWORD: mueslipw
     volumes:
-      - '../travis-muesli-origDb.sql:/docker-entrypoint-initdb.d/travis-muesli-origDb.sql'
+      - '../deployment/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh'
 
   muesli:
     image: "muesli:tests"
@@ -19,5 +20,10 @@ services:
       dockerfile: ./docker_run_tests/Dockerfile
     volumes:
       - '../:/opt/muesli4'
+    environment:
+      MUESLI_DB_HOST: postgres
+      MUESLI_DB: muesli
+      MUESLI_DB_USER: muesli
+      MUESLI_DB_PASSWORD: mueslipw
     depends_on:
       - postgres
