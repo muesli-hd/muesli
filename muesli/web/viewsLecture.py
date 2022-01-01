@@ -274,6 +274,8 @@ class Edit:
         exams = dict([[cat['id'], sorted(list(lecture.exams.filter(models.Exam.category==cat['id'])),
                               key=lambda x:len(x.name))]
                       for cat in utils.categories])
+        self.request.javascript.append('select2.min.js')
+        self.request.css.append('select2.min.css')
         return {'lecture': lecture,
                 'names': names,
                 'pref_count': pref_count,
@@ -323,25 +325,32 @@ def delete(request):
 def change_assistants(request):
     lecture = request.context.lecture
     if request.method == 'POST':
-        for index, assistant in enumerate(lecture.assistants):
-            if 'change-{}'.format(assistant.id) in request.POST:
-                new_assistant = request.db.query(models.User).get(request.POST['assistant-{}'.format(assistant.id)])
-                if new_assistant in lecture.assistants:
-                    request.session.flash('{} ist bereits als Assistent für die Vorlesung eingetragen'.format(new_assistant.name), queue='errors')
-                else:
-                    lecture.assistants[index] = new_assistant
-                    request.session.flash('{} ist jetzt als neuer Assistent für die Vorlesung eingetragen!'.format(new_assistant.name), queue='messages')
-            if 'remove-{}'.format(assistant.id) in request.POST:
-                request.session.flash('{} wurde als Vorlesungsassistent entfernt!'.format(lecture.assistants[index].name), queue='messages')
-                del lecture.assistants[index]
-        if 'add-assistant' in request.POST:
-            if request.POST['new-assistant'] == "None":
-                request.session.flash('Bitte einen Assistenten auswählen!', queue='errors')
+        current_assistant_set = set(lecture.assistants)
+        for requested_assistant_str in request.POST.getall('assistants'):
+            # Frist try to add a normal assistant
+            try:
+                requested_assistant_int = int(requested_assistant_str)
+                requested_assistant = request.db.query(models.User).get(requested_assistant_int)
+            except ValueError:
+                # Now try to find a user with a corresponding email address
+                try:
+                    requested_assistant = request.db.query(models.User).filter(models.User.email == requested_assistant_str).one()
+                except exc.NoResultFound:
+                    request.session.flash('{} konnte nicht zu Assistenten hinzugefügt werden!'.format(requested_assistant_str),
+                                          queue='messages')
+                    continue
+            print(requested_assistant)
+            if requested_assistant in current_assistant_set:
+                current_assistant_set.remove(requested_assistant)
             else:
-                new_assistant = request.db.query(models.User).get(request.POST['new-assistant'])
-                if new_assistant and new_assistant not in lecture.assistants:
-                    lecture.assistants.append(new_assistant)
-                    request.session.flash('{} ist jetzt als zusätzlicher Assistent für die Vorlesung eingetragen!'.format(new_assistant.name), queue='messages')
+                lecture.assistants.append(requested_assistant)
+                request.session.flash(
+                    '{} ist jetzt als zusätzlicher Assistent für die Vorlesung eingetragen!'.format(requested_assistant.name),
+                    queue='messages')
+        for assistant_to_remove in current_assistant_set:
+            lecture.assistants.remove(assistant_to_remove)
+            request.session.flash('{} wurde als Vorlesungsassistent entfernt!'.format(assistant_to_remove.name),
+                                  queue='messages')
     if request.db.new or request.db.dirty or request.db.deleted:
         if len(lecture.assistants) > 0:
             lecture.old_assistant = lecture.assistants[0]

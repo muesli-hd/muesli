@@ -8,38 +8,37 @@
   <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
 
+<script>
+$(document).ready(function() {
+  // The following is some boilerplate to enable select2 and let backspace remove a bullet instead of converting it to text
+  // See https://github.com/select2/select2/issues/3354
+  $.fn.select2.amd.require(['select2/selection/search'], function (Search) {
+    var oldRemoveChoice = Search.prototype.searchRemoveChoice;
+
+    Search.prototype.searchRemoveChoice = function () {
+      oldRemoveChoice.apply(this, arguments);
+      this.$search.val('');
+    };
+
+    $('#assistant-select').select2();
+  });
+});
+</script>
+
 <div tal:condition="request.permissionInfo.has_permission('change_assistant')">
   <form tal:attributes="action request.route_path('lecture_change_assistants', lecture_id=lecture.id)" method="POST">
-  <div class="form-group">
-    <div class="input-group mb-2" tal:repeat="assistant lecture.assistants">
-       <select class="custom-select w-auto" tal:attributes="name 'assistant-%i' % assistant.id">
-         <span tal:repeat="assistant2 assistants" tal:omit-tag="">
-         <option tal:attributes="value assistant2.id; selected 'selected' if assistant.id == assistant2.id else None">
-           ${assistant2}
-         </option>
-         </span>
-       </select>
-       <div class="input-group-append">
-         <input class="btn btn-primary" role="button" type="submit" value="Ändern" tal:attributes="name 'change-%i' % assistant.id" />
-       </div>
-       <div class="input-group-append">
-         <input class="btn btn-danger" role="button" type="submit" value="Löschen" tal:attributes="name 'remove-%i' % assistant.id" />
-       </div>
+    <div class="form-group">
+      <div class="input-group mb-2">
+        <select id="assistant-select" class="custom-select" name="assistants" multiple="multiple">
+          <option tal:repeat="assistant assistants" tal:attributes="value assistant.id; selected 'selected' if assistant in lecture.assistants else None">
+            ${assistant}
+          </option>
+        </select>
+        <div class="input-group-append">
+          <input class="btn btn-success" role="button" type="submit" value="Speichern" name="save-assistants"/>
+        </div>
+      </div>
     </div>
-    <div class="input-group">
-       <select class="custom-select" name="new-assistant">
-         <option value="None" selected="selected">---</option>
-         <span tal:repeat="assistant2 assistants" tal:omit-tag="">
-           <option tal:attributes="value assistant2.id">
-             ${assistant2}
-           </option>
-         </span>
-       </select>
-       <div class="input-group-append">
-         <input class="btn btn-success" role="button" type="submit" value="Hinzufügen" name="add-assistant" />
-       </div>
-    </div>
-  </div>
   </form>
 </div>
 <div tal:condition="not request.permissionInfo.has_permission('change_assistant')">
