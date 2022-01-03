@@ -3,10 +3,11 @@
 Ein großes Dankeschön an Christian Heusel für die Implementierung des Bootstrap Designs im MÜSLI.
 
 Einige andere kleinere Bugfixes sind inzwischen eingegangen, wie beispielsweise auf der Bearbeitungsseite für Noten oder
-der interaktiven Vergabe von Punkten auf Übungsblättern.
+der interaktiven Vergabe von Punkten auf Übungsblättern. Außerdem wurde auch das Ziel aufgegeben, MÜSLI möglichst auch
+ohne aktiviertes Javascript vollumfänglich nutzen zu können.
 
 Es wird eine neue MaintainerIn (m,w,d) fürs MÜSLI gesucht. Bei Interesse schreiben Sie bitte eine E-Mail an Herrn
-Vogel vom Mathematischen Institut
+Vogel vom Mathematischen Institut.
 
 ### 2020-04-14
 

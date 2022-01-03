@@ -67,6 +67,7 @@ def overview(request):
         tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
         tutorials = tutorials.filter(Lecture.term >= semesterlimit)
         lectures_as_assistant = lectures_as_assistant.filter(Lecture.term >= semesterlimit)
+    request.javascript.append('unsubscribe_modal_helpers.js')
     return {'uboo': uboo,
             'time_preferences': request.user.prepareTimePreferences(),
             'penalty_names': utils.penalty_names,
