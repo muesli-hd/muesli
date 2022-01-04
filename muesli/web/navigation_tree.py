@@ -73,7 +73,7 @@ def create_navigation_tree(request):
     if tutorials.count() > 0:
         tutorials_node = NavigationTree("Belegte Übungsgruppen", request.route_url('overview'))
         for t in tutorials:
-            t_node = NavigationTree(tutorial_str(t), request.route_url('lecture_view_points',
+            t_node = NavigationTree("{} ({})".format(t.lecture.name, tutorial_str(t)), request.route_url('lecture_view_points',
                     lecture_id=t.lecture.id))
             tutorials_node.append(t_node)
         root.append(tutorials_node)
@@ -97,7 +97,7 @@ def create_navigation_tree(request):
         lecture = request.context.lecture
         this_lecture_node = NavigationTree(lecture.name, request.route_url('lecture_view', lecture_id=lecture.id))
         this_lecture_node.children = get_lecture_specific_nodes(request, lecture)
-        # Only add this top level menu field, if makes sense
+        # Only add this top level menu field, if it makes sense
         if this_lecture_node.children:
             root.append(this_lecture_node)
 
