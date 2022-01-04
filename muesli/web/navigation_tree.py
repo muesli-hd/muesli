@@ -71,7 +71,7 @@ def create_navigation_tree(request):
     # add tutorials the user subscribed to
     tutorials = request.user.tutorials.options(joinedload(models.Tutorial.tutor), joinedload(models.Tutorial.lecture)).filter(models.Lecture.term >= semesterlimit)
     if tutorials.count() > 0:
-        tutorials_node = NavigationTree("Belegte Übungsgruppen", request.route_url('overview'))
+        tutorials_node = NavigationTree("Aktuelle Übungsgruppen", request.route_url('overview'))
         for t in tutorials:
             t_node = NavigationTree("{} ({})".format(t.lecture.name, tutorial_str(t)), request.route_url('lecture_view_points',
                     lecture_id=t.lecture.id))
