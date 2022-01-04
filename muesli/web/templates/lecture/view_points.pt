@@ -95,11 +95,7 @@
   <div class="card mt-2" tal:condition="grades">
     <div class="card-body">
     <h3 class="card-title">Benotungen</h3>
-    <table class="table table-striped table-sm w-auto">
-      <thead class="thead-dark">
-        <th scope="col"></th>
-        <th scope="col">Punkte</th>
-      </thead>
+    <table class="table table-sm w-auto">
       <tr tal:repeat="grade grades">
         <th>${grade.grading.name}</th>
         <td>${grade.grade if grade.grade is not None else '-'}</td>
