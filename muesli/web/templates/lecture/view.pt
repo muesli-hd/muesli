@@ -52,6 +52,7 @@
         <th scope="col">Zeit</th>
         <th scope="col">Raum</th>
         <th scope="col">Auslastung</th>
+        <th scope="col" class="w-auto"></th>
         <th scope="col">Tutor</th>
         <th scope="col">Kommentar</th>
         <th scope="col"></th>
@@ -61,6 +62,7 @@
         <th scope="col">Zeit</th>
         <th scope="col">Raum</th>
         <th scope="col">Auslastung</th>
+        <th scope="col" class="w-auto"></th>
         <th scope="col">Tutor</th>
         <th scope="col">Titel</th>
         <th scope="col"></th>
@@ -72,6 +74,12 @@
           <td>${tutorial.place}</td>
           <td>
             <metal:main metal:use-macro="templates('Fragments/HTML/tutorial_occupancy.pt').macros['tutorial_occupancy']" />
+          </td>
+
+          <td class="w-auto">
+            <div class="col-sm-auto" style="padding: 0; margin: 0">
+              ${tutorial.student_count}/${tutorial.max_students}
+            </div>
           </td>
           <td>
             <span tal:omit-tag='' tal:condition='tutorial.tutor'>

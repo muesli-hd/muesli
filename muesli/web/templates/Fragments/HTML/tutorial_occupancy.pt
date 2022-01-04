@@ -8,17 +8,10 @@
       percentage = (tutorial.student_count/tutorial.max_students) * 100
       str_percentage = "%5.2f" % percentage
   ?>
-  <div class="row">
-    <div class="col">
-      <div class="progress bg-light">
-        <div class="progress-bar progress-bar-striped"
-             role="progressbar" style="padding: 0; margin: 0"
-             aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"
-             tal:attributes="aria-valuenow percentage; class color_attr; style 'width:' + str_percentage + '%'"></div>
-      </div>
-    </div>
-    <div class="col-sm-auto" style="padding: 0; margin: 0">
-      ${tutorial.student_count}/${tutorial.max_students}
-    </div>
+  <div class="progress bg-light">
+    <div class="progress-bar progress-bar-striped"
+         role="progressbar" style="padding: 0; margin: 0"
+         aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"
+         tal:attributes="aria-valuenow percentage; class color_attr; style 'width:' + str_percentage + '%'"></div>
   </div>
 </metal:main>
