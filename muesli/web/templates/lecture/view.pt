@@ -106,7 +106,7 @@
                tal:condition="(tutorial.student_count < tutorial.max_students) and subscribed_tutorial and tutorial != subscribed_tutorial"
                tal:attributes="data-href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)"
                data-modal-text="Möchtest du die Übungsgruppe der Vorlesung „${tutorial.lecture.name}“
-               ${'bei {}'.format(subscribed_tutorial.tutor.name) if subscribed_tutorial.tutor is not None else ''} wirklick verlassen und zur
+               ${'bei {}'.format(subscribed_tutorial.tutor.name) if subscribed_tutorial.tutor is not None else ''} wirklich verlassen und zur
                neuen Gruppe ${'bei {}'.format(tutorial.tutor.name) if tutorial.tutor is not None else ''} wechseln?"
                data-modal-button-text="Wechseln" data-modal-button-class="btn-primary">
                Wechseln
@@ -115,7 +115,7 @@
                tal:condition="tutorial == subscribed_tutorial"
                tal:attributes="data-href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)"
                data-modal-text="Möchtest du die Übungsgruppe der Vorlesung „${tutorial.lecture.name}“
-               ${'bei {}'.format(tutorial.tutor.name) if tutorial.tutor is not None else ''} wirklick verlassen?">
+               ${'bei {}'.format(tutorial.tutor.name) if tutorial.tutor is not None else ''} wirklich verlassen?">
               Austreten
             </a>
           </td>

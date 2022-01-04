@@ -40,8 +40,8 @@
 
 <div class="container-fluid">
   <div class="alert alert-secondary mt-2" role="alert">
-    <div>Das MÜSLI sucht ab Januar eine/n neue/n Maintainer/in. Bei Interesse an dieser hilfswissenschaftlichen 20h
-         Stelle kontaktieren Sie bitte Denis Vogel per Email unter vogel@mathi.uni-heidelberg.de.
+    <div>Das MÜSLI sucht ab sofort eine/n neue/n Maintainer/in. Bei Interesse an dieser hilfswissenschaftlichen 20h/Monat
+      Stelle kontaktieren Sie bitte Denis Vogel per Email unter <a href="mailto:vogel@mathi.uni-heidelberg.de">vogel@mathi.uni-heidelberg.de</a>.
     </div>
   </div>
   <main class="pt-3" role="main">
