@@ -348,9 +348,12 @@ def change_assistants(request):
                     '{} ist jetzt als zusätzlicher Assistent für die Vorlesung eingetragen!'.format(requested_assistant.name),
                     queue='messages')
         for assistant_to_remove in current_assistant_set:
-            lecture.assistants.remove(assistant_to_remove)
-            request.session.flash('{} wurde als Vorlesungsassistent entfernt!'.format(assistant_to_remove.name),
-                                  queue='messages')
+            if len(lecture.assistants) > 1:
+                lecture.assistants.remove(assistant_to_remove)
+                request.session.flash('{} wurde als Vorlesungsassistent entfernt!'.format(assistant_to_remove.name),
+                                      queue='messages')
+            else:
+                request.session.flash('{} konnte nicht als Vorlesungsassistent entfernt werden, da sonst für diese Vorlesung kein Assistent mehr eingetragen wäre! Bitte wenden Sie sich an die MÜSLI Administration!'.format(assistant_to_remove.name), queue='errors')
     if request.db.new or request.db.dirty or request.db.deleted:
         if len(lecture.assistants) > 0:
             lecture.old_assistant = lecture.assistants[0]
