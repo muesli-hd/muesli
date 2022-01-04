@@ -326,7 +326,8 @@ def delete(request):
 def change_assistants(request):
     lecture = request.context.lecture
     if request.method == 'POST':
-        current_assistant_set = set(lecture.assistants)
+        assistants_to_remove = set(lecture.assistants)
+        amount_assistants = len(assistants_to_remove)
         for requested_assistant_str in request.POST.getall('assistants'):
             # Frist try to add a normal assistant
             try:
@@ -340,20 +341,24 @@ def change_assistants(request):
                     request.session.flash('{} konnte nicht zu Assistenten hinzugefügt werden!'.format(requested_assistant_str),
                                           queue='messages')
                     continue
-            if requested_assistant in current_assistant_set:
-                current_assistant_set.remove(requested_assistant)
+            if requested_assistant in assistants_to_remove:
+                assistants_to_remove.remove(requested_assistant)
             else:
                 lecture.assistants.append(requested_assistant)
                 request.session.flash(
                     '{} ist jetzt als zusätzlicher Assistent für die Vorlesung eingetragen!'.format(requested_assistant.name),
                     queue='messages')
-        for assistant_to_remove in current_assistant_set:
-            if len(lecture.assistants) > 1:
+                amount_assistants += 1
+
+        # check that there still is an assistant left if we remove the
+        # requested ones
+        if amount_assistants - len(assistants_to_remove) > 0 :
+            for assistant_to_remove in assistants_to_remove:
                 lecture.assistants.remove(assistant_to_remove)
                 request.session.flash('{} wurde als Vorlesungsassistent entfernt!'.format(assistant_to_remove.name),
-                                      queue='messages')
-            else:
-                request.session.flash('{} konnte nicht als Vorlesungsassistent entfernt werden, da sonst für diese Vorlesung kein Assistent mehr eingetragen wäre! Bitte wenden Sie sich an die MÜSLI Administration!'.format(assistant_to_remove.name), queue='errors')
+                                          queue='messages')
+        else:
+            request.session.flash('Es konnten keine Vorlesungsassistenten entfernt werden, da sonst für diese Vorlesung kein Assistent mehr eingetragen wäre! Bitte lassen Sie einen Assistenten übrig', queue='errors')
     if request.db.new or request.db.dirty or request.db.deleted:
         if len(lecture.assistants) > 0:
             lecture.old_assistant = lecture.assistants[0]
