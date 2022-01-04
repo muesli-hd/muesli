@@ -7,48 +7,49 @@
     </h2>
     <h3 class="card-subtitle mb-2 text-muted">für ${lecture.name}</h3>
 
-    <div tal:define="fF lambda f: '%.1f' % f if f != None else '-'" >
-  <div tal:repeat="catexams exams_by_category" tal:omit-tag="">
-    <table class="table table-striped table-sm w-auto">
-      <thead class="thead-dark">
-        <th scope="col">
-          ${catexams['name']}
-        </th>
-        <!-- The hack used below makes the tablehead fit above all further cols -->
-        <th scope="col" tal:attributes="colspan 1+max([len(e.exercises) for e in catexams['exams']])">
-          Punkte
-        </th>
-      </thead>
-      <tr tal:repeat="exam catexams['exams']">
-        <span tal:condition="not exam.results_hidden" tal:omit-tag="">
-        <th scope="col">
-          <a tal:condition="exam.url" tal:attributes="href exam.url">${exam.name}</a>
-          <span tal:condition="not exam.url" tal:omit-tag="">${exam.name}</span>
-        </th>
-        <td>
-          <strong>${fF(results[exam.id]['sum'])}/${fF(exam.getMaxpoints())}</strong>
-        </td>
-        <td tal:repeat="e exam.exercises">
-          ${fF(results[exam.id][e.id]['points'])}/${fF(results[exam.id][e.id]['exercise'].maxpoints)}
-        </td>
-        </span>
-      </tr>
-      <tfoot>
-        <th scope="row">Insgesamt: </th>
-        <td colspan="3"><strong>${fF(catexams['sum'])}/${fF(catexams['max'])}</strong>
-          <span tal:condition="catexams['max']>0 and catexams['max_rel']>0 and catexams['max']!=catexams['max_rel']">
-         (${'%2.f' % (catexams['sum']/catexams['max']*100)}%, ${'%2.f' % (catexams['sum']/catexams['max_rel']*100)}% rel.)
-        </span>
-        <span tal:condition="catexams['max']>0 and catexams['max']==catexams['max_rel']">
-            (${'%2.f' % (catexams['sum']/catexams['max']*100)}%)
+    <div tal:omit-tag="" tal:define="fF lambda f: '%.1f' % f if f != None else '-'" >
+  <div class="card mt-2" tal:repeat="catexams exams_by_category">
+    <div class="card-body">
+      <h3 class="card-title">${catexams['name']}</h3>
+      <table class="table table-striped table-sm w-auto" tal:define="max_exercises max([len(e.exercises) for e in catexams['exams']])">
+        <thead class="thead-dark">
+          <th scope="col"></th>
+          <!-- The hack used below makes the tablehead fit above all further cols -->
+          <th scope="col" tal:attributes="colspan 1+max_exercises">
+            Punkte
+          </th>
+        </thead>
+        <tr tal:repeat="exam catexams['exams']">
+          <div tal:condition="not exam.results_hidden" tal:omit-tag="">
+            <th scope="col">
+              <a tal:condition="exam.url" tal:attributes="href exam.url">${exam.name}</a>
+              <span tal:condition="not exam.url" tal:omit-tag="">${exam.name}</span>
+            </th>
+            <td>
+              <strong>${fF(results[exam.id]['sum'])}/${fF(exam.getMaxpoints())}</strong>
+            </td>
+            <td tal:repeat="e exam.exercises">
+              ${fF(results[exam.id][e.id]['points'])}/${fF(results[exam.id][e.id]['exercise'].maxpoints)}
+            </td>
+            <td tal:repeat="i [1 for j in range(max_exercises - len(exam.exercises))]"></td>
+          </div>
+        </tr>
+        <tfoot>
+          <th scope="row">Insgesamt: </th>
+          <td colspan="3"><strong>${fF(catexams['sum'])}/${fF(catexams['max'])}</strong>
+            <span tal:condition="catexams['max']>0 and catexams['max_rel']>0 and catexams['max']!=catexams['max_rel']">
+           (${'%2.f' % (catexams['sum']/catexams['max']*100)}%, ${'%2.f' % (catexams['sum']/catexams['max_rel']*100)}% rel.)
           </span>
-        </td>
-      </tfoot>
-    </table>
-
+          <span tal:condition="catexams['max']>0 and catexams['max']==catexams['max_rel']">
+              (${'%2.f' % (catexams['sum']/catexams['max']*100)}%)
+            </span>
+          </td>
+        </tfoot>
+      </table>
+    </div>
   </div>
 
-  <div class="card" tal:condition="admissions">
+  <div class="card mt-2" tal:condition="admissions">
     <div class="card-body">
     <h3 class="card-title">Klausurzulassungen</h3>
     <table>
@@ -91,13 +92,17 @@
     </div>
   </div>
 
-  <div class="card" tal:condition="grades" tal:omit-tag="">
+  <div class="card mt-2" tal:condition="grades">
     <div class="card-body">
     <h3 class="card-title">Benotungen</h3>
-    <table>
+    <table class="table table-striped table-sm w-auto">
+      <thead class="thead-dark">
+        <th scope="col"></th>
+        <th scope="col">Punkte</th>
+      </thead>
       <tr tal:repeat="grade grades">
         <th>${grade.grading.name}</th>
-        <td>${grade.grade}</td>
+        <td>${grade.grade if grade.grade is not None else '-'}</td>
       </tr>
     </table>
     </div>
