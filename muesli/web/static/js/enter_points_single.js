@@ -236,10 +236,10 @@ function submit_all_points(row_id) {
                     } else {
                         p = p.toFixed(1)
                     }
-                    insert_data += '<td style="text-align: center" data-exercise="' + exercise_ids[i][1] +'">' + p + '</td>';
+                    insert_data += '<td class="align-middle text-center" data-exercise="' + exercise_ids[i][1] +'">' + p + '</td>';
                 }
-                insert_data += `<td style="text-align: center" class="total">${sum_of_points.toFixed(2)}</td>`;
-                insert_data += `<td><button class="btn btn-primary" data-students="${response['students'].join(',')}" onclick="correct_row(${new_row_id})" type="button">Korrigieren</button></td>`;
+                insert_data += `<td class="align-middle text-center total">${sum_of_points.toFixed(2)}</td>`;
+                insert_data += `<td class="align-middle text-center"><button class="btn btn-primary" data-students="${response['students'].join(',')}" onclick="correct_row(${new_row_id})" type="button">Korrigieren</button></td>`;
                 if (!save_successful) {
                     return false;
                 }

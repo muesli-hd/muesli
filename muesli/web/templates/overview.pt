@@ -259,7 +259,12 @@
               </a>
             </td>
             <td>
-              (<a tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">bearbeiten</a>)
+              <a role="button"
+                 style="text-decoration: none"
+                 class="btn-sm btn-info"
+                   tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">
+                Verwalten
+              </a>
             </td>
           </tr>
         </tbody>

@@ -25,15 +25,15 @@
   <table class="points_table table w-auto" id="enter_points_table">
     <thead class="thead-dark">
       <tr>
-        <th scope="col">Namen</th>
-        <th scope="col" tal:repeat="e exercises">${e.nr}</th>
-        <th scope="col">Σ</th>
-        <th scope="col"></th>
-        <th scope="col"></th>
+        <th class="text-center" scope="col">Namen</th>
+        <th class="text-center" scope="col" tal:repeat="e exercises">${e.nr}</th>
+        <th class="text-center" scope="col">Σ</th>
+        <th class="text-center" scope="col"></th>
+        <th class="text-center" scope="col"></th>
       </tr>
     </thead>
     <tr id="row-0">
-      <td>
+      <td class="align-bottom">
         <label>
           <select class="student_select" name="students" multiple="multiple">
               <option tal:repeat="student students" value=${student.id}>${student.last_name}, ${student.first_name}</option>
@@ -43,13 +43,13 @@
       <td tal:repeat="e exercises">
         <div style="text-align: center" class="current-points"></div>
         <label>
-          <input class="form-control points" type="text" name="points-${e.id}" size="3" onchange="update_total(0) ">
+          <input class="form-control points text-center" type="text" name="points-${e.id}" size="3" onchange="update_total(0) ">
         </label>
       </td>
       <td>
         <div style="text-align: center" class="current-points"></div>
         <label>
-          <input class="form-control total" readonly="readonly" size="4" value="0">
+          <input class="form-control total text-center" readonly="readonly" size="4" value="0">
         </label>
       </td>
       <td></td>
