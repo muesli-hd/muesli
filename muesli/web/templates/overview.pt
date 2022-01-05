@@ -2,91 +2,288 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<div tal:condition="uboo">
-    Bitte nehmen Sie sich die Zeit zu überprüfen, ob noch alle Ihre Angaben korrekt sind. Dies ist insbesondere wichtig,
-    wenn Sie den Studiengang gewechselt haben.<br>
-    Bestätigen/Korrigieren Sie <a tal:attributes="href request.route_path('user_check')">hier</a> Ihre Informationen,
-    um diese Erinnerung für den Rest des Semesters nicht mehr zu sehen.
+<h1 class="display-4">Startseite</h1>
+
+<h2>
+  Übersicht Ihrer Veranstaltungen
+</h2>
+
+<div class="alert alert-warning" role="alert" tal:condition="uboo">
+  Bitte nehmen Sie sich die Zeit zu überprüfen, ob noch alle Ihre Angaben korrekt sind. <br>
+  Dies ist insbesondere wichtig,
+  wenn Sie den Studiengang gewechselt haben.<br>
+  Bestätigen/Korrigieren Sie <a tal:attributes="href request.route_path('user_check')">hier</a> Ihre Informationen,
+  um diese Erinnerung für den Rest des Semesters nicht mehr zu sehen.
 </div>
 
-<h2>Übersicht Ihrer Veranstaltungen in diesem Semester</h2>
+    <metal:main metal:use-macro="templates('Fragments/unsubscribe_modal.pt').macros['unsubscribe_modal']" />
 
-<div tal:omit-tag="" tal:condition="tutorials_as_tutor">
-  <h3>Eigene Übungsgruppen (als Übungsleiter)</h3>
-  <table>
-    <tr><th>Semester</th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th></th></tr>
-    <tr tal:repeat="tutorial tutorials_as_tutor">
-      <td>${tutorial.lecture.term}</td>
-      <td><a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
-        ${tutorial.lecture.name}
-      </a></td>
-      <td>${tutorial.time}</td>
-      <td>${tutorial.place}</td>
-      <td><a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">
-         [&nbsp;Details&nbsp;]
-         </a>
-          <a tal:define="multi_tutorials request.user.prepareMultiTutorials()"
-            tal:condition="len(multi_tutorials[tutorial.lecture.id])&gt; 1"
-            tal:attributes="href request.route_path('tutorial_view',
-              tutorial_ids=','.join([str(t.id) for t in multi_tutorials[tutorial.lecture.id]]))"
-            title="Alle eigenen Übungsgruppen zu dieser Vorlesung verwalten">[&nbsp;+&nbsp;]</a>
-      </td>
-  </tr>
-  </table>
-</div>
+<div class="card mb-2" tal:condition="tutorials_as_tutor">
+  <div class="card-body" tal:define="multi_tutorials request.user.prepareMultiTutorials()">
+    <h3 class="card-title">
+      Eigene Übungsgruppen
+    </h3>
+    <h4 class="card-subtitle mb-2 text-muted">(als Übungsleiter)</h4>
 
-<div tal:condition="tutorials">
-  <h3>Feste Eintragungen in Übungsgruppen</h3>
-  <table>
-    <tr><th></th><th>Vorlesung</th><th>Zeit</th><th>Raum</th><th>Übungsleiter</th><th></th><th></th></tr>
+    <!-- mobile view -->
+    <div class="d-lg-none m-3">
+      <table class="table">
+        <div tal:repeat="tutorial tutorials_as_tutor" tal:omit-tag="">
+          <tr class="row">
+            <th scope="col" class="col text-center bg-dark text-white h4 m-0">
+              <a class="text-white" tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
+                  ${tutorial.lecture.name}
+              </a>
+            </th>
+          </tr>
+          <tr class="row">
+            <th scope="row" class="col-sm-2 table-active">Semester</th>
+            <td class="font-italic" tal:condition="tutorial.lecture.term == '-'">Keinem Semester zugeordnet!</td>
+            <td tal:condition="tutorial.lecture.term != '-'"> ${tutorial.lecture.term} </td>
+          </tr>
+          <tr class="row">
+            <th scope="row" class="col-sm-2 table-active">Zeit</th>
+            <td class="col">${tutorial.time}</td>
+          </tr>
+          <tr class="row">
+            <th scope="row" class="col-sm-2 table-active">Raum</th>
+            <td class="col">${tutorial.place}</td>
+          </tr>
+          <tr class="row" tal:condition="tutorial.video_call">
+            <th scope="row" class="col-sm-2 table-active">Videoraum</th>
+            <td class="col">${tutorial.video_call}</td>
+          </tr>
+          <tr class="row text-center table-secondary mb-3">
+            <td class="col">
+              <a role="button"
+                 style="text-decoration: none"
+                 class="btn-sm btn-info"
+                   tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">
+                Verwalten
+              </a>
+            </td>
+            <td class="col" tal:condition="len(multi_tutorials[tutorial.lecture.id]) > 1">
+              <a role="button"
+                 style="text-decoration: none"
+                 class="btn-sm btn-primary font-bold ml-1"
+                   tal:attributes="href request.route_path('tutorial_view', tutorial_ids=','.join([str(t.id) for t in multi_tutorials[tutorial.lecture.id]]))"
+                 title="Alle eigenen Übungsgruppen zu dieser Vorlesung verwalten">+</a>
+            </td>
+          </tr>
+        </div>
+      </table>
+    </div>
 
-    <tr tal:repeat="tutorial tutorials">
-      <td>${tutorial.lecture.term}</td>
-      <td><a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">${tutorial.lecture.name}</a></td>
-      <td>${tutorial.time}</td>
-      <td>${tutorial.place}</td>
-      <td><a href="${tutorial.video_call}" tal:condition="tutorial.video_call">Videoanruf</a></td>
-      <td>
-        <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name()}</a></td>
-      <td><a tal:attributes="href request.route_path('lecture_view_points', lecture_id=tutorial.lecture.id)">Ergebnisse</a></td>
-    </tr>
-  </table>
-</div>
-
-<div tal:condition="time_preferences">
-<h3>Vorläufige Eintragungen in Übungsgruppen</h3>
-<table>
-  <tr>
-    <th>Vorlesung</th>
-    <th>Zeit</th>
-    <th>Präferenz</th>
-  </tr>
-  <div tal:omit-tag="" tal:repeat="lecture_id time_preferences">
-    <metal:main
-      metal:use-macro="templates('Fragments/Format/time_preferences_table.pt').macros['time_preferences_table']" />
+    <!-- desktop view -->
+    <div class="d-none d-lg-block m-3">
+      <table class="table">
+        <tr class="thead-light">
+          <th>Semester</th>
+          <th>Vorlesung</th>
+          <th>Zeit</th>
+          <th>Raum</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+        </tr>
+        <tr tal:repeat="tutorial tutorials_as_tutor">
+          <td class="font-italic" tal:condition="tutorial.lecture.term == '-'">Keinem Semester zugeordnet!</td>
+          <td tal:condition="tutorial.lecture.term != '-'"> ${tutorial.lecture.term} </td>
+          <td>
+            <a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
+                ${tutorial.lecture.name}
+            </a>
+          </td>
+          <td>${tutorial.time}</td>
+          <td>${tutorial.place}</td>
+          <td><a href="${tutorial.video_call}" tal:condition="tutorial.video_call">Videoraum</a></td>
+          <td>
+            <a role="button"
+               style="text-decoration: none"
+               class="btn-sm btn-info"
+                 tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">
+              Verwalten
+            </a>
+          </td>
+          <td>
+            <a role="button"
+               style="text-decoration: none"
+               class="btn-sm btn-primary font-bold ml-1"
+               tal:attributes="href request.route_path('tutorial_view', tutorial_ids=','.join([str(t.id) for t in multi_tutorials[tutorial.lecture.id]]))"
+               title="Alle eigenen Übungsgruppen zu dieser Vorlesung verwalten">+</a>
+          </td>
+        </tr>
+      </table>
+    </div>
   </div>
-</table>
 </div>
 
-<div tal:condition="lectures_as_assistant">
-  <h3>Von Ihnen verwaltete Vorlesungen</h3>
 
-  <ul>
-    <li tal:repeat="lecture lectures_as_assistant">
-      (${lecture.term})
-      <a tal:attributes="href request.route_path('lecture_view', lecture_id=lecture.id)">
-        ${lecture.name}</a>
-      (<a tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">bearbeiten</a>)
-    </li>
-  </ul>
+<div class="card mb-2 mt-2" tal:condition="tutorials">
+  <div class="card-body">
+    <h3 class="card-title">
+      Feste Eintragungen in Übungsgruppen
+    </h3>
+    <div class="d-lg-none m-3">
+      <table class="table">
+        <div tal:omit-tag="" tal:repeat="tutorial tutorials">
+          <tr class="row">
+            <th scope="col" class="col text-center bg-dark text-white h4 m-0">
+              <a class="text-white" tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
+                ${tutorial.lecture.name}
+              </a>
+            </th>
+          </tr>
+          <tr class="row">
+            <th scope="row" class="col-sm-2 table-active">Semester</th>
+            <td class="font-italic" tal:condition="tutorial.lecture.term == '-'">Keinem Semester zugeordnet!</td>
+            <td tal:condition="tutorial.lecture.term != '-'"> ${tutorial.lecture.term} </td>
+          </tr>
+          <tr class="row">
+            <th scope="row" class="col-sm-2 table-active">Zeit</th>
+            <td class="col">${tutorial.time}</td>
+          </tr>
+          <tr class="row">
+            <th scope="row" class="col-sm-2 table-active">Raum</th>
+            <td class="col">${tutorial.place}</td>
+          </tr>
+          <tr class="row">
+            <th scope="row" class="col-sm-2 table-active">Tutor</th>
+            <td class="col">
+              <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name}</a>
+            </td>
+          </tr>
+          <tr class="row text-center table-secondary mb-3">
+            <td class="col">
+              <a role="button"
+                 class="btn btn-info"
+                tal:attributes="href request.route_path('lecture_view_points',
+                lecture_id=tutorial.lecture.id)">Ergebnisse</a>
+            </td>
+            <td class="col">
+              <a tal:condition="tutorial.lecture.mode != 'static'" tal:attributes="data-href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)" role="button" class="btn btn-danger text-white" data-toggle="modal" data-target="#confirm_unsubscribe" data-modal-text="Möchtest du die Übungsgruppe der Vorlesung „${tutorial.lecture.name}“
+                   ${'bei {}'.format(tutorial.tutor.name) if tutorial.tutor is not None else ''} wirklich verlassen?">
+                Austreten
+              </a>
+            </td>
+          </tr>
+        </div>
+      </table>
+    </div>
 
+    <div class="d-none d-lg-block m-3">
+      <table class="table">
+        <tr class="thead-light">
+          <th>Semester</th>
+          <th>Vorlesung</th>
+          <th>Zeit</th>
+          <th>Raum</th>
+          <th>Übungsleiter</th>
+          <th></th>
+          <th></th>
+          <th></th>
+        </tr>
+          <tr tal:repeat="tutorial tutorials">
+            <td class="font-italic" tal:condition="tutorial.lecture.term == '-'">Keinem Semester zugeordnet!</td>
+            <td tal:condition="tutorial.lecture.term != '-'"> ${tutorial.lecture.term} </td>
+            <td>
+              <a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">
+                ${tutorial.lecture.name}
+              </a>
+            </td>
+            <td>${tutorial.time}</td>
+            <td>${tutorial.place}</td>
+            <td>
+              <a tal:condition="tutorial.tutor" tal:attributes="href 'mailto:'+tutorial.tutor.email">${tutorial.tutor.name}</a>
+            </td>
+            <td><a href="${tutorial.video_call}" tal:condition="tutorial.video_call">Videoraum</a></td>
+            <td>
+              <a role="button"
+                 class="btn-sm btn-info"
+                tal:attributes="href request.route_path('lecture_view_points',
+                lecture_id=tutorial.lecture.id)">Ergebnisse</a>
+            </td>
+            <td>
+              <a tal:condition="tutorial.lecture.mode != 'static'" tal:attributes="data-href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)" role="button" class="btn-sm btn-danger text-white" data-toggle="modal" data-target="#confirm_unsubscribe" data-modal-text="Möchtest du die Übungsgruppe der Vorlesung „${tutorial.lecture.name}“
+                   ${'bei {}'.format(tutorial.tutor.name) if tutorial.tutor is not None else ''} wirklich verlassen?">
+                Austreten
+              </a>
+            </td>
+          </tr>
+      </table>
+    </div>
+  </div>
 </div>
-<p tal:condition="request.GET.get('show_all', '0')=='0'">Es werden nur aktuelle Veranstaltungen angezeigt.
-  <a tal:attributes="href request.route_path('overview', _query= {'show_all': '1'})">Alle anzeigen</a>.</p>
-<p tal:condition="request.GET.get('show_all', '0')=='1'">Es werden alle Veranstaltungen angezeigt. <a tal:attributes="href request.route_path('overview')">Nur aktuelle anzeigen</a>.</p>
+
+<div class="card mb-2 mt-2" tal:condition="time_preferences">
+  <div class="card-body">
+    <h3 class="card-title">
+      Vorläufige Eintragungen in Übungsgruppen
+    </h3>
+    <table class="table">
+      <thead class="thead-light">
+        <th scope="col">Vorlesung</th>
+        <th scope="col">Zeit</th>
+        <th scope="col">Präferenz</th>
+      </thead>
+      <div tal:omit-tag="" tal:repeat="lecture_id time_preferences">
+        <metal:main
+          metal:use-macro="templates('Fragments/Format/time_preferences_table.pt').macros['time_preferences_table']" />
+      </div>
+    </table>
+  </div>
+</div>
+
+
+<div class="card mb-2 mt-2" tal:condition="lectures_as_assistant">
+  <div class="card-body">
+    <h3 class="card-title">
+      Von Ihnen verwaltete Vorlesungen
+    </h3>
+    <div class="m-3">
+      <table class="table">
+        <thead class="thead-light">
+          <th>Semester</th>
+          <th>Vorlesung</th>
+          <th></th>
+        </thead>
+        <tbody>
+          <tr tal:repeat="lecture lectures_as_assistant">
+
+            <td class="font-italic" tal:condition="lecture.term == '-'">Keinem Semester zugeordnet!</td>
+            <td tal:condition="lecture.term != '-'"> ${lecture.term} </td>
+            <td>
+              <a tal:attributes="href request.route_path('lecture_view', lecture_id=lecture.id)">
+                ${lecture.name}
+              </a>
+            </td>
+            <td>
+              <a role="button"
+                 style="text-decoration: none"
+                 class="btn-sm btn-info"
+                   tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">
+                Verwalten
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<p class="alert alert-info" tal:condition="request.GET.get('show_all', '0') == '0'">
+  Es werden nur aktuelle Veranstaltungen angezeigt.
+  <a tal:attributes="href request.route_path('overview', _query={'show_all': '1'})">Alle anzeigen</a>.
+</p>
+<p class="alert alert-info" role="alert" tal:condition="request.GET.get('show_all', '0') == '1'">
+  Es werden alle Veranstaltungen angezeigt.
+  <a tal:attributes="href request.route_path('overview')">Nur aktuelle anzeigen</a>.
+</p>
 
 <a tal:condition="request.GET.get('help', '0')=='0'" tal:attributes="href request.route_path('overview', _query= {'help': '1'})">Hilfe</a>
-<div tal:condition="request.GET.get('help', '0')=='1'">
+<div tal:condition="request.GET.get('help', '0') == '1'">
 <a tal:attributes="href request.route_path('overview')">Hilfe verbergen</a>
 <ul>
     <li>${tooltips.lecture}</li>

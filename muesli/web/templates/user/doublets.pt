@@ -4,20 +4,27 @@
 
 <h2>Doppelte Anmeldungen</h2>
 
-<table class="colored">
-  <thead>
-    <tr>
-      <td>Email</td>
-      <td>User</td>
-    </tr>
+<p class="alert alert-info" tal:condition="not doublets">
+  Es gibt anscheinend nix doppelte Studenten.
+</p>
+<table class="table table-striped" tal:condition="doublets">
+  <thead class="thead-dark">
+    <th scope="col">Email</th>
+    <th scope="col">User</th>
   </thead>
-  <tr tal:repeat="(email, students) doublets">
-    <td>${email}</td>
-    <td>
-      <span tal:repeat="student students"><a tal:attributes="href request.route_path('user_edit', user_id=student.id)">${student}
-        <span tal:condition="student.is_deletable()"> (löschbar)</span></a><br /></span>
-    </td>
-  </tr>
+  <tbody>
+    <tr tal:repeat="(email, students) doublets">
+      <td class="text-monspace">${email}</td>
+      <td>
+        <span tal:repeat="student students">
+          <a tal:attributes="href request.route_path('user_edit', user_id=student.id)">
+            ${student}
+            <span tal:condition="student.is_deletable()"> (löschbar)</span>
+          </a>
+        </span>
+      </td>
+    </tr>
+  </tbody>
 </table>
 
   </metal:main>

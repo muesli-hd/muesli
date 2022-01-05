@@ -2,88 +2,58 @@
 <metal:main metal:define-macro="main">
 <html>
 <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <!--
   Copyright 2011, Matthias Kümmerer <matthias@matthias-k.org>
 
   Released under the terms of the GNU GPL 3 or later
   -->
   <title>MÜSLI</title>
-  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/muesli.css')"></link>
-  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/fancybox/jquery.fancybox.css')"></link>
-  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/select2.css')"></link>
-  <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
-  <script tal:attributes="src request.static_url('muesli.web:static/js/accidental-action-prevention.js')"></script>
+  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/muesli.css')"/>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/jquery.min.js')"></script>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/april_fool.js')"></script>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/accidental-action-prevention.js')"></script>
+  <!-- Bootstrap -->
+  <link rel="stylesheet"
+        type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/bootstrap.min.css')"/>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/popper.min.js')"></script>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/bootstrap.min.js')"></script>
+  <link rel="stylesheet"
+        type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/bt4-dropdown-submenu.css')"/>
+  <script
+      type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/bt4-dropdown-submenu.js')"></script>
+
+  <!-- Manually added scripts and stylesheets -->
+  <link rel="stylesheet" type="text/css" tal:repeat="filename request.css"
+       tal:attributes="href request.static_url('muesli.web:static/css/%s' % (filename))"/>
+  <script type="text/javascript" tal:repeat="filename request.javascript"
+          tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
+
 </head>
 <body onload="aprilFool()">
-<div id="header">
-  <h1>MÜSLI</h1>
-  <h2>Mathematisches Übungsgruppen- und Scheinlisten-Interface</h2>
-</div>
+
 <metal:main metal:use-macro="templates('Fragments/menu.pt').macros['menu']" />
 
-<script>
-/* <![CDATA[ */
-function set_navigation(nav) {
-  var str = "<ul>\n";
-  for (var i = 0; i<nav.length; i++) {
-    str += '<li><a href="';
-    str += nav[i][1];
-    str += '">';
-    str += nav[i][0];
-    str += '</a></li>\n';
-  }
-  str += '</ul>';
-  document.getElementById('history').innerHTML = str;
-}
-/* ]]> */
-</script>
-<script>
-    var backgroundColorInterval, cursorInterval;
-    function getRandomColor() {
-        var letters = '0123456789ABCDEF';
-        var color = '#';
-        for (var i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-    }
-    function setRandomBackgroundColor(waitTime) {
-        document.getElementById("header").style.backgroundColor = getRandomColor();
-        backgroundColorInterval = setInterval(function() {
-            document.getElementById("header").style.backgroundColor = getRandomColor();
-        }, waitTime);
-    }
-    function aprilFool() {
-        var waitTime = 10000;
-        var now = new Date();
-        if (now.getDate() === 1 && now.getMonth() === 3) {
-            setRandomBackgroundColor(waitTime);
-        }
-    }
-</script>
-<div id="history">
-</div>
-<div id="content">
+<metal:main metal:use-macro="templates('Fragments/message_queue.pt').macros['message_queue']">
 
-<p tal:condition="request.session.peek_flash('errors')" tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('errors'))" class="error"></p>
-<p tal:condition="request.session.peek_flash('messages')" tal:content="'&lt;br /&gt;'.join(request.session.pop_flash('messages'))" class="message"></p>
+<div class="container-fluid">
+  <div class="alert alert-secondary mt-2" role="alert">
+    <div>Das MÜSLI sucht ab sofort eine/n neue/n Maintainer/in. Bei Interesse an dieser hilfswissenschaftlichen 20h/Monat
+      Stelle kontaktieren Sie bitte Denis Vogel per Email unter <a href="mailto:vogel@mathi.uni-heidelberg.de">vogel@mathi.uni-heidelberg.de</a>.
+    </div>
+  </div>
+  <main class="pt-3" role="main">
+    <div class="jumbotron bg-mdb-color-lighten-6" id="content">
 
-<metal:main metal:use-macro="templates('Fragments/navigation.pt').macros['navigation']" />
-<metal:content define-slot="content" />
+      <metal:content define-slot="content" />
+
+    </div>
+  </main>
 </div>
 
-<div id="bottom">
-
-<div id="legal">
-<a href="https://www.uni-heidelberg.de/impressum.html">Impressum</a> <a href="/datenschutzerklaerung.html">Datenschutzerkl&auml;rung</a>
-</div>
-<div id="debug">
-loading time: ${'{0:.3f}s'.format(request.now() - request.time)}
-queries: ${request.queries}
-</div>
-
-</div>
-
+<metal:main metal:use-macro="templates('Fragments/footer.pt').macros['footer']">
 </body>
 </html>
 </metal:main>

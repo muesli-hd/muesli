@@ -58,6 +58,11 @@ class UserLoggedInTests(UnloggedTests):
         # get 200 instead of 302
         res = self.testapp.get('/overview', status=200)
 
+    def test_overview_full(self):
+        # Now we are logged in, thus we should
+        # get 200 instead of 302
+        res = self.testapp.get('/overview?show_all=1', status=200)
+
 class TutorLoggedInTests(UserLoggedInTests):
     def setUp(self):
         UserLoggedInTests.setUp(self)

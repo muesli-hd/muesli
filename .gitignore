@@ -13,4 +13,9 @@ venv
 .pytest_cache
 maintainance_scripts
 **/header.txt
-captcha.min.js
+
+# External JS files
+muesli/web/static/js/**
+
+# External CSS files
+muesli/web/static/css/*

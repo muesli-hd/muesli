@@ -95,12 +95,17 @@ def add_javascript_to_request(event):
     event.request.javascript = list()
 
 @subscriber(NewRequest)
+def add_css_to_request(event):
+    event.request.css = list()
+
+@subscriber(NewRequest)
 def add_config_to_request(event):
     event.request.config = muesli.config
 
-@subscriber(BeforeTraversal)
-def add_navigationTree_to_request(event):
-    event.request.navigationTree = create_navigation_tree(event.request, event.request.user)
+@subscriber(BeforeRender)
+def add_navigation_tree_to_request(event):
+    if event['request']:
+        event['navigation_tree'] = create_navigation_tree(event['request'])
 
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):
@@ -169,9 +174,11 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('contact', '/contact')
     config.add_route('changelog', '/changelog')
     config.add_route('admin', '/admin', factory = GeneralContext)
+    config.add_route('test_exceptions', 'test_exception', factory=GeneralContext)
     config.add_route('index', '/')
     config.add_route('email_users', '/email_users', factory = GeneralContext)
     config.add_route('email_all_users','/email_all_users',factory = GeneralContext)
+
     config.add_route('user_update', '/user/update', factory = GeneralContext)
     config.add_route('user_check', '/user/check', factory = GeneralContext)
     config.add_route('user_change_email', '/user/change_email', factory = GeneralContext)
@@ -249,7 +256,6 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('tutorial_remove_student', '/tutorial/remove_student/{tutorial_ids}/{student_id}', factory=TutorialContext)
     config.add_route('tutorial_subscribe', '/tutorial/subscribe/{tutorial_id}', factory=TutorialContext)
     config.add_route('tutorial_unsubscribe', '/tutorial/unsubscribe/{tutorial_id}', factory=TutorialContext)
-    config.add_route('tutorial_occupancy_bar', '/tutorial/occupancy_bar/{count}/{max_count}')
     config.add_route('tutorial_ajax_get_tutorial', '/tutorial/ajax_get_tutorial/{lecture_id}', factory=LectureContext)
 
     config.add_route('exam_auto_admit', '/exam/auto_admit/{exam_id}', factory = ExamContext)

@@ -1,21 +1,117 @@
-<metal:main metal:define-macro="menu">
-  <ul class="menu" id="menu-left">
-    <div tal:omit-tag="" tal:condition="request.userInfo.is_loggedin()">
-      <li><a tal:attributes="href request.route_path('overview')">Übersicht</a></li>
-      <li tal:condition="request.userInfo.is_admin()"><a tal:attributes="href request.route_path('admin')">Administration</a></li>
+<!--! -*- coding: utf-8 -*-                                                 -->
+<!--! muesli/web/templates/Fragments/menu.pt                   -->
+<!--                                                                        -->
+<!--! This file is part of MUESLI.                                          -->
+<!--! Copyright (C) 2020, Christian Heusel <christian (at) heusel.eu>       -->
+<!--                                                                        -->
+<!--! This program is free software: you can redistribute it and/or modify  -->
+<!--! it under the terms of the GNU General Public License as published by  -->
+<!--! the Free Software Foundation, either version 3 of the License, or     -->
+<!--! (at your option) any later version.                                   -->
+<!--                                                                        -->
+<!--! This program is distributed in the hope that it will be useful,       -->
+<!--! but WITHOUT ANY WARRANTY; without even the implied warranty of        -->
+<!--! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         -->
+<!--! GNU General Public License for more details.                          -->
+<!--                                                                        -->
+<!--! You should have received a copy of the GNU General Public License     -->
+<!--! along with this program.  If not, see <http://www.gnu.org/licenses/>. -->
 
-      <li><a tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a></li>
-      <li><a tal:attributes="href request.route_path('user_update')">Angaben ergänzen</a></li>
-      <li><a tal:attributes="href request.route_path('user_change_email')">E-Mail ändern</a></li>
-      <li><a tal:attributes="href request.route_path('user_change_password')">Passwort ändern</a></li>
-      <li ><a tal:attributes="href request.route_path('user_api_keys')">API</a></li>
-      <li><a tal:attributes="href request.route_path('user_logout')">Abmelden</a></li>
-    </div>
-    <div tal:omit-tag="" tal:condition="not request.userInfo.is_loggedin()">
-      <li><a tal:attributes="href request.route_path('user_login')">Anmelden</a></li>
-      <li><a tal:attributes="href request.route_path('user_register')">Registrieren</a></li>
-    </div>
-    <li><a tal:attributes="href request.route_path('contact')">Kontakt</a></li>
-    <li><a tal:attributes="href request.route_path('changelog')">Neues</a></li>
-  </ul>
+<metal:main metal:define-macro="menu">
+  <nav class="navbar navbar-dark navbar-expand-md bg-dark justify-content-md-center">
+      <a class="navbar-brand display-1" tal:attributes="href request.route_path('overview')">
+        <img class="mr-1" style="height: 1em;" tal:attributes="src '/favicon.ico'">
+        MÜSLI
+      </a>
+      <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#collapsingNavbar2">
+          <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="navbar-collapse collapse w-100" id="collapsingNavbar2">
+
+          <ul class="navbar-nav mx-auto text-center w-1000 justify-content-start">
+            <li class="nav-item active">
+              <a tal:condition="request.userInfo.is_loggedin()"
+                 class="nav-link" tal:attributes="href request.route_path('start')">Übersicht</a>
+            </li>
+
+            <!-- Navigation tree -->
+            <div tal:define="nodes navigation_tree.children" tal:omit-tag="">
+              <div metal:define-macro="nav_tree_view" tal:omit-tag="">
+                <div tal:repeat="node nodes" tal:omit-tag="">
+                  <div tal:condition="node.is_first_level()" tal:omit-tag="">
+                    <li class="nav-item active" tal:condition="not node.children">
+                      <a class="nav-link" tal:attributes="href node.url">${node.label}</a>
+                    </li>
+                    <li class="nav-item active dropdown" tal:condition="node.children" tal:attributes="href node.url">
+                      <a class="nav-link dropdown-toggle" role="button"
+                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          ${node.label}
+                      </a>
+                      <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <div tal:define="nodes node.children" metal:use-macro="template.macros['nav_tree_view']" />
+                      </ul>
+                    </li>
+                  </div>
+                  <div tal:condition="not node.is_first_level()" tal:omit-tag="">
+                    <li tal:condition="not node.children">
+                      <a class="dropdown-item" tal:attributes="href node.url">${node.label}</a>
+                    </li>
+                    <li tal:condition="node.children" class="dropdown-submenu" aria-labelledby="navbarDropdownMenuLink">
+                      <a tal:attributes="href node.url" role="button" data-toggle="dropdown" class="dropdown-item dropdown-toggle"
+                         aria-haspopup="true" aria-expanded="false">
+                        ${node.label}
+                      </a>
+                      <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <div tal:define="nodes node.children" metal:use-macro="template.macros['nav_tree_view']" />
+                      </ul>
+                    </li>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ul>
+
+          <ul class="nav navbar-nav flex-row justify-content-end ml-auto w-100">
+            <li class="nav-item active" tal:condition="request.userInfo.is_admin()">
+              <a class="nav-link" tal:attributes="href request.route_path('admin')">Administration</a>
+            </li>
+
+            <li class="nav-item active">
+              <a class="nav-link" tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a>
+            </li>
+
+            <li class="nav-item dropdown text-center"
+                tal:condition="request.userInfo.is_loggedin()">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Nutzereinstellungen
+              </button>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" tal:attributes="href request.route_path('user_update')">Angaben ergänzen</a>
+                <a class="dropdown-item" tal:attributes="href request.route_path('user_change_email')">E-Mail ändern</a>
+                <a class="dropdown-item" tal:attributes="href request.route_path('user_change_password')">Passwort ändern</a>
+                <a class="dropdown-item" tal:attributes="href request.route_path('user_api_keys')">API</a>
+              </div>
+            </li>
+            <li>
+              <a role="button"
+                 class="btn btn-primary btn-large nav-item"
+                 tal:condition="not (request.userInfo.is_loggedin() or
+                                     request.url == request.route_url('user_register'))"
+                 tal:attributes="href request.route_path('user_register')">Registrieren</a>
+            </li>
+            <li>
+              <a role="button"
+                 class="btn btn-success btn-large nav-item ml-2"
+                 tal:attributes="href request.route_path('user_login')"
+                 tal:condition="not request.userInfo.is_loggedin()">Anmelden</a>
+            </li>
+            <li>
+              <a role="button"
+                 class="btn btn-danger btn-large nav-item ml-2"
+                 tal:attributes="href request.route_path('user_logout')"
+                 tal:condition="request.userInfo.is_loggedin()">Abmelden</a>
+            </li>
+          </ul>
+      </div>
+  </nav>
 </metal:main>

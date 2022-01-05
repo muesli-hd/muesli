@@ -169,7 +169,7 @@ class EnterGradesBasic:
                             grades[ls.student_id]['grade'].grade = value
                             grades[ls.student_id]['gradestr'] = value
                         except:
-                            error_msgs.append('Could not convert "%s" (%s)'%(value, ls.student.name()))
+                            error_msgs.append('Could not convert "%s" (%s)'%(value, ls.student.name))
         if self.db.new or self.db.dirty or self.db.deleted:
             self.db.commit()
         return grades, error_msgs
@@ -226,9 +226,10 @@ class EnterGradesBasic:
         grades = self.populate_with_exam_results(grades, lecture_students, grading)
         grades, error_msgs = self.apply_formula(grades, formula, lecture_students, grading, varsForExam, error_msgs)
 
-        #self.request.javascript.append('prototype.js')
-        self.request.javascript.append('jquery/jquery.min.js')
-        self.request.javascript.append('jquery/jquery.fancybox.min.js')
+        self.request.javascript.append('fancybox.umd.js')
+        self.request.css.append('fancybox.css')
+        self.request.javascript.append('toast.min.js')
+        self.request.css.append('toast.min.css')
         #grades = {key: value for key,value in grades.items()}
 
         return {'grading': grading,

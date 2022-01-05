@@ -3,22 +3,28 @@
   <metal:main metal:fill-slot="content">
     <h2>Liste der mit MÜSLI verwalteten Vorlesungen</h2>
 
-    <table>
-      <tr><th>Semester</th><th>Name</th><th>Dozent</th><th>Assistent</th></tr>
+    <table class="table table-striped">
+      <thead class="thead-dark">
+        <th scope="col">Semester</th>
+        <th scope="col">Name</th>
+        <th scope="col">Dozent</th>
+        <th scope="col">Assistent</th>
+      </thead>
       <tr tal:repeat="lecture sticky_lectures" tal:condition="sticky_lectures">
         <td>
           ${lecture.term}
         </td>
-        <td><a tal:attributes="href request.route_path('lecture_view', lecture_id=lecture.id)">${lecture.name}</a></td>
-        <td>${lecture.lecturer}</td>
+        <td>
+          <a tal:attributes="href request.route_path('lecture_view', lecture_id=lecture.id)">${lecture.name}</a>
+        </td>
+        <td>
+          ${lecture.lecturer}
+        </td>
         <td>
           <span tal:repeat="assistant lecture.assistants">
             <a tal:attributes="href 'mailto:'+assistant.email">${assistant.last_name}</a>
           </span>
         </td>
-      </tr>
-      <tr tal:condition="sticky_lectures">
-       <td></td>
       </tr>
       <tr tal:repeat="lecture lectures">
         <td>
@@ -33,7 +39,10 @@
         </td>
       </tr>
     </table>
-    <a tal:condition="request.permissionInfo.has_permission('create_lecture')" tal:attributes="href request.route_path('lecture_add')">Neue Vorlesung eintragen</a>
+      <a role="button"
+         class="btn btn-primary"
+         tal:condition="request.permissionInfo.has_permission('create_lecture')"
+         tal:attributes="href request.route_path('lecture_add')">Neue Vorlesung eintragen</a>
 
   </metal:main>
 </metal:main>

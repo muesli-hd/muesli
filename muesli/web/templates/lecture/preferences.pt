@@ -7,27 +7,45 @@
 <div tal:condition="lecture.mode=='prefs'" tal:omit-tag="">
   <h3>Einteilung vornehmen</h3>
   <p>Verteilung der angemeldeten Studenten:</p>
-  <table>
-    <thead>
-      <tr><th>Studiengang</th><th>Anzahl Teilnehmer</th></tr>
+  <table class="table w-auto">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">Studiengang</th>
+        <th scope="col">Anzahl Teilnehmer</th>
+      </tr>
     </thead>
     <tbody>
-
       <tr tal:repeat="subject pref_subjects">
-        <td>${subject[1] if subject[1] else 'Keine Angabe'}</td><td>${subject[0]}</td></tr>
-    <tr>
-      <td>Gesamt</td><td>${pref_count}</td>
-    </tr>
+        <td>${subject[1] if subject[1] else 'Keine Angabe'}</td>
+        <td>${subject[0]}</td>
+      </tr>
+      <tr class="font-weight-bold">
+        <td>Gesamt</td>
+        <td>${pref_count}</td>
+      </tr>
     </tbody>
   </table>
-  <p>
-  Es haben sich insgesamt ${pref_count} Studenten angemeldet.
-  Gruppeneinteilung nach Präferenzen vornehmen.
+
+  <p tal:condition="pref_count > 1">
+  Es haben sich insgesamt ${pref_count} Studenten angemeldet 
+  (<a tal:attributes="href request.route_path('lecture_preferences', lecture_id=lecture.id)">Details</a>).
+  <br>
+  Sie können jetzt die Gruppeneinteilung nach Präferenzen vornehmen.
+  <br>
+  <strong>Dies überschreibt vorherige Einteilungen!</strong>
+  </p>
+
+  <p tal:condition="pref_count <= 1">
+  Es hat sich bisher nur ${pref_count} Student angemeldet
+  (<a tal:attributes="href request.route_path('lecture_preferences', lecture_id=lecture.id)">Details</a>).
+  <br>
+  Sie können jetzt die Gruppeneinteilung nach Präferenzen vornehmen.
+  <br>
   <strong>Dies überschreibt vorherige Einteilungen!</strong>
   </p>
 
  <form method="post" tal:attributes="action request.route_path('lecture_do_allocation', lecture_id=lecture.id)">
-    <input type="submit" value="Einteilung vornehmen"/>
+    <input role="button" class="btn btn-danger" type="submit" value="Einteilung vornehmen"/>
   </form>
 </div>
 
@@ -47,25 +65,57 @@
 Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
 </p>
 
-<table>
-  <tr><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>${names['tutor']}</th><th>Kommentar</th><th></th><th></th></tr>
-  <tr tal:repeat="tutorial lecture.tutorials">
-    <td>${tutorial.time}</td>
-    <td>${tutorial.place}</td>
-    <td><metal:main metal:use-macro="templates('Fragments/HTML/tutorial_occupancy.pt').macros['tutorial_occupancy']" /></td>
-    <td>
-      ${tutorial.tutor.name() if tutorial.tutor else ''}
-    </td>
-    <td>${tutorial.comment}</td>
-    <td><a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">Details</a></td>
-    <td><a tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">Bearbeiten</a></td>
-  </tr>
-  <tr>
-    <td colspan="3">
-      Neue <a tal:attributes="href request.route_path('tutorial_add', lecture_id = lecture.id)">${names['tutorial']} hinzufügen</a>
-    </td>
-  </tr>
+<table class="table">
+  <thead class="thead-dark">
+    <th>Zeit</th>
+    <th>Raum</th>
+    <th>Auslastung</th>
+    <th></th>
+    <th>${names['tutor']}</th>
+    <th>Kommentar</th>
+    <th></th>
+    <th></th>
+  </thead>
+  <tbody>
+    <tr tal:repeat="tutorial lecture.tutorials">
+      <td>${tutorial.time}</td>
+      <td>${tutorial.place}</td>
+      <td><metal:main metal:use-macro="templates('Fragments/HTML/tutorial_occupancy.pt').macros['tutorial_occupancy']" /></td>
+      <td>
+        <div class="col-sm-auto" style="padding: 0; margin: 0">
+          ${tutorial.student_count}/${tutorial.max_students}
+        </div>
+      </td>
+      <td>
+        <span tal:omit-tag='' tal:condition='tutorial.tutor'>
+          ${tutorial.tutor.first_name} ${tutorial.tutor.last_name}
+        </span>
+        <span tal:omit-tag='' tal:condition="not tutorial.tutor and request.permissionInfo.has_permission('take_tutorial')"> <!-- TODO: and (is assistant or is_tutor) -->
+          <a role="button" class="btn-sm btn-success" tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
+        </span>
+      </td>
+      <td tal:condition="tutorial.comment">${tutorial.comment}</td>
+      <td class="font-italic" tal:condition="not tutorial.comment">Keine Beschreibung</td>
+      <td>
+        <a role="button"
+           class="btn-sm btn-info"
+           tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">
+          Details
+        </a>
+      </td>
+      <td>
+        <a role="button" class="btn-sm btn-primary" tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">
+          Bearbeiten
+        </a>
+      </td>
+    </tr>
+  </tbody>
 </table>
+<a class="btn btn-primary"
+   role="button"
+   tal:attributes="href request.route_path('tutorial_add', lecture_id = lecture.id)">
+  ${names['tutorial']} hinzufügen
+</a>
 
   </metal:main>
 </metal:main>

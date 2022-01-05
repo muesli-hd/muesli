@@ -1,4 +1,5 @@
 ---
+
 database:
     connection: postgresql:///muesli
 

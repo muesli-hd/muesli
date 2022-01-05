@@ -15,64 +15,38 @@
         }
       };
     </script>
-    <h2>Dokumentation</h2>
-    <p>
-    Die verschiedenen API-Zugriffe sind über eine Swagger-UI dokumentiert.
-    <br>
-    Diese finden Sie
-    <a href="../api-explorer" target="_blank" rel="noopener noreferrer"
-       title="Link zur Swagger UI">hier</a>.
-    <br>
-    <strong>Achtung:</strong> Die dort angezeigten <em>"Try it out"</em>-Knöpfe führen die Anfragen auch tatsächlich aus.
-    </p>
-    <h2>API Keys verwalten</h2>
+    <h1 class="display-4">API</h1>
 
-    <p>
-    Hier können Sie ihre aktuellen API Keys verwalten.
-    </p>
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title">Dokumentation</h2>
+        <p>
+        Die verschiedenen API-Zugriffe sind über eine Swagger-UI dokumentiert.
+        <br>
+        Diese finden Sie
+        <a href="../api-explorer" target="_blank" rel="noopener noreferrer"
+           title="Link zur Swagger UI">hier</a>.
+        <br>
+        <strong>Achtung:</strong> Die dort angezeigten <em>"Try it out"</em>-Knöpfe führen die Anfragen auch tatsächlich aus.
+        </p>
+      </div>
+    </div>
+    <div class="card mt-2">
+      <div class="card-body">
+        <h2>API Keys verwalten</h2>
 
-    <table class="colored">
-    <thead>
-      <tr>
-        <th> ID </th>
-        <th> Ablaufdatum </th>
-        <th> Beschreibung </th>
-        <th> Entfernen </th>
-        <th tal:condition="freshtoken"></th>
-      </tr>
-    <tbody>
-      <tr tal:condition="keys" tal:repeat="key keys">
-        <td style="font-family:monospace;font-size:1.1em;">
-            ${key.id}
-        </td>
-        <td>
-            ${key.expires.strftime("%d. %B %Y, %H:%M Uhr")}
+        <metal:main metal:use-macro="templates('Fragments/api_keys_table.pt').macros['api_key_table']" />
 
-        </td>
+        <p>
+        Hier können Sie ihre aktuellen API Keys verwalten.
+        </p>
 
-        <td tal:define="italic 'font-style: italic !important;;font-size: 0.9em;;'" tal:attributes="style italic" tal:condition="not key.description">
-            Keine Beschreibung
-        </td>
-
-        <td tal:condition="key.description">
-            ${key.description}
-        </td>
-        <td>
-          <form method="post" tal:attributes="action request.route_path('remove_api_key',key_id=key.id)">
-            <input type="submit" value="Entfernen"/>
-          </form>
-        </td>
-        <td tal:condition="freshtoken">
-          <button tal:condition="key.id == max([e.id for e in keys])" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
-        </td>
-      </tr>
-    </tbody>
-    </thead>
-    </table>
-    <br>
-    <form action="/user/api_keys" tal:attributes="action request.route_path('user_api_keys')" method="POST">
-      <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
-    </form>
+        <br>
+        <form action="/user/api_keys" tal:attributes="action request.route_path('user_api_keys')" method="POST">
+          <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+        </form>
+      </div>
+    </div>
 
   </metal:main>
 </metal:main>

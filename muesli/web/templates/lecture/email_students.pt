@@ -12,7 +12,7 @@ Geben Sie hierzu in das Formular unten einen Betreff und die Nachricht ein und k
 
 <form action="/lecture/email_students" tal:attributes="action request.route_path('lecture_email_students', lecture_id=lecture.id)" method="POST"
   enctype="multipart/form-data">
-<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+  <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
 
 

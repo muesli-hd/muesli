@@ -1,37 +1,35 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
+    <h2>Studenten in die <a tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">${lecture.name}</a> eintragen</h2>
 
-<h2>Studenten in diese Vorlesung eintragen</h2>
-
-<p>
-Vorlesung: <a tal:attributes="href request.route_path('lecture_edit', lecture_id=lecture.id)">${lecture.name}</a>
-</p>
-
-<form action="/lecture/add_student" tal:attributes="action request.route_path('lecture_add_student', lecture_id=lecture.id)" method="POST">
-  <table>
-    <tr>
-      <td><label for="student_email">Email</label></td>
-      <td>   
-        <input name="student_email" />
-      </td>
-    </tr>
-    <tr>
-      <td><label for="new_tutorial">Tutorium</label></td>
-      <td>
-      <select name="new_tutorial">
-        <option tal:repeat="tutorial tutorials" tal:attributes="value tutorial.id">
-          ${tutorial.time} - ${tutorial.place} ${('(%s)' % tutorial.tutor_name)}
-        </option>
-      </select>
-      </td>
-    </tr>
-    <tr>
-      <td><input type="submit" value="Eintragen"/></td>
-    </tr>
-  </table>
-</form>
-
+    <form action="/lecture/add_student" tal:attributes="action request.route_path('lecture_add_student', lecture_id=lecture.id)" method="POST">
+      <div class="form-group row">
+        <div class="col-sm-2">
+          <label for="student_email"><b>Email</b></label>
+        </div>
+        <div class="col-sm-10">
+          <input class="form-control" name="student_email" />
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-sm-2">
+          <label for="new_tutorial"><b>Tutorium</b></label>
+        </div>
+        <div class="col-sm-10">
+          <select class="custom-select" name="new_tutorial">
+            <option tal:repeat="tutorial tutorials" tal:attributes="value tutorial.id">
+            ${tutorial.time} - ${tutorial.place} ${('({})'.format(tutorial.tutor_name))}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="row pt-2">
+        <div class="col text-sm-left text-center">
+          <input role="button" class="btn btn-primary" type="submit" value="Eintragen"/>
+        </div>
+      </div>
+    </form>
 
   </metal:main>
 </metal:main>

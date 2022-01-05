@@ -1,0 +1,74 @@
+<!--! -*- coding: utf-8 -*- -->
+
+<!--! muesli/web/templates/Fragments/message_queue.pt -->
+
+<!--! This file is part of MUESLI. -->
+<!--! Copyright (C) 2020, Christian Heusel <christian (at) heusel.eu> -->
+
+<!--! This program is free software: you can redistribute it and/or modify -->
+<!--! it under the terms of the GNU General Public License as published by -->
+<!--! the Free Software Foundation, either version 3 of the License, or -->
+<!--! (at your option) any later version. -->
+
+<!--! This program is distributed in the hope that it will be useful, -->
+<!--! but WITHOUT ANY WARRANTY; without even the implied warranty of -->
+<!--! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the -->
+<!--! GNU General Public License for more details. -->
+
+<!--! You should have received a copy of the GNU General Public License -->
+<!--! along with this program.  If not, see <http://www.gnu.org/licenses/>. -->
+
+<metal:main metal:define-macro="message_queue">
+  <?python
+  errors = request.session.peek_flash('errors')
+  messages = request.session.peek_flash('messages')
+  ?>
+  <div class="sticky-top">
+    <div class=" position-absolute w-100 d-flex flex-column p-4 align-items-end" style="z-index: 999999" tal:condition="errors or messages">
+      <div class="justify-content-end">
+        <!-- BEGIN ERRORS -->
+        <div tal:repeat="(num, error) enumerate(request.session.pop_flash('errors'))" tal:omit-tag="">
+          <div class="toast position-relative mr-3 mt-1 border border-danger" id="errorToast${num}" data-delay="5000">
+            <div class="toast-header">
+              <img src="/favicon.ico" width="25px" class="rounded mr-2" alt="Das MÜSLI Logo">
+              <strong class="mr-auto text-danger">Error</strong>
+              <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="toast-body">
+              <p class="text-wrap" tal:content="error" />
+            </div>
+          </div>
+        </div>
+        <!-- END ERRORS -->
+        <!-- BEGIN MESSAGES -->
+        <div tal:repeat="(num, message) enumerate(request.session.pop_flash('messages'))" tal:omit-tag="">
+          <div class="toast position-relative mr-3 mt-1 border border-success" id="messageToast${num}" data-delay="5000">
+            <div class="toast-header">
+              <img src="/favicon.ico" width="25px" class="rounded mr-2" alt="Das MÜSLI Logo">
+              <strong class="mr-auto text-success">That worked!</strong>
+              <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="toast-body">
+              <p class="text-wrap" tal:content="message" />
+            </div>
+          </div>
+        </div>
+        <!-- END MESSAGES -->
+      </div>
+    </div>
+  </div>
+
+  <script tal:condition="errors or messages">
+  var i;
+  for (i = 0; i < ${len(errors)}; i++) {
+    $("#errorToast"+String(i)).toast('show');
+  }
+  for (i = 0; i < ${len(messages)}; i++) {
+    $("#messageToast"+String(i)).toast('show');
+  }
+  </script>
+</metal:main>

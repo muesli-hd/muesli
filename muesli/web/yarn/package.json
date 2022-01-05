@@ -6,8 +6,16 @@
   "license": "GPL-3.0-or-later",
   "private": false,
   "dependencies": {
+    "@fancyapps/ui": "^4.0.12",
+    "@popperjs/core": "^2.11.0",
+    "bootstrap": "latest-4",
+    "bs4-toast": "^1.2.0",
     "esbuild": "^0.8.44",
-    "friendly-challenge": "^0.7.1"
+    "friendly-challenge": "^0.7.1",
+    "jquery": "^3.6.0",
+    "popper.js": "1.16.1",
+    "select2": "^4.1.0-rc.0",
+    "tablesorter": "^2.31.3"
   },
   "scripts": {
     "build": "./node_modules/.bin/esbuild handle_captcha.js --bundle --outfile=../static/js/captcha.min.js --minify",

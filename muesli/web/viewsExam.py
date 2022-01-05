@@ -196,7 +196,7 @@ class EnterPointsBasic:
                     elif medical_certificate_value == '0':
                         admissions[student.student_id].medical_certificate = False
                     else:
-                        admissions[student.student_id].medical_certificate = None    
+                        admissions[student.student_id].medical_certificate = None
                 for e in exam.exercises:
                     param = 'points-%u-%u' % (student.student_id, e.id)
                     if param in self.request.POST:
@@ -209,7 +209,7 @@ class EnterPointsBasic:
                                 value = float(value)
                                 points[student.student_id][e.id].points = value
                             except:
-                                error_msgs.append('Could not convert "%s" (%s, Exercise %i)'%(value, student.student.name(), e.nr))
+                                error_msgs.append('Could not convert "%s" (%s, Exercise %i)'%(value, student.student.name, e.nr))
         for student in points:
             points[student]['total'] = sum([v.points for v in list(points[student].values()) if v.points])
         if self.db.new or self.db.dirty or self.db.deleted:
@@ -221,8 +221,9 @@ class EnterPointsBasic:
             statistics.update(exam.getStatistics(students=students, prefix='tut'))
         else:
             statistics = exam.getStatistics(students=students)
-        if not self.raw:
-            self.request.javascript.append('prototype.js')
+        self.request.javascript.append('toast.min.js')
+        self.request.javascript.append('jquery/jquery.tablesorter.min.js')
+        self.request.css.append('toast.min.css')
         return {'exam': exam,
                 'tutorial_ids': self.request.matchdict['tutorial_ids'],
                 'students': students,
@@ -397,7 +398,6 @@ def statistics(request):
         for i,q in enumerate(exam.getQuantils(students=tutorialstudents)):
             quantils[i]['tutorial'] = q
         #quantils['tutorials'] = exam.getQuantils(students=tutorialstudents)
-    request.javascript.append('prototype.js')
     #pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
     #points = DictOfObjects(lambda: {})
     #for point in pointsQuery:
@@ -512,26 +512,40 @@ class HistogramForExam(Histogram):
         self.points = [round(float(p.points)-0.01) for p in exercise_points if p.points!=None]
         self.max = self.exam.getMaxpoints()
 
+
 @view_config(route_name='exam_correlation', context=CorrelationContext, permission='correlation')
 class Correlation(MatplotlibView):
     def __init__(self, request):
         super(Correlation, self).__init__()
         self.request = request
+
     def getExamData(self, id):
         exam = self.request.db.query(models.Exam).get(id)
         points = exam.getResults()
         return dict([(e.student_id, e.points) for e in points if e.points != None]), exam.getMaxpoints(), exam.name
+
     def getLectureData(self, id):
         lecture = self.request.db.query(models.Lecture).get(id)
         points = lecture.getLectureResultsByCategory()
         max_points = sum([exam.getMaxpoints() for exam in lecture.exams if exam.category == 'assignment'])
         return dict([(e.student_id, e.points) for e in points if e.points != None and e.category == 'assignment']), max_points, lecture.name
+
+    def getExerciseData(self, id):
+        exercise = self.request.db.query(models.Exercise).get(id)
+        points = exercise.exam.lecture.getLectureResultsByCategory()
+        return (dict([(e.student_id, e.points) for e in points if e.points != None and e.category == 'assignment']),
+                exercise.maxpoints,
+                "Aufgabe {}".format(exercise.nr))
+
     def getData(self, source):
         source_type, source_id = source.split('_',1)
         if source_type == 'exam':
             return self.getExamData(source_id)
         elif source_type == 'lecture':
             return self.getLectureData(source_id)
+        elif source_type == 'exercise':
+            return self.getExerciseData(source_id)
+
     def getBins(self, max_value, max_bins = 10):
         if float(max_value)/max_bins < 1:
             stepsize = 0.5
@@ -541,6 +555,7 @@ class Correlation(MatplotlibView):
         while bins[-1] < float(max_value):
             bins.append(bins[-1]+stepsize)
         return bins
+
     def __call__(self):
         source1 = self.request.GET['source1']
         source2 = self.request.GET['source2']
@@ -583,13 +598,15 @@ class Correlation(MatplotlibView):
         ax.set_title("Korrelation = %.2f" % corrcoef)
         return self.createResponse()
 
+
 @view_config(route_name='exam_enter_points_single', renderer='muesli.web:templates/exam/enter_points_single.pt', context=ExamContext, permission='enter_points')
 def enterPointsSingle(request):
     exam = request.context.exam
     exercises = exam.exercises
-    request.javascript.append('prototype.js')
-    request.javascript.append('jquery/jquery.min.js')
-    request.javascript.append('jquery/select2.min.js')
+    request.javascript.append('select2.min.js')
+    request.css.append('select2.min.css')
+    request.javascript.append('toast.min.js')
+    request.css.append('toast.min.css')
     show_tutor = not request.context.tutorials
     show_time = (not request.context.tutorials) or len(request.context.tutorials) > 1
 
@@ -606,30 +623,37 @@ def enterPointsSingle(request):
         current_points.append(str(stud_result['sum']))
         student_results[str(student.id)] = {}
         student_results[str(student.id)]['points'] = current_points
-        student_results[str(student.id)]['name'] = student.name()
+        student_results[str(student.id)]['name'] = student.name
         student_results[str(student.id)]['tutorial_time'] = ls.tutorial.time.__html__()
         student_results[str(student.id)]['tutorial_tutor'] = ls.tutorial.tutor_name
     student_results_json = json.dumps(student_results)
 
     return {
-            'students': students,
-            'exam': exam,
-            'exercises': exercises,
-            'exercise_ids': exercise_ids_json,
-            'student_results': student_results_json,
-            'tutorial_ids': request.context.tutorial_ids_str,
-            'show_tutor': show_tutor,
-            'show_time': show_time
-            }
+        'students': students,
+        'exam': exam,
+        'exercises': exercises,
+        'exercise_ids': exercise_ids_json,
+        'student_results': student_results_json,
+        'tutorial_ids': request.context.tutorial_ids_str,
+        'show_tutor': show_tutor,
+        'show_time': show_time
+    }
 
 
+# Parse post data and retrieve a dict with parsed float point values
 def parse_points(post_data, exercises):
     e_points = {}
     json_data = {'msg': '', 'format_error_cells': []}
     for exercise in exercises:
-        get_param = 'points-%s' % exercise.id
-        if get_param in post_data:
-            p = post_data[get_param].replace(',','.')
+        exercise_dict_key = None
+        # I know some people use scripts to submit points right now. If you stumble upon this, you can remove the lookup
+        # migrate away from the points- lookup. People should not assume internal APIs to be constant.
+        if str(exercise.id) in post_data:
+            exercise_dict_key = str(exercise.id)
+        elif 'points-{}'.format(exercise.id) in post_data:
+            exercise_dict_key = 'points-{}'.format(exercise.id)
+        if exercise_dict_key:
+            p = post_data[exercise_dict_key].replace(',','.')
             if p:
                 try:
                     p = float(p)
@@ -640,7 +664,7 @@ def parse_points(post_data, exercises):
                     json_data['format_error_cells'].append(exercise.id)
             else:
                 e_points[exercise.id] = None
-    json_data['msg'] = json_data['msg'] or 'sucessfull'
+    json_data['msg'] = json_data['msg'] or 'successful'
     json_data['submitted_points'] = e_points
     return e_points, json_data
 
@@ -705,6 +729,7 @@ def interactive_admission(request):
 
 @view_config(route_name='exam_auto_admit', renderer='json', context=ExamContext, permission='edit')
 def autoadmit(request):
+    """Unfortunately this is still not fully implemented. I have a script on my laptop calling this regularly for lectures that ask for this functionality"""
     exam = request.context.exam
     assignments = exam.lecture.exams.filter(models.Exam.category == "assignment").all()
     admission_limit = int(request.params['admission_limit'])

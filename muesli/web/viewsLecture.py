@@ -85,10 +85,13 @@ class View:
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
         times = lecture.prepareTimePreferences(user=self.request.user)
         subscribed_tutorial = self.request.user.tutorials.filter(Tutorial.lecture_id == self.lecture_id).first()
+        form = TutorLectureAuthSignIn(self.request)
+        self.request.javascript.append('unsubscribe_modal_helpers.js')
         return {'lecture': lecture,
                 'subscribed_tutorial': subscribed_tutorial,
                 'times': times,
-                'prefs': utils.preferences}
+                'prefs': utils.preferences,
+                'form': form}
 
 @view_config(route_name='lecture_add_exam', renderer='muesli.web:templates/lecture/add_exam.pt', context=LectureContext, permission='edit')
 class AddExam:
@@ -209,8 +212,8 @@ class SwitchStudents(object):
         self.request = request
         self.db = self.request.db
         self.lecture_id = request.matchdict['lecture_id']
-        request.javascript.append('jquery/jquery.min.js')
-        request.javascript.append('jquery/select2.min.js')
+        request.javascript.append('select2.min.js')
+        request.css.append('select2.min.css')
 
     def __call__(self):
         lecture = self.db.query(models.Lecture).get(self.lecture_id)
@@ -227,7 +230,7 @@ class SwitchStudents(object):
 
             if student1_id == student2_id:
                 self.request.session.flash('Student kann nicht mit sich selbst getauscht werden!', queue='errors')
-            elif ls1.tutorial==ls2.tutorial:
+            elif ls1.tutorial == ls2.tutorial:
                 self.request.session.flash('Die beiden Studenten sind im gleichen Tutorium!', queue='errors')
             else:
                 tmp = ls1.tutorial
@@ -240,12 +243,11 @@ class SwitchStudents(object):
                 muesli.web.viewsTutorial.sendChangesMailSubscribe(self.request, ls2.tutorial, student2, ls1.tutorial)
                 muesli.web.viewsTutorial.sendChangesMailUnsubscribe(self.request, ls1.tutorial, student2, ls2.tutorial)
                 muesli.web.viewsTutorial.sendChangesMailUnsubscribe(self.request, ls2.tutorial, student1, ls1.tutorial)
-                self.request.session.flash('Sie haben die Tutorien von {} und {} vertauscht'.format(student1.name(),student2.name()), queue='messages')
+                self.request.session.flash('Sie haben die Tutorien von {} und {} vertauscht'.format(student1.name, student2.name), queue='messages')
 
         return {'lecture': lecture,
                 'tutorials': tutorials,
-                'students': students
-                }
+                'students': students}
 
 
 @view_config(route_name='lecture_edit', renderer='muesli.web:templates/lecture/edit.pt', context=LectureContext, permission='edit')
@@ -258,6 +260,7 @@ class Edit:
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
         form = LectureEdit(self.request, lecture)
         assistants = self.db.query(models.User).filter(models.User.is_assistant==1).order_by(models.User.last_name).all()
+
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
             form.saveValues()
             self.request.db.commit()
@@ -272,6 +275,8 @@ class Edit:
         exams = dict([[cat['id'], sorted(list(lecture.exams.filter(models.Exam.category==cat['id'])),
                               key=lambda x:len(x.name))]
                       for cat in utils.categories])
+        self.request.javascript.append('select2.min.js')
+        self.request.css.append('select2.min.css')
         return {'lecture': lecture,
                 'names': names,
                 'pref_count': pref_count,
@@ -286,49 +291,76 @@ class Edit:
 @view_config(route_name='lecture_delete', context=LectureContext, permission='delete_lecture')
 def delete(request):
     lecture = request.context.lecture
+    lecture_is_deletable = True
     if lecture.tutorials:
         request.session.flash('Vorlesung hat noch Übungsgruppen!', queue='errors')
-    elif lecture.tutors:
+        lecture_is_deletable = False
+    if lecture.tutors:
         request.session.flash('Vorlesung hat noch Tutoren!', queue='errors')
-    elif lecture.lecture_students.all():
+        lecture_is_deletable = False
+    if lecture.lecture_students.all():
         request.session.flash('Vorlesung hat noch Studenten', queue='errors')
-    elif lecture.lecture_removed_students.all():
+        lecture_is_deletable = False
+    if lecture.lecture_removed_students.all():
         request.session.flash('Vorlesung hat noch gelöschte Studenten', queue='errors')
-    elif lecture.exams.all():
+        lecture_is_deletable = False
+    if lecture.exams.all():
         request.session.flash('Vorlesung hat noch Testate', queue='errors')
-    elif lecture.gradings:
+        lecture_is_deletable = False
+    if lecture.gradings:
         request.session.flash('Vorlesung hat noch Benotungen', queue='errors')
-    elif lecture.time_preferences.all():
+        lecture_is_deletable = False
+    if lecture.time_preferences.all():
         request.session.flash('Vorlesung hat noch Präferenzen', queue='errors')
-    else:
+        lecture_is_deletable = False
+
+    if lecture_is_deletable:
         lecture.assistants = []
         request.db.delete(lecture)
         request.db.commit()
         request.session.flash('Vorlesung gelöscht', queue='messages')
+
     return HTTPFound(location=request.route_url('lecture_list'))
 
 @view_config(route_name='lecture_change_assistants', context=LectureContext, permission='change_assistant')
 def change_assistants(request):
     lecture = request.context.lecture
     if request.method == 'POST':
-        for nr, assistant in enumerate(lecture.assistants):
-            if 'change-%i' % assistant.id in request.POST:
-                new_assistant = request.db.query(models.User).get(request.POST['assistant-%i' % assistant.id])
-                if new_assistant in lecture.assistants:
-                    request.session.flash('Assistent ist bereits in Vorlesung eingetragen', queue='errors')
-                else:
-                    lecture.assistants[nr] = new_assistant
-            if 'remove-%i' % assistant.id in request.POST:
-                del lecture.assistants[nr]
-        if 'add-assistant' in request.POST:
-            if request.POST['new-assistant'] == "None":
-                request.session.flash('Bitte einen Assistenten auswählen', queue='errors')
+        assistants_to_remove = set(lecture.assistants)
+        amount_assistants = len(assistants_to_remove)
+        for requested_assistant_str in request.POST.getall('assistants'):
+            # Frist try to add a normal assistant
+            try:
+                requested_assistant_int = int(requested_assistant_str)
+                requested_assistant = request.db.query(models.User).get(requested_assistant_int)
+            except ValueError:
+                # Now try to find a user with a corresponding email address
+                try:
+                    requested_assistant = request.db.query(models.User).filter(models.User.email == requested_assistant_str).one()
+                except exc.NoResultFound:
+                    request.session.flash('{} konnte nicht zu Assistenten hinzugefügt werden!'.format(requested_assistant_str),
+                                          queue='messages')
+                    continue
+            if requested_assistant in assistants_to_remove:
+                assistants_to_remove.remove(requested_assistant)
             else:
-                new_assistant = request.db.query(models.User).get(request.POST['new-assistant'])
-                if new_assistant and new_assistant not in lecture.assistants:
-                    lecture.assistants.append(new_assistant)
+                lecture.assistants.append(requested_assistant)
+                request.session.flash(
+                    '{} ist jetzt als zusätzlicher Assistent für die Vorlesung eingetragen!'.format(requested_assistant.name),
+                    queue='messages')
+                amount_assistants += 1
+
+        # check that there still is an assistant left if we remove the
+        # requested ones
+        if amount_assistants - len(assistants_to_remove) > 0 :
+            for assistant_to_remove in assistants_to_remove:
+                lecture.assistants.remove(assistant_to_remove)
+                request.session.flash('{} wurde als Vorlesungsassistent entfernt!'.format(assistant_to_remove.name),
+                                          queue='messages')
+        else:
+            request.session.flash('Es konnten keine Vorlesungsassistenten entfernt werden, da sonst für diese Vorlesung kein Assistent mehr eingetragen wäre! Bitte lassen Sie einen Assistenten übrig', queue='errors')
     if request.db.new or request.db.dirty or request.db.deleted:
-        if len(lecture.assistants)>0:
+        if len(lecture.assistants) > 0:
             lecture.old_assistant = lecture.assistants[0]
         else:
             lecture.old_assistant = None
@@ -445,7 +477,7 @@ def emailTutors(request):
     db = request.db
     lecture = request.context.lecture
     form = LectureEmailTutors(request)
-    
+
     if request.method == 'POST' and form.processPostData(request.POST):
         tutors = lecture.tutors
         message = Message(subject='[{}][Tutoren] {}'.format(lecture.name, form['subject']),
@@ -498,12 +530,11 @@ def emailStudents(request):
 
 @view_config(route_name='lecture_view_removed_students', renderer='muesli.web:templates/lecture/view_removed_students.pt', context=LectureContext, permission='edit')
 def viewRemovedStudents(request):
-    db = request.db
     lecture = request.context.lecture
-    ls = lecture.lecture_removed_students
-    ls = ls.join(LectureRemovedStudent.student).order_by(User.last_name, User.first_name)
+    lecture_students = lecture.lecture_removed_students
+    lecture_students = lecture_students.join(LectureRemovedStudent.student).order_by(User.last_name, User.first_name)
     return {'lecture': lecture,
-            'removed_students': ls}
+            'removed_students': list(lecture_students)}
 
 @view_config(route_name='lecture_export_totals', renderer='muesli.web:templates/lecture/export_totals.pt', context=LectureContext, permission='edit')
 def exportTotals(request):
@@ -672,7 +703,7 @@ def exportYaml(request):
     for lecture in lectures.all():
         lecture_dict = {}
         tutors = set([tutorial.tutor for tutorial in lecture.tutorials])
-        lecture_dict['tutors'] = [tutor.name() for tutor in tutors if tutor!= None]
+        lecture_dict['tutors'] = [tutor.name for tutor in tutors if tutor!= None]
         lecture_dict['name'] = lecture.name
         lecture_dict['lecturer'] = lecture.lecturer
         lecture_dict['student_count'] = lecture.lecture_students.count()
@@ -692,7 +723,7 @@ def exportYaml_details(request):
         lecture_dict = {}
         lecture_dict['tutorials'] = []
         for tutorial in lecture.tutorials:
-            vtutor = 'tutor: ' + tutorial.tutor.name() if tutorial.tutor!=None else 'tutor: '
+            vtutor = 'tutor: ' + tutorial.tutor.name if tutorial.tutor!=None else 'tutor: '
             vemail = 'email: ' + tutorial.tutor.email  if tutorial.tutor!=None else 'email: '
             vplace = 'place: ' + tutorial.place
             vtime = 'time: '+ tutorial.time.__html__()
@@ -719,13 +750,13 @@ def exportYaml_emails(request):
             'student_count': lecture.lecture_students.count(),
             'term': lecture.term.__html__(),
             'tutorials': [{
-                    'tutor': tutorial.tutor.name() if tutorial.tutor else '',
+                    'tutor': tutorial.tutor.name if tutorial.tutor else '',
                     'email': tutorial.tutor.email if tutorial.tutor else '',
                     'place': tutorial.place,
                     'time': tutorial.time.__html__(),
                     'comment': tutorial.comment if tutorial.comment else '',
                     'students': [{
-                        'name': student.name(),
+                        'name': student.name,
                         'email': student.email
                     } for student in tutorial.students]
                 } for tutorial in lecture.tutorials
@@ -773,7 +804,7 @@ class DoExport(ExcelExport):
             tutorial_list = []
             lecture_name = lecture.name
             for tutorial in lecture.tutorials:
-                vtutor = tutorial.tutor.name() if tutorial.tutor is not None else 'None'
+                vtutor = tutorial.tutor.name if tutorial.tutor is not None else 'None'
                 vtutor_first_name = tutorial.tutor.first_name if tutorial.tutor is not None else 'None'
                 vtutor_last_name = tutorial.tutor.last_name if tutorial.tutor is not None else 'None'
                 vemail = tutorial.tutor.email if tutorial.tutor is not None else 'None'

@@ -1,9 +1,9 @@
 <script>/* <![CDATA[ */
-  function update_total(row)
+  function update_total(student_id)
   {
     var total = 0;
     var current = 0;
-    $("#row-" + row + " input.rawpoints").each(
+    $(`input.rawpoints[student_id=$${student_id}]`).each(
       function(index) {
         current = parseFloat($(this).val().replace(/,/, "."));
         if (!isNaN(current)) {
@@ -11,21 +11,60 @@
         }
       }
     );
-
-    $("#total-" + row).val(Number(total).toFixed(2));
+    $(`input.total[student_id=$${student_id}]`).val(Number(total).toFixed(2));
   }
 
     $(document).ready(function() {
-      $(".rawform").each(
-        function(index) {
-          $(this).submit(function() {
+      $(".rawform").each(function(index) {
+        $(this).submit(function() {
+          try {
             $("#savestatus").text("Speichere...");
-            var url = $(this).attr('action');
-            $.post(url, $(this).serialize(), function() {
-              $("#savestatus").text("Gespeichert");
+
+            // Save each row individually via ajax to get better errors
+            $(".rawform tbody tr").each(function() {
+              let student_id = $(this).attr("student_id");
+              if (student_id === undefined) {
+                return false;
+              }
+
+              // Build request data for this student
+              let data = {"student_id": student_id}
+              $(this).find(`input.rawpoints[student_id=$${student_id}]`).each(function() {
+                  data[$(this).attr("exercise_id")] = $(this).val();
+              })
+              // Submit the collected data to the ajax endpoint
+              $.ajax('${request.route_path('exam_ajax_save_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)}', {
+                method: "POST",
+                dataType: "json",
+                data: data,
+                success: function(response) {
+                  // Check if all requested points were saved
+                  if (response["format_error_cells"].length == 0 && response["msg"] == "successful") {
+                    $.snack("info", 'Änderungen gespeichert', 10000);
+                    // Transfer the new total to the main table
+                    $(`#exampoints-$${student_id}-${exam.id}`).text($(`input.total[student_id=$${student_id}]`).val());
+                    Fancybox.getInstance().close();
+                    $("#savestatus").text("Gespeichert");
+                  } else {
+                    $.toast({
+                      type: "error",
+                      title: "Fehler beim Speichern!",
+                      content: response["msg"],
+                      delay: 10000
+                    });
+                    $("#savestatus").text(response["msg"]);
+                  }
+                },
+                error: function(response) {
+                    $.snack("error", "Fehler: Konnte Punkte nicht speichern!", 10000)
+                    $("#savestatus").text(response)
+                }
+              });
             });
+          } finally {
             return false;
-          });
+          }
+        });
       });
     });
 /* ]]> */
@@ -33,25 +72,27 @@
 <form id="rawform" class="rawform" method="post" tal:attributes="action request.route_path('exam_enter_points', exam_id = exam.id, tutorial_ids = request.context.tutorial_ids_str)">
 <input type="hidden" name="student_ids" tal:attributes="value ','.join([str(ls.student_id) for ls in students])" />
 <table class="colored">
-  <tr>
+  <thead>
     <th tal:condition="not tutorial_ids">Tutor</th>
     <th>Name</th>
     <th tal:repeat="e exam.exercises">${e.nr}</th>
     <th>Σ</th>
-  </tr>
+  </thead>
 
-  <tr tal:repeat="ls students" tal:attributes="id 'row-'+str(ls.student_id)" tal:define="total 0">
-      <input type="hidden" tal:attributes="value ls.student_id" name="student_id" />
-      <td tal:condition="not tutorial_ids">
-        <span tal:condition="ls.tutorial.tutor" tal:content="ls.tutorial.tutor.last_name" />
-      </td>
-      <td>${ls.student.name()}</td>
-      <td tal:repeat="e exam.exercises">
-        <input class="rawpoints" tal:attributes="name 'points-'+str(ls.student.id)+'-'+str(e.id); onchange 'update_total('+str(ls.student.id)+')'; value points[ls.student_id][e.id].points" size="3" type="text" />
-      </td>
-      <td><input tal:attributes="id 'total-'+str(ls.student.id); value points[ls.student.id]['total']" readonly="readonly" size="4" /></td>
-      <td></td>
-  </tr>
+  <tbody>
+    <tr tal:repeat="ls students" tal:attributes="student_id str(ls.student_id)" tal:define="total 0">
+        <input type="hidden" tal:attributes="value ls.student_id" name="student_id" />
+        <td tal:condition="not tutorial_ids">
+          <span tal:condition="ls.tutorial.tutor" tal:content="ls.tutorial.tutor.last_name" />
+        </td>
+        <td>${ls.student.name}</td>
+        <td tal:repeat="e exam.exercises">
+          <input class="rawpoints" tal:attributes="student_id str(ls.student_id); exercise_id e.id; name 'points-'+str(ls.student.id)+'-'+str(e.id); onchange 'update_total('+str(ls.student.id)+')'; value points[ls.student_id][e.id].points" size="3" type="text" />
+        </td>
+        <td><input class="total" tal:attributes="student_id str(ls.student.id); value points[ls.student.id]['total']" readonly="readonly" size="4" /></td>
+        <td></td>
+    </tr>
+  </tbody>
 </table>
 <input type="submit" value="Speichern"/> <span id="savestatus"></span>
 </form>

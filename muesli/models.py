@@ -107,6 +107,15 @@ class User(Base):
     is_assistant = Column(Integer, nullable=False, default=0)
 
     @property
+    def name(self):
+        name = "{}{}{}".format(
+            self.title+' ' if self.title is not None else '',
+            self.first_name+' ' if self.first_name is not None else '',
+            self.last_name if self.last_name is not None else ''
+        )
+        return name
+
+    @property
     def tutorials(self):
         session = Session.object_session(self)
         return session.query(Tutorial).filter(Tutorial.lecture_students.any(LectureStudent.student_id == self.id)).join(Tutorial.lecture).order_by(Lecture.term)
@@ -129,9 +138,6 @@ class User(Base):
             else:
                 mt[tutorial.lecture.id] = [tutorial]
         return mt
-
-    def name(self):
-        return self.first_name + ' ' + self.last_name
 
     def getFirstName(self):
         return self.first_name
@@ -184,10 +190,10 @@ class User(Base):
         return True
 
     def __str__(self):
-        return '{name} <{email}>'.format(name=self.name(), email=self.email)
+        return '{name} <{email}>'.format(name=self.name, email=self.email)
 
     def __repr__(self):
-        return 'u<User %r <%r>>' % (self.name(), self.email)
+        return 'u<User %r <%r>>' % (self.name, self.email)
 
 
 class Confirmation(Base):
@@ -208,8 +214,16 @@ class Lecture(Base):
     id = Column(Integer, primary_key=True)
     # Should be removed some day. Stays here just to make muesli3 work.
     assistant_id = Column('assistant', Integer, ForeignKey(User.id, ondelete='SET NULL'))
-    old_assistant = relationship(User, backref=backref('lectures_as_assistant_old', order_by='Lecture.term', lazy='dynamic'))
-    assistants = relationship(User, secondary=lecture_assistants_table, backref=backref("lectures_as_assistant", order_by='Lecture.term', lazy='dynamic'))
+    old_assistant = relationship(
+        User, backref=backref(
+            'lectures_as_assistant_old', order_by='Lecture.term', lazy='dynamic'
+        )
+    )
+    assistants = relationship(
+        User, secondary=lecture_assistants_table, backref=backref(
+            "lectures_as_assistant", order_by='Lecture.term', lazy='dynamic'
+        )
+    )
     name = Column(Text)
     # lecture type
     #  'lecture'
@@ -235,7 +249,7 @@ class Lecture(Base):
     minimum_preferences = Column(Integer, default=None)
     tutor_rights = Column(Text, nullable=False, default=editOwnTutorials)
     tutorials = relationship('Tutorial', order_by='Tutorial.time,Tutorial.comment')
-    tutors = relationship(User, secondary=lecture_tutors_table, backref = "lectures_as_tutor")
+    tutors = relationship(User, secondary=lecture_tutors_table, backref="lectures_as_tutor")
 
     @property
     def students(self):

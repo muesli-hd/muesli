@@ -10,8 +10,16 @@ Geben Sie hierzu in das Formular unten einen Betreff und die Nachricht ein und k
 </p>
 
 <ul>
-  <li><a tal:attributes="href request.route_path('email_users',_query={'type': 'wrong_subject'})">Falsches Fach</a></li>
-  <li><a tal:attributes="href request.route_path('email_users',_query={'type': 'unconfirmed'})">Karteileichen</a></li>
+  <li>
+    <a tal:attributes="href request.route_path('email_users',_query={'type': 'wrong_subject'})">
+      Falsches Fach
+    </a>
+  </li>
+  <li>
+    <a tal:attributes="href request.route_path('email_users',_query={'type': 'unconfirmed'})">
+      Karteileichen
+    </a>
+  </li>
 </ul>
 
 <p>
@@ -30,21 +38,32 @@ Mit freundlichen Grüßen,<br />
 
 <form action="/email_wrong_subject" tal:attributes="action request.route_path('email_users')" method="POST"
   enctype="multipart/form-data">
-<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+  <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
 
 <p>Anzahl: ${len(students)}</p>
-<table class="colored">
-  <thead>
-    <tr>
-      <td>Name</td>
-      <td tal:repeat="header headers">${header}</td>
-    </tr>
+
+<p tal:condition="not table" class="alert alert-primary">
+Es gibt anscheinend keine Studis im Müsli, du hast also wohl irgendwas kaputt gemacht :P
+</p>
+
+<table tal:condition="table" class="table table-striped">
+  <thead class="thead-dark">
+    <th scope="col">Name</th>
+    <th scope="col" tal:repeat="header headers">${header}</th>
   </thead>
-  <tr tal:repeat="tstudent table">
-    <td><a tal:attributes="href request.route_path('user_edit', user_id=tstudent[0].id)">${tstudent[0].name()}</a></td>
-    <td tal:repeat="field tstudent[1:]">${field}</td>
-  </tr>
+  <tbody>
+    <tr tal:repeat="tstudent table">
+      <td>
+        <a tal:attributes="href request.route_path('user_edit', user_id=tstudent[0].id)">
+          ${tstudent[0].name}
+        </a>
+      </td>
+      <td tal:repeat="field tstudent[1:]">
+        ${field}
+      </td>
+    </tr>
+  </tbody>
 </table>
 
   </metal:main>

@@ -1,202 +1,168 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
-  <metal:main metal:fill-slot="content" tal:define='physics_tutorial_map {1327: 7509}'>
+  <metal:main metal:fill-slot="content">
+    <metal:main metal:use-macro="templates('Fragments/unsubscribe_modal.pt').macros['unsubscribe_modal']" />
 
-  <h2>${lecture.name}</h2>
+    <h2>
+        ${lecture.name}
+  </h2>
 
   <p tal:condition="lecture.url">
-  Internetseite zu dieser Vorlesung: <a href="${lecture.url}">${lecture.url}</a>
+    Internetseite zu dieser Vorlesung: <a href="${lecture.url}">${lecture.url}</a>
   </p>
 
   <p tal:condition="request.permissionInfo.has_permission('edit')">
-  Sie können <a tal:attributes='href request.route_path("lecture_edit", lecture_id=lecture.id)'>diese Vorlesung bearbeiten</a>.
+    Sie können
+    <a tal:attributes='href request.route_path("lecture_edit", lecture_id=lecture.id)'>
+      diese Vorlesung bearbeiten
+    </a>.
   </p>
 
   <p tal:condition="request.permissionInfo.has_permission('mail_tutors')">
-  Sie können eine <a tal:attributes='href request.route_path("lecture_email_tutors", lecture_id=lecture.id)'>E-Mail an alle Übungsleiter schreiben</a>.
+    Sie können eine
+    <a tal:attributes='href request.route_path("lecture_email_tutors", lecture_id=lecture.id)'>
+      E-Mail an alle Übungsleiter schreiben
+    </a>.
   </p>
 
   <h3>Übungsgruppen</h3>
-  <p tal:condition='lecture.mode=="off"'>
-    Es ist derzeit nicht möglich sich zu Übungsgruppen in dieser Vorlesung anzumelden.
+
+  <p class="alert alert-warning" tal:condition='lecture.mode == "off" and lecture.tutorials'>
+    Es ist derzeit noch nicht möglich sich zu Übungsgruppen in dieser Vorlesung anzumelden.
+    <span tal:condition="request.userInfo.is_assistant()">Sie sehen die Übungsgruppen, da Sie Assistent sind.</span>
+    <span tal:condition="request.userInfo.is_admin()">Sie sehen die Übungsgruppen, da Sie Admin sind.</span>
   </p>
 
+  <div tal:condition="not lecture.tutorials" class="alert alert-info">
+    Es gibt momentan noch keine Übungsgruppen
+  </div>
 
-    <div tal:condition='lecture.id in physics_tutorial_map.keys()'>
-      <!--
-        This is horribly hacky. If you see this message after the first half of summer term 2021, find the corresponding
-        commit and revert it please. This is just for the summer term during the pandemic.
-
-        The idea is to let physics students register in a separate lecture and do some manual importing of results later.
-        The map above is Lecture Id (LA2 or Ana2) -> the tutorial in the separate lecture copy
-      -->
-
-      <script id="physics_hack_script"
-              type="text/javascript" tal:attributes="data-state 'physics' if physics_tutorial_map[lecture.id] in [x.id for x in request.user.tutorials] else 'maths' if request.user.hasPreferences(lecture=lecture) or lecture.id in [t.lecture.id for t in request.user.tutorials] else 'not_registered'">
-        function show_physics_hack_elements(state) {
-          switch (state) {
-            case "not_registered":
-              document.querySelector("#physics_hack_question").style.display = 'block';
-              document.querySelector("#physics_hack_physics").style.display = 'none';
-              document.querySelector("#regular_registration").style.display = 'none';
-              document.querySelector("#physics_hack_maths").style.display = 'none';
-              break;
-            case "physics":
-              document.querySelector("#physics_hack_question").style.display = 'none';
-              document.querySelector("#physics_hack_physics").style.display = 'block';
-              document.querySelector("#regular_registration").style.display = 'none';
-              document.querySelector("#physics_hack_maths").style.display = 'none';
-              break;
-            case "maths":
-              document.querySelector("#physics_hack_question").style.display = 'none';
-              document.querySelector("#physics_hack_physics").style.display = 'none';
-              document.querySelector("#regular_registration").style.display = 'block';
-              document.querySelector("#physics_hack_maths").style.display = 'block';
-              break;
-          }
-        }
-
-        function exit_math_mode_physics_hack(){
-          let x = document.querySelector("input[value=\"Präferenzen vergessen\"]");
-          if (x != null) {
-              x.form.submit()
-          }
-          for (const a of document.querySelectorAll("a")) {
-              if (a.textContent.includes("Austreten")) {
-                  window.open(a.href, "_top")
-              }
-          }
-          show_physics_hack_elements("not_registered")
-        }
-
-        function docReady(fn) {
-          // see if DOM is already available
-          if (document.readyState === "complete" || document.readyState === "interactive") {
-            // call on next available tick
-            setTimeout(fn, 1);
-          } else {
-            document.addEventListener("DOMContentLoaded", fn);
-          }
-        }
-
-        function apply_current_physics_hack_state() {
-          let hack_state = document.querySelector("#physics_hack_script").dataset.state;
-          show_physics_hack_elements(hack_state)
-        }
-
-        docReady(apply_current_physics_hack_state)
-      </script>
-
-      <div id="physics_hack_question">
-        <p>Studieren Sie Physik?</p>
-        <a class="action" tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=physics_tutorial_map[lecture.id])">
-          Ich studiere Physik und melde mich hiermit zu dieser Veranstaltung an.
-        </a> (Die Zuteilung wird über die Präferenzen im Übungsgruppensystem der Physik vorgenommen)
-        <br/>
-        <a class="action" onclick="show_physics_hack_elements('maths')">Ich studiere etwas anderes, z.B.
-          Mathematik/Informatik und möchte
-          mich anmelden</a>
-      </div>
-
-      <div id="physics_hack_physics" style="display: none;;">
-        <p>Sie sind aktuell für diese Veranstaltung angemeldet und werden von der Physikfakultät in Ihre Bubble
-          eingeteilt.</p>
-        <a class="action" tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=physics_tutorial_map[lecture.id])">
-          Ich habe mich vertan und möchte mich wieder abmelden</a>
-        <br/>
-        <p>Sie können sich anschließend wieder für die Veranstaltung anmelden.</p>
-      </div>
-
-      <div id="physics_hack_maths" style="display: none;;">
-        <a class="action" onclick='exit_math_mode_physics_hack()'>
-          Ich habe mich vertan und möchte mich wieder abmelden</a>
-        <br/>
-        <p>Sie können sich anschließend wieder für die Veranstaltung anmelden.</p>
-      </div>
-    </div>
-
-    <div id="regular_registration" tal:attributes='style "display: none;;" if lecture.id in physics_tutorial_map.keys() else None'>
-
-    <div tal:omit-tag='' tal:condition="lecture.mode=='direct' or request.userInfo.is_assistant() or request.userInfo.is_admin() or request.permissionInfo.has_permission('take_tutorial')">
+  <div tal:omit-tag=''
+       tal:condition="(lecture.mode == 'direct' or
+                       request.userInfo.is_assistant() or
+                       request.userInfo.is_admin() or
+                       request.permissionInfo.has_permission('take_tutorial'))
+                       and lecture.tutorials">
     <p>
-    Zu dieser Vorlesung werden die folgenden Übungsgruppen angeboten:
+      Zu dieser Vorlesung werden die folgenden Übungsgruppen angeboten:
     </p>
 
-    <table>
-      <tr tal:condition='lecture.type == "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Kommentar</th><th></th><th></tr>
-      <tr tal:condition='lecture.type != "lecture"'><th>Zeit</th><th>Raum</th><th>Auslastung</th><th>Tutor</th><th>Titel</th><th></th><th></th></tr>
+    <table class="table">
+      <thead class="thead-dark" tal:condition='lecture.type == "lecture"'>
+        <th scope="col">Zeit</th>
+        <th scope="col">Raum</th>
+        <th scope="col">Auslastung</th>
+        <th scope="col" class="w-auto"></th>
+        <th scope="col">Tutor</th>
+        <th scope="col">Kommentar</th>
+        <th scope="col"></th>
+      </thead>
 
-      <tr tal:repeat='tutorial lecture.tutorials'>
-        <td>${tutorial.time}</td>
-        <td>${tutorial.place}</td>
-        <td>
-          <metal:main metal:use-macro="templates('Fragments/HTML/tutorial_occupancy.pt').macros['tutorial_occupancy']" />
-        </td>
-        <td>
-          <span tal:omit-tag='' tal:condition='tutorial.tutor'>
-            ${tutorial.tutor.first_name} ${tutorial.tutor.last_name}
-          </span>
-          <span tal:omit-tag='' tal:condition="not tutorial.tutor and request.permissionInfo.has_permission('take_tutorial')"> <!-- TODO: and (is assistant or is_tutor) -->
-            <a class="action" tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
-          </span>
-        </td>
-        <td>${tutorial.comment}</td>
-        <td tal:condition="request.permissionInfo.has_permission('view_tutorials')">
-          <a tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">Details</a>
-        </td>
-        <td>
-          <div tal:omit-tag='' tal:condition="(tutorial.student_count &lt; tutorial.max_students) and tutorial != subscribed_tutorial">
-            <a class="action" tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)" tal:condition="not subscribed_tutorial">
-              Beitreten
+      <thead class="thead-dark" tal:condition='lecture.type != "lecture"'>
+        <th scope="col">Zeit</th>
+        <th scope="col">Raum</th>
+        <th scope="col">Auslastung</th>
+        <th scope="col" class="w-auto"></th>
+        <th scope="col">Tutor</th>
+        <th scope="col">Titel</th>
+        <th scope="col"></th>
+      </thead>
+
+      <tbody>
+        <tr tal:repeat='tutorial lecture.tutorials'>
+          <td>${tutorial.time}</td>
+          <td>${tutorial.place}</td>
+          <td>
+            <metal:main metal:use-macro="templates('Fragments/HTML/tutorial_occupancy.pt').macros['tutorial_occupancy']" />
+          </td>
+
+          <td class="w-auto">
+            <div class="col-sm-auto" style="padding: 0; margin: 0">
+              ${tutorial.student_count}/${tutorial.max_students}
+            </div>
+          </td>
+          <td>
+            <span tal:omit-tag='' tal:condition='tutorial.tutor'>
+              ${tutorial.tutor.first_name} ${tutorial.tutor.last_name}
+            </span>
+            <span tal:omit-tag='' tal:condition="not tutorial.tutor and request.permissionInfo.has_permission('take_tutorial')"> <!-- TODO: and (is assistant or is_tutor) -->
+              <a role="button" class="btn-sm btn-success" tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
+            </span>
+          </td>
+          <td tal:condition="tutorial.comment">${tutorial.comment}</td>
+          <td class="font-italic" tal:condition="not tutorial.comment">Keine Beschreibung</td>
+          <td>
+            <a role="button" class="btn-sm btn-info mr-2"
+              tal:condition="request.permissionInfo.has_permission('view_tutorials')"
+              tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">
+              Verwalten
             </a>
-            <a class="action" onclick="return accidentalClickPrevention(event)" tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)" tal:condition="subscribed_tutorial">
-              Wechseln
+            <a role="button" class="btn-sm btn-primary mr-2"
+               tal:condition="(tutorial.student_count < tutorial.max_students) and not subscribed_tutorial"
+               tal:attributes="href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)">
+               Beitreten
             </a>
-          </div>
-          <a class="action" onclick="return accidentalClickPrevention(event)" tal:condition="tutorial == subscribed_tutorial"
-             tal:attributes="href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)">
-            Austreten
-          </a>
-        </td>
-      </tr>
+            <a role="button" class="btn-sm btn-primary mr-2" data-toggle="modal" data-target="#confirm_unsubscribe"
+               tal:condition="(tutorial.student_count < tutorial.max_students) and subscribed_tutorial and tutorial != subscribed_tutorial"
+               tal:attributes="data-href request.route_path('tutorial_subscribe', tutorial_id=tutorial.id)"
+               data-modal-text="Möchtest du die Übungsgruppe der Vorlesung „${tutorial.lecture.name}“
+               ${'bei {}'.format(subscribed_tutorial.tutor.name) if subscribed_tutorial.tutor is not None else ''} wirklich verlassen und zur
+               neuen Gruppe ${'bei {}'.format(tutorial.tutor.name) if tutorial.tutor is not None else ''} wechseln?"
+               data-modal-button-text="Wechseln" data-modal-button-class="btn-primary">
+               Wechseln
+            </a>
+            <a role="button" class="btn-sm btn-danger text-white" data-toggle="modal" data-target="#confirm_unsubscribe"
+               tal:condition="tutorial == subscribed_tutorial"
+               tal:attributes="data-href request.route_path('tutorial_unsubscribe', tutorial_id=tutorial.id)"
+               data-modal-text="Möchtest du die Übungsgruppe der Vorlesung „${tutorial.lecture.name}“
+               ${'bei {}'.format(tutorial.tutor.name) if tutorial.tutor is not None else ''} wirklich verlassen?">
+              Austreten
+            </a>
+          </td>
+        </tr>
+      </tbody>
    </table>
   </div>
 
 
   <div tal:condition='lecture.mode == "prefs"'>
-    <p>
-      Die Zeiten, zu denen Übungsgruppen angeboten werden, sind in der folgenden Tabelle aufgelistet.
-      Damit MÜSLI Sie in Übungsgruppen eintragen kann, müssen Sie eine bestimmte Anzahl von Übungsgruppen in den Modi "Gut" oder "Mittel" ausgewählt haben.
-      Diese kann je nach Zahl der vorhandenen Übungsgruppen variieren.
-      Probieren Sie es einfach aus!
-    </p>
+  <p>
+    Die Zeiten, zu denen Übungsgruppen angeboten werden, sind in der folgenden Tabelle aufgelistet.
+    Damit MÜSLI Sie in Übungsgruppen eintragen kann, müssen Sie eine bestimmte Anzahl von Übungsgruppen in den Modi "Gut" oder "Mittel" ausgewählt haben.
+    Diese kann je nach Zahl der vorhandenen Übungsgruppen variieren.
+    Probieren Sie es einfach aus!
+  </p>
 
   <form method='post' tal:attributes='action request.route_path("lecture_set_preferences", lecture_id=lecture.id)'>
-  <table>
-    <tr>
-      <th>Zeit</th>
-      <th>Verf. Plätze</th>
-      <th>Präferenz</th>
-    </tr>
-    <tr tal:repeat='(count,time) enumerate(times,1)'>
-      <td>${time['time']}</td>
-      <td>${time['max_students']}</td>
-      <td>
-        <input type='hidden' name="time-${count}" value="${str(time['time'])}" />
-        <select name='pref-${count}'>
-          <option tal:repeat="pref prefs" value="${pref['penalty']}" tal:attributes="selected 'selected' if pref['penalty']==time['penalty'] else None">
-            ${pref['name']}
-          </option>
-        </select>
-      </td>
-    </tr>
-  </table>
-  <input type='submit' value='Ausgewählte Präferenzen speichern'/>
+    <table class="table w-auto">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">Zeit</th>
+          <th scope="col">Verf. Plätze</th>
+          <th scope="col">Präferenz</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr tal:repeat='(count, time) enumerate(times, 1)'>
+          <td>${time['time']}</td>
+          <td>${time['max_students']}</td>
+          <td>
+            <input type='hidden' name="time-${count}" value="${str(time['time'])}" />
+            <select class="custom-select" name='pref-${count}'>
+              <option tal:repeat="pref prefs" value="${pref['penalty']}" tal:attributes="selected 'selected' if pref['penalty'] == time['penalty'] else None">
+                ${pref['name']}
+              </option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <input class="btn btn-primary" role="button" type='submit' value='Ausgewählte Präferenzen speichern'/>
   </form>
 
-  <form tal:condition="request.user.hasPreferences(lecture)"
-    method="post" tal:attributes="action request.route_path('lecture_remove_preferences', lecture_id=lecture.id)">
-    <input type="submit" value="Präferenzen vergessen"/>
+  <form tal:condition="request.user.hasPreferences(lecture)" method="post" class="pt-1"
+        tal:attributes="action request.route_path('lecture_remove_preferences', lecture_id=lecture.id)">
+    <input class="btn btn-danger" type="submit" value="Präferenzen vergessen"/>
   </form>
 
   </div>
@@ -205,25 +171,12 @@
   <h3>Als Übungsleiter anmelden</h3>
 
   <p>
-  Um sich als Übungsleiter für diese Vorlesung anzumelden, geben Sie bitte das Passwort ein, das Ihnen vom Assistenten mitgeteilt wurde:
+    Um sich als Übungsleiter für diese Vorlesung anzumelden, geben Sie bitte das Passwort ein, das Ihnen vom Assistenten mitgeteilt wurde:
   </p>
 
   <form method="post" tal:attributes="action request.route_path('lecture_add_tutor', lecture_id=lecture.id)">
-  <table>
-    <tr>
-      <td>Passwort:</td>
-      <td><input type="text" size="30" name="password"/></td>
-    </tr>
-    <tr>
-      <td></td>
-      <td><input type="submit" value="Anmelden"/></td>
-    </tr>
-  </table>
-  </form>
-
+      <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
   </div>
-
-
 
   </metal:main>
 </metal:main>

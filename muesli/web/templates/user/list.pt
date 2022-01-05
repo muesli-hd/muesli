@@ -2,16 +2,24 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<h2>Liste aller registrierten Nutzer</h2>
+<h2 class="display-4">Registrierte Nutzer</h2>
 
-<table>
-  <tr><th>Name</th><th>E-Mail</th></tr>
-  <tr tal:repeat="user users">
-    <td><a tal:attributes="href request.route_path('user_edit', user_id=user.id)">${user.last_name}, ${user.first_name}</a></td>
-    <td>${user.email}</td>
-  </tr>
+<table class="table table-striped">
+  <thead class="thead-dark">
+    <th scope="col">Name</th>
+    <th scope="col">E-Mail</th>
+  </thead>
+  <tbody>
+    <tr tal:repeat="user users">
+      <td>
+        <a tal:attributes="href request.route_path('user_edit', user_id=user.id)">
+          ${user.name}
+        </a>
+      </td>
+      <td class="text-monospace">${user.email}</td>
+    </tr>
+  </tbody>
 </table>
-
 
   </metal:main>
 </metal:main>

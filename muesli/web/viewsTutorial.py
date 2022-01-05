@@ -41,12 +41,18 @@ import PIL.ImageDraw
 import io
 from natsort import natsorted
 
-@view_config(route_name='tutorial_view', renderer='muesli.web:templates/tutorial/view.pt', context=TutorialContext, permission='viewOverview')
+@view_config(
+    route_name='tutorial_view',
+    renderer='muesli.web:templates/tutorial/view.pt',
+    context=TutorialContext,
+    permission='viewOverview'
+)
 class View:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
         self.tutorial_ids = request.matchdict['tutorial_ids']
+
     def __call__(self):
         tutorials = self.request.context.tutorials
         lecture_students = self.request.context.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))
@@ -56,9 +62,11 @@ class View:
         # Query results are already lexicographically sorted.
         # Sort again using length as key so we get length lexicographical sorting
         # https://github.com/muesli-hd/muesli/issues/28
-        exams = dict([[cat['id'], natsorted(list(tutorial.lecture.exams.filter(models.Exam.category==cat['id'])),
-                                         key=lambda x: x.name)]
-                      for cat in utils.categories])
+        exams = dict([[cat['id'], natsorted(
+                    list(tutorial.lecture.exams.filter(models.Exam.category==cat['id'])),
+                    key=lambda x: x.name)
+            ] for cat in utils.categories
+        ])
         return {'tutorial': tutorial,
                 'tutorials': tutorials,
                 'tutorial_ids': self.tutorial_ids,
@@ -69,34 +77,6 @@ class View:
                 'names': self.request.config['lecture_types'][tutorial.lecture.type],
                 'old_tutorial_id': None  #see move_student
                 }
-
-@view_config(route_name='tutorial_occupancy_bar')
-class OccupancyBar:
-    def __init__(self, request):
-        self.request = request
-        self.count = int(request.matchdict['count'])
-        self.max_count = int(request.matchdict['max_count'])
-        self.width = 60
-        self.height = 10
-        self.color1 = (0,0,255)
-        self.color2 = (140,140,255)
-    def __call__(self):
-        image = PIL.Image.new('RGB', (self.width,self.height),(255,255,255))
-        draw = PIL.ImageDraw.Draw(image)
-        # prevent 0-division error
-        if self.max_count > 0:
-            draw.rectangle([(0,0),(float(self.width)*self.max_count/self.max_count,10)], fill=self.color2)
-            draw.rectangle([(0,0),(float(self.width)*self.count/self.max_count,10)], fill=self.color1)
-        else:
-            draw.rectangle([(0,0),(float(self.width),10)], fill=self.color1)
-        output = io.BytesIO()
-        image.save(output, format='PNG')
-        response = Response()
-        response.content_type = 'image/png'
-        response.cache_control = 'max-age=86400'
-        response.body = output.getvalue()
-        output.close()
-        return response
 
 @view_config(route_name='tutorial_add', renderer='muesli.web:templates/tutorial/add.pt', context=LectureContext, permission='edit')
 class Add:
@@ -114,7 +94,7 @@ class Add:
             form.obj = tutorial
             form.saveValues()
             self.request.db.commit()
-            form.message = "Neue Übungsgruppe angelegt."
+            self.request.session.flash('Neue Übungsgruppe angelegt.', queue='messages')
         return {'lecture': lecture,
                 'names': self.request.config['lecture_types'][lecture.type],
                 'form': form,
@@ -193,7 +173,6 @@ def results(request):
     cat_maxpoints = dict([cat['id'], 0] for cat in utils.categories)
     for exam in lecture.exams:
         cat_maxpoints[exam.category] += exam.getMaxpoints()
-    request.javascript.append('jquery/jquery.min.js')
     request.javascript.append('jquery/jquery.tablesorter.min.js')
     return {'tutorials': tutorials,
             'tutorial_ids': request.context.tutorial_ids_str,
@@ -312,9 +291,9 @@ def sendChangesMailSubscribe(request, tutorial, student, fromTutorial=None):
     if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'In Ihre Übungsgruppe zur Vorlesung %s am %s hat sich %s eingetragen'\
-            % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
+            % (tutorial.lecture.name, tutorial.time.__html__(), student.name)
     if fromTutorial:
-        text += ' (Wechsel aus der Gruppe am %s von %s).' % (fromTutorial.time.__html__(), fromTutorial.tutor.name() if fromTutorial.tutor else 'NN')
+        text += ' (Wechsel aus der Gruppe am %s von %s).' % (fromTutorial.time.__html__(), fromTutorial.tutor.name if fromTutorial.tutor else 'NN')
     else:
         text += '.'
     sendChangesMail(request, tutorial.tutor, text)
@@ -326,9 +305,9 @@ def sendChangesMailUnsubscribe(request, tutorial, student, toTutorial=None):
     if not tutorial.tutor or mail_preference.receive_status_mails == False:
         return
     text = 'Aus Ihrer Übungsgruppe zur Vorlesung %s am %s hat sich %s ausgetragen'\
-                    % (tutorial.lecture.name, tutorial.time.__html__(), student.name())
+                    % (tutorial.lecture.name, tutorial.time.__html__(), student.name)
     if toTutorial:
-        text += ' (Wechsel in die Gruppe am %s von %s).' % (toTutorial.time.__html__(), toTutorial.tutor.name() if toTutorial.tutor else 'NN')
+        text += ' (Wechsel in die Gruppe am %s von %s).' % (toTutorial.time.__html__(), toTutorial.tutor.name if toTutorial.tutor else 'NN')
     else:
         text += '.'
     sendChangesMail(request, tutorial.tutor, text)
@@ -358,7 +337,7 @@ def email_preference(request):
         if not mail_preference in request.db:
             db.add(mail_preference)
         request.db.commit()
-        request.session.flash('Your preferences have been updated', queue='messages')
+        request.session.flash('Ihre Einstellungen wurden geändert!', queue='messages')
     return {'tutorials': tutorials,
             'tutorial_ids': request.context.tutorial_ids_str,
             'lecture': lecture,
@@ -400,33 +379,35 @@ def ajaxGetTutorial(request):
     ret = {}
     if ls and ls.tutorial:
         ret = {'msg': 'sucessful'}
-        ret['tutor'] = ls.tutorial.tutor.name() if ls.tutorial.tutor else 'N.N.'
+        ret['tutor'] = ls.tutorial.tutor.name if ls.tutorial.tutor else 'N.N.'
         ret['time'] = ls.tutorial.time.formatted()
         return ret
     else:
         return {'msg': 'No Tutorial found!'}
 
-@view_config(route_name='tutorial_assign_student', renderer='muesli.web:templates/tutorial/assign_student.pt', context=AssignStudentContext, permission='move')
+@view_config(route_name='tutorial_assign_student', context=AssignStudentContext, permission='move')
 def assign_student(request):
     student = request.context.student
     new_tutorial = request.context.tutorial
     lecture = new_tutorial.lecture
     lrs = request.db.query(models.LectureRemovedStudent).get((lecture.id, student.id))
-    if lrs: request.db.delete(lrs)
-    ls = request.db.query(models.LectureStudent).get((lecture.id, student.id))
-    if ls:
-        pass
-    #       oldtutorial = ls.tutorial
-    else:
-        ls = models.LectureStudent()
-        ls.lecture = lecture
-        ls.student = student
-    #       oldtutorial = None
-    ls.tutorial = new_tutorial
-    if not ls in request.db: request.db.add(ls)
+    if lrs:
+        request.db.delete(lrs)
+    lecture_student = request.db.query(models.LectureStudent).get((lecture.id, student.id))
+    # TODO: is this really needed?!
+    if not lecture_student:
+        lecture_student = models.LectureStudent()
+        lecture_student.lecture = lecture
+        lecture_student.student = student
+    lecture_student.tutorial = new_tutorial
+    if lecture_student not in request.db:
+        request.db.add(lecture_student)
     request.db.commit()
-    #if oldtutorial:
-    #       sendChangesMailUnsubscribe(request, oldtutorial, request.user, toTutorial=tutorial)
-    #sendChangesMailSubscribe(request, tutorial, request.user, fromTutorial=oldtutorial)
-    return {'student': student,
-            'new_tutorial': new_tutorial}
+    request.session.flash(
+        '{} wurde der Übungsgruppe am {} zugeteilt!'.format(
+            student.name,
+            new_tutorial.time.formatted()
+        ),
+        queue='messages'
+    )
+    return HTTPFound(location=request.referrer)

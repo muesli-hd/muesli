@@ -4,12 +4,29 @@
 
 <h2>Liste aller eingetragenen Studiengänge</h2>
 
-<table>
-  <tr><th>Studiengang</th><th>Anzahl</th></tr>
-  <tr tal:repeat="(subject,count) subjects">
-    <td><a tal:attributes="href request.route_path('user_list', _query={'subject': subject})">${subject}</a></td>
-    <td>${count}</td>
-  </tr>
+<table class="table table-striped w-auto">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Studiengang</th>
+      <th scope="col">Anzahl</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr tal:repeat="(subject, count) subjects">
+      <td>
+        <a tal:attributes="href request.route_path('user_list', _query={'subject': subject})">
+          ${subject}
+        </a>
+      </td>
+      <td>
+        ${count}
+      </td>
+    </tr>
+    <tr class="font-weight-bold">
+      <td>Gesamt</td>
+      <td>${len(subjects.all())}</td>
+    </tr>
+  </tbody>
 </table>
 
 

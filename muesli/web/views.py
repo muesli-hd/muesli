@@ -46,7 +46,7 @@ import traceback
 @view_config(route_name='overview', renderer='muesli.web:templates/overview.pt')
 def overview(request):
     if not request.user:
-        return HTTPFound(location = request.route_url('user_login'))
+        return HTTPFound(location=request.route_url('index'))
     tutorials_as_tutor = request.user.tutorials_as_tutor.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
     tutorials = request.user.tutorials.options(joinedload(Tutorial.tutor), joinedload(Tutorial.lecture))
     lectures_as_assistant = request.user.lectures_as_assistant
@@ -67,6 +67,7 @@ def overview(request):
         tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
         tutorials = tutorials.filter(Lecture.term >= semesterlimit)
         lectures_as_assistant = lectures_as_assistant.filter(Lecture.term >= semesterlimit)
+    request.javascript.append('unsubscribe_modal_helpers.js')
     return {'uboo': uboo,
             'time_preferences': request.user.prepareTimePreferences(),
             'penalty_names': utils.penalty_names,
@@ -83,6 +84,22 @@ def start(request):
 
 @view_config(route_name='admin', renderer='muesli.web:templates/admin.pt', context=GeneralContext, permission='admin')
 def admin(request):
+    return {}
+
+@view_config(
+    route_name='test_exceptions',
+    renderer='muesli.web:templates/test_exceptions.pt',
+    context=GeneralContext,
+    permission='admin'
+)
+def test_exceptions(request):
+    if request.method == 'POST':
+        if request.POST.get("HTTPInternalServerError"):
+            raise Exception("Das ist eine Testnachricht!")
+        if request.POST.get("HTTPBadRequest"):
+            raise HTTPBadRequest("Dies ist eine Testfehlermeldung!")
+        if request.POST.get("HTTPForbidden"):
+            raise HTTPForbidden("Du kommsch hier ned rein!")
     return {}
 
 

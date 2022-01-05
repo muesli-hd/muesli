@@ -2,12 +2,6 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<script>
-set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture_view", lecture_id=exam.lecture.id)}']
-                ${",['Uebungsgruppe','"+request.route_path('tutorial_view', tutorial_ids=tutorial_ids)+"']" if tutorial_ids else ''}
-     ]);
-</script>
-
 
 <h2>Punkte eintragen</h2>
 
@@ -23,72 +17,81 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
   <p class="error" tal:condition="error_msg">${error_msg}</p>
 
 
-<script>/* <![CDATA[ */
-  function update_total(row)
-  {
-    var objs = $$("#row-" + row + " input.points");
-    var total = 0;
-    var current = 0;
-
-    for (i = 0; i < objs.length; i++) {
-      current = parseFloat(objs[i].value.replace(/,/, "."));
-      if (!isNaN(current)) {
-        total += current;
-      }
+  <script type="text/javascript">
+    function update_total(row)
+    {
+      let total = 0;
+      let current = 0;
+      $("#row-" + row + " input[name^='points-']").map(function() {
+          current = parseFloat(this.value.replace(/,/, "."));
+          if (!isNaN(current)) {
+            total += current;
+          }
+      });
+      console.log(total)
+      return $("#total-" + row).val(Number(total).toFixed(2));
     }
-
-    return $("total-" + row).value = Number(total).toFixed(2);
-  }
-/* ]]> */
-</script>
+    $(document).ready(function()
+    {
+      $("#grading-table").tablesorter();
+    }
+    );
+  </script>
+  <p>Diese Tabelle ist durch Anklicken der Spalten sortierbar.</p>
 
 <form method="post">
 <input type="hidden" name="submit" value="1"/>
-<table class="colored">
-  <tr>
-    <th tal:condition="not tutorial_ids">Tutor</th>
-    <th>Name</th>
-    <th tal:condition="exam.medical_certificate is not None">Attest</th>
-    <th tal:repeat="e exam.exercises">${e.nr}</th>
-    <th>Σ</th>
-  </tr>
+<table id="grading-table" class="table w-auto">
+  <thead class="thead-dark">
+    <th scope="col" tal:condition="not tutorial_ids">Tutor</th>
+    <th scope="col">Name</th>
+    <th scope="col" tal:condition="exam.medical_certificate is not None">Attest</th>
+    <th scope="col" tal:repeat="e exam.exercises">${e.nr}</th>
+    <th scope="col">Σ</th>
+  </thead>
 
-  <tr tal:repeat="ls students" tal:attributes="id 'row-'+str(ls.student_id)" tal:define="total 0">
+  <tbody>
+    <tr tal:repeat="ls students" tal:attributes="id 'row-'+str(ls.student_id)" tal:define="total 0">
       <td tal:condition="not tutorial_ids">
         <span tal:condition="ls.tutorial.tutor" tal:content="ls.tutorial.tutor.last_name" />
       </td>
-    <td>${ls.student.name()}</td>
-    <td tal:condition="exam.medical_certificate is not None"
-        tal:on-error="nothing"
-        tal:define="name     'medical_certificate-%s' % ls.student.id;
-                    value     admissions[ls.student_id].medical_certificate;
-                    readonly  exam.medical_certificate!=True">
-        <metal:main metal:use-macro="templates('Fragments/HTML/input_tristate.pt').macros['input_tristate']" />
-    </td>
-    <td tal:repeat="e exam.exercises">
-        <input class="points" tal:attributes="name 'points-'+str(ls.student.id)+'-'+str(e.id); onchange 'update_total('+str(ls.student.id)+')'; value points[ls.student_id][e.id].points" size="3" type="text" />
-    </td>
-    <td><input tal:attributes="id 'total-'+str(ls.student.id); value points[ls.student.id]['total']" readonly="readonly" size="4" /></td>
-  </tr>
+      <td>
+        ${ls.student.name}
+      </td>
+      <td tal:condition="exam.medical_certificate is not None"
+          tal:on-error="nothing"
+          tal:define="name     'medical_certificate-%s' % ls.student.id;
+                      value     admissions[ls.student_id].medical_certificate;
+                      readonly  exam.medical_certificate!=True">
+          <metal:main metal:use-macro="templates('Fragments/HTML/input_tristate.pt').macros['input_tristate']" />
+      </td>
+      <td tal:repeat="e exam.exercises">
+          <input class="form-control" tal:attributes="name 'points-'+str(ls.student.id)+'-'+str(e.id); onchange 'update_total('+str(ls.student.id)+')'; value points[ls.student_id][e.id].points" size="3" type="text" />
+      </td>
+      <td>
+        <input class="form-control" tal:attributes="id 'total-'+str(ls.student.id); value points[ls.student.id]['total']" readonly="readonly" size="4" />
+      </td>
+    </tr>
+  </tbody>
 
   <tfoot>
-  <tr>
-    <td>Durchschnitt (Gruppe/Gesamt)</td>
-    <th tal:condition="exam.medical_certificate is not None"></th>
-    <td tal:condition="not tutorial_ids"></td>
-    <td tal:repeat="e exam.exercises">
-      <span tal:define="statisticsData statistics[e.id]; statistics_images False" tal:omit-tag="">
+    <tr>
+      <td>Durchschnitt (Gruppe/Gesamt)</td>
+      <th tal:condition="exam.medical_certificate is not None"></th>
+      <td tal:condition="not tutorial_ids"></td>
+      <td tal:repeat="e exam.exercises">
+        <span tal:define="statisticsData statistics[e.id]; statistics_images False" tal:omit-tag="">
+          <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
+        </span>
+      </td>
+      <td tal:define="statisticsData statistics['exam']; statistics_images False">
         <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
-      </span>
-    </td>
-    <td tal:define="statisticsData statistics['exam']; statistics_images False">
-      <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
-    </td>
-  </tr>
+      </td>
+    </tr>
   </tfoot>
 
 </table>
-<input type="submit" value="Speichern"/>
+<input class="btn btn-primary" type="submit" value="Speichern"/>
 </form>
 
 <h3>Statistiken</h3>
@@ -96,19 +99,36 @@ set_navigation([['Vorlesung ${exam.lecture.name}','${request.route_path("lecture
 <ul>
   <li><a tal:attributes="href request.route_path('exam_statistics', exam_id=exam.id, tutorial_ids=tutorial_ids)">Statistik/Histogramme</a></li>
   <li>
-    <form method="get" tal:attributes="action request.route_path('exam_correlation')">
-      <input type="hidden" name="type1" value="exercise"/>
-      <input type="hidden" name="type2" value="exercise"/>
-      <select name="id1">
-        <option tal:repeat="e exam.exercises" tal:attributes="value e.id">Aufgabe ${e.nr}</option>
-      </select>
-      <select name="id2">
-        <option tal:repeat="e exam.exercises" tal:attributes="value e.id">Aufgabe ${e.nr}</option>
-      </select>
-      <input type="submit" value="Korrelation"/>
-    </form>
+
+<form class="form-inline" method="get" tal:attributes="action request.route_path('exam_correlation')">
+  <!-- TODO: Same here, we did not find any place where this was used! -->
+  <!-- <input type="hidden" name="type1" value="exercise"/> -->
+  <!-- <input type="hidden" name="type2" value="exercise"/> -->
+  <div class="form-group pr-1">
+    <select class="custom-select" name="source1">
+      <option tal:repeat="e exam.exercises"
+              tal:attributes="value 'exercise_%s' % e.id">
+        Aufgabe ${e.nr}
+      </option>
+    </select>
+  </div>
+  <div class="form-group pr-1">
+    <select class="custom-select" name="source2">
+      <option tal:repeat="e exam.exercises"
+              tal:attributes="value 'exercise_%s' % e.id">
+        Aufgabe ${e.nr}
+      </option>
+    </select>
+  </div>
+  <input role="button" class="btn btn-primary" type="submit" value="Korrelation"/>
+</form>
   </li>
-  <li><a tal:attributes="href request.route_path('exam_correlation', _query={'type1': 'assignments', 'id1': exam.lecture.id, 'type2': 'exam', 'id2': exam.id})">Korrelation Testat/Übungszettel gesamt</a></li>
+  <li>
+    <!-- TODO: Please check this carefully on review! -->
+    <a tal:attributes="href request.route_path('exam_correlation', _query={'source1': 'lecture_' + str(exam.lecture.id), 'source2': 'exam_' + str(exam.id)})">
+      Korrelation Testat/Übungszettel gesamt
+    </a>
+  </li>
 </ul>
 
 

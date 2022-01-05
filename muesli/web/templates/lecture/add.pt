@@ -2,12 +2,11 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<h2>Neue Vorlesung anlegen</h2>
+    <h2>Neue Vorlesung anlegen</h2>
 
-<form action="/lecture/add" tal:attributes="action request.route_path('lecture_add')" method="POST">
-<metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
-</form>
-
+    <form action="/lecture/add" tal:attributes="action request.route_path('lecture_add')" method="POST">
+      <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+    </form>
 
   </metal:main>
 </metal:main>

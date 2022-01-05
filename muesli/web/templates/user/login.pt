@@ -1,49 +1,34 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
-<h2>Anmelden</h2>
+    <h2 class="display-4">Anmelden</h2>
 
-<p tal:condition="request.user is not None">
-Sie sind zur Zeit als ${request.user.email} angemeldet.
-</p>
+    <p tal:condition="request.user is not None">
+    Sie sind zur Zeit als ${request.user.email} angemeldet.
+    </p>
 
-<p tal:condition="user is not None">
-  pyramid.security glaubt, sie seien ${user}.
-</p>
+    <p tal:condition="user is not None">
+      pyramid.security glaubt, sie seien ${user}.
+    </p>
 
 <p>
 MÜSLI verwaltet viele Übungsgruppen und Vorlesungen an der Fakultät für
 Mathematik und Informatik der Universität Heidelberg.
 </p>
 
-<form action="/user/login" tal:attributes="action request.route_path('user_login')" method="POST">
-<table>
-<tr>
-  <td><label for="email">E-Mail:</label></td>
-  <td><input name="email" tal:attributes="value form['email']" /></td>
-  <td><span tal:condition="'email' in form.errors" tal:content="form.errors['email']">Error!</span></td>
-</tr>
-<tr>
-  <td><label for="password">Passwort:</label></td>
-  <td><input name="password" type="password" /></td>
-  <td><span tal:condition="'password' in form.errors" tal:content="form.errors['password']"></span></td>
-</tr>
-<tr>
-  <td></td>
-  <td><input type="submit" value="Anmelden" /></td>
-  <td></td>
-</tr>
-</table>
-</form>
+    <form action="/user/login" tal:attributes="action request.route_path('user_login')" method="POST">
+      <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
+    </form>
 
-<p>
-Wenn Sie noch keinen Account haben, müssen Sie sich zuerst
+    <br>
+
+    <p class="alert alert-info">
+    Wenn Sie noch keinen Account haben, müssen Sie sich zuerst
 <a tal:attributes="href request.route_path('user_register')">bei MÜSLI registrieren</a>.
-Falls Sie Ihr Passwort vergessen haben, können Sie Ihr 
+    Falls Sie Ihr Passwort vergessen haben, können Sie Ihr
 <a tal:attributes="href request.route_path('user_reset_password')">Passwort zurücksetzen</a>.
-Sollten Sie dennoch Probleme bei der Anmeldung haben,
+    Sollten Sie dennoch Probleme bei der Anmeldung haben,
 <a tal:attributes="href request.route_path('contact')">wenden Sie sich an uns</a>.
-</p>
-
+    </p>
   </metal:main>
 </metal:main>
