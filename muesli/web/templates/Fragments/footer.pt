@@ -21,22 +21,26 @@
 <metal:main metal:define-macro="footer">
   <footer class="footer mt-auto py-3">
     <div class="container">
-      <div class="row">
-        <div class="text-muted col-sm text-md-left text-center">
+      <div class="row justify-content-md-around">
+        <div class="text-muted">
+          <a href="https://www.uni-heidelberg.de/de/impressum">Impressum</a>
+          <a href="/datenschutzerklaerung.html">Datenschutzerklärung</a>
+        </div>
+
+        <div class="text-muted">
+          <a role="button"
+             class="btn btn-sm btn-info"
+             tal:attributes="href request.route_path('changelog')">Was ist neu?</a>
+          <a role="button"
+             class="btn btn-sm btn-info"
+               tal:attributes="href request.route_path('contact')">Kontakt</a>
+        </div>
+
+        <div class="text-muted">
           <small>
             loading time: ${'{0:.3f}s'.format(request.now() - request.time)}
             queries: ${request.queries}
           </small>
-        </div>
-
-        <div class="text-muted col-sm text-center">
-          <a role="button"
-             class="btn btn-sm btn-info"
-             tal:attributes="href request.route_path('changelog')">What's new?</a>
-        </div>
-
-        <div class="text-muted col-sm text-center text-md-right">
-          <a href="https://www.uni-heidelberg.de/de/impressum">Impressum</a> <a href="/datenschutzerklaerung.html">Datenschutzerkl&auml;rung</a>
         </div>
       </div>
     </div>
