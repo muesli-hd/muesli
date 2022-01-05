@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-echo "Waiting for database to start ..."; sleep 3;
-wait-for-it "${MUESLI_DB_HOST}":5432 -t 30 || exit 1
-
 if [[ -v MUESLI_TESTMODE ]]
 then
+    echo "Waiting for database to start ..."; sleep 3;
+    wait-for-it "${MUESLI_DB_HOST}":5432 -t 30 || exit 1
     echo "Generating configs ... "
     sed "s/connection: \S\+/connection: postgresql:\/\/${MUESLI_DB_USER:-postgres}:${MUESLI_DB_PASSWORD}@${MUESLI_DB_HOST}\/${MUESLI_DB}/" muesli.yml.example | sed 's/production: \S\+/production: False/' | sed 's/server: \S\+/server: mailcatcher:1025/' > muesli.yml
     sed "s/sqlalchemy.url = \S\+/sqlalchemy.url = postgres:\/\/${MUESLI_DB_USER:-postgres}:${MUESLI_DB_PASSWORD}@${MUESLI_DB_HOST}\/${MUESLI_DB}/" alembic.ini.example > alembic.ini
