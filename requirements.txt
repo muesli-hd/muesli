@@ -20,7 +20,7 @@ marshmallow==3.14.1
 matplotlib==2.2.0
 natsort==7.0.1
 networkx==2.5
-numpy==1.19.3
+numpy==1.21.0
 openpyxl==2.5.0
 Paste==3.5.0
 PasteDeploy==2.1.1
