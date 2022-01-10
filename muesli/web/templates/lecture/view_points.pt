@@ -11,41 +11,43 @@
   <div class="card mt-2" tal:repeat="catexams exams_by_category">
     <div class="card-body">
       <h3 class="card-title">${catexams['name']}</h3>
-      <table class="table table-striped table-sm w-auto" tal:define="max_exercises max([len(e.exercises) for e in catexams['exams']])">
-        <thead class="thead-dark">
+      <div class="table-responsive">
+        <table class="table table-striped table-sm w-auto" tal:define="max_exercises max([len(e.exercises) for e in catexams['exams']])">
+          <thead class="thead-dark">
           <th scope="col"></th>
           <!-- The hack used below makes the tablehead fit above all further cols -->
           <th scope="col" tal:attributes="colspan 1+max_exercises">
             Punkte
           </th>
-        </thead>
-        <tr tal:repeat="exam catexams['exams']">
-          <div tal:condition="not exam.results_hidden" tal:omit-tag="">
-            <th scope="col">
-              <a tal:condition="exam.url" tal:attributes="href exam.url">${exam.name}</a>
-              <span tal:condition="not exam.url" tal:omit-tag="">${exam.name}</span>
-            </th>
-            <td>
-              <strong>${fF(results[exam.id]['sum'])}/${fF(exam.getMaxpoints())}</strong>
-            </td>
-            <td tal:repeat="e exam.exercises">
+          </thead>
+          <tr tal:repeat="exam catexams['exams']">
+            <div tal:condition="not exam.results_hidden" tal:omit-tag="">
+              <th scope="col">
+                <a tal:condition="exam.url" tal:attributes="href exam.url">${exam.name}</a>
+                <span tal:condition="not exam.url" tal:omit-tag="">${exam.name}</span>
+              </th>
+              <td>
+                <strong>${fF(results[exam.id]['sum'])}/${fF(exam.getMaxpoints())}</strong>
+              </td>
+              <td tal:repeat="e exam.exercises">
               ${fF(results[exam.id][e.id]['points'])}/${fF(results[exam.id][e.id]['exercise'].maxpoints)}
-            </td>
-            <td tal:repeat="i [1 for j in range(max_exercises - len(exam.exercises))]"></td>
-          </div>
-        </tr>
-        <tfoot>
+              </td>
+              <td tal:repeat="i [1 for j in range(max_exercises - len(exam.exercises))]"></td>
+            </div>
+          </tr>
+          <tfoot>
           <th scope="row">Insgesamt: </th>
           <td colspan="3"><strong>${fF(catexams['sum'])}/${fF(catexams['max'])}</strong>
             <span tal:condition="catexams['max']>0 and catexams['max_rel']>0 and catexams['max']!=catexams['max_rel']">
            (${'%2.f' % (catexams['sum']/catexams['max']*100)}%, ${'%2.f' % (catexams['sum']/catexams['max_rel']*100)}% rel.)
           </span>
-          <span tal:condition="catexams['max']>0 and catexams['max']==catexams['max_rel']">
+            <span tal:condition="catexams['max']>0 and catexams['max']==catexams['max_rel']">
               (${'%2.f' % (catexams['sum']/catexams['max']*100)}%)
             </span>
           </td>
-        </tfoot>
-      </table>
+          </tfoot>
+        </table>
+      </div>
     </div>
   </div>
 
