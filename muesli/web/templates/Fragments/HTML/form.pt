@@ -101,14 +101,14 @@
       <!-- HIDDEN INPUT -->
       <input type="hidden" tal:attributes="name field.name; size str(field.size); value field.value; readonly 'readonly' if field.readonly else None"/>
     </div>
-
-    <div tal:condition="hasattr(form, 'captcha')" tal:omit-tag="">
-      <!-- CAPTCHA -->
-      <div class="frc-captcha" id="captcha-widget" data-lang="de"
-           data-sitekey="TEST" tal:attributes="data-puzzle_url request.config['captcha']['puzzle_url']"></div>
-    </div>
-
   </div>
+
+  <div tal:condition="hasattr(form, 'captcha')" tal:omit-tag="">
+    <!-- CAPTCHA -->
+    <div class="frc-captcha" id="captcha-widget" data-lang="de"
+         data-sitekey="TEST" tal:attributes="data-puzzle_url request.config['captcha']['puzzle_url']"></div>
+  </div>
+
   <input role="button" class="btn btn-primary" type="submit" id="form-submit-button" tal:attributes="value form.send ; disabled True if hasattr(form, 'captcha') else None" />
 </div>
 </metal:main>
