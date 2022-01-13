@@ -20,15 +20,16 @@
 
 from pyramid import security
 from pyramid.config import Configurator
-from pyramid.events import subscriber, BeforeTraversal, BeforeRender, NewRequest
+from pyramid.events import subscriber, BeforeRender, NewRequest
 from pyramid.renderers import get_renderer
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
-from muesli.web.pyramid_jwt import JWTAuthenticationPolicy
+from pyramid.authorization import ACLHelper, Authenticated, Everyone
 from pyramid_multiauth import MultiAuthenticationPolicy
 import pyramid_beaker
 import beaker.ext.sqla
 import tempfile
+import jwt
 
 from muesli.web.navigation_tree import create_navigation_tree
 from muesli.web.context import *
@@ -78,17 +79,11 @@ def add_session_to_request(event):
         request.db.rollback()
     event.request.add_finished_callback(callback)
 
-    user_id = security.authenticated_userid(event.request)
-    if user_id is not None:
-        event.request.user = event.request.db.query(User).get(user_id)
-    else:
-        event.request.user = None
+    event.request.user = None
+    if event.request.identity is not None:
+        event.request.user = event.request.identity['user']
     event.request.userInfo = utils.UserInfo(event.request.user)
     event.request.permissionInfo = utils.PermissionInfo(event.request)
-    #event.request.objgraph = objgraph
-    #event.request.inspect = inspect
-    #event.request.random = random
-    #event.request.gc = gc
 
 @subscriber(NewRequest)
 def add_javascript_to_request(event):
@@ -112,12 +107,89 @@ def add_templates_to_renderer_globals(event):
     event['templates'] = lambda name: get_renderer('templates/{0}'.format(name)).implementation()
     event['Number'] = numbers.Number
 
-def principals_for_user(user_id, request):
-    user = request.db.query(User).get(user_id)
-    principals = ['user:{0}'.format(user_id)]
-    if user.is_admin:
-        principals.append('group:administrators')
-    return principals
+
+
+# This class was created using the documentation on migrations pyramid 1.x authentication systems to 2.x.
+# https://docs.pylonsproject.org/projects/pyramid/en/latest/whatsnew-2.0.html#upgrading-auth-20
+class MuesliSecurityPolicy:
+    def __init__(self, jwt_key, jwt_expiration_days):
+        self.jwt_key = jwt_key
+        self.jwt_expiration_days = jwt_expiration_days
+        self.authenticated_via_api = False
+
+    def jwt_identify(self, request):
+        try:
+            if request.authorization is None:
+                return None
+        except ValueError:  # Invalid Authorization header
+            return None
+        auth_type, token = request.authorization
+        if auth_type != "Bearer" or not token:
+            return None
+        try:
+            identity = jwt.decode(token, self.jwt_key, algorithms=['HS512'], audience=None)
+            if request.db.query(models.BearerToken).get(identity["jti"]).revoked:
+                return None
+            else:
+                self.authenticated_via_api = True
+                # rename the subject id into userid
+                identity['userid'] = identity.pop('sub')
+                return identity
+        except jwt.InvalidTokenError:
+            return None
+
+    def identity(self, request):
+        identity = None
+        # Check if user authenticated using Session
+        if 'auth.userid' in request.session:
+            identity = {'userid': request.session['auth.userid']}
+        # Maybe the user authenticated using JWT. Now check for JWT token.
+        if identity is None:
+            identity = self.jwt_identify(request)
+        if identity is None:
+            # Avoid a database request on empty user_id requests
+            return None
+        identity['user'] = request.db.query(User).get(identity['userid'])
+        if identity['user'] is None:
+            return None
+
+        # Set default principals
+        identity['principals'] = ['user:{0}'.format(identity['user'].id)]
+        if identity['user'].is_admin:
+            identity['principals'].append('group:administrators')
+
+        return identity
+
+    def authenticated_userid(self, request):
+        # defer to the identity logic to determine if the user id logged in
+        # and return None if they are not
+        identity = request.identity
+        if identity is not None:
+            return identity['userid']
+
+    def permits(self, request, context, permission):
+        # use the identity to build a list of principals, and pass them
+        # to the ACLHelper to determine allowed/denied
+        identity = request.identity
+        principals = set([Everyone])
+        if identity is not None:
+            principals.add(Authenticated)
+            principals.add(identity['userid'])
+            principals.update(identity['principals'])
+        return ACLHelper().permits(context, principals, permission)
+
+    def remember(self, request, userid, **kw):
+        if not self.authenticated_via_api:
+            request.session['auth.userid'] = userid
+        return []
+
+    def forget(self, request, **kw):
+        if not self.authenticated_via_api:
+            if 'auth.userid' in request.session:
+                del request.session['auth.userid']
+        return []
+
+
 
 
 def main(global_config=None, testmode=False, **settings):
@@ -144,29 +216,21 @@ def main(global_config=None, testmode=False, **settings):
             'beaker.session.data_dir': tempfile.mkdtemp(),
             'beaker.session.timeout': 7200,
     })
-    if not muesli.PRODUCTION_INSTANCE:
+    if muesli.DEVELOPMENT_MODE:
         settings.update({
             'debugtoolbar.hosts': '0.0.0.0/0',
+            'pyramid.includes': 'pyramid_debugtoolbar',
         })
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
-    jwt_authentication_policy = JWTAuthenticationPolicy(
-        muesli.config["api"]["JWT_SECRET_TOKEN"],
-        callback=principals_for_user,
-        auth_type="Bearer",
-        expiration=datetime.timedelta(days=muesli.config["api"]["KEY_EXPIRATION"])
-    )
-    session_authentication_policy = SessionAuthenticationPolicy(callback=principals_for_user)
-    authentication_policy = MultiAuthenticationPolicy([session_authentication_policy, jwt_authentication_policy])
 
-    authorization_policy = ACLAuthorizationPolicy()
     config = Configurator(
-            authentication_policy=authentication_policy,
-            authorization_policy=authorization_policy,
             session_factory=session_factory,
             settings=settings,
             )
-    config.include('muesli.web.pyramid_jwt')
-    config.set_jwt_authentication_policy(jwt_authentication_policy)
+
+    config.set_security_policy(
+        MuesliSecurityPolicy(muesli.config["api"]["JWT_SECRET_TOKEN"], muesli.config["api"]["KEY_EXPIRATION"]))
+
     config.add_static_view('static', 'muesli.web:static')
 
     config.add_route('start', '/start', factory = GeneralContext)
@@ -297,9 +361,6 @@ def main(global_config=None, testmode=False, **settings):
     # developed API's.
     config.route_prefix = 'api/v1'
     config.include('cornice')
-
-    if not muesli.PRODUCTION_INSTANCE:
-        config.include('pyramid_debugtoolbar')
 
     config.scan()
 

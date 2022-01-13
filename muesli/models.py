@@ -39,7 +39,7 @@ from marshmallow import Schema, fields, pre_load, post_load
 from marshmallow.exceptions import ValidationError
 
 from sqlalchemy.dialects.sqlite.base import SQLiteDialect
-from sqlalchemy.interfaces import PoolListener
+from sqlalchemy.events import PoolEvents
 
 Base = sqlalchemy.ext.declarative.declarative_base()
 
@@ -57,7 +57,7 @@ def getOrCreate(type, session, primary_key):
 def initializeSession(engine):
     Session.configure(bind=engine)
     if isinstance(engine.dialect, SQLiteDialect):
-        class SQLiteConnectionListener(PoolListener):
+        class SQLiteConnectionListener(PoolEvents):
             def connect(self, con, rec):
                 con.enable_load_extension(True)
                 con.load_extension('./libsqlitefunctions.so')
@@ -216,7 +216,7 @@ class Lecture(Base):
     assistant_id = Column('assistant', Integer, ForeignKey(User.id, ondelete='SET NULL'))
     old_assistant = relationship(
         User, backref=backref(
-            'lectures_as_assistant_old', order_by='Lecture.term', lazy='dynamic'
+            'lectures_as_assistant_old', order_by='Lecture.term', lazy='select'
         )
     )
     assistants = relationship(
@@ -248,7 +248,6 @@ class Lecture(Base):
     mode = Column(Text, nullable=False, default='off')
     minimum_preferences = Column(Integer, default=None)
     tutor_rights = Column(Text, nullable=False, default=editOwnTutorials)
-    tutorials = relationship('Tutorial', order_by='Tutorial.time,Tutorial.comment')
     tutors = relationship(User, secondary=lecture_tutors_table, backref="lectures_as_tutor")
 
     @property
@@ -510,7 +509,8 @@ class Tutorial(Base):
     __tablename__ = 'tutorials'
     id = Column(Integer, primary_key=True)
     lecture_id = Column('lecture', Integer, ForeignKey(Lecture.id))
-    lecture = relationship(Lecture, backref=backref('tutorials_q', lazy='dynamic'))
+    lecture = relationship(Lecture, lazy='joined',
+                           backref=backref('tutorials', order_by='Tutorial.time,Tutorial.comment', lazy='select'))
     tutor_id = Column('tutor', Integer, ForeignKey(User.id))
     tutor = relationship(User, lazy='joined')
     place = Column(Text)
@@ -573,7 +573,7 @@ class LectureStudent(Base):
 
 Tutorial.student_count = column_property(
                 sa.select([sa.func.count(LectureStudent.student_id)]).\
-                        where(LectureStudent.tutorial_id==Tutorial.id),
+                        where(LectureStudent.tutorial_id==Tutorial.id).scalar_subquery(),
                 deferred=True
                 )
 

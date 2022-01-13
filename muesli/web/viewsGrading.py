@@ -379,7 +379,7 @@ class Export(ExcelView):
         # set column width
         for column_cells in worksheet_exams.columns:
             max_length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet_exams.column_dimensions[column_cells[0].column].width = max_length*1.2
+            worksheet_exams.column_dimensions[column_cells[0].column_letter].width = max_length*1.2
 
         # sheet Pruefungsteilnehmer
         worksheet_grades = self.w.create_sheet('Pruefungsteilnehmer')
@@ -400,5 +400,5 @@ class Export(ExcelView):
         # set column width
         for column_cells in worksheet_grades.columns:
             max_length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet_grades.column_dimensions[column_cells[0].column].width = max_length*1.2
+            worksheet_grades.column_dimensions[column_cells[0].column_letter].width = max_length*1.2
         return self.createResponse()

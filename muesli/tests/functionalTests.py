@@ -53,9 +53,9 @@ class BaseTests(unittest.TestCase):
         import sqlalchemy
         self.config = muesli.config
 
-        databaseName = muesli.config['database']['connection']
-        databaseName = databaseName + "test"
-        self.engine = sqlalchemy.create_engine(databaseName)
+        database_connect_str = muesli.database_connect_str
+        database_connect_str = database_connect_str + "test"
+        self.engine = sqlalchemy.create_engine(database_connect_str, connect_args={'connect_timeout': 30})
 
         import muesli.models
         muesli.models.Base.metadata.create_all(self.engine)

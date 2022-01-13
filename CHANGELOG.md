@@ -1,3 +1,8 @@
+### 2022-01-13
+
+Einige interne Altlasten des Quelltextes wurden angegangen und an neue Versionen der Abhängigkeiten angepasst. Die
+Codebase befindet sich in einem einigermaßen guten Zustand.
+
 ### 2021-12-31
 
 Ein großes Dankeschön an Christian Heusel für die Implementierung des Bootstrap Designs im MÜSLI.

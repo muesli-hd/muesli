@@ -64,7 +64,7 @@ class Edit:
             form.message = "Änderungen gespeichert."
         if exam.admission!=None or exam.registration!=None:
             students = exam.lecture.lecture_students.options(sqlalchemy.orm.joinedload(LectureStudent.student))\
-                    .options(sqlalchemy.orm.joinedload_all('tutorial.tutor'))
+                    .options(sqlalchemy.orm.joinedload('tutorial.tutor'))
             if exam.admission != None:
                 students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.admission==True))))
             if exam.registration != None:
@@ -150,7 +150,7 @@ class EnterPointsBasic:
         exam = self.request.context.exam
         tutorials = self.request.context.tutorials
         students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))\
-                                .options(sqlalchemy.orm.joinedload_all('tutorial.tutor'))
+                                .options(sqlalchemy.orm.joinedload('tutorial.tutor'))
         students = students.all()
         if 'students' in self.request.GET:
             student_ids = self.request.GET['students'].split(',')
@@ -269,7 +269,7 @@ class Admission:
         exam = self.request.context.exam
         tutorials = self.request.context.tutorials
         students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))\
-                                .options(sqlalchemy.orm.joinedload_all('tutorial.tutor'))
+                                .options(sqlalchemy.orm.joinedload('tutorial.tutor'))
         students = students.all()
         db_admissions = exam.exam_admissions.filter(ExamAdmission.student_id.in_([s.student.id for s  in students])).all()
         admissions={}

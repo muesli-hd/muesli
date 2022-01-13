@@ -11,3 +11,12 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
 
     CREATE DATABASE mueslitest OWNER muesli;
 EOSQL
+
+# This allows restoring sql dumps in the compressed postgres format too
+if [[ -f "/muesli.prod.sql" ]]; then
+  echo "Loading production database dump"
+  pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" -d muesli -n public -1 /muesli.prod.sql
+else
+  echo "Loading development database dump"
+  pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" -d muesli -n public -1 /muesli.sql
+fi

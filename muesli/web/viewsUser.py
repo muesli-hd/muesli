@@ -72,12 +72,10 @@ def login(request):
     if request.method == 'POST' and form.processPostData(request.POST):
         user = lookup_user(request, form)
         if user is not None:
-            security.remember(request, user.id)
-            request.user = user
-            url = request.route_url('overview')
-            return HTTPFound(location=url)
+            headers = security.remember(request, user.id)
+            return HTTPFound(location=request.route_url('overview'), headers=headers)
         request.session.flash('Benutzername oder Passwort sind falsch.', queue='errors')
-    return {'form': form, 'user': security.authenticated_userid(request)}
+    return {'form': form, 'user': request.authenticated_userid}
 
 
 @view_config(route_name='api_login', renderer='json', request_method='POST')
@@ -94,7 +92,7 @@ def api_login(request):
                                )
     request.db.add(token)
     request.db.flush()
-    jwt_token = request.create_jwt_token(user.id, admin=(user.is_admin), jti=token.id, expiration=exp)
+    jwt_token = muesli.utils.create_jwt_token(user.id, admin=(user.is_admin), jti=token.id, expiration=exp)
     request.db.commit()
     if user:
         return {
@@ -118,9 +116,9 @@ def api_login(request):
 
 @view_config(route_name='user_logout')
 def logout(request):
-    security.forget(request)
+    headers = security.forget(request)
     request.session.invalidate()
-    return HTTPFound(location=request.route_url('index'))
+    return HTTPFound(location=request.route_url('index'), headers=headers)
 
 
 @view_config(route_name='user_list', renderer='muesli.web:templates/user/list.pt', context=context.GeneralContext, permission='admin')
@@ -612,7 +610,7 @@ def list_auth_keys(request):
                                    )
         request.db.add(token)
         request.db.flush()
-        jwt_token = request.create_jwt_token(request.user.id,
+        jwt_token = muesli.utils.create_jwt_token(request.user.id,
                                              admin=(request.user.is_admin),
                                              jti=token.id,
                                              expiration=exp)

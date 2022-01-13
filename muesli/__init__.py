@@ -30,31 +30,35 @@ config = Configuration(
     os.getenv('MUESLI_PATH', '/opt/muesli4') + '/muesli.yml')
 
 import muesli.mail
-muesli.mail.server = config['contact']['server']
 
-databaseName = config['database']['connection']
-PRODUCTION_INSTANCE = config.get("production", True)
+muesli.mail.server = config['contact'].get('mailserver_host', os.environ.get('MUESLI_MAILSERVER_HOST', '127.0.0.1'))
+muesli.mail.port = config['contact'].get('mailserver_port', os.environ.get('MUESLI_MAILSERVER_PORT', 25))
+
+database_connect_str = config.get('database', {}).get('connection', None)
+if database_connect_str is None:
+    database_connect_str = os.environ.get('MUESLI_DB_CONNECTION_STRING', 'postgresql:///muesli')
+DEVELOPMENT_MODE = config.get("development", os.environ.get('MUESLI_DEVMODE', False))
 
 # Read in the dataprotection and changelog so they are static to the instance
 dataprotection_path = os.path.join(os.path.dirname(__file__), "web", "static", "datenschutzerklaerung.md")
-with open(dataprotection_path) as f:
+with open(dataprotection_path, 'r', encoding='UTF-8') as f:
     dataprotection = f.read()
 DATAPROTECTION_HTML = markdown(dataprotection)
 
 changelog_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "CHANGELOG.md"))
-with open(changelog_path) as f:
+with open(changelog_path, 'r', encoding='UTF-8') as f:
     changelog = f.read()
 CHANGELOG_HTML = markdown(changelog)
 
 def engine():
-    if not PRODUCTION_INSTANCE:
-        return create_engine(databaseName, max_overflow=-1)
+    if DEVELOPMENT_MODE:
+        return create_engine(database_connect_str, max_overflow=-1, connect_args={'connect_timeout': 30})
     else:
-        return create_engine(databaseName)
+        return create_engine(database_connect_str, connect_args={'connect_timeout': 30})
 
 
 def testengine():
-    if not PRODUCTION_INSTANCE:
-        return create_engine(databaseName + "test", max_overflow=-1)
+    if DEVELOPMENT_MODE:
+        return create_engine(database_connect_str + "test", max_overflow=-1, connect_args={'connect_timeout': 30})
     else:
-        return create_engine(databaseName + "test")
+        return create_engine(database_connect_str + "test", connect_args={'connect_timeout': 30})

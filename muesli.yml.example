@@ -1,7 +1,8 @@
 ---
 
-database:
-    connection: postgresql:///muesli
+# Setting a database connection here overrides the environment variable
+#database:
+#    connection: postgresql:///muesli
 
 listen:
     host: 0.0.0.0
@@ -10,9 +11,12 @@ listen:
 contact:
     email: muesli@mathi.uni-heidelberg.de
     name: MÜSLI-Team
-    server: 0.0.0.0
+# Specifies the mail server address:
+    # mailserver_host: 127.0.0.1
+    # mailserver_port: 25
 
-production: True
+# Setting the development mode variable here overrides the environment variable
+# development: False
 
 subjects:
     - Mathematik (BSc 100%)

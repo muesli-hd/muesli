@@ -19,7 +19,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+import muesli
 from muesli import models, utils, DATAPROTECTION_HTML, CHANGELOG_HTML
 from muesli.web.forms import *
 from muesli.web.context import *
@@ -222,7 +222,7 @@ def forbidden(exc, request):
 
 @view_config(context=pyramid.exceptions.HTTPBadRequest)
 def badRequest(e, request):
-    if not muesli.PRODUCTION_INSTANCE:
+    if muesli.DEVELOPMENT_MODE:
         print("TRYING TO RECONSTRUCT EXCEPTION")
         traceback.print_exc()
         print("RAISING ANYHOW")
@@ -254,7 +254,7 @@ def badRequest(e, request):
 
 @view_config(context=Exception)
 def internalServerError(e, request):
-    if not muesli.PRODUCTION_INSTANCE:
+    if muesli.DEVELOPMENT_MODE:
         print("TRYING TO RECONSTRUCT EXCEPTION")
         traceback.print_exc()
         print("RAISING ANYHOW")

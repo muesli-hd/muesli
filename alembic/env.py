@@ -6,7 +6,7 @@ from logging.config import fileConfig
 # access to the values within the .ini file in use.
 config = context.config
 
-# Interpret the config file for Pyhton logging.
+# Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
 
@@ -27,6 +27,11 @@ target_metadata = muesli.models.Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
+# Hack, to prioritize the environment variable for db connections
+config.set_main_option("sqlalchemy.url", config.get_main_option("sqlalchemy.url",
+                                                                os.environ.get('MUESLI_DB_CONNECTION_STRING',
+                                                                               'postgresql:///muesli')))
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
@@ -55,7 +60,7 @@ def run_migrations_online():
     """
     engine = engine_from_config(
                 config.get_section(config.config_ini_section),
-                prefix='sqlalchemy.',
+                prefix='sqlalchemy.', connect_args={'connect_timeout': 30},
                 poolclass=pool.NullPool)
 
     connection = engine.connect()

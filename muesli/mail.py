@@ -39,6 +39,7 @@ testing = False
 
 # To be overwritten by value from config file
 server = 'localhost'
+port = 25
 
 """Code adapted from http://docs.python.org/library/email-examples.html"""
 def createAttachment(filename, data):
@@ -96,7 +97,7 @@ class Message:
         self.outer.attach(createAttachment(filename, data))
 
 def sendMail(message, request=None):
-    s = smtplib.SMTP(server)
+    s = smtplib.SMTP(server, port)
     if not testing:
         try:
             s.sendmail(message.sender, message.send_to, message.as_string())

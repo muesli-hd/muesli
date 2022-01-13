@@ -37,6 +37,7 @@ class WrappedColumn:
 def ColumnWrapper(type):
     class Wrapped(types.TypeDecorator):
         impl = types.Unicode
+        cache_ok = True
         def process_bind_param(self, value, dialect):
             if isinstance(value, type):
                 return value.value
