@@ -18,5 +18,5 @@ if [[ -f "/muesli.prod.sql" ]]; then
   pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" -d muesli -n public -1 /muesli.prod.sql
 else
   echo "Loading development database dump"
-  pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" -d muesli -n public -1 /muesli.sql
+  psql -U "$POSTGRES_USER" -f /muesli.sql muesli
 fi
