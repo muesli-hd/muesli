@@ -19,3 +19,5 @@ muesli/web/static/js/**
 
 # External CSS files
 muesli/web/static/css/*
+
+docker/docker-compose.github-actions.yml
