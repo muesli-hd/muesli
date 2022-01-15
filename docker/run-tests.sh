@@ -14,6 +14,7 @@ services:
   muesli:
     image: $2
 EOFILE
+  cat docker/docker-compose.github-actions.yml
 
   DOCKER_COMPOSE_PROJECT_OPTS+=( "-f" "${SCRIPT_DIR}/docker-compose.github-actions.yml" )
 
