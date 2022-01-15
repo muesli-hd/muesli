@@ -15,7 +15,7 @@ services:
     image: $2
 EOFILE
 
-  DOCKER_COMPOSE_PROJECT_OPTS+=( "${SCRIPT_DIR}/docker-compose.github-actions.yml" )
+  DOCKER_COMPOSE_PROJECT_OPTS+=( "-f" "${SCRIPT_DIR}/docker-compose.github-actions.yml" )
 
   docker-compose "${DOCKER_COMPOSE_PROJECT_OPTS[@]}" up --abort-on-container-exit --exit-code-from muesli --no-build "$@"
 else

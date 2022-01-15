@@ -65,7 +65,7 @@ class BaseTests(unittest.TestCase):
         muesli.engine = lambda: self.engine
         import muesli.web
         from muesli.web import main
-        self.app = main({})
+        self.app = main()
         from webtest import TestApp
         self.testapp = TestApp(self.app)
         self.session = muesli.models.Session()

@@ -113,13 +113,6 @@ class PermissionInfo:
         self.request = request
     def has_permission(self, permission):
         return self.request.has_permission(permission, self.request.context)
-    def has_permission_in_context(self, context, permission, matchdict=None):
-        # instantiate the corresponding context and check permissions
-        requestcopy = self.request.copy()
-        requestcopy.matchdict = matchdict if matchdict is not None else dict()
-        requestcopy.db = self.request.db
-        context_instance = context(requestcopy)
-        return pyramid.security.has_permission(permission, context_instance, self.request)
 
 class UserInfo:
     def __init__(self, user):

@@ -18,14 +18,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyramid import security
 from pyramid.config import Configurator
 from pyramid.events import subscriber, BeforeRender, NewRequest
 from pyramid.renderers import get_renderer
-from pyramid.authentication import SessionAuthenticationPolicy
-from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.authorization import ACLHelper, Authenticated, Everyone
-from pyramid_multiauth import MultiAuthenticationPolicy
 import pyramid_beaker
 import beaker.ext.sqla
 import tempfile
@@ -33,7 +29,6 @@ import jwt
 
 from muesli.web.navigation_tree import create_navigation_tree
 from muesli.web.context import *
-from muesli.models import *
 from muesli.web.views import *
 from muesli.web.viewsLecture import *
 from muesli.web.viewsUser import *
@@ -44,13 +39,7 @@ from muesli import utils
 import muesli
 
 import time
-import datetime
 import numbers
-
-# import objgraph
-# import inspect
-# import random
-# mport gc
 
 import weakref
 
@@ -171,7 +160,7 @@ class MuesliSecurityPolicy:
         # use the identity to build a list of principals, and pass them
         # to the ACLHelper to determine allowed/denied
         identity = request.identity
-        principals = set([Everyone])
+        principals = {Everyone}
         if identity is not None:
             principals.add(Authenticated)
             principals.add(identity['userid'])
@@ -190,44 +179,7 @@ class MuesliSecurityPolicy:
         return []
 
 
-
-
-def main(global_config=None, testmode=False, **settings):
-    if testmode:
-        engine = muesli.testengine()
-    else:
-        engine = muesli.engine()
-    initializeSession(engine)
-
-    # XXX: ugly
-    import sqlalchemy as sa
-    beaker.ext.sqla.sa = sa
-    # Even more ugly, but otherwise the tests won't work
-    # as the metadata is shared between tests
-    if not 'beaker_cache' in Base.metadata.tables:
-        session_table = beaker.ext.sqla.make_cache_table(Base.metadata)
-    else:
-        session_table = Base.metadata.tables['beaker_cache']
-    session_table.create(bind=engine, checkfirst=True)
-    settings.update({
-            'beaker.session.type': 'ext:sqla',
-            'beaker.session.bind': engine,
-            'beaker.session.table': session_table,
-            'beaker.session.data_dir': tempfile.mkdtemp(),
-            'beaker.session.timeout': 7200,
-    })
-    if muesli.DEVELOPMENT_MODE:
-        settings.update({
-            'debugtoolbar.hosts': '0.0.0.0/0',
-            'pyramid.includes': 'pyramid_debugtoolbar',
-        })
-    session_factory = pyramid_beaker.session_factory_from_settings(settings)
-
-    config = Configurator(
-            session_factory=session_factory,
-            settings=settings,
-            )
-
+def populate_config(config):
     config.set_security_policy(
         MuesliSecurityPolicy(muesli.config["api"]["JWT_SECRET_TOKEN"], muesli.config["api"]["KEY_EXPIRATION"]))
 
@@ -363,5 +315,36 @@ def main(global_config=None, testmode=False, **settings):
     config.include('cornice')
 
     config.scan()
+
+
+def main(global_config=None, **settings):
+    engine = muesli.engine()
+    initializeSession(engine)
+
+    # XXX: ugly
+    import sqlalchemy as sa
+    beaker.ext.sqla.sa = sa
+    # Even more ugly, but otherwise the tests won't work
+    # as the metadata is shared between tests
+    if not 'beaker_cache' in Base.metadata.tables:
+        session_table = beaker.ext.sqla.make_cache_table(Base.metadata)
+    else:
+        session_table = Base.metadata.tables['beaker_cache']
+    session_table.create(bind=engine, checkfirst=True)
+    settings.update({
+            'beaker.session.type': 'ext:sqla',
+            'beaker.session.bind': engine,
+            'beaker.session.table': session_table,
+            'beaker.session.data_dir': tempfile.mkdtemp(),
+            'beaker.session.timeout': 7200,
+    })
+    session_factory = pyramid_beaker.session_factory_from_settings(settings)
+
+    config = Configurator(
+            session_factory=session_factory,
+            settings=settings,
+            )
+
+    populate_config(config)
 
     return config.make_wsgi_app()

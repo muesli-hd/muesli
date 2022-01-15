@@ -55,10 +55,3 @@ def engine():
         return create_engine(database_connect_str, max_overflow=-1, connect_args={'connect_timeout': 30})
     else:
         return create_engine(database_connect_str, connect_args={'connect_timeout': 30})
-
-
-def testengine():
-    if DEVELOPMENT_MODE:
-        return create_engine(database_connect_str + "test", max_overflow=-1, connect_args={'connect_timeout': 30})
-    else:
-        return create_engine(database_connect_str + "test", connect_args={'connect_timeout': 30})
