@@ -68,4 +68,4 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
       
       - name: Run tests
-        run: docker/run-tests.sh --github-actions-image "${{ steps.buildx.outputs.name }"
+        run: docker/run-tests.sh --github-actions-image "${{ steps.buildx.outputs.name }}"
