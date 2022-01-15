@@ -20,7 +20,7 @@ EOFILE
 
   # Remove the first two script arguments
   set -- "${@:3}"
-  echo docker-compose "${DOCKER_COMPOSE_PROJECT_OPTS[@]}" up --abort-on-container-exit --exit-code-from muesli --no-build "$@"
+  docker-compose "${DOCKER_COMPOSE_PROJECT_OPTS[@]}" up --abort-on-container-exit --exit-code-from muesli --no-build "$@"
 else
   docker-compose "${DOCKER_COMPOSE_PROJECT_OPTS[@]}" up --abort-on-container-exit --exit-code-from muesli --build "$@"
   docker-compose "${DOCKER_COMPOSE_PROJECT_OPTS[@]}" down
