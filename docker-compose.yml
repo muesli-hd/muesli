@@ -3,7 +3,7 @@ version: '3.2'
 
 services:
   postgres:
-    image: 'postgres:latest'
+    image: 'postgres:10'
     environment:
       POSTGRES_DB: muesli
       POSTGRES_USER: muesli
