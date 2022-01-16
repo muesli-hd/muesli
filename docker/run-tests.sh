@@ -13,7 +13,7 @@ version: '3.2'
 services:
   muesli:
     image: $2
-    volume:
+    volumes:
       - coverage.xml:/opt/muesli4/coverage.xml
 EOFILE
 
