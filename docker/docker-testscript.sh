@@ -6,7 +6,7 @@ cp -n muesli.yml.example muesli.yml
 # the init-db.sh script creates the necessary db.
 
 echo "Starting the tests ..."
-py.test --cov=muesli --cov-report=xml muesli/tests/*
+py.test --cov=muesli --cov-report=xml:docker/.coverage.xml muesli/tests/*
 TESTS_EXIT_CODE=$?
 # py.test --cov=muesli muesli/tests/api/v1/*
 cuv graph

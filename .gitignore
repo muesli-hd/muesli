@@ -8,6 +8,7 @@ alembic.ini
 TODO
 .coverage
 coverage.xml
+docker/.coverage.xml
 
 venv
 .idea

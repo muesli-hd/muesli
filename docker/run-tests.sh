@@ -14,7 +14,7 @@ services:
   muesli:
     image: $2
     volumes:
-      - ./coverage.xml:/opt/muesli4/coverage.xml
+      - ./coverage.xml:/opt/muesli4/docker/.coverage.xml
 EOFILE
 
   DOCKER_COMPOSE_PROJECT_OPTS+=( "-f" "${SCRIPT_DIR}/docker-compose.github-actions.yml" )
