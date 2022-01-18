@@ -74,6 +74,7 @@ def add_navigation_tree_to_request(event):
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):
     event['templates'] = lambda name: get_renderer('templates/{0}'.format(name)).implementation()
+    event['Number'] = numbers.Number
 
 
 
