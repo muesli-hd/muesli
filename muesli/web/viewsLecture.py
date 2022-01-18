@@ -40,7 +40,7 @@ import sqlalchemy
 #
 from openpyxl import Workbook
 from openpyxl.styles import Font
-from openpyxl.writer.excel import save_virtual_workbook
+from tempfile import NamedTemporaryFile
 import io
 #
 from muesli import types
@@ -775,7 +775,10 @@ class ExcelExport:
 
     def createResponse(self):
         response = Response(content_type='application/vnd.ms-excel')
-        response.body = save_virtual_workbook(self.w)
+        with NamedTemporaryFile() as tmp:
+            self.w.save(tmp.name)
+            tmp.seek(0)
+            response.body = tmp.read()
         return response
 
 
