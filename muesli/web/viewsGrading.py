@@ -369,7 +369,7 @@ class Export(ExcelView):
                 grading.examiner_id,
                 lecture.lecturer]
         worksheet_exams.append(data)
-        date_p = re.compile('(\d{1,2}).(\d{1,2}).(\d{4})$')
+        date_p = re.compile(r"(\d{1,2}).(\d{1,2}).(\d{4})$")
         m = date_p.match(grading.hispos_date or '')
         if m:
             date = datetime.datetime(year=int(m.group(3)), month=int(m.group(2)), day=int(m.group(1)))

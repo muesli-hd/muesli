@@ -1,5 +1,5 @@
 from muesli.models import *
-from pyramid.security import Allow, Deny, Everyone, Authenticated, DENY_ALL, ALL_PERMISSIONS
+from pyramid.authorization import Allow, Deny, Everyone, Authenticated, DENY_ALL, ALL_PERMISSIONS
 from pyramid.httpexceptions import HTTPNotFound, HTTPForbidden, HTTPBadRequest
 
 from sqlalchemy import and_

@@ -180,18 +180,18 @@ class Parser:
             return Decimal(math.pi)
         elif op == "E":
             return Decimal(math.e)
-        elif re.search('^\$[a-zA-Z0-9_]*$',op):
+        elif re.search(r"^\$[a-zA-Z0-9_]*$",op):
             if op in self.variables:
                 return self.variables[op]
             else:
                 return None
-        elif re.search('^[-+]?[0-9]+$',op):
+        elif re.search(r"^[-+]?[0-9]+$",op):
             return int( op )
         else:
             return Decimal( op )
     def cases(self, parameters):
         val = parameters[0]
-        if val == None:
+        if val is None:
             return None
         bs = parameters[2::2]
         results = parameters[1::2]
