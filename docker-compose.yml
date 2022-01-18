@@ -14,6 +14,13 @@ services:
       - type: volume
         source: db-data
         target: /var/lib/postgresql/data
+
+  mailcatcher:
+    image: 'schickling/mailcatcher'
+
+  redis:
+    image: 'redis:6-alpine'
+
   muesli:
     build:
       context: .
@@ -21,17 +28,13 @@ services:
     image: muesli:latest
     depends_on:
       - postgres
+      - redis
+      - mailcatcher
     environment:
       MUESLI_DEVMODE: 1
       MUESLI_DB_CONNECTION_STRING: postgresql://muesli:mueslipw@postgres/muesli
       MUESLI_MAILSERVER_HOST: mailcatcher
       MUESLI_MAILSERVER_PORT: 1025
-
-  mailcatcher:
-    image: 'schickling/mailcatcher'
-
-  redis:
-    image: 'redis:6-alpine'
 
 volumes:
   db-data:
