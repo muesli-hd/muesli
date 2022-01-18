@@ -46,9 +46,9 @@
 
     </div>
   </main>
+  <metal:main metal:use-macro="templates('Fragments/footer.pt').macros['footer']">
 </div>
 
-<metal:main metal:use-macro="templates('Fragments/footer.pt').macros['footer']">
 </body>
 </html>
 </metal:main>
