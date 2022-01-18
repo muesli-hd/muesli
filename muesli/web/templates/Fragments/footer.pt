@@ -35,13 +35,6 @@
              class="btn btn-sm btn-info"
                tal:attributes="href request.route_path('contact')">Kontakt</a>
         </div>
-
-        <div class="text-muted">
-          <small>
-            loading time: ${'{0:.3f}s'.format(request.now() - request.time)}
-            queries: ${request.queries}
-          </small>
-        </div>
       </div>
     </div>
   </footer>

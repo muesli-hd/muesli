@@ -44,55 +44,36 @@ import weakref
 from sqlalchemy import event as saevent
 
 @subscriber(NewRequest)
-def add_session_to_request(event):
-    event.request.time = time.time()
-    event.request.now = time.time
+def add_request_attributes(event):
+    # Add database session
     event.request.db = event.request.registry.db_maker()
-    event.request.queries = 0
-    # The listener is not yet deleted after the request completes,
-    # as this is not implemented in sqlalchemy. Therefore, the
-    # closure would contain a reference to the event as long
-    # as the connection to the database is active, which
-    # creates a memory leak. As long as the listener cannot be
-    # removed, we have to use a weak reference.
-    weak_event = weakref.ref(event)
-    def before_execute(conn, clauseelement, multiparams, params):
-        wevent = weak_event()
-        if wevent:
-            wevent.request.queries += 1
-    saevent.listen(event.request.db.get_bind(), "before_execute", before_execute)
-
     def callback(request):
         request.db.rollback()
     event.request.add_finished_callback(callback)
 
+    # Add user objects
     event.request.user = None
     if event.request.identity is not None:
         event.request.user = event.request.identity['user']
     event.request.userInfo = utils.UserInfo(event.request.user)
     event.request.permissionInfo = utils.PermissionInfo(event.request)
 
-@subscriber(NewRequest)
-def add_javascript_to_request(event):
+    # Add Javascript and CSS
     event.request.javascript = list()
-
-@subscriber(NewRequest)
-def add_css_to_request(event):
     event.request.css = list()
 
-@subscriber(NewRequest)
-def add_config_to_request(event):
+    # Add config
     event.request.config = muesli.config
 
 @subscriber(BeforeRender)
 def add_navigation_tree_to_request(event):
+    # Add navigation tree
     if event['request']:
         event['navigation_tree'] = create_navigation_tree(event['request'])
 
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):
     event['templates'] = lambda name: get_renderer('templates/{0}'.format(name)).implementation()
-    event['Number'] = numbers.Number
 
 
 
