@@ -8,8 +8,8 @@ from muesli.web.navigation_tree import create_navigation_tree
 class BaseTests(functionalTests.BaseTests):
     def setUp(self):
         functionalTests.BaseTests.setUp(self)
-        self.config = testing.setUp()
-        muesli.web.populate_config(self.config)
+        config = testing.setUp()
+        muesli.web.populate_config(config)
     def test_navigation_tree_empty_login(self):
         request = DummyRequest()
         request.user = None
@@ -19,8 +19,8 @@ class BaseTests(functionalTests.BaseTests):
 class PopulatedTests(functionalTests.PopulatedTests):
     def setUp(self):
         functionalTests.BaseTests.setUp(self)
-        self.config = testing.setUp()
-        muesli.web.populate_config(self.config)
+        config = testing.setUp()
+        muesli.web.populate_config(config)
     def test_navigation_tree_no_tutorials(self):
         request = DummyRequest()
         request.user = self.user_without_lecture

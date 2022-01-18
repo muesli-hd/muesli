@@ -176,7 +176,6 @@ class MuesliSecurityPolicy:
                 del request.session['auth.userid']
         return []
 
-
 def populate_config(config):
     config.set_security_policy(
         MuesliSecurityPolicy(muesli.config["api"]["JWT_SECRET_TOKEN"], muesli.config["api"]["KEY_EXPIRATION"]))
@@ -312,14 +311,19 @@ def populate_config(config):
     config.route_prefix = 'api/v1'
     config.include('cornice')
 
-    config.registry.db_maker = sessionmaker(bind=muesli.engine())
+    config.registry.engine = muesli.engine()
+    config.registry.db_maker = sessionmaker(bind=config.registry.engine)
 
     config.scan()
 
 
-def main(global_config=None, **settings):
+def create_config(settings):
     settings.update(muesli.config['settings_override'])
     config = Configurator(settings=settings)
     populate_config(config)
+    return config
 
+
+def main(global_config=None, **settings):
+    config = create_config(settings)
     return config.make_wsgi_app()

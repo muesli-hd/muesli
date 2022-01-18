@@ -32,13 +32,15 @@ config = Configuration(
 
 import muesli.mail
 
+testmode = False
+
 muesli.mail.server = config['contact'].get('mailserver_host', os.environ.get('MUESLI_MAILSERVER_HOST', '127.0.0.1'))
 muesli.mail.port = config['contact'].get('mailserver_port', os.environ.get('MUESLI_MAILSERVER_PORT', 25))
+DEVELOPMENT_MODE = config.get("development", os.environ.get('MUESLI_DEVMODE', False))
 
 database_connect_str = config.get('database', {}).get('connection', None)
 if database_connect_str is None:
     database_connect_str = os.environ.get('MUESLI_DB_CONNECTION_STRING', 'postgresql:///muesli')
-DEVELOPMENT_MODE = config.get("development", os.environ.get('MUESLI_DEVMODE', False))
 
 # Read in the dataprotection and changelog so they are static to the instance
 dataprotection_path = os.path.join(os.path.dirname(__file__), "web", "static", "datenschutzerklaerung.md")
@@ -52,10 +54,11 @@ with open(changelog_path, 'r', encoding='UTF-8') as f:
 CHANGELOG_HTML = markdown(changelog)
 
 def engine():
+    db_str = '{}{}'.format(database_connect_str, 'test' if testmode else '')
     if DEVELOPMENT_MODE:
-        sa_engine = create_engine(database_connect_str, max_overflow=-1, connect_args={'connect_timeout': 30})
+        sa_engine = create_engine(db_str, max_overflow=-1, connect_args={'connect_timeout': 30})
     else:
-        sa_engine = create_engine(database_connect_str, connect_args={'connect_timeout': 30})
+        sa_engine = create_engine(db_str, connect_args={'connect_timeout': 30})
     # SQLite support:
     if isinstance(sa_engine.dialect, SQLiteDialect):
         class SQLiteConnectionListener(PoolEvents):

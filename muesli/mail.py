@@ -29,13 +29,13 @@ from email.mime.text import MIMEText
 from email.mime.message import MIMEMessage
 from email.utils import parseaddr, formataddr
 
+import muesli
+
 
 import mimetypes
 import smtplib
 import chardet
 
-
-testing = False
 
 # To be overwritten by value from config file
 server = 'localhost'
@@ -98,7 +98,7 @@ class Message:
 
 def sendMail(message, request=None):
     s = smtplib.SMTP(server, port)
-    if not testing:
+    if not muesli.testmode:
         try:
             s.sendmail(message.sender, message.send_to, message.as_string())
         except smtplib.SMTPSenderRefused as e:

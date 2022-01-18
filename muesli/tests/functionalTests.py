@@ -27,19 +27,28 @@ import muesli.types
 import muesli.mail
 from muesli import utils
 
-from sqlalchemy.orm import relationship, sessionmaker
+def setup_wsgi_app(muesli):
+    # Read Python Paste style ini config
+    import configparser
+    ini_config = configparser.ConfigParser()
+    ini_config.read('/opt/muesli4/development.ini')
+    settings = dict(ini_config['app:main'])
+
+    # Set test environment variables in muesli package
+    muesli.testmode = True
+
+    return muesli.web.create_config(settings)
+
 
 class OrigDatabaseTests(unittest.TestCase):
     def setUp(self):
-        import muesli.web
-        from muesli.web import main
-        app = main({}, testmode=True)
+        import muesli
         from webtest import TestApp
+        wsgi_config = setup_wsgi_app(muesli)
+        app = wsgi_config.make_wsgi_app()
         self.testapp = TestApp(app)
 
     def test_root(self):
-        #session = muesli.models.Session()
-        #print("Anzahl lectures", session.query(muesli.models.Lecture).count())
         res = self.testapp.get('/lecture/list', status=200)
         self.assertTrue('Liste' in res)
 
@@ -50,25 +59,18 @@ class OrigDatabaseTests(unittest.TestCase):
 class BaseTests(unittest.TestCase):
     def setUp(self):
         import muesli
-        import sqlalchemy
-        self.config = muesli.config
-
-        database_connect_str = muesli.database_connect_str
-        database_connect_str = database_connect_str + "test"
-        self.engine = sqlalchemy.create_engine(database_connect_str, connect_args={'connect_timeout': 30})
-
-        import muesli.models
-        muesli.models.Base.metadata.create_all(self.engine)
-        muesli.mailerName = 'pyramid_mailer.testing'
-        muesli.mail.testing=True
-        muesli.old_engine = muesli.engine
-        muesli.engine = lambda: self.engine
-        import muesli.web
-        from muesli.web import main
-        self.app = main()
         from webtest import TestApp
+
+        # Build pyramid config and extract objects shared with test code
+        wsgi_config = setup_wsgi_app(muesli)
+        self.config = muesli.config
+        self.engine = wsgi_config.registry.engine
+        self.session = wsgi_config.registry.db_maker()
+
+        # Create all database tables and launch wsgi app
+        muesli.models.Base.metadata.create_all(self.engine)
+        self.app = wsgi_config.make_wsgi_app()
         self.testapp = TestApp(self.app)
-        self.session = muesli.models.Session()
 
         # TODO: This makes it incredibly hard to setup new testcases.
         # Since you cant just modify the sql image but have to change the
@@ -83,7 +85,6 @@ class BaseTests(unittest.TestCase):
     def tearDown(self):
         self.session.close()
         self.engine.dispose()
-        muesli.engine = muesli.old_engine
 
     def populate(self):
         pass
