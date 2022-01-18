@@ -60,7 +60,7 @@ def run_migrations_online():
     """
     engine = engine_from_config(
                 config.get_section(config.config_ini_section),
-                prefix='sqlalchemy.', connect_args={'connect_timeout': 30},
+                prefix='sqlalchemy.', connect_args={'connect_timeout': 60},
                 poolclass=pool.NullPool)
 
     connection = engine.connect()

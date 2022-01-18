@@ -56,9 +56,9 @@ CHANGELOG_HTML = markdown(changelog)
 def engine():
     db_str = '{}{}'.format(database_connect_str, 'test' if testmode else '')
     if DEVELOPMENT_MODE:
-        sa_engine = create_engine(db_str, max_overflow=-1, connect_args={'connect_timeout': 30})
+        sa_engine = create_engine(db_str, max_overflow=-1, connect_args={'connect_timeout': 60})
     else:
-        sa_engine = create_engine(db_str, connect_args={'connect_timeout': 30})
+        sa_engine = create_engine(db_str, connect_args={'connect_timeout': 60})
     # SQLite support:
     if isinstance(sa_engine.dialect, SQLiteDialect):
         class SQLiteConnectionListener(PoolEvents):
