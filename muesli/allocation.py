@@ -22,6 +22,7 @@
 
 import muesli
 from muesli import utils, models
+from sqlalchemy.orm import object_session
 
 import tempfile
 import subprocess
@@ -56,7 +57,7 @@ class Arc:
 class Allocation:
     def __init__(self, lecture):
         self.lecture = lecture
-        self.session = models.Session.object_session(self.lecture)
+        self.session = object_session(self.lecture)
     def doAllocation(self):
         if not self.lecture.mode == 'prefs':
             raise Exception('Lecture not in preference mode')

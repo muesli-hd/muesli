@@ -24,13 +24,11 @@ import random
 import time
 import hashlib
 
-import muesli
-
 import sqlalchemy
 import sqlalchemy as sa
 import sqlalchemy.ext.declarative
 from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, String, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table, text
-from sqlalchemy.orm import relationship, sessionmaker, backref, column_property
+from sqlalchemy.orm import relationship, backref, column_property, object_session
 from muesli.types import Term, TutorialTime, ColumnWrapper
 from muesli.utils import DictOfObjects, AutoVivification, editOwnTutorials, listStrings, getTerms
 from muesli.web.api.v1 import allowed_attributes
@@ -38,12 +36,8 @@ from muesli.web.api.v1 import allowed_attributes
 from marshmallow import Schema, fields, pre_load, post_load
 from marshmallow.exceptions import ValidationError
 
-from sqlalchemy.dialects.sqlite.base import SQLiteDialect
-from sqlalchemy.events import PoolEvents
 
 Base = sqlalchemy.ext.declarative.declarative_base()
-
-Session = sessionmaker()
 
 
 def getOrCreate(type, session, primary_key):
@@ -52,20 +46,6 @@ def getOrCreate(type, session, primary_key):
         obj = type(primary_key=primary_key)
         session.add(obj)
     return obj
-
-
-def initializeSession(engine):
-    Session.configure(bind=engine)
-    if isinstance(engine.dialect, SQLiteDialect):
-        class SQLiteConnectionListener(PoolEvents):
-            def connect(self, con, rec):
-                con.enable_load_extension(True)
-                con.load_extension('./libsqlitefunctions.so')
-                con.enable_load_extension(False)
-
-        engine.pool.add_listener(SQLiteConnectionListener())
-
-# Session = sessionmaker(bind=engine)
 
 
 lecture_tutors_table = Table('lecture_tutors', Base.metadata,
@@ -117,17 +97,17 @@ class User(Base):
 
     @property
     def tutorials(self):
-        session = Session.object_session(self)
+        session = object_session(self)
         return session.query(Tutorial).filter(Tutorial.lecture_students.any(LectureStudent.student_id == self.id)).join(Tutorial.lecture).order_by(Lecture.term)
 
     @property
     def tutorials_as_tutor(self):
-        session = Session.object_session(self)
+        session = object_session(self)
         return session.query(Tutorial).filter(Tutorial.tutor_id == self.id).join(Tutorial.lecture).order_by(Lecture.term,Lecture.name,Tutorial.time)
 
     @property
     def tutorials_removed(self):
-        session = Session.object_session(self)
+        session = object_session(self)
         return session.query(LectureRemovedStudent).filter(LectureRemovedStudent.student_id == self.id).join(LectureRemovedStudent.tutorial).join(Tutorial.lecture).order_by(Lecture.term,Lecture.name,Tutorial.time)
 
     def prepareMultiTutorials(self):
@@ -157,7 +137,7 @@ class User(Base):
         return tps
 
     def hasPreferences(self, lecture=None):
-        session = Session.object_session(self)
+        session = object_session(self)
         query = session.query(TimePreference).filter(TimePreference.student_id == self.id)
         if lecture:
             query = query.filter(TimePreference.lecture_id == lecture.id)
@@ -252,7 +232,7 @@ class Lecture(Base):
 
     @property
     def students(self):
-        session = Session.object_session(self)
+        session = object_session(self)
         return session.query(User).filter(User.lecture_students.any(LectureStudent.lecture_id==self.id))
 
     def lecture_students_for_tutorials(self, tutorials=[], order=True):
@@ -264,11 +244,11 @@ class Lecture(Base):
         return ls
 #       @property
 #       def tutors(self):
-#               session = Session.object_session(self)
+#               session = object_session(self)
 #               return session.query(User).filter(User.lecture_tutors.any(LectureTutor.lecture==self))
 
     def prepareTimePreferences(self, user=None):
-        session = Session.object_session(self)
+        session = object_session(self)
         if self.mode == "prefs":
             times = session.query(sqlalchemy.func.sum(Tutorial.max_students), Tutorial.time).\
                     filter(Tutorial.lecture == self).\
@@ -294,19 +274,19 @@ class Lecture(Base):
         return times
 
     def pref_subjects(self):
-        session = Session.object_session(self)
+        session = object_session(self)
         return session.query(sqlalchemy.func.count(User.id), User.subject).\
                 filter(User.time_preferences.any(TimePreference.lecture_id == self.id)).\
                 group_by(User.subject).order_by(User.subject)
 
     def subjects(self):
-        session = Session.object_session(self)
+        session = object_session(self)
         return session.query(sqlalchemy.func.count(User.id), User.subject).\
                 filter(User.lecture_students.any(LectureStudent.lecture_id == self.id)).\
                 group_by(User.subject).order_by(User.subject)
 
     def getLectureResults(self, tutorials=[], students=None):
-        session = Session.object_session(self)
+        session = object_session(self)
         if not students:
             students = self.lecture_students_for_tutorials(tutorials)
         exercises = session.query(Exercise).filter(Exercise.exam_id.in_([e.id for e in self.exams])).all()
@@ -321,7 +301,7 @@ class Lecture(Base):
         return lecture_results
 
     def getLectureResultsByCategory(self, *args, **kwargs):
-        session = Session.object_session(self)
+        session = object_session(self)
         results = self.getLectureResults(*args, **kwargs).subquery()
         return session.query(func.sum(results.c.points).label('points'), results.c.student_id, results.c.category)\
                 .group_by(results.c.category, results.c.student_id)
@@ -336,7 +316,7 @@ class Lecture(Base):
         return results
 
     def getGradingResults(self, tutorials=[], students=None):
-        session = Session.object_session(self)
+        session = object_session(self)
         return session.query(StudentGrade).filter(StudentGrade.grading_id.in_([g.id for g in self.gradings]))
 
 
@@ -361,11 +341,11 @@ class Exam(Base):
 
     @property
     def exercise_points(self):
-        session = Session.object_session(self)
+        session = object_session(self)
         return session.query(ExerciseStudent).filter(ExerciseStudent.exercise.has(Exercise.exam_id==self.id))
 
     def getResults(self, students=None):
-        session = Session.object_session(self)
+        session = object_session(self)
         pointsQuery = self.exercise_points
         if students:
             pointsQuery = pointsQuery.filter(ExerciseStudent.student_id.in_([s.student_id for s  in students]))
@@ -377,7 +357,7 @@ class Exam(Base):
         return examPoints
 
     def getResultsForStudent(self, student):
-        session = Session.object_session(self)
+        session = object_session(self)
         pointsQuery = self.exercise_points
         pointsQuery = pointsQuery.filter(ExerciseStudent.student_id==student.id)
         results = {}
@@ -397,7 +377,7 @@ class Exam(Base):
     def getStatistics(self, tutorials=None, students=None, statistics=None, prefix='lec'):
         if statistics is None:
             statistics = AutoVivification()
-        session = Session.object_session(self)
+        session = object_session(self)
         if not students:
             students = self.lecture.lecture_students_for_tutorials(tutorials).all()
         pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student_id for s  in students]))\
@@ -434,7 +414,7 @@ class Exam(Base):
         return statistics
 
     def getStatisticsBySubjects(self, tutorials=None, students=None, statistics=None, prefix='lec'):
-        session = Session.object_session(self)
+        session = object_session(self)
         if not students:
             students = self.lecture.lecture_students_for_tutorials(tutorials)
         exercise_points = session.query(ExerciseStudent, ExerciseStudent.student)
@@ -520,7 +500,7 @@ class Tutorial(Base):
 
     @property
     def students(self):
-        session = Session.object_session(self)
+        session = object_session(self)
         return session.query(User).filter(User.lecture_students.any(LectureStudent.tutorial==self))
 
     @property

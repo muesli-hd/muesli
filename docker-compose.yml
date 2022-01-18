@@ -30,5 +30,8 @@ services:
   mailcatcher:
     image: 'schickling/mailcatcher'
 
+  redis:
+    image: 'redis:6-alpine'
+
 volumes:
   db-data:

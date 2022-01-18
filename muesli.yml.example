@@ -15,6 +15,9 @@ contact:
     # mailserver_host: 127.0.0.1
     # mailserver_port: 25
 
+settings_override:
+    redis.sessions.secret: your_cookie_signing_secret
+
 # Setting the development mode variable here overrides the environment variable
 # development: False
 

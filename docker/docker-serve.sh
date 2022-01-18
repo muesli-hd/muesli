@@ -2,6 +2,7 @@
 
 cp -n alembic.ini.example alembic.ini
 cp -n muesli.yml.example muesli.yml
+chmod 0666 muesli.yml alembic.ini
 
 echo "Deploying JS and CSS libs"
 rsync -rv /opt/muesli_static_libs/ muesli/web/static/

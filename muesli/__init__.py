@@ -22,7 +22,8 @@ import os
 from markdown import markdown
 
 from sqlalchemy import create_engine
-from sqlalchemy.pool import NullPool
+from sqlalchemy.dialects.sqlite.base import SQLiteDialect
+from sqlalchemy.events import PoolEvents
 
 from .utils import Configuration
 
@@ -52,6 +53,16 @@ CHANGELOG_HTML = markdown(changelog)
 
 def engine():
     if DEVELOPMENT_MODE:
-        return create_engine(database_connect_str, max_overflow=-1, connect_args={'connect_timeout': 30})
+        sa_engine = create_engine(database_connect_str, max_overflow=-1, connect_args={'connect_timeout': 30})
     else:
-        return create_engine(database_connect_str, connect_args={'connect_timeout': 30})
+        sa_engine = create_engine(database_connect_str, connect_args={'connect_timeout': 30})
+    # SQLite support:
+    if isinstance(sa_engine.dialect, SQLiteDialect):
+        class SQLiteConnectionListener(PoolEvents):
+            def connect(self, con, rec):
+                con.enable_load_extension(True)
+                con.load_extension('./libsqlitefunctions.so')
+                con.enable_load_extension(False)
+
+        sa_engine.pool.add_listener(SQLiteConnectionListener())
+    return sa_engine

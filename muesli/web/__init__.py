@@ -22,10 +22,8 @@ from pyramid.config import Configurator
 from pyramid.events import subscriber, BeforeRender, NewRequest
 from pyramid.renderers import get_renderer
 from pyramid.authorization import ACLHelper, Authenticated, Everyone
-import pyramid_beaker
-import beaker.ext.sqla
-import tempfile
 import jwt
+from sqlalchemy.orm import sessionmaker
 
 from muesli.web.navigation_tree import create_navigation_tree
 from muesli.web.context import *
@@ -49,7 +47,7 @@ from sqlalchemy import event as saevent
 def add_session_to_request(event):
     event.request.time = time.time()
     event.request.now = time.time
-    event.request.db = Session()
+    event.request.db = event.request.registry.db_maker()
     event.request.queries = 0
     # The listener is not yet deleted after the request completes,
     # as this is not implemented in sqlalchemy. Therefore, the
@@ -314,37 +312,14 @@ def populate_config(config):
     config.route_prefix = 'api/v1'
     config.include('cornice')
 
+    config.registry.db_maker = sessionmaker(bind=muesli.engine())
+
     config.scan()
 
 
 def main(global_config=None, **settings):
-    engine = muesli.engine()
-    initializeSession(engine)
-
-    # XXX: ugly
-    import sqlalchemy as sa
-    beaker.ext.sqla.sa = sa
-    # Even more ugly, but otherwise the tests won't work
-    # as the metadata is shared between tests
-    if not 'beaker_cache' in Base.metadata.tables:
-        session_table = beaker.ext.sqla.make_cache_table(Base.metadata)
-    else:
-        session_table = Base.metadata.tables['beaker_cache']
-    session_table.create(bind=engine, checkfirst=True)
-    settings.update({
-            'beaker.session.type': 'ext:sqla',
-            'beaker.session.bind': engine,
-            'beaker.session.table': session_table,
-            'beaker.session.data_dir': tempfile.mkdtemp(),
-            'beaker.session.timeout': 7200,
-    })
-    session_factory = pyramid_beaker.session_factory_from_settings(settings)
-
-    config = Configurator(
-            session_factory=session_factory,
-            settings=settings,
-            )
-
+    settings.update(muesli.config['settings_override'])
+    config = Configurator(settings=settings)
     populate_config(config)
 
     return config.make_wsgi_app()
