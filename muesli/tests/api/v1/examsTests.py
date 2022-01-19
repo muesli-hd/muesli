@@ -27,7 +27,7 @@ from muesli.models import ExerciseStudent
 
 class BaseTests(functionalTests.BaseTests):
     def test_exam_get(self):
-        self.testapp.get(URL+'/exams/12345', headers=STATIC_HEADERS, status=404)
+        self.testapp.get(f'{URL}/exams/12345', headers=STATIC_HEADERS, status=404)
 
 class UnLoggedTests(functionalTests.PopulatedTests):
     def setUp(self):
@@ -42,7 +42,7 @@ class UnLoggedTests(functionalTests.PopulatedTests):
 
     def test_tutorial_get(self):
         self.testapp.get(
-            URL+'/exams/{}'.format(self.exam.id),
+            f'{URL}/exams/{self.exam.id}',
             headers=STATIC_HEADERS,
             status=403
         )
@@ -62,4 +62,4 @@ class UserLoggedInTests(functionalTests.PopulatedTests):
         self.exerciseStudent.student_id = self.user.id
 
     def test_tutorial_get(self):
-        self.testapp.get(URL+'/exams/{}'.format(self.exam.id), headers=self.api_token, status=200)
+        self.testapp.get(f'{URL}/exams/{self.exam.id}', headers=self.api_token, status=200)

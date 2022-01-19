@@ -24,15 +24,16 @@ from cornice.resource import resource, view
 from sqlalchemy import and_
 
 from muesli import models
-from muesli.web import context
+from muesli.web.context import ExerciseEndpointContext
 
 
 @resource(collection_path=r'/exercises/{exercise_id:(\d+)+\/?}',
           path=r'/exercises/{exercise_id:\d+}/{user_id:(\d+)+\/?}',
-          factory=context.ExerciseEndpointContext,
+          factory=ExerciseEndpointContext,
           permission='view')
 class Exercise:
     def __init__(self, request, context=None):
+        del context
         self.request = request
         self.db = request.db
 

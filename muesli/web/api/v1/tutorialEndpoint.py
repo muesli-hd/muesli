@@ -19,6 +19,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from json import JSONDecodeError
 
 from marshmallow.exceptions import ValidationError
 from cornice.resource import resource, view
@@ -27,15 +28,16 @@ from sqlalchemy.orm import joinedload
 from pyramid.httpexceptions import HTTPBadRequest
 
 from muesli import models
-from muesli.web import context
+from muesli.web.context import TutorialEndpointContext
 from muesli.web.api.v1 import allowed_attributes
 
 
 @resource(collection_path='/tutorials',
           path='/tutorials/{tutorial_id}',
-          factory=context.TutorialEndpointContext,)
+          factory=TutorialEndpointContext)
 class Tutorial:
     def __init__(self, request, context=None):
+        del context
         self.request = request
         self.db = request.db
 
@@ -93,7 +95,7 @@ class Tutorial:
                     models.Tutorial.id == self.request.matchdict['tutorial_id'] # pylint: disable=C0121
                 ).one()
         except NoResultFound:
-            raise HTTPBadRequest("Ungueltige Tutorial ID!")
+            raise HTTPBadRequest("Ungueltige Tutorial ID!") # pylint: disable=W0707
         exa = tutorial.lecture.exams.filter((models.Exam.results_hidden == False)|(models.Exam.results_hidden == None)) # pylint: disable=C0121
         if self.request.has_permission('viewAll'):
             tut_schema = models.TutorialSchema()
@@ -163,6 +165,10 @@ class Tutorial:
             result = schema.load(self.request.json_body)
         except ValidationError as e:
             self.request.errors.add('body', 'fail', e.messages)
+            return {}
+        except JSONDecodeError:
+            self.request.errors.add('body', 'fail', 'Invalid JSON')
+            return {}
         else:
             tutorial = models.Tutorial(**result)
             self.db.add(tutorial)

@@ -23,14 +23,15 @@
 from cornice.resource import resource, view
 
 from muesli import models
-from muesli.web import context
+from muesli.web.context import ExamEndpointContext
 
 
 @resource(path='/exams/{exam_id}',
-          factory=context.ExamEndpointContext,
+          factory=ExamEndpointContext,
           permission='view')
 class Exam:
     def __init__(self, request, context=None):
+        del context # unused
         self.request = request
         self.db = request.db
 

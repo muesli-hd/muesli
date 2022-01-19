@@ -19,6 +19,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from json import JSONDecodeError
 
 from cornice.resource import resource, view
 from sqlalchemy.orm import joinedload, undefer
@@ -28,14 +29,15 @@ from marshmallow.exceptions import ValidationError
 
 
 from muesli import models
-from muesli.web import context
+from muesli.web.context import LectureEndpointContext
 from muesli.web.api.v1 import allowed_attributes
 
 @resource(collection_path='/lectures',
           path='/lectures/{lecture_id}',
-          factory=context.LectureEndpointContext)
+          factory=LectureEndpointContext)
 class Lecture:
     def __init__(self, request, context=None):
+        del context # unused
         self.request = request
         self.db = request.db
 
@@ -162,6 +164,10 @@ class Lecture:
             result = schema.load(self.request.json_body, partial=True)
         except ValidationError as e:
             self.request.errors.add('body', 'fail', e.messages)
+            return {}
+        except JSONDecodeError:
+            self.request.errors.add('body', 'fail', 'Invalid JSON')
+            return {}
         else:
             for k, v in result.items():
                 setattr(lecture, k, v)
@@ -169,6 +175,7 @@ class Lecture:
                 self.db.commit()
             except SQLAlchemyError:
                 self.db.rollback()
+                return {}
             else:
                 return {'result': 'ok', 'update': self.get()}
 
@@ -224,6 +231,10 @@ class Lecture:
             result = schema.load(self.request.json_body)
         except ValidationError as e:
             self.request.errors.add('body', 'fail', e.messages)
+            return {}
+        except JSONDecodeError:
+            self.request.errors.add('body', 'fail', 'Invalid JSON')
+            return {}
         else:
             lecture = models.Lecture(**result)
             self.db.add(lecture)

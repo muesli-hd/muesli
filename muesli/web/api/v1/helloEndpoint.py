@@ -22,14 +22,14 @@
 
 from cornice.resource import resource, view
 
-from muesli.web import context
+from muesli.web.context import NonLoginContext
 from muesli.models import UserSchema
 from muesli.web.api.v1 import allowed_attributes
 
-@resource(path='/whoami',
-          factory=context.NonLoginContext)
+@resource(path='/whoami', factory=NonLoginContext)
 class Whoami:
     def __init__(self, request, context=None):
+        del context
         self.request = request
         self.db = request.db
 
