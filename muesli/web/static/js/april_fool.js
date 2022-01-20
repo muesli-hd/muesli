@@ -1,24 +1,24 @@
-var backgroundColorInterval;
+let backgroundColorInterval;
 
 function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
+    let letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
         color += letters[Math.floor(Math.random() * 16)];
     }
     return color;
 }
 
 function setRandomBackgroundColor(waitTime) {
-    document.getElementById("header").style.backgroundColor = getRandomColor();
+    $(".navbar").removeClass('navbar-dark bg-dark').addClass('navbar-light').css('background-color', getRandomColor());
     backgroundColorInterval = setInterval(function() {
-        document.getElementById("header").style.backgroundColor = getRandomColor();
+        $(".navbar").css('background-color', getRandomColor());
     }, waitTime);
 }
 
 function aprilFool() {
-    var waitTime = 10000;
-    var now = new Date();
+    let waitTime = 4000;
+    let now = new Date();
     if (now.getDate() === 1 && now.getMonth() === 3) {
         setRandomBackgroundColor(waitTime);
     }
