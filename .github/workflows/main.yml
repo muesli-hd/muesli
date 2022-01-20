@@ -17,6 +17,9 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+env:
+ GHCR_SLUG: ghcr.io/muesli-hd/muesli
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -33,7 +36,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/muesli-hd/muesli
+          images: ${{ env.GHCR_SLUG }}
           labels: |
             org.opencontainers.image.title=MÜSLI
             org.opencontainers.image.description=Mathematisches Übungsgruppen und Scheinlisten Interface
@@ -75,10 +78,8 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
       
       - name: Run tests
-        run: docker/run-tests.sh --github-actions-image "${IMAGE_NAME}"
-        env:
-          IMAGE_NAME: ${{steps.meta.outputs.tags[0]}}
-      
+        run: docker/run-tests.sh --github-actions-image "${{ env.GHCR_SLUG }}:${{ steps.meta.outputs.version }}"
+
       - uses: codecov/codecov-action@v2
         with:
           files: ./docker/.coverage.xml
