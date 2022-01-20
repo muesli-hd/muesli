@@ -75,7 +75,7 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
       
       - name: Run tests
-        run: docker/run-tests.sh --github-actions-image "ghcr.io/muesli-hd/muesli:${steps.meta.outputs.tags[0]}"
+        run: docker/run-tests.sh --github-actions-image "ghcr.io/muesli-hd/muesli:${{steps.meta.outputs.tags[0]}}"
       
       - uses: codecov/codecov-action@v2
         with:
