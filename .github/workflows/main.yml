@@ -6,9 +6,13 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - production
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
+      - production
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -24,14 +28,16 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      
-      - name: Prepare
-        id: prep
-        run: |
-          TAG=$(echo $GITHUB_SHA | head -c7)
-          IMAGE="ghcr.io/muesli-hd/muesli"
-          echo ::set-output name=tagged_image::${IMAGE}:${TAG}
-          echo ::set-output name=tag::${TAG}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ghcr.io/muesli-hd/muesli
+          labels: |
+            org.opencontainers.image.title=MÜSLI
+            org.opencontainers.image.description=Mathematisches Übungsgruppen und Scheinlisten Interface
+            org.opencontainers.image.vendor=Fakultät für Mathematik und Informatik, Universität Heidelberg
 
       - name: Set up Docker Buildx
         id: buildx
@@ -54,11 +60,13 @@ jobs:
           context: .
           builder: ${{ steps.buildx.outputs.name }}
           file: docker/Dockerfile
-          push: true
-          tags: ${{ steps.prep.outputs.tagged_image }}
+          load: true
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
-        
+
         # Temp fix
         # https://github.com/docker/build-push-action/issues/252
         # https://github.com/moby/buildkit/issues/1896
@@ -68,7 +76,7 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
       
       - name: Run tests
-        run: docker/run-tests.sh --github-actions-image "${{ steps.prep.outputs.tagged_image }}"
+        run: docker/run-tests.sh --github-actions-image "ghcr.io/muesli-hd/muesli:${steps.meta.outputs.tags[0]}"
       
       - uses: codecov/codecov-action@v2
         with:
