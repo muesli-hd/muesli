@@ -1,15 +1,19 @@
 version: '2'
 services:
   muesli:
-    build:
-      context: https://github.com/muesli-hd/muesli.git#production
-    image: muesli
-    container_name: muesli
+    image: ghcr.io/muesli-hd/muesli:production
     ports:
       - "127.0.0.1:8033:8080"
       - "127.0.0.1:8034:8081"
-    network_mode: "bridge"
     restart: always
     volumes:
       - "/opt/muesli4/muesli.yml:/opt/muesli4/muesli.yml"
-      - "/opt/muesli4/alembic.ini:/opt/muesli4/alembic.ini"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      MUESLI_DB_CONNECTION_STRING: postgresql://muesli:mueslipw@postgres/muesli
+      MUESLI_MAILSERVER_HOST: mailcatcher
+      MUESLI_MAILSERVER_PORT: 1025
+  redis:
+    image: redis:6-alpine
