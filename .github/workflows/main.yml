@@ -60,7 +60,6 @@ jobs:
           context: .
           builder: ${{ steps.buildx.outputs.name }}
           file: docker/Dockerfile
-          load: true
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
