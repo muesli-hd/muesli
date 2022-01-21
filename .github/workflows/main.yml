@@ -93,15 +93,16 @@ jobs:
     needs: [build]
     steps:
       - name: Check if deployment necessary
+        id: needs-deploy
         run: |
           if [[ ${{ github.ref }} == refs/heads/production ]]; then
-            echo "::set-env name=deploy::true"
+            echo "::set-output name=deploy::true"
           else
-            echo "::set-env name=deploy::false"
+            echo "::set-output name=deploy::false"
           fi
 
       - name: Deploy to production (if necessary)
-        if: ${{ env.deploy }} == 'true'
+        if: ${{ steps.needs-deploy.outputs.deploy }} == 'true'
         uses: distributhor/workflow-webhook@v2
         env:
           webhook_url: ${{ secrets.WEBHOOK_URL }}
