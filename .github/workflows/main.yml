@@ -99,9 +99,7 @@ jobs:
       - name: Deploy to production (if necessary)
         if: ${{ env.deploy }} == 'true'
         uses: distributhor/workflow-webhook@v2
-        needs:
-          - docker-build
-          - tests
+        needs: [docker-build, tests]
         env:
           webhook_url: ${{ secrets.WEBHOOK_URL }}
           webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
