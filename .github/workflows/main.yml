@@ -94,7 +94,7 @@ jobs:
     steps:
       - name: Check if deployment necessary
         run: |
-          if [ ${{ github.ref }} == refs/heads/production ] then
+          if [[ ${{ github.ref }} == refs/heads/production ]] then
             echo "::set-env name=deploy::true"
           else
             echo "::set-env name=deploy::false"
