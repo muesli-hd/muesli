@@ -58,6 +58,7 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build MÜSLI image
+        id: docker-build
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -78,6 +79,7 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
       
       - name: Run tests
+        id: tests
         run: docker/run-tests.sh --github-actions-image "${{ env.GHCR_SLUG }}:${{ steps.meta.outputs.version }}"
 
       - uses: codecov/codecov-action@v2
@@ -85,4 +87,22 @@ jobs:
           files: ./docker/.coverage.xml
           flags: unittests
           name: MÜSLI
+
+      - name: Check if deployment necessary
+          run: |
+            if [ ${{ github.ref }} == refs/heads/production ] then
+              echo "::set-env name=deploy::true"
+            else
+              echo "::set-env name=deploy::false"
+            fi
+      
+      - name: Deploy to production (if necessary)
+        if: ${{ env.deploy }} == 'true'
+        uses: distributhor/workflow-webhook@v2
+        needs:
+          - docker-build
+          - tests
+        env:
+          webhook_url: ${{ secrets.WEBHOOK_URL }}
+          webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
 
