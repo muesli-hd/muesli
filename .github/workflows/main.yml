@@ -88,6 +88,10 @@ jobs:
           flags: unittests
           name: MÜSLI
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
       - name: Check if deployment necessary
         run: |
           if [ ${{ github.ref }} == refs/heads/production ] then
@@ -95,11 +99,10 @@ jobs:
           else
             echo "::set-env name=deploy::false"
           fi
-      
+
       - name: Deploy to production (if necessary)
         if: ${{ env.deploy }} == 'true'
         uses: distributhor/workflow-webhook@v2
-        needs: [docker-build, tests]
         env:
           webhook_url: ${{ secrets.WEBHOOK_URL }}
           webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
