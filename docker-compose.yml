@@ -22,9 +22,6 @@ services:
     image: 'redis:6-alpine'
 
   muesli:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
     image: muesli:latest
     depends_on:
       - postgres

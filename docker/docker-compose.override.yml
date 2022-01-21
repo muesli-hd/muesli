@@ -3,4 +3,8 @@ version: '3.2'
 
 services:
   muesli:
+    image: muesli:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     command: ["/opt/muesli4/docker/docker-testscript.sh"]
