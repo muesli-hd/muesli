@@ -89,12 +89,12 @@ jobs:
           name: MÜSLI
 
       - name: Check if deployment necessary
-          run: |
-            if [ ${{ github.ref }} == refs/heads/production ] then
-              echo "::set-env name=deploy::true"
-            else
-              echo "::set-env name=deploy::false"
-            fi
+        run: |
+          if [ ${{ github.ref }} == refs/heads/production ] then
+            echo "::set-env name=deploy::true"
+          else
+            echo "::set-env name=deploy::false"
+          fi
       
       - name: Deploy to production (if necessary)
         if: ${{ env.deploy }} == 'true'
