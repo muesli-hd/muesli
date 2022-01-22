@@ -23,3 +23,4 @@ muesli/web/static/js/**
 muesli/web/static/css/*
 
 docker/docker-compose.github-actions.yml
+local-backup
