@@ -5,8 +5,6 @@ services:
   postgres:
     image: 'postgres:10'
     environment:
-      POSTGRES_DB: muesli
-      POSTGRES_USER: muesli
       POSTGRES_PASSWORD: mueslipw
     volumes:
       - './docker/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh'
