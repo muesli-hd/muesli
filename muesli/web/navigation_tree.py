@@ -114,7 +114,7 @@ def get_lecture_specific_nodes(request, lecture):
     nodes = []
 
     data = [
-        ("Bearbeiten", "lecture_edit", "edit", True),
+        ("Verwalten", "lecture_edit", "edit", True),
         ("Anmeldeseite", "lecture_view", "view", False),
         ("E-Mail an alle Übungsleiter schreiben", "lecture_email_tutors", "mail_tutors", True),
         ("E-Mail an alle Studenten schreiben", "lecture_email_students", "edit", True),
