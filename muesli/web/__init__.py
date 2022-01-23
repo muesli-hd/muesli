@@ -36,12 +36,7 @@ from muesli.web.api.v1 import *
 from muesli import utils
 import muesli
 
-import time
 import numbers
-
-import weakref
-
-from sqlalchemy import event as saevent
 
 @subscriber(NewRequest)
 def add_request_attributes(event):
