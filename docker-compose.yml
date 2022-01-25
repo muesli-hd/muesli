@@ -28,6 +28,7 @@ services:
     environment:
       MUESLI_DEVMODE: 1
       MUESLI_DB_CONNECTION_STRING: postgresql://muesli:mueslipw@postgres/muesli
+      MUESLI_MIGRATION_DB_CONNECTION_STRING: postgresql://muesli-admin:mueslipw@postgres/muesli
       MUESLI_MAILSERVER_HOST: mailcatcher
       MUESLI_MAILSERVER_PORT: 1025
 
