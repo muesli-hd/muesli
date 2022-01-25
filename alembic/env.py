@@ -30,8 +30,9 @@ target_metadata = muesli.models.Base.metadata
 
 # Hack, to prioritize the environment variable for db connections
 config.set_main_option("sqlalchemy.url", config.get_main_option("sqlalchemy.url",
+                                                                os.environ.get('MUESLI_MIGRATION_DB_CONNECTION_STRING',
                                                                 os.environ.get('MUESLI_DB_CONNECTION_STRING',
-                                                                               'postgresql:///muesli')))
+                                                                               'postgresql:///muesli'))))
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
