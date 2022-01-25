@@ -7,11 +7,10 @@ Create Date: 2021-08-15 14:31:40.721068
 """
 
 # revision identifiers, used by Alembic.
-import muesli.models
-
 revision = '8025dec50f89'
 down_revision = '49004a6100d6'
 
+from muesli.models import Subject, User
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
@@ -53,41 +52,54 @@ def upgrade():
         "Computerlinguistik (BA 100%)",
         "Computerlinguistik (BA 50%)",
     ]:
-        subject = muesli.models.Subject()
+        subject = Subject()
         subject.name = name
         subject.approved = True
         session.add(subject)
         subject_map[name] = subject
 
     # Migrate existing users
-    users = session.scalars(sa.select(muesli.models.User))
-    for user in users:
-        if not user.subject:
-            continue
-        if user.subject not in subject_map:
-            subject = muesli.models.Subject()
-            subject.name = user.subject
+    def append_subject(subject_name):
+        if subject_name not in subject_map:
+            subject = Subject()
+            subject.name = subject_name
             subject.approved = False
             session.add(subject)
-            subject_map[user.subject] = subject
-        user.subjects.append(subject_map[user.subject])
+            subject_map[subject_name] = subject
+        user.subjects.append(subject_map[subject_name])
+
+    users = session.scalars(sa.select(User))
+    for user in users:
+        if user.subject:
+            append_subject(user.subject)
+        if user.second_subject:
+            append_subject(f'Beifach: {user.second_subject}')
     session.commit()
     # In production there is a view, some admin created back when a lot of things were done manually.
     # Remove it, if it exists.
     if sa.inspect(bind).has_table('common_statistics'):
         op.execute('DROP VIEW common_statistics')
     op.drop_column('users', 'subject')
+    op.drop_column('users', 'second_subject')
 
 
 def downgrade():
     op.add_column('users', sa.Column('subject', sa.Text))
+    op.add_column('users', sa.Column('second_subject', sa.Text))
 
     # Migrate data
     session = sa.orm.Session(bind=op.get_bind())
-    for user in session.scalars(sa.select(muesli.models.User)):
+    for user in session.scalars(sa.select(User)):
         user_subjects = user.subjects
-        if len(user.subjects) > 0:
-            user.subject = user.subjects[0].name
+        if user.subjects.count() > 0:
+            for s in user.subjects:
+                if s.name.startswith('Beifach: '):
+                    user.second_subject = s.name[9:]
+                    break
+            for s in user_subjects:
+                if not s.name.startswith('Beifach: '):
+                    user.subject = s.name
+                    break
     session.commit()
 
     # drop tables
