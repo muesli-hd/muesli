@@ -73,7 +73,7 @@ def upgrade():
         if user.subject:
             append_subject(user.subject)
         if user.second_subject:
-            append_subject(f'Beifach: {user.second_subject}')
+            append_subject(f'LA Beifach: {user.second_subject}')
     session.commit()
     # In production there is a view, some admin created back when a lot of things were done manually.
     # Remove it, if it exists.
@@ -93,11 +93,11 @@ def downgrade():
         user_subjects = user.subjects
         if user.subjects.count() > 0:
             for s in user.subjects:
-                if s.name.startswith('Beifach: '):
-                    user.second_subject = s.name[9:]
+                if s.name.startswith('LA Beifach: '):
+                    user.second_subject = s.name[12:]
                     break
             for s in user_subjects:
-                if not s.name.startswith('Beifach: '):
+                if not s.name.startswith('LA Beifach: '):
                     user.subject = s.name
                     break
     session.commit()
