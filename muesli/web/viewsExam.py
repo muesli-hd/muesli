@@ -222,7 +222,7 @@ class EnterPointsBasic:
         else:
             statistics = exam.getStatistics(students=students)
         self.request.javascript.append('toast.min.js')
-        self.request.javascript.append('jquery/jquery.tablesorter.min.js')
+        self.request.javascript.append('jquery.tablesorter.min.js')
         self.request.css.append('toast.min.css')
         return {'exam': exam,
                 'tutorial_ids': self.request.matchdict['tutorial_ids'],
