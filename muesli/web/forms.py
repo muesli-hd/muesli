@@ -32,12 +32,12 @@ import requests
 import json
 
 def boolToValue(boolean):
-    if boolean:
+    if boolean is None:
+        return 'None'
+    elif boolean:
         return 1
     elif not boolean:
         return 0
-    elif boolean is None:
-        return 'None'
 
 def valueToBool(value):
     if value == 1:
