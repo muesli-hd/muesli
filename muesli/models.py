@@ -592,6 +592,14 @@ class ExerciseStudent(Base):
     student = relationship(User, backref='exercise_points')
     points = Column(Numeric(precision=8, scale=1))
 
+    def __init__(self, exercise=None, student=None, primary_key=None):
+        if primary_key:
+            self.exercise_id = primary_key[0]
+            self.student_id = primary_key[1]
+        else:
+            self.exercise = exercise
+            self.student = student
+
 
 class ExamAdmission(Base):
     __tablename__ = 'exam_admissions'

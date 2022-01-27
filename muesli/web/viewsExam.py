@@ -686,7 +686,7 @@ def ajaxSavePoints(request):
                 request.db.query(ExerciseStudent).filter(models.ExerciseStudent.student_id == student_id)\
                     .filter(models.ExerciseStudent.exercise_id == exercise_id).delete()
             else:
-                ep = models.ExerciseStudent()
+                ep = models.getOrCreate(models.ExerciseStudent, request.db, (student_id, exercise_id))
                 ep.student_id = student_id
                 ep.exercise_id = exercise_id
                 ep.points = submitted_points[exercise_id]
