@@ -166,6 +166,9 @@ class EnterGradesBasic:
                         value = value.replace(',','.')
                         try:
                             value = float(value)
+                            if not 0 <= value <= 6:
+                                # Only accept valid grades from 0 to 6. (usually 5, but let's be lenient here)
+                                raise ValueError
                             grades[ls.student_id]['grade'].grade = value
                             grades[ls.student_id]['gradestr'] = value
                         except:
