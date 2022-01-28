@@ -690,7 +690,6 @@ def ajaxSavePoints(request):
                 ep.student_id = student_id
                 ep.exercise_id = exercise_id
                 ep.points = submitted_points[exercise_id]
-                request.db.merge(ep)
 
     request.db.commit()
     return json_data
