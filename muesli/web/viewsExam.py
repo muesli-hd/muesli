@@ -686,10 +686,9 @@ def ajaxSavePoints(request):
                 request.db.query(ExerciseStudent).filter(models.ExerciseStudent.student_id == student_id)\
                     .filter(models.ExerciseStudent.exercise_id == exercise_id).delete()
             else:
-                ep = models.getOrCreate(models.ExerciseStudent, request.db, (student_id, exercise_id))
-                ep.student_id = student_id
-                ep.exercise_id = exercise_id
-                ep.points = submitted_points[exercise_id]
+                ep = models.ExerciseStudent(exercise_id=exercise_id, student_id=student_id,
+                                            points=submitted_points[exercise_id])
+                request.db.merge(ep)
 
     request.db.commit()
     return json_data
@@ -734,8 +733,8 @@ def autoadmit(request):
     admission_limit = int(request.params['admission_limit'])
     admitted_students = exam.lecture.students.join(models.User.exercise_points).join(models.ExerciseStudent.exercise).filter(models.Exercise.exam_id.in_([a.id for a in assignments])).group_by(models.User.id).having(func.sum(models.ExerciseStudent.points) >= admission_limit).all()
     for student in admitted_students:
-        student_admission = models.getOrCreate(models.ExamAdmission, request.db, (exam.id, student.id))
-        student_admission.admission = True
+        student_admission = models.ExamAdmission(exam_id=exam.id, student_id=student.id, admission=True)
+        request.db.merge(student_admission)
     request.db.commit()
 
     return {

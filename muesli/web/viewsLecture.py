@@ -603,9 +603,9 @@ def setPreferences(request):
     tps = []
     while 'time-%i' % row in request.POST:
         time = types.TutorialTime(request.POST['time-%i' % row])
-        tp = models.getOrCreate(models.TimePreference, request.db, (lecture.id, request.user.id, time))
-        tp.penalty = int(request.POST['pref-%i' % row])
-        tps.append(tp)
+        penalty = int(request.POST['pref-%i' % row])
+        tp = models.TimePreference(lecture_id=lecture.id, student_id=request.user.id, time=time, penalty=penalty)
+        tps.append(request.db.merge(tp))
         row +=  1
     if lecture.minimum_preferences:
         valid = len([tp for tp in tps if tp.penalty < 100]) >= lecture.minimum_preferences

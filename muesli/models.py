@@ -40,14 +40,6 @@ from marshmallow.exceptions import ValidationError
 Base = sqlalchemy.ext.declarative.declarative_base()
 
 
-def getOrCreate(type, session, primary_key):
-    obj = session.query(type).get(primary_key)
-    if not obj:
-        obj = type(primary_key=primary_key)
-        session.add(obj)
-    return obj
-
-
 lecture_tutors_table = Table('lecture_tutors', Base.metadata,
         Column('lecture', Integer, ForeignKey('lectures.id'), primary_key=True),
         Column('tutor', Integer, ForeignKey('users.id'), primary_key=True)
@@ -530,17 +522,6 @@ class TimePreference(Base):
     time = Column(ColumnWrapper(TutorialTime)(length=7), primary_key=True)
     penalty = Column(Integer)
 
-    def __init__(self, lecture=None, student=None, time=None, penalty=None, primary_key=None):
-        if primary_key:
-            self.lecture_id = primary_key[0]
-            self.student_id = primary_key[1]
-            self.time = primary_key[2]
-        else:
-            self.lecture = lecture
-            self.student = student
-            self.time = time
-            self.penalty = penalty
-
 
 class LectureStudent(Base):
     __tablename__ = 'lecture_students'
@@ -592,14 +573,6 @@ class ExerciseStudent(Base):
     student = relationship(User, backref='exercise_points')
     points = Column(Numeric(precision=8, scale=1))
 
-    def __init__(self, exercise=None, student=None, primary_key=None):
-        if primary_key:
-            self.exercise_id = primary_key[0]
-            self.student_id = primary_key[1]
-        else:
-            self.exercise = exercise
-            self.student = student
-
 
 class ExamAdmission(Base):
     __tablename__ = 'exam_admissions'
@@ -610,14 +583,6 @@ class ExamAdmission(Base):
     admission = Column(Boolean)
     registration = Column(Boolean)
     medical_certificate = Column(Boolean)
-
-    def __init__(self, exam=None, student=None, primary_key=None):
-        if primary_key:
-            self.exam_id = primary_key[0]
-            self.student_id = primary_key[1]
-        else:
-            self.exam = exam
-            self.student = student
 
 
 class Grading(Base):
