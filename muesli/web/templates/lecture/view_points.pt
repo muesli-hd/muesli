@@ -14,11 +14,13 @@
       <div class="table-responsive">
         <table class="table table-striped table-sm w-auto" tal:define="max_exercises max([len(e.exercises) for e in catexams['exams']])">
           <thead class="thead-dark">
-          <th scope="col"></th>
-          <!-- The hack used below makes the tablehead fit above all further cols -->
-          <th scope="col" tal:attributes="colspan 1+max_exercises">
-            Punkte
-          </th>
+          <tr>
+            <th scope="col"></th>
+            <!-- The hack used below makes the tablehead fit above all further cols -->
+            <th scope="col" tal:attributes="colspan 1+max_exercises">
+              Punkte
+            </th>
+          </tr>
           </thead>
           <tr tal:repeat="exam catexams['exams']">
             <div tal:condition="not exam.results_hidden" tal:omit-tag="">
@@ -36,15 +38,17 @@
             </div>
           </tr>
           <tfoot>
-          <th scope="row">Insgesamt: </th>
-          <td colspan="3"><strong>${fF(catexams['sum'])}/${fF(catexams['max'])}</strong>
-            <span tal:condition="catexams['max']>0 and catexams['max_rel']>0 and catexams['max']!=catexams['max_rel']">
+          <tr>
+            <th scope="row">Insgesamt: </th>
+            <td tal:attributes="colspan 1+max_exercises"><strong>${fF(catexams['sum'])}/${fF(catexams['max'])}</strong>
+              <span tal:condition="catexams['max']>0 and catexams['max_rel']>0 and catexams['max']!=catexams['max_rel']">
            (${'%2.f' % (catexams['sum']/catexams['max']*100)}%, ${'%2.f' % (catexams['sum']/catexams['max_rel']*100)}% rel.)
           </span>
-            <span tal:condition="catexams['max']>0 and catexams['max']==catexams['max_rel']">
+              <span tal:condition="catexams['max']>0 and catexams['max']==catexams['max_rel']">
               (${'%2.f' % (catexams['sum']/catexams['max']*100)}%)
             </span>
-          </td>
+            </td>
+          </tr>
           </tfoot>
         </table>
       </div>
