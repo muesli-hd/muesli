@@ -34,7 +34,6 @@ from pyramid.renderers import render_to_response as render
 import pyramid.exceptions
 from pyramid.url import route_url
 from sqlalchemy.orm import exc, joinedload
-from hashlib import sha1
 from markdown import markdown
 
 import re

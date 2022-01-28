@@ -31,6 +31,7 @@ psycopg2-binary==2.9.3
 py==1.11.0
 pylint
 pyjwt==2.3.0
+pynacl==1.5.0
 pyparsing==3.0.6
 pyramid==2.0
 pyramid_session_redis==1.6.3

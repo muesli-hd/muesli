@@ -33,9 +33,11 @@ from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTPForbidden
 from pyramid.url import route_url
 from sqlalchemy.orm import exc
-from sqlalchemy import func, or_, not_
+from sqlalchemy import func, or_, not_, select
 from hashlib import sha1
 from muesli.mail import Message, sendMail
+
+import nacl.pwhash
 
 import re
 import os
@@ -43,34 +45,52 @@ import datetime
 import collections
 
 
-def lookup_user(request, form):
-    assert request.method == 'POST'
-    query = request.db.query(models.User).filter(func.lower(models.User.email) == form['email'].strip().lower(),
-                                                 models.User.password == sha1(
-                                                     form['password'].encode('utf-8')).hexdigest())
-
-    # Due to historically case sensitive email addresses, do a case insensitive first and switch to case sensitivity
-    # on email addresses, if the user is ambiguous.
-    user = None
-    if query.count() == 1:
-        # case insensitive
-        user = query.first()
+def authenticate_user_with_password(sa_session, user, guessed_password):
+    if not user.password.startswith('$'):
+        # legacy sha1 password
+        if user.password == sha1(guessed_password.encode('utf-8')).hexdigest():
+            user.password = nacl.pwhash.str(guessed_password.encode('utf-8')).decode('utf-8')
+            sa_session.commit()
+            return user
     else:
-        # case sensitive
-        for res in query:
-            if res.email == form['email'].strip():
+        if nacl.pwhash.verify(user.password.encode('utf-8'), guessed_password.encode('utf-8')):
+            return user
+    return None
+
+
+def lookup_user(request, email, guessed_password):
+    assert request.method == 'POST'
+    # Check for registered users with the given email
+    user_candidates = request.db.scalars(
+        select(models.User).where(func.lower(models.User.email) == email.strip().lower())).all()
+
+    # Due to historically case-sensitive email addresses, do a case-insensitive first and switch to case sensitivity
+    # on email addresses, if the user is ambiguous.
+    candidate_to_verify = None
+    if len(user_candidates) == 1:
+        # case-insensitive
+        candidate_to_verify = user_candidates[0]
+    else:
+        # case-sensitive search
+        for user_candidate in user_candidates:
+            if user_candidate.email == email.strip():
                 # In case two users with the exact same email casing and password exist, take the first one
-                user = res
+                candidate_to_verify = user_candidate
                 break
 
-    return user
+    # If a candidate was found, verify it
+    if candidate_to_verify:
+        # The authentication function is responsible for returning a verified user object
+        return authenticate_user_with_password(request.db, candidate_to_verify, guessed_password)
+
+    return None
 
 
 @view_config(route_name='user_login', renderer='muesli.web:templates/user/login.pt')
 def login(request):
     form = forms.UserLoginForm(request)
     if request.method == 'POST' and form.processPostData(request.POST):
-        user = lookup_user(request, form)
+        user = lookup_user(request, form['email'], form['password'])
         if user is not None:
             headers = security.remember(request, user.id)
             return HTTPFound(location=request.route_url('overview'), headers=headers)
@@ -80,21 +100,18 @@ def login(request):
 
 @view_config(route_name='api_login', renderer='json', request_method='POST')
 def api_login(request):
-    user = request.db.query(models.User).filter_by(
-        email=request.POST['email'].strip(),
-        password=sha1(request.POST['password'].encode('utf-8')).hexdigest()
-    ).first()
-    exp = datetime.timedelta(days=muesli.config["api"]["KEY_EXPIRATION"])
-    token = models.BearerToken(client="Personal Token",
-                               user=user,
-                               description="Requested from API",
-                               expires=datetime.datetime.utcnow()+exp
-                               )
-    request.db.add(token)
-    request.db.flush()
-    jwt_token = muesli.utils.create_jwt_token(user.id, admin=(user.is_admin), jti=token.id, expiration=exp)
-    request.db.commit()
+    user = lookup_user(request, request.POST['email'], request.POST['password'])
     if user:
+        exp = datetime.timedelta(days=muesli.config["api"]["KEY_EXPIRATION"])
+        token = models.BearerToken(client="Personal Token",
+                                   user=user,
+                                   description="Requested from API",
+                                   expires=datetime.datetime.utcnow()+exp
+                                   )
+        request.db.add(token)
+        request.db.flush()
+        jwt_token = muesli.utils.create_jwt_token(user.id, admin=(user.is_admin), jti=token.id, expiration=exp)
+        request.db.commit()
         return {
             'result': 'ok',
             'token': jwt_token
@@ -426,7 +443,7 @@ def confirm(request):
     form = forms.UserConfirm(request, request.context.confirmation)
     if request.method == 'POST' and form.processPostData(request.POST):
         user = request.context.confirmation.user
-        user.password = sha1(form['password'].encode('utf-8')).hexdigest()
+        user.password = nacl.pwhash.str(form['password'].encode('utf-8')).decode('utf-8')
         request.db.delete(request.context.confirmation)
         data_updated = models.UserHasUpdated(user.id, muesli.utils.getSemesterLimit())
         request.db.add(data_updated)
@@ -515,8 +532,8 @@ def changePassword(request):
     form = forms.UserChangePassword(request)
     if request.method == 'POST' and form.processPostData(request.POST):
         # check if old_password is correct
-        if request.user.password == sha1(form['old_password'].encode('utf-8')).hexdigest():
-            request.user.password = sha1(form['new_password'].encode('utf-8')).hexdigest()
+        if authenticate_user_with_password(request.db, request.user, form['old_password']):
+            request.user.password = nacl.pwhash.str(form['new_password'].encode('utf-8')).decode('utf-8')
             request.session.flash('Neues Passwort gesetzt', queue='messages')
             request.db.commit()
         else:
@@ -573,7 +590,7 @@ def resetPassword3(request):
     form = forms.UserResetPassword3(request, request.context.confirmation)
     if request.method == 'POST' and form.processPostData(request.POST):
         user = request.context.confirmation.user
-        user.password = sha1(form['password'].encode('utf-8')).hexdigest()
+        user.password = nacl.pwhash.str(form['password'].encode('utf-8')).decode('utf-8')
         request.db.delete(request.context.confirmation)
         request.db.commit()
         return HTTPFound(location=request.route_url('user_login'))

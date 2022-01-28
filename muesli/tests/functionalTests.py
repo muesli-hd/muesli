@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from hashlib import sha1
+import nacl.pwhash
 
 import unittest
 import muesli.web
@@ -112,7 +112,8 @@ class BaseTests(unittest.TestCase):
 
 def setUserPassword(user, password):
     user.realpassword = password
-    user.password = sha1(password.encode('utf-8')).hexdigest()
+    user.password = nacl.pwhash.str(password.encode('utf-8')).decode('utf-8')
+
 
 class PopulatedTests(BaseTests):
     def populate(self):
