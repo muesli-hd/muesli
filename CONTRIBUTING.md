@@ -1,6 +1,6 @@
 # Workflow
 
-* Set up your system as described in the [`INSTALL.md`](./INSTALL.md).
+* Set up your system as described in the [`README.md`](./README.md).
 * if you plan on contributing to muesli, fork the repository and clone it:
 ```bash
 $ git clone git@github.com:<your_username>/muesli.git
@@ -10,7 +10,7 @@ $ git clone git@github.com:<your_username>/muesli.git
 $ git checkout -b <your_very_special_branchname>
 ```
 * develop the changes you want to do
-* try to use the correct styling / formatting for your code ([Google Stylguidelines](https://github.com/google/styleguide/blob/gh-pages/pyguide.md)([Summary](https://github.com/TheEbolaDoc/google_python_styleguidelines/blob/master/README.md)))
+* try to use the correct styling / formatting for your code ([Google Stylguidelines](https://github.com/google/styleguide/blob/gh-pages/pyguide.md)([Summary](https://github.com/christian-heusel/google_python_styleguidelines/blob/master/README.md)))
 * push your changes
 ```bash
 $ git push --set-upstream origin <your_very_special_branchname>
@@ -38,9 +38,9 @@ Muesli currently uses the the following frameworks and programs:
 | Location                               | What's it good for?                                               |
 |----------------------------------------|-------------------------------------------------------------------|
 | alembic                                | Database-handling                                                 |
-| docker\_run\_tests                     | used for running tests in a docker container                      |
+| docker                                 | directory with docker related scripts and files                   |
+| docker/run-tests.sh                    | used to run the testsuite                                         |
 | muesli                                 | contains actual code for muesli                                   |
-| docker-serve.sh                        | This file is executed by the docker-container on startup          |
 | muesli/tests                           | contains tests for the muesli code                                |
 | muesli/web                             | contains most muesli code                                         |
 | muesli/models.py                       | contains all model-definition used in the database                |
@@ -72,9 +72,8 @@ $ alembic revision -m "Added a column"
 
 ### Static web-content
 
-Don't add JS-libraries to the repository, instead add a symlink pointing to the
-install-location on Ubuntu. You can install new dependencies with `apt` via the
-`Dockerfile`.
+Don't add JS-libraries to the repository, instead add add them to the package.json file and let them be copied by the
+Dockerfile. You can install new dependencies with `apt` via the `Dockerfile`, too.
 
 ### Page setup
 
@@ -114,8 +113,8 @@ specific context.
 
 ### Navigation\_tree
 
-The navigation\_tee is a tree-structure saved in the request object used for the
-navigation the the right site. When editing this tree make sure not to create
+The navigation_tree is a tree-structure saved in the request object used for the
+navigation buttons at the top. When editing this tree make sure not to create
 any cycles, since these will crash the template-engine.
 
 ### The API
@@ -154,12 +153,11 @@ Add a method for `POST` or something else to get familiar with how things work.
 It can also make sense to change the following value in `./muesli.yml.example` 
 since it provides some tooling to analyze the framework.
 ```yaml
-production: True
+development: False
 ```
 
 #### Contact (for API related stuff)
 
-Just tag [Chris (@TheEbolaDoc)](https://github.com/TheEbolaDoc) or [@Philipp-g](https://github.com/Philipp-g) in your corresponding issue or PR. :smile:
-
+Just tag [Chris (@christian-heusel)](https://github.com/christian-heusel) or [@Philipp-g](https://github.com/Philipp-g) in your corresponding issue or PR. :smile:
 
 ### --> Happy Hacking and Godspeed! <--

@@ -38,7 +38,7 @@ def api_spec(request):
     ---
     get:
       description: "Outputs the Open-API specification with version 2.0.0. More information can be found on https://swagger.io/docs/specification/2-0/basic-structure/"
-      operationId: "lecture_get"
+      operationId: "openapi_spec_get"
       tags:
       - "Open API"
       produces:
@@ -78,6 +78,8 @@ def api_spec(request):
 
     add_pyramid_paths(spec, 'openapi_spec', request=request)
 
+    add_pyramid_paths(spec, 'whoami', request=request)
+
     # Be careful how the schemes are defined:
     #
     # If one (or its member) are instantiated as object and some are as class
@@ -86,14 +88,27 @@ def api_spec(request):
 
     spec.components.schema('User', schema=models.UserSchema(only=allowed_attributes.user()))
 
-    spec.components.schema('Tutorial', schema=models.TutorialSchema(only=allowed_attributes.tutorial()))
-    spec.components.schema('CollectionTutorial', schema=models.TutorialSchema(only=allowed_attributes.collection_tutorial()))
+    spec.components.schema(
+        'Tutorial',
+        schema=models.TutorialSchema(only=allowed_attributes.tutorial())
+    )
+    spec.components.schema(
+        'CollectionTutorial',
+        schema=models.TutorialSchema(only=allowed_attributes.collection_tutorial())
+    )
 
-    spec.components.schema('Lecture', schema=models.LectureSchema(only=allowed_attributes.lecture()))
-    spec.components.schema('CollectionLecture', schema=models.LectureSchema(only=allowed_attributes.collection_lecture()))
+    spec.components.schema(
+        'Lecture',
+        schema=models.LectureSchema(only=allowed_attributes.lecture())
+    )
+    spec.components.schema(
+        'CollectionLecture',
+        schema=models.LectureSchema(only=allowed_attributes.collection_lecture())
+    )
 
     spec.components.schema('ExerciseStudent', schema=models.ExerciseStudentSchema)
     spec.components.schema('Exercise', schema=models.ExerciseSchema)
+
     openapi_json = spec.to_dict()
 
     return remove_regex(openapi_json)

@@ -1,0 +1,49 @@
+version: '2'
+services:
+  postgres:
+    image: 'postgres:14'
+    environment:
+      POSTGRES_PASSWORD: your_postgres_superuser_password
+    ports:
+      - '127.0.0.1:5433:5432'
+    volumes:
+      - './psql_db_data:/var/lib/postgresql/data'
+      - './init-db.sh:/docker-entrypoint-initdb.d/init-db.sh'
+    restart: always
+  muesli:
+    image: ghcr.io/muesli-hd/muesli:production
+    ports:
+      - "127.0.0.1:8033:8080"
+      - "127.0.0.1:8034:8081"
+    restart: always
+    volumes:
+      - "/opt/muesli4/muesli.yml:/opt/muesli4/muesli.yml"
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      MUESLI_DB_CONNECTION_STRING: postgresql://muesli:your_muesli_application_user_password@172.17.0.1/muesli
+      MUESLI_MAILSERVER_HOST: 172.17.0.1
+      MUESLI_MAILSERVER_PORT: 25
+  redis:
+    image: redis:6-alpine
+    restart: always
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local
+    restart: always
+    user: postgres:postgres
+    volumes:
+      - './local-backup:/backups'
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: muesli
+      POSTGRES_USER: muesli-admin
+      POSTGRES_PASSWORD: mueslipw
+      POSTGRES_EXTRA_OPTS: -Fc
+      SCHEDULE: '@daily'
+      BACKUP_SUFFIX: .pg_dump
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      TZ: Europe/Berlin

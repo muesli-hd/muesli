@@ -18,21 +18,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyramid import security
 from pyramid.config import Configurator
-from pyramid.events import subscriber, BeforeTraversal, BeforeRender, NewRequest
+from pyramid.events import subscriber, BeforeRender, NewRequest
 from pyramid.renderers import get_renderer
-from pyramid.authentication import SessionAuthenticationPolicy
-from pyramid.authorization import ACLAuthorizationPolicy
-from muesli.web.pyramid_jwt import JWTAuthenticationPolicy
-from pyramid_multiauth import MultiAuthenticationPolicy
-import pyramid_beaker
-import beaker.ext.sqla
-import tempfile
+from pyramid.authorization import ACLHelper, Authenticated, Everyone
+import jwt
+from sqlalchemy.orm import sessionmaker
 
 from muesli.web.navigation_tree import create_navigation_tree
 from muesli.web.context import *
-from muesli.models import *
 from muesli.web.views import *
 from muesli.web.viewsLecture import *
 from muesli.web.viewsUser import *
@@ -42,128 +36,130 @@ from muesli.web.api.v1 import *
 from muesli import utils
 import muesli
 
-import time
-import datetime
 import numbers
 
-# import objgraph
-# import inspect
-# import random
-# mport gc
-
-import weakref
-
-from sqlalchemy import event as saevent
-
 @subscriber(NewRequest)
-def add_session_to_request(event):
-    event.request.time = time.time()
-    event.request.now = time.time
-    event.request.db = Session()
-    event.request.queries = 0
-    # The listener is not yet deleted after the request completes,
-    # as this is not implemented in sqlalchemy. Therefore, the
-    # closure would contain a reference to the event as long
-    # as the connection to the database is active, which
-    # creates a memory leak. As long as the listener cannot be
-    # removed, we have to use a weak reference.
-    weak_event = weakref.ref(event)
-    def before_execute(conn, clauseelement, multiparams, params):
-        wevent = weak_event()
-        if wevent:
-            wevent.request.queries += 1
-    saevent.listen(event.request.db.get_bind(), "before_execute", before_execute)
-
+def add_request_attributes(event):
+    # Add database session
+    event.request.db = event.request.registry.db_maker()
     def callback(request):
         request.db.rollback()
     event.request.add_finished_callback(callback)
 
-    user_id = security.authenticated_userid(event.request)
-    if user_id is not None:
-        event.request.user = event.request.db.query(User).get(user_id)
-    else:
-        event.request.user = None
+    # Add user objects
+    event.request.user = None
+    if event.request.identity is not None:
+        event.request.user = event.request.identity['user']
     event.request.userInfo = utils.UserInfo(event.request.user)
     event.request.permissionInfo = utils.PermissionInfo(event.request)
-    #event.request.objgraph = objgraph
-    #event.request.inspect = inspect
-    #event.request.random = random
-    #event.request.gc = gc
 
-@subscriber(NewRequest)
-def add_javascript_to_request(event):
+    # Add Javascript and CSS
     event.request.javascript = list()
+    event.request.css = list()
 
-@subscriber(NewRequest)
-def add_config_to_request(event):
+    # Add config
     event.request.config = muesli.config
 
-@subscriber(BeforeTraversal)
-def add_navigationTree_to_request(event):
-    event.request.navigationTree = create_navigation_tree(event.request, event.request.user)
+@subscriber(BeforeRender)
+def add_navigation_tree_to_request(event):
+    # Add navigation tree
+    if event['request']:
+        event['navigation_tree'] = create_navigation_tree(event['request'])
 
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):
     event['templates'] = lambda name: get_renderer('templates/{0}'.format(name)).implementation()
     event['Number'] = numbers.Number
 
-def principals_for_user(user_id, request):
-    user = request.db.query(User).get(user_id)
-    principals = ['user:{0}'.format(user_id)]
-    if user.is_admin:
-        principals.append('group:administrators')
-    return principals
 
 
-def main(global_config=None, testmode=False, **settings):
-    if testmode:
-        engine = muesli.testengine()
-    else:
-        engine = muesli.engine()
-    initializeSession(engine)
+# This class was created using the documentation on migrations pyramid 1.x authentication systems to 2.x.
+# https://docs.pylonsproject.org/projects/pyramid/en/latest/whatsnew-2.0.html#upgrading-auth-20
+class MuesliSecurityPolicy:
+    def __init__(self, jwt_key, jwt_expiration_days):
+        self.jwt_key = jwt_key
+        self.jwt_expiration_days = jwt_expiration_days
+        self.authenticated_via_api = False
 
-    # XXX: ugly
-    import sqlalchemy as sa
-    beaker.ext.sqla.sa = sa
-    # Even more ugly, but otherwise the tests won't work
-    # as the metadata is shared between tests
-    if not 'beaker_cache' in Base.metadata.tables:
-        session_table = beaker.ext.sqla.make_cache_table(Base.metadata)
-    else:
-        session_table = Base.metadata.tables['beaker_cache']
-    session_table.create(bind=engine, checkfirst=True)
-    settings.update({
-            'beaker.session.type': 'ext:sqla',
-            'beaker.session.bind': engine,
-            'beaker.session.table': session_table,
-            'beaker.session.data_dir': tempfile.mkdtemp(),
-            'beaker.session.timeout': 7200,
-    })
-    if not muesli.PRODUCTION_INSTANCE:
-        settings.update({
-            'debugtoolbar.hosts': '0.0.0.0/0',
-        })
-    session_factory = pyramid_beaker.session_factory_from_settings(settings)
-    jwt_authentication_policy = JWTAuthenticationPolicy(
-        muesli.config["api"]["JWT_SECRET_TOKEN"],
-        callback=principals_for_user,
-        auth_type="Bearer",
-        expiration=datetime.timedelta(days=muesli.config["api"]["KEY_EXPIRATION"])
-    )
-    session_authentication_policy = SessionAuthenticationPolicy(callback=principals_for_user)
-    authentication_policy = MultiAuthenticationPolicy([session_authentication_policy, jwt_authentication_policy])
+    def jwt_identify(self, request):
+        try:
+            if request.authorization is None:
+                return None
+        except ValueError:  # Invalid Authorization header
+            return None
+        auth_type, token = request.authorization
+        if auth_type != "Bearer" or not token:
+            return None
+        try:
+            identity = jwt.decode(token, self.jwt_key, algorithms=['HS512'], audience=None)
+            if request.db.query(models.BearerToken).get(identity["jti"]).revoked:
+                return None
+            else:
+                self.authenticated_via_api = True
+                # rename the subject id into userid
+                identity['userid'] = identity.pop('sub')
+                return identity
+        except jwt.InvalidTokenError:
+            return None
 
-    authorization_policy = ACLAuthorizationPolicy()
-    config = Configurator(
-            authentication_policy=authentication_policy,
-            authorization_policy=authorization_policy,
-            session_factory=session_factory,
-            settings=settings,
-            )
-    config.include('muesli.web.pyramid_jwt')
-    config.set_jwt_authentication_policy(jwt_authentication_policy)
+    def identity(self, request):
+        identity = None
+        # Check if user authenticated using Session
+        if 'auth.userid' in request.session:
+            identity = {'userid': request.session['auth.userid']}
+        # Maybe the user authenticated using JWT. Now check for JWT token.
+        if identity is None:
+            identity = self.jwt_identify(request)
+        if identity is None:
+            # Avoid a database request on empty user_id requests
+            return None
+        identity['user'] = request.db.query(User).get(identity['userid'])
+        if identity['user'] is None:
+            return None
+
+        # Set default principals
+        identity['principals'] = ['user:{0}'.format(identity['user'].id)]
+        if identity['user'].is_admin:
+            identity['principals'].append('group:administrators')
+
+        return identity
+
+    def authenticated_userid(self, request):
+        # defer to the identity logic to determine if the user id logged in
+        # and return None if they are not
+        identity = request.identity
+        if identity is not None:
+            return identity['userid']
+
+    def permits(self, request, context, permission):
+        # use the identity to build a list of principals, and pass them
+        # to the ACLHelper to determine allowed/denied
+        identity = request.identity
+        principals = {Everyone}
+        if identity is not None:
+            principals.add(Authenticated)
+            principals.add(identity['userid'])
+            principals.update(identity['principals'])
+        return ACLHelper().permits(context, principals, permission)
+
+    def remember(self, request, userid, **kw):
+        if not self.authenticated_via_api:
+            request.session['auth.userid'] = userid
+        return []
+
+    def forget(self, request, **kw):
+        if not self.authenticated_via_api:
+            if 'auth.userid' in request.session:
+                del request.session['auth.userid']
+        return []
+
+def populate_config(config):
+    config.set_security_policy(
+        MuesliSecurityPolicy(muesli.config["api"]["JWT_SECRET_TOKEN"], muesli.config["api"]["KEY_EXPIRATION"]))
+
     config.add_static_view('static', 'muesli.web:static')
 
+    config.add_route('start', '/start', factory = GeneralContext)
     config.add_route('overview', '/overview', factory = GeneralContext)
     config.add_route('contact', '/contact')
     config.add_route('changelog', '/changelog')
@@ -182,6 +178,7 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('user_list', '/user/list', factory = GeneralContext)
     config.add_route('user_edit', '/user/edit/{user_id}', factory = UserContext)
     config.add_route('user_delete', '/user/delete/{user_id}', factory = UserContext)
+    config.add_route('user_delete_gdpr', '/user/delete_gdpr/{user_id}', factory = UserContext)
     config.add_route('user_delete_unconfirmed', '/user/delete_unconfirmed', factory = GeneralContext)
     config.add_route('user_doublets', '/user/doublets', factory = GeneralContext)
     config.add_route('user_resend_confirmation_mail', '/user/resend_confirmation_mail/{user_id}', factory = UserContext)
@@ -226,6 +223,7 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('lecture_export_totals', '/lecture/export_totals/{lecture_id}', factory = LectureContext)
     config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory = GeneralContext)
     config.add_route('lecture_export_yaml_details','/lecture/export_yaml_details',factory = GeneralContext) #Canh added
+    config.add_route('lecture_export_yaml_emails', '/lecture/export_yaml_emails', factory = GeneralContext)
     config.add_route('lecture_export_excel','/lecture/export_excel/downloadDetailTutorials.xlsx',factory = GeneralContext)
 
     config.add_route('lecture_view_points', '/lecture/view_points/{lecture_id}', factory = LectureContext)
@@ -248,9 +246,10 @@ def main(global_config=None, testmode=False, **settings):
     config.add_route('tutorial_remove_student', '/tutorial/remove_student/{tutorial_ids}/{student_id}', factory=TutorialContext)
     config.add_route('tutorial_subscribe', '/tutorial/subscribe/{tutorial_id}', factory=TutorialContext)
     config.add_route('tutorial_unsubscribe', '/tutorial/unsubscribe/{tutorial_id}', factory=TutorialContext)
-    config.add_route('tutorial_occupancy_bar', '/tutorial/occupancy_bar/{count}/{max_count}')
     config.add_route('tutorial_ajax_get_tutorial', '/tutorial/ajax_get_tutorial/{lecture_id}', factory=LectureContext)
 
+    config.add_route('exam_auto_admit', '/exam/auto_admit/{exam_id}', factory = ExamContext)
+    config.add_route('exam_interactive_admission', '/exam/interactive_admission/{exam_id}', factory = ExamContext)
     config.add_route('exam_add_or_edit_exercise', '/exam/add_or_edit_exercise/{exam_id}/{exercise_id:[^/]*}', factory=ExamContext)
     config.add_route('exam_delete_exercise', '/exam/delete_exercise/{exam_id}/{exercise_id}', factory=ExamContext)
     config.add_route('exam_edit', '/exam/edit/{exam_id}', factory=ExamContext)
@@ -289,9 +288,19 @@ def main(global_config=None, testmode=False, **settings):
     config.route_prefix = 'api/v1'
     config.include('cornice')
 
-    if not muesli.PRODUCTION_INSTANCE:
-        config.include('pyramid_debugtoolbar')
+    config.registry.engine = muesli.engine()
+    config.registry.db_maker = sessionmaker(bind=config.registry.engine)
 
     config.scan()
 
+
+def create_config(settings):
+    settings.update(muesli.config['settings_override'])
+    config = Configurator(settings=settings)
+    populate_config(config)
+    return config
+
+
+def main(global_config=None, **settings):
+    config = create_config(settings)
     return config.make_wsgi_app()

@@ -19,26 +19,22 @@
 
 
 <metal:main metal:define-macro="footer">
-  <footer class="footer mt-auto py-3">
-    <div class="container">
-      <div class="row">
-        <div class="text-muted col-sm text-md-left text-center">
-          <small>
-            loading time: ${'{0:.3f}s'.format(request.now() - request.time)}
-            queries: ${request.queries}
-          </small>
-        </div>
-
-        <div class="text-muted col-sm text-center">
+  <footer class="footer">
+      <div class="d-flex">
+        <div class="mr-auto">
           <a role="button"
              class="btn btn-sm btn-info"
-             tal:attributes="href request.route_path('changelog')">What's new?</a>
+             tal:attributes="href request.route_path('changelog')">Was ist neu?</a>
+          <a role="button"
+             class="btn btn-sm btn-info"
+               tal:attributes="href request.route_path('contact')">Kontakt</a>
         </div>
-
-        <div class="text-muted col-sm text-center text-md-right">
-          <a href="https://www.uni-heidelberg.de/impressum.html">Impressum</a> <a href="/datenschutzerklaerung.html">Datenschutzerkl&auml;rung</a>
+        <div>
+          <ul class="list-unstyled text-right">
+            <li><a class="text-muted" href="https://www.uni-heidelberg.de/de/impressum">Impressum</a></li>
+            <li><a class="text-muted" href="/datenschutzerklaerung.html">Datenschutzerklärung</a></li>
+          </ul>
         </div>
-      </div>
     </div>
   </footer>
 </metal:main>

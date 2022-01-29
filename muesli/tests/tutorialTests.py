@@ -19,8 +19,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from hashlib import sha1
-
 import unittest
 import muesli.web
 from muesli.tests import functionalTests
@@ -29,13 +27,6 @@ from muesli import utils, models
 class BaseTests(functionalTests.BaseTests):
     def test_tutorial_view(self):
         res = self.testapp.get('/tutorial/view/%s' % 12456, status=403)
-
-    def test_tutorial_occupancy_bar(self):
-        res = self.testapp.get('/tutorial/occupancy_bar/10/20', status=200)
-        res = self.testapp.get('/tutorial/occupancy_bar/50/30', status=200)
-        res = self.testapp.get('/tutorial/occupancy_bar/0/0', status=200)
-        res = self.testapp.get('/tutorial/occupancy_bar/30/0', status=200)
-        self.assertEqual(res.content_type, 'image/png')
 
     def test_tutorial_add(self):
         res = self.testapp.get('/tutorial/add/%s' % 12456, status=404)

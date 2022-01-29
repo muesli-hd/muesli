@@ -1,0 +1,118 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches:
+      - master
+      - production
+  pull_request:
+    branches:
+      - master
+      - production
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+ GHCR_SLUG: ghcr.io/muesli-hd/muesli
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    outputs:
+      image_version: ${{ steps.meta.outputs.version }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.GHCR_SLUG }}
+          labels: |
+            org.opencontainers.image.title=MÜSLI
+            org.opencontainers.image.description=Mathematisches Übungsgruppen und Scheinlisten Interface
+            org.opencontainers.image.vendor=Fakultät für Mathematik und Informatik, Universität Heidelberg
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@master
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-single-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-single-buildx
+      
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build MÜSLI image
+        id: docker-build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: docker/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+        # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      
+  test:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run tests
+        id: tests
+        run: docker/run-tests.sh --github-actions-image "${{ env.GHCR_SLUG }}:${{ needs.build.outputs.image_version }}"
+
+      - uses: codecov/codecov-action@v2
+        with:
+          files: ./docker/.coverage.xml
+          flags: unittests
+          name: MÜSLI
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build, test]
+    steps:
+      - name: Check if deployment necessary
+        id: needs-deploy
+        run: |
+          if [[ ${{ github.ref }} == refs/heads/production ]]; then
+            echo "::set-output name=deploy::true"
+          else
+            echo "::set-output name=deploy::false"
+          fi
+
+      - name: Deploy to production (if necessary)
+        if: ${{ steps.needs-deploy.outputs.deploy == 'true' }}
+        uses: distributhor/workflow-webhook@v2
+        env:
+          webhook_url: ${{ secrets.WEBHOOK_URL }}
+          webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
+

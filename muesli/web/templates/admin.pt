@@ -1,22 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
-<style type="text/css" media="screen">
-#content {
-  background-image: linear-gradient(45deg, violet, indigo, blue, green, yellow, orange, red);
-}
-.white-text-border {
-  text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
-}
-.flip {
-  -moz-transform:    scaleX(-1); /* Gecko */
-  -o-transform:      scaleX(-1); /* Opera */
-  -webkit-transform: scaleX(-1); /* Webkit */
-  transform:         scaleX(-1); /* Standard */
-
-  filter: FlipH;                 /* IE 6/7/8 */
-}
-</style>
 <h2 class="flip white-text-border">Administration mit viel Regenbogen</h2>
 <div class="row">
   <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('user_list')"><span class="align-self-center mx-auto">Nutzerliste</span></a>
@@ -33,6 +17,10 @@
 <div class="row">
   <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml_details')"><span class="align-self-center mx-auto">Aktuelle Vorlesungen und Tutorien als YAML exportieren</span></a>
   <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml_details', _query={'show_all': 1})"><span class="align-self-center mx-auto">Alle Vorlesungen und Tutorien als YAMLexportieren</span></a>
+</div>
+<div class="row">
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml_emails')"><span class="align-self-center mx-auto">Aktuelle Vorlesungsen Emails der Teilnehmenden als YAML exportieren</span></a>
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml_emails', _query={'show_all': 1})"><span class="align-self-center mx-auto">Alle exportieren</span></a>
 </div>
 <div class="row">
   <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_excel')"><span class="align-self-center mx-auto">Aktuelle Vorlesungen und Tutorien als Excel Exportieren</span></a>

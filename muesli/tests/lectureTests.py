@@ -19,8 +19,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from hashlib import sha1
-
 import unittest
 import muesli.web
 from muesli.tests import functionalTests
@@ -89,6 +87,9 @@ class BaseTests(functionalTests.BaseTests):
 
     def test_lecture_export_yaml(self):
         res = self.testapp.get('/lecture/export_yaml', status=403)
+
+    def test_lecture_export_yaml_emails(self):
+        res = self.testapp.get('/lecture/export_yaml_emails', status=403)
 
     def test_all_lecture_export_excel(self):
         res = self.testapp.get('/lecture/export_excel/downloadDetailTutorials.xlsx', status=403)
@@ -344,6 +345,11 @@ class AdminLoggedInTests(AssistantLoggedInTests):
     def test_lecture_export_yaml(self):
         res = self.testapp.get('/lecture/export_yaml', status=200)
         self.assertEqual(res.content_type, 'application/x-yaml')
+
+    def test_lecture_export_yaml_emails(self):
+        res = self.testapp.get('/lecture/export_yaml_emails', status=200)
+        self.assertEqual(res.content_type, 'application/x-yaml')
+
 
     def test_all_lecture_export_excel(self):
         res = self.testapp.get('/lecture/export_excel/downloadDetailTutorials.xlsx', status=200)

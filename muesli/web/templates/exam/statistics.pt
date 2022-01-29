@@ -5,49 +5,25 @@
 <script>/* <![CDATA[ */
   function hide_points ()
   {
-    var fields = $$(".points");
-    for (i=0; i<fields.length; i++) {
-      Element.hide(fields[i]);
-    }
-    var fields = $$(".nopoints");
-    for (i=0; i<fields.length; i++) {
-      Element.show(fields[i]);
-    }
+    $(".points").hide();
+    $(".nopoints").show();
   }
 
   function show_points ()
   {
-    var fields = $$(".points");
-    for (i=0; i<fields.length; i++) {
-      Element.show(fields[i]);
-    }
-    var fields = $$(".nopoints");
-    for (i=0; i<fields.length; i++) {
-      Element.hide(fields[i]);
-    }
+    $(".points").show();
+    $(".nopoints").hide();
   }
   function hide_quantils ()
   {
-    var fields = $$(".quantile");
-    for (i=0; i<fields.length; i++) {
-      Element.hide(fields[i]);
-    }
-    var fields = $$(".noquantile");
-    for (i=0; i<fields.length; i++) {
-      Element.show(fields[i]);
-    }
+    $(".quantile").hide();
+    $(".noquantile").show();
   }
 
   function show_quantils ()
   {
-    var fields = $$(".quantile");
-    for (i=0; i<fields.length; i++) {
-      Element.show(fields[i]);
-    }
-    var fields = $$(".noquantile");
-    for (i=0; i<fields.length; i++) {
-      Element.hide(fields[i]);
-    }
+    $(".quantile").show();
+    $(".noquantile").hide();
   }
 /* ]]> */
 </script>

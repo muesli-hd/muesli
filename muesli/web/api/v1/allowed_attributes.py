@@ -29,7 +29,7 @@ def user():
         attributes: A list of unlocked attributes for the user.
     Raises:
     """
-    attributes = ['id', 'first_name', 'last_name', 'email']
+    attributes = ['id', 'first_name', 'last_name', 'email', 'title',]
     return attributes
 
 

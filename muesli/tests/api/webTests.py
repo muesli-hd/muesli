@@ -42,6 +42,9 @@ class UserLoggedInTests(functionalTests.PopulatedTests):
     def test_api_keys(self):
         self.testapp.get('/user/api_keys', status=200)
 
+    def test_openapi_json(self):
+        self.testapp.get('/openapi.json', status=200)
+
     def test_api_explorer(self):
         self.testapp.get('/api-explorer', status=200)
 

@@ -28,10 +28,10 @@ from muesli.models import ExerciseStudent
 
 class BaseTests(functionalTests.BaseTests):
     def test_collection_exercise_get(self):
-        self.testapp.get(URL+'/exercises/6723', headers=STATIC_HEADERS, status=400)
+        self.testapp.get(f'{URL}/exercises/6723', headers=STATIC_HEADERS, status=404)
 
     def test_exercise_get(self):
-        self.testapp.get(URL+'/exercises/6723/67209', headers=STATIC_HEADERS, status=400)
+        self.testapp.get(f'{URL}/exercises/6723/67209', headers=STATIC_HEADERS, status=404)
 
 class StudentLoggedInTests(functionalTests.PopulatedTests):
     def setUp(self):
@@ -47,17 +47,14 @@ class StudentLoggedInTests(functionalTests.PopulatedTests):
 
     def test_collection_exercise_get(self):
         self.testapp.get(
-            URL+'/exercises/'+str(self.exercise.id),
+            f'{URL}/exercises/{self.exercise.id}',
             headers=self.api_token,
             status=200
         )
 
     def test_exercise_get(self):
         self.testapp.get(
-            URL+'/exercises/{}/{}/'.format(
-                self.exerciseStudent.exercise.id,
-                self.exerciseStudent.student.id
-            ),
+            f'{URL}/exercises/{self.exerciseStudent.exercise.id}/{self.exerciseStudent.student.id}/',
             headers=self.api_token,
             status=200
         )

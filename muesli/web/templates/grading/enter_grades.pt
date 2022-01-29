@@ -131,8 +131,10 @@ Liefert r<sub>0</sub> falls val &lt; b<sub>1</sub> und r<sub>i</sub> falls val &
     <option value="">Alle</option>
     <option tal:repeat="exam grading.exams" tal:attributes="selected str(exam.id)==exam_id; value exam.id">${exam.name}</option>
   </select>
-  <input class="btn btn-primary"type="submit" value="Anzeigen"/>
+  <input class="btn btn-primary" type="submit" value="Anzeigen"/>
 </form>
+
+    <p>Durch Klicken auf die Punktzahl eines Testates, kann diese bearbeitet werden.</p>
 
 <form class="pt-3" id="gradingsform" method="post" tal:attributes="action request.route_path('grading_enter_grades', grading_id=grading.id)">
   <input type="hidden" name="submit" value="1" />

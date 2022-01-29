@@ -33,9 +33,11 @@ from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTPForbidden
 from pyramid.url import route_url
 from sqlalchemy.orm import exc
-from sqlalchemy import func, or_, not_
+from sqlalchemy import func, or_, not_, select
 from hashlib import sha1
 from muesli.mail import Message, sendMail
+
+import nacl.pwhash
 
 import re
 import os
@@ -43,37 +45,73 @@ import datetime
 import collections
 
 
+def authenticate_user_with_password(sa_session, user, guessed_password):
+    if not user.password.startswith('$'):
+        # legacy sha1 password
+        if user.password == sha1(guessed_password.encode('utf-8')).hexdigest():
+            user.password = nacl.pwhash.str(guessed_password.encode('utf-8')).decode('utf-8')
+            sa_session.commit()
+            return user
+    else:
+        if nacl.pwhash.verify(user.password.encode('utf-8'), guessed_password.encode('utf-8')):
+            return user
+    return None
+
+
+def lookup_user(request, email, guessed_password):
+    assert request.method == 'POST'
+    # Check for registered users with the given email
+    user_candidates = request.db.scalars(
+        select(models.User).where(func.lower(models.User.email) == email.strip().lower())).all()
+
+    # Due to historically case-sensitive email addresses, do a case-insensitive first and switch to case sensitivity
+    # on email addresses, if the user is ambiguous.
+    candidate_to_verify = None
+    if len(user_candidates) == 1:
+        # case-insensitive
+        candidate_to_verify = user_candidates[0]
+    else:
+        # case-sensitive search
+        for user_candidate in user_candidates:
+            if user_candidate.email == email.strip():
+                # In case two users with the exact same email casing and password exist, take the first one
+                candidate_to_verify = user_candidate
+                break
+
+    # If a candidate was found, verify it
+    if candidate_to_verify:
+        # The authentication function is responsible for returning a verified user object
+        return authenticate_user_with_password(request.db, candidate_to_verify, guessed_password)
+
+    return None
+
+
 @view_config(route_name='user_login', renderer='muesli.web:templates/user/login.pt')
 def login(request):
     form = forms.UserLoginForm(request)
     if request.method == 'POST' and form.processPostData(request.POST):
-        user = request.db.query(models.User).filter_by(email=form['email'].strip(), password=sha1(form['password'].encode('utf-8')).hexdigest()).first()
+        user = lookup_user(request, form['email'], form['password'])
         if user is not None:
-            security.remember(request, user.id)
-            request.user = user
-            url = request.route_url('overview')
-            return HTTPFound(location=url)
+            headers = security.remember(request, user.id)
+            return HTTPFound(location=request.route_url('overview'), headers=headers)
         request.session.flash('Benutzername oder Passwort sind falsch.', queue='errors')
-    return {'form': form, 'user': security.authenticated_userid(request)}
+    return {'form': form, 'user': request.authenticated_userid}
 
 
 @view_config(route_name='api_login', renderer='json', request_method='POST')
 def api_login(request):
-    user = request.db.query(models.User).filter_by(
-        email=request.POST['email'].strip(),
-        password=sha1(request.POST['password'].encode('utf-8')).hexdigest()
-    ).first()
-    exp = datetime.timedelta(days=muesli.config["api"]["KEY_EXPIRATION"])
-    token = models.BearerToken(client="Personal Token",
-                               user=user,
-                               description="Requested from API",
-                               expires=datetime.datetime.utcnow()+exp
-                               )
-    request.db.add(token)
-    request.db.flush()
-    jwt_token = request.create_jwt_token(user.id, admin=(user.is_admin), jti=token.id, expiration=exp)
-    request.db.commit()
+    user = lookup_user(request, request.POST['email'], request.POST['password'])
     if user:
+        exp = datetime.timedelta(days=muesli.config["api"]["KEY_EXPIRATION"])
+        token = models.BearerToken(client="Personal Token",
+                                   user=user,
+                                   description="Requested from API",
+                                   expires=datetime.datetime.utcnow()+exp
+                                   )
+        request.db.add(token)
+        request.db.flush()
+        jwt_token = muesli.utils.create_jwt_token(user.id, admin=(user.is_admin), jti=token.id, expiration=exp)
+        request.db.commit()
         return {
             'result': 'ok',
             'token': jwt_token
@@ -95,9 +133,9 @@ def api_login(request):
 
 @view_config(route_name='user_logout')
 def logout(request):
-    security.forget(request)
+    headers = security.forget(request)
     request.session.invalidate()
-    return HTTPFound(location=request.route_url('index'))
+    return HTTPFound(location=request.route_url('index'), headers=headers)
 
 
 @view_config(route_name='user_list', renderer='muesli.web:templates/user/list.pt', context=context.GeneralContext, permission='admin')
@@ -210,6 +248,34 @@ def delete(request):
         request.db.commit()
         request.session.flash('{} wurde gelöscht!'.format(user.name), queue='messages')
         return HTTPFound(location=request.route_url('admin'))
+
+    return HTTPFound(location=request.route_url("user_edit", user_id=user.id))
+
+
+@view_config(route_name='user_delete_gdpr', context=context.UserContext, permission='delete')
+def delete_gdpr(request):
+    user = request.context.user
+    request.db.query(models.TimePreference).filter(models.TimePreference.student_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.LectureStudent).filter(models.LectureStudent.student_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.LectureRemovedStudent).filter(models.LectureRemovedStudent.student_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.ExerciseStudent).filter(models.ExerciseStudent.student_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.ExamAdmission).filter(models.ExamAdmission.student_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.StudentGrade).filter(models.StudentGrade.student_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.EmailPreferences).filter(models.EmailPreferences.user_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.UserHasUpdated).filter(models.UserHasUpdated.user_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.BearerToken).filter(models.BearerToken.user_id == user.id).delete(synchronize_session=False)
+    request.db.query(models.Confirmation).filter(models.Confirmation.user_id == user.id).delete(synchronize_session=False)
+
+    for l in user.lectures_as_tutor:
+        l.tutors.remove(user)
+    for l in user.lectures_as_assistant:
+        l.assistants.remove(user)
+    for t in user.tutorials_as_tutor:
+        t.tutor = None
+    request.db.delete(user)
+    request.db.commit()
+    request.session.flash('Benutzer %s und alle zugehörigen Daten wurden gelöscht!' % user, queue='messages')
+    return HTTPFound(location=request.route_url('admin'))
 
     return HTTPFound(location=request.route_url('user_edit', user_id=user.id))
 
@@ -351,10 +417,7 @@ def resendConfirmationMail(request):
     body = """
 Hallo!
 
-Sie haben sich am %s bei MÜSLI mit den folgenden Daten angemeldet:
-
-Name:   %s
-E-Mail: %s
+Sie haben sich am %s bei MÜSLI angemeldet:
 
 Um die Anmeldung abzuschließen, gehen Sie bitte auf die Seite
 
@@ -365,7 +428,7 @@ einfach.
 
 Mit freudlichen Grüßen,
 Das MÜSLI-Team
-    """ % (confirmation.created_on, user.name, user.email, request.route_url('user_confirm', confirmation=confirmation.hash))
+    """ % (confirmation.created_on, request.route_url('user_confirm', confirmation=confirmation.hash))
     message = Message(subject='MÜSLI: Ihre Registrierung bei MÜSLI',
                       sender=('%s <%s>' % (request.config['contact']['name'],
                                            request.config['contact']['email'])),
@@ -380,7 +443,7 @@ def confirm(request):
     form = forms.UserConfirm(request, request.context.confirmation)
     if request.method == 'POST' and form.processPostData(request.POST):
         user = request.context.confirmation.user
-        user.password = sha1(form['password'].encode('utf-8')).hexdigest()
+        user.password = nacl.pwhash.str(form['password'].encode('utf-8')).decode('utf-8')
         request.db.delete(request.context.confirmation)
         data_updated = models.UserHasUpdated(user.id, muesli.utils.getSemesterLimit())
         request.db.add(data_updated)
@@ -468,9 +531,13 @@ def confirmEmail(request):
 def changePassword(request):
     form = forms.UserChangePassword(request)
     if request.method == 'POST' and form.processPostData(request.POST):
-        request.user.password = sha1(form['new_password'].encode('utf-8')).hexdigest()
-        request.session.flash('Neues Passwort gesetzt', queue='messages')
-        request.db.commit()
+        # check if old_password is correct
+        if authenticate_user_with_password(request.db, request.user, form['old_password']):
+            request.user.password = nacl.pwhash.str(form['new_password'].encode('utf-8')).decode('utf-8')
+            request.session.flash('Neues Passwort gesetzt', queue='messages')
+            request.db.commit()
+        else:
+            request.session.flash('Altes Passwort ist falsch!', queue='errors')
     return {'form': form}
 
 
@@ -523,7 +590,7 @@ def resetPassword3(request):
     form = forms.UserResetPassword3(request, request.context.confirmation)
     if request.method == 'POST' and form.processPostData(request.POST):
         user = request.context.confirmation.user
-        user.password = sha1(form['password'].encode('utf-8')).hexdigest()
+        user.password = nacl.pwhash.str(form['password'].encode('utf-8')).decode('utf-8')
         request.db.delete(request.context.confirmation)
         request.db.commit()
         return HTTPFound(location=request.route_url('user_login'))
@@ -560,7 +627,7 @@ def list_auth_keys(request):
                                    )
         request.db.add(token)
         request.db.flush()
-        jwt_token = request.create_jwt_token(request.user.id,
+        jwt_token = muesli.utils.create_jwt_token(request.user.id,
                                              admin=(request.user.is_admin),
                                              jti=token.id,
                                              expiration=exp)

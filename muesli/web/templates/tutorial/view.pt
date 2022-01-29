@@ -2,10 +2,6 @@
 <metal:main metal:use-macro="templates('Fragments/main.pt').macros['main']">
   <metal:main metal:fill-slot="content">
 
-<script>
-set_navigation([['Vorlesung ${tutorial.lecture.name}','${request.route_path("lecture_view", lecture_id=tutorial.lecture.id)}']])
-</script>
-
 <h2>
   ${names['tutorial']} zur
   <a tal:attributes="href request.route_path('lecture_view', lecture_id=tutorial.lecture.id)">

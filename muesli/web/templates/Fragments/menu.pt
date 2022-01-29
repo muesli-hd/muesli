@@ -18,32 +18,60 @@
 <!--! along with this program.  If not, see <http://www.gnu.org/licenses/>. -->
 
 <metal:main metal:define-macro="menu">
-  <nav class="navbar navbar-dark navbar-expand-md bg-dark justify-content-md-center justify-content-start">
-      <div class="dropdown">
-        <a href="#" class="display-1 navbar-brand" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <img class="mr-1" style="height: 1.5em;" tal:attributes="src '/favicon.ico'">
-          MÜSLI
-        </a>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-          <a class="dropdown-item" tal:attributes="href request.route_path('overview')">
-            <img class="mr-1" style="height: 1em;" tal:attributes="src '/favicon.ico'">
-            MÜSLI
-          </a>
-          <div tal:repeat="site request.config['urls']" tal:omit-tag="">
-            <a class="dropdown-item" tal:attributes="href site['link']"><img class="mr-1" style="height: 1em;" tal:attributes="src site['favicon']">${site['displayname']}</a>
-          </div>
-        </div>
-      </div>
+  <nav class="navbar navbar-dark navbar-expand-md bg-dark justify-content-md-center">
+      <a class="navbar-brand display-1" tal:attributes="href request.route_path('overview')">
+        <img class="mr-1" style="height: 1em;" tal:attributes="src '/favicon.ico'">
+        MÜSLI
+      </a>
       <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#collapsingNavbar2">
           <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="navbar-collapse collapse justify-content-between align-items-center w-100" id="collapsingNavbar2">
+      <div class="navbar-collapse collapse w-100" id="collapsingNavbar2">
 
-          <ul class="navbar-nav mx-auto text-center">
-            <li class="nav-item active" tal:condition="request.userInfo.is_loggedin()">
-              <a class="nav-link" tal:attributes="href request.route_path('overview')">Übersicht</a>
+          <ul class="navbar-nav mx-auto text-center w-1000 justify-content-start">
+            <li class="nav-item active">
+              <a tal:condition="request.userInfo.is_loggedin()"
+                 class="nav-link" tal:attributes="href request.route_path('overview')">Übersicht</a>
             </li>
 
+            <!-- Navigation tree -->
+            <div tal:define="nodes navigation_tree.children" tal:omit-tag="">
+              <div metal:define-macro="nav_tree_view" tal:omit-tag="">
+                <div tal:repeat="node nodes" tal:omit-tag="">
+                  <div tal:condition="node.is_first_level()" tal:omit-tag="">
+                    <li class="nav-item active" tal:condition="not node.children">
+                      <a class="nav-link" tal:attributes="href node.url">${node.label}</a>
+                    </li>
+                    <li class="nav-item active dropdown" tal:condition="node.children" tal:attributes="href node.url">
+                      <a class="nav-link dropdown-toggle" role="button"
+                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          ${node.label}
+                      </a>
+                      <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <div tal:define="nodes node.children" metal:use-macro="template.macros['nav_tree_view']" />
+                      </ul>
+                    </li>
+                  </div>
+                  <div tal:condition="not node.is_first_level()" tal:omit-tag="">
+                    <li tal:condition="not node.children">
+                      <a class="dropdown-item" tal:attributes="href node.url">${node.label}</a>
+                    </li>
+                    <li tal:condition="node.children" class="dropdown-submenu" aria-labelledby="navbarDropdownMenuLink">
+                      <a tal:attributes="href node.url" role="button" data-toggle="dropdown" class="dropdown-item dropdown-toggle"
+                         aria-haspopup="true" aria-expanded="false">
+                        ${node.label}
+                      </a>
+                      <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <div tal:define="nodes node.children" metal:use-macro="template.macros['nav_tree_view']" />
+                      </ul>
+                    </li>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ul>
+
+          <ul class="nav navbar-nav flex-row justify-content-end ml-auto w-100">
             <li class="nav-item active" tal:condition="request.userInfo.is_admin()">
               <a class="nav-link" tal:attributes="href request.route_path('admin')">Administration</a>
             </li>
@@ -52,12 +80,6 @@
               <a class="nav-link" tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a>
             </li>
 
-            <li class="nav-item active" tal:condition="request.userInfo.is_loggedin()">
-              <a class="nav-link" tal:attributes="href request.route_path('user_api_keys')">API</a>
-            </li>
-          </ul>
-
-          <ul class="nav navbar-nav flex-row justify-content-center">
             <li class="nav-item dropdown text-center"
                 tal:condition="request.userInfo.is_loggedin()">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

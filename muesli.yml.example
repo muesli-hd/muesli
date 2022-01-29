@@ -1,12 +1,8 @@
 ---
 
-urls:
-    - displayname: MaMpf
-      link: "https:mampf.media"
-      favicon: "https://mampf.mathi.uni-heidelberg.de/favicon.ico"
-
-database:
-    connection: postgresql:///muesli
+# Setting a database connection here overrides the environment variable
+#database:
+#    connection: postgresql:///muesli
 
 listen:
     host: 0.0.0.0
@@ -15,9 +11,15 @@ listen:
 contact:
     email: muesli@mathi.uni-heidelberg.de
     name: MÜSLI-Team
-    server: 0.0.0.0
+# Specifies the mail server address:
+    # mailserver_host: 127.0.0.1
+    # mailserver_port: 25
 
-production: True
+settings_override:
+    redis.sessions.secret: your_cookie_signing_secret
+
+# Setting the development mode variable here overrides the environment variable
+# development: False
 
 subjects:
     - Mathematik (BSc 100%)
@@ -120,3 +122,9 @@ api:
   KEY_EXPIRATION: 30
   JWT_SECRET_TOKEN: "secret"
   MAX_KEYS: 10
+
+captcha:
+  enable: false
+  puzzle_url: "https://your_puzzle_server/v1/puzzle"
+  verification_url: "https://your_verification_server/v1/verify"
+  application_token: "supersecret"

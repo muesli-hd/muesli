@@ -1,6 +1,39 @@
-### Ausstehend
+### 2022-01-13
 
-Vollständiges Redesign von MÜSLI mittels Bootstrap: MÜSLI funktioniert jetzt unter anderem auch gut auf Mobilgeräten.
+Einige interne Altlasten des Quelltextes wurden angegangen und an neue Versionen der Abhängigkeiten angepasst. Die
+Codebase befindet sich in einem einigermaßen guten Zustand.
+
+### 2021-12-31
+
+Ein großes Dankeschön an Christian Heusel für die Implementierung des Bootstrap Designs im MÜSLI.
+
+Einige andere kleinere Bugfixes sind inzwischen eingegangen, wie beispielsweise auf der Bearbeitungsseite für Noten oder
+der interaktiven Vergabe von Punkten auf Übungsblättern. Außerdem wurde auch das Ziel aufgegeben, MÜSLI möglichst auch
+ohne aktiviertes Javascript vollumfänglich nutzen zu können.
+
+Es wird eine neue MaintainerIn (m,w,d) fürs MÜSLI gesucht. Bei Interesse schreiben Sie bitte eine E-Mail an Herrn
+Vogel vom Mathematischen Institut.
+
+### 2020-04-14
+
+Aktionen werden auf dem UI jetzt als Buttons dargestellt, Links zur Navigation als Links.
+
+### 2019-12-31
+
+* Mails können jetzt auch nur an die anderen Tutoren (nicht nur an Tutoren und Assistenten geschickt) werden.
+* Das Feld für Matrikelnummern akzeptiert (clientseitig) nur noch Zahlen, um z.B. zu verhindern, dass dort versehentlich die Uni-ID eingetragen wird.
+
+### 2019-11-25
+
+Hinter einer belegten Übungsgruppe wird jetzt korrekterweise "austreten" (statt fälschlicherweise "wechseln") als Aktion angeboten.
+
+### 2019-09-30
+
+Erklärung zur E-Mail-Adresse auf der "Registrieren"-Seite verbessert.
+
+### 2019-05-24
+
+Es wird angezeigt, an welche Übungsgruppen eine Mail geschickt wird.
 
 ### 2019-03-12
 

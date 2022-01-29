@@ -41,7 +41,7 @@ from collections import Counter
 
 from openpyxl import Workbook
 from openpyxl.styles import Font
-from openpyxl.writer.excel import save_virtual_workbook
+from tempfile import NamedTemporaryFile
 from muesli.web.tooltips import grading_edit_tooltips
 
 import re
@@ -166,6 +166,9 @@ class EnterGradesBasic:
                         value = value.replace(',','.')
                         try:
                             value = float(value)
+                            if not 0 <= value <= 6:
+                                # Only accept valid grades from 0 to 6. (usually 5, but let's be lenient here)
+                                raise ValueError
                             grades[ls.student_id]['grade'].grade = value
                             grades[ls.student_id]['gradestr'] = value
                         except:
@@ -226,9 +229,10 @@ class EnterGradesBasic:
         grades = self.populate_with_exam_results(grades, lecture_students, grading)
         grades, error_msgs = self.apply_formula(grades, formula, lecture_students, grading, varsForExam, error_msgs)
 
-        #self.request.javascript.append('prototype.js')
-        self.request.javascript.append('jquery/jquery.min.js')
-        self.request.javascript.append('jquery/jquery.fancybox.min.js')
+        self.request.javascript.append('fancybox.umd.js')
+        self.request.css.append('fancybox.css')
+        self.request.javascript.append('toast.min.js')
+        self.request.css.append('toast.min.css')
         #grades = {key: value for key,value in grades.items()}
 
         return {'grading': grading,
@@ -342,7 +346,10 @@ class ExcelView:
         self.w = Workbook()
     def createResponse(self):
         response = Response(content_type='application/vnd.ms-excel')
-        response.body = save_virtual_workbook(self.w)
+        with NamedTemporaryFile() as tmp:
+            self.w.save(tmp.name)
+            tmp.seek(0)
+            response.body = tmp.read()
         return response
 
 @view_config(route_name='grading_export', context=GradingContext, permission='edit')
@@ -368,7 +375,7 @@ class Export(ExcelView):
                 grading.examiner_id,
                 lecture.lecturer]
         worksheet_exams.append(data)
-        date_p = re.compile('(\d{1,2}).(\d{1,2}).(\d{4})$')
+        date_p = re.compile(r"(\d{1,2}).(\d{1,2}).(\d{4})$")
         m = date_p.match(grading.hispos_date or '')
         if m:
             date = datetime.datetime(year=int(m.group(3)), month=int(m.group(2)), day=int(m.group(1)))
@@ -378,7 +385,7 @@ class Export(ExcelView):
         # set column width
         for column_cells in worksheet_exams.columns:
             max_length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet_exams.column_dimensions[column_cells[0].column].width = max_length*1.2
+            worksheet_exams.column_dimensions[column_cells[0].column_letter].width = max_length*1.2
 
         # sheet Pruefungsteilnehmer
         worksheet_grades = self.w.create_sheet('Pruefungsteilnehmer')
@@ -399,5 +406,5 @@ class Export(ExcelView):
         # set column width
         for column_cells in worksheet_grades.columns:
             max_length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet_grades.column_dimensions[column_cells[0].column].width = max_length*1.2
+            worksheet_grades.column_dimensions[column_cells[0].column_letter].width = max_length*1.2
         return self.createResponse()

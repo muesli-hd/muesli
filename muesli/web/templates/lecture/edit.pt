@@ -8,38 +8,37 @@
   <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
 
+<script>
+$(document).ready(function() {
+  // The following is some boilerplate to enable select2 and let backspace remove a bullet instead of converting it to text
+  // See https://github.com/select2/select2/issues/3354
+  $.fn.select2.amd.require(['select2/selection/search'], function (Search) {
+    var oldRemoveChoice = Search.prototype.searchRemoveChoice;
+
+    Search.prototype.searchRemoveChoice = function () {
+      oldRemoveChoice.apply(this, arguments);
+      this.$search.val('');
+    };
+
+    $('#assistant-select').select2();
+  });
+});
+</script>
+
 <div tal:condition="request.permissionInfo.has_permission('change_assistant')">
   <form tal:attributes="action request.route_path('lecture_change_assistants', lecture_id=lecture.id)" method="POST">
-  <div class="form-group">
-    <div class="input-group mb-2" tal:repeat="assistant lecture.assistants">
-       <select class="custom-select" style="width: auto !important" tal:attributes="name 'assistant-%i' % assistant.id">
-         <span tal:repeat="assistant2 assistants" tal:omit-tag="">
-         <option tal:attributes="value assistant2.id; selected 'selected' if assistant.id == assistant2.id else None">
-           ${assistant2}
-         </option>
-         </span>
-       </select>
-       <div class="input-group-append">
-         <input class="btn btn-primary" role="button" type="submit" value="Ändern" tal:attributes="name 'change-%i' % assistant.id" />
-       </div>
-       <div class="input-group-append">
-         <input class="btn btn-danger" role="button" type="submit" value="Löschen" tal:attributes="name 'remove-%i' % assistant.id" />
-       </div>
+    <div class="form-group">
+      <div class="input-group mb-2">
+        <select id="assistant-select" class="custom-select" name="assistants" multiple="multiple">
+          <option tal:repeat="assistant assistants" tal:attributes="value assistant.id; selected 'selected' if assistant in lecture.assistants else None">
+            ${assistant}
+          </option>
+        </select>
+        <div class="input-group-append">
+          <input class="btn btn-success" role="button" type="submit" value="Speichern" name="save-assistants"/>
+        </div>
+      </div>
     </div>
-    <div class="input-group">
-       <select class="custom-select" name="new-assistant">
-         <option value="None" selected="selected">---</option>
-         <span tal:repeat="assistant2 assistants" tal:omit-tag="">
-           <option tal:attributes="value assistant2.id">
-             ${assistant2}
-           </option>
-         </span>
-       </select>
-       <div class="input-group-append">
-         <input class="btn btn-success" role="button" type="submit" value="Hinzufügen" name="add-assistant" />
-       </div>
-    </div>
-  </div>
   </form>
 </div>
 <div tal:condition="not request.permissionInfo.has_permission('change_assistant')">
@@ -82,11 +81,9 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
     <th scope="col">Zeit</th>
     <th scope="col">Raum</th>
     <th scope="col">Auslastung</th>
+    <th scope="col"></th>
     <th scope="col">${names['tutor']}</th>
     <th scope="col">Kommentar</th>
-    <th scope="col"></th>
-    <th scope="col"></th>
-    <th scope="col"></th>
     <th scope="col"></th>
   </thead>
   <tbody>
@@ -95,11 +92,16 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
       <td>${tutorial.place}</td>
       <td><metal:main metal:use-macro="templates('Fragments/HTML/tutorial_occupancy.pt').macros['tutorial_occupancy']" /></td>
       <td>
+        <div class="col-sm-auto" style="padding: 0; margin: 0">
+          ${tutorial.student_count}/${tutorial.max_students}
+        </div>
+      </td>
+      <td>
         <span tal:omit-tag='' tal:condition='tutorial.tutor'>
           ${tutorial.tutor.first_name} ${tutorial.tutor.last_name}
         </span>
-        <span tal:omit-tag='' tal:condition="not tutorial.tutor and request.permissionInfo.has_permission('take_tutorial')"> <!-- TODO: and (is assistant or is_tutor) -->
-          <a role="button" class="btn btn-sm btn-success" tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
+        <span tal:omit-tag='' tal:condition="not tutorial.tutor and request.permissionInfo.has_permission('take_tutorial')">
+          <a role="button" class="btn-sm btn-success" tal:attributes="href request.route_path('tutorial_take', tutorial_id=tutorial.id)">Übernehmen</a>
         </span>
         <!-- ${tutorial.tutor.name if tutorial.tutor else ''} -->
       </td>
@@ -109,28 +111,22 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
       </td>
       <td>
         <a role="button"
-           class="btn btn-sm btn-info"
+           class="btn-sm btn-info mr-2"
            tal:attributes="href request.route_path('tutorial_view', tutorial_ids=tutorial.id)">
           Details
         </a>
-      </td>
-      <td>
         <a role="button"
-           class="btn btn-sm btn-primary"
+           class="btn-sm btn-primary mr-2"
            tal:attributes="href request.route_path('tutorial_edit', tutorial_id=tutorial.id)">
           Bearbeiten
         </a>
-      </td>
-      <td>
         <a role="button"
-           class="btn btn-sm btn-primary"
+           class="btn-sm btn-primary mr-2"
            tal:attributes="href request.route_path('tutorial_duplicate', lecture_id=lecture.id, tutorial_id=tutorial.id)">
           Duplizieren
         </a>
-      </td>
-      <td>
         <a role="button"
-           class="btn btn-sm btn-danger"
+           class="btn-sm btn-danger mr-2"
            tal:condition="not tutorial.student_count"
            tal:attributes="href request.route_path('tutorial_delete', tutorial_ids=tutorial.id)">
           Löschen
@@ -160,18 +156,26 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   </div>
 </h3>
 
-<table>
-  <tr tal:repeat="tutor lecture.tutors">
-    <td>
-      <a tal:attributes="href 'mailto:'+tutor.email">${tutor.name}</a>
-      <a class="btn btn-sm btn-danger" tal:attributes="href request.route_path('lecture_remove_tutor', lecture_id=lecture.id, tutor_id=tutor.id)">entfernen</a>
-    </td>
-  </tr>
+<table class="table table-striped w-auto">
+  <thead class="thead-dark">
+    <tr>
+      <th>Übungsleiter</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr tal:repeat="tutor lecture.tutors">
+      <td>
+        <a tal:attributes="href 'mailto:'+tutor.email">${tutor.name}</a>
+      </td>
+      <td>
+        <a class="btn-sm btn-danger" tal:attributes="href request.route_path('lecture_remove_tutor', lecture_id=lecture.id, tutor_id=tutor.id)">entfernen</a>
+      </td>
+    </tr>
+  </tbody>
 </table>
 
 <h3>Testate</h3>
-
-<p><a tal:attributes="href request.route_path('lecture_add_exam', lecture_id=lecture.id)">Testat hinzufügen</a></p>
 
 <div tal:repeat="category categories" tal:omit-tag="">
   <h4 tal:condition="exams[category['id']]">${category['name']}</h4>
@@ -184,7 +188,6 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
         <a tal:attributes="href request.route_path('exam_delete', exam_id=exam.id)">Löschen</a>)</li>
   </ul>
 </div>
-
 
 <form class="form-inline" method="get" tal:attributes="action request.route_path('exam_correlation')">
   <div class="form-group pr-1">
@@ -210,31 +213,33 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
   <input role="button" class="btn btn-primary" type="submit" value="Korrelation"/>
 </form>
 
-<h3>
+<p><a class="btn btn-primary mt-3" tal:attributes="href request.route_path('lecture_add_exam', lecture_id=lecture.id)">Testat hinzufügen</a></p>
+
+<h3 class="mt-3">
   Benotungen
   <div class="tooltip_questionmark"><p>
     ${tooltips['grading']}
   </p></div>
 </h3>
 
-<p>
-  <a tal:attributes="href request.route_path('lecture_add_grading', lecture_id=lecture.id)">
-    Benotung hinzufügen
-  </a>
-</p>
 
-<ul>
+<ol>
   <li tal:repeat="grading lecture.gradings">
     <a tal:attributes="href request.route_path('grading_edit', grading_id=grading.id)">
       ${grading.name}
     </a>
   </li>
-</ul>
+</ol>
 
+<p>
+  <a class="btn btn-primary" tal:attributes="href request.route_path('lecture_add_grading', lecture_id=lecture.id)">
+    Benotung hinzufügen
+  </a>
+</p>
 
 <h3>Teilnehmer nach Studiengängen</h3>
 
-<table class="table" style="width: auto !important">
+<table class="table w-auto">
   <thead class="thead-dark">
     <tr>
       <th>Studiengang</th>

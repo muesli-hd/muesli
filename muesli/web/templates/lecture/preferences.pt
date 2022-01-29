@@ -7,7 +7,7 @@
 <div tal:condition="lecture.mode=='prefs'" tal:omit-tag="">
   <h3>Einteilung vornehmen</h3>
   <p>Verteilung der angemeldeten Studenten:</p>
-  <table class="table" style="width: auto !important">
+  <table class="table w-auto">
     <thead class="thead-dark">
       <tr>
         <th scope="col">Studiengang</th>
@@ -70,6 +70,7 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
     <th>Zeit</th>
     <th>Raum</th>
     <th>Auslastung</th>
+    <th></th>
     <th>${names['tutor']}</th>
     <th>Kommentar</th>
     <th></th>
@@ -80,6 +81,11 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
       <td>${tutorial.time}</td>
       <td>${tutorial.place}</td>
       <td><metal:main metal:use-macro="templates('Fragments/HTML/tutorial_occupancy.pt').macros['tutorial_occupancy']" /></td>
+      <td>
+        <div class="col-sm-auto" style="padding: 0; margin: 0">
+          ${tutorial.student_count}/${tutorial.max_students}
+        </div>
+      </td>
       <td>
         <span tal:omit-tag='' tal:condition='tutorial.tutor'>
           ${tutorial.tutor.first_name} ${tutorial.tutor.last_name}

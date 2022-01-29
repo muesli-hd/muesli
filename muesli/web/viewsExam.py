@@ -64,7 +64,7 @@ class Edit:
             form.message = "Änderungen gespeichert."
         if exam.admission!=None or exam.registration!=None:
             students = exam.lecture.lecture_students.options(sqlalchemy.orm.joinedload(LectureStudent.student))\
-                    .options(sqlalchemy.orm.joinedload_all('tutorial.tutor'))
+                    .options(sqlalchemy.orm.joinedload('tutorial.tutor'))
             if exam.admission != None:
                 students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.admission==True))))
             if exam.registration != None:
@@ -150,7 +150,7 @@ class EnterPointsBasic:
         exam = self.request.context.exam
         tutorials = self.request.context.tutorials
         students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))\
-                                .options(sqlalchemy.orm.joinedload_all('tutorial.tutor'))
+                                .options(sqlalchemy.orm.joinedload('tutorial.tutor'))
         students = students.all()
         if 'students' in self.request.GET:
             student_ids = self.request.GET['students'].split(',')
@@ -221,8 +221,9 @@ class EnterPointsBasic:
             statistics.update(exam.getStatistics(students=students, prefix='tut'))
         else:
             statistics = exam.getStatistics(students=students)
-        if not self.raw:
-            self.request.javascript.append('prototype.js')
+        self.request.javascript.append('toast.min.js')
+        self.request.javascript.append('jquery.tablesorter.min.js')
+        self.request.css.append('toast.min.css')
         return {'exam': exam,
                 'tutorial_ids': self.request.matchdict['tutorial_ids'],
                 'students': students,
@@ -268,7 +269,7 @@ class Admission:
         exam = self.request.context.exam
         tutorials = self.request.context.tutorials
         students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))\
-                                .options(sqlalchemy.orm.joinedload_all('tutorial.tutor'))
+                                .options(sqlalchemy.orm.joinedload('tutorial.tutor'))
         students = students.all()
         db_admissions = exam.exam_admissions.filter(ExamAdmission.student_id.in_([s.student.id for s  in students])).all()
         admissions={}
@@ -397,7 +398,6 @@ def statistics(request):
         for i,q in enumerate(exam.getQuantils(students=tutorialstudents)):
             quantils[i]['tutorial'] = q
         #quantils['tutorials'] = exam.getQuantils(students=tutorialstudents)
-    request.javascript.append('prototype.js')
     #pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
     #points = DictOfObjects(lambda: {})
     #for point in pointsQuery:
@@ -603,9 +603,10 @@ class Correlation(MatplotlibView):
 def enterPointsSingle(request):
     exam = request.context.exam
     exercises = exam.exercises
-    request.javascript.append('prototype.js')
-    request.javascript.append('jquery/jquery.min.js')
-    request.javascript.append('jquery/select2.min.js')
+    request.javascript.append('select2.min.js')
+    request.css.append('select2.min.css')
+    request.javascript.append('toast.min.js')
+    request.css.append('toast.min.css')
     show_tutor = not request.context.tutorials
     show_time = (not request.context.tutorials) or len(request.context.tutorials) > 1
 
@@ -639,13 +640,20 @@ def enterPointsSingle(request):
     }
 
 
+# Parse post data and retrieve a dict with parsed float point values
 def parse_points(post_data, exercises):
     e_points = {}
     json_data = {'msg': '', 'format_error_cells': []}
     for exercise in exercises:
-        get_param = 'points-%s' % exercise.id
-        if get_param in post_data:
-            p = post_data[get_param].replace(',','.')
+        exercise_dict_key = None
+        # I know some people use scripts to submit points right now. If you stumble upon this, you can remove the lookup
+        # migrate away from the points- lookup. People should not assume internal APIs to be constant.
+        if str(exercise.id) in post_data:
+            exercise_dict_key = str(exercise.id)
+        elif 'points-{}'.format(exercise.id) in post_data:
+            exercise_dict_key = 'points-{}'.format(exercise.id)
+        if exercise_dict_key:
+            p = post_data[exercise_dict_key].replace(',','.')
             if p:
                 try:
                     p = float(p)
@@ -656,7 +664,7 @@ def parse_points(post_data, exercises):
                     json_data['format_error_cells'].append(exercise.id)
             else:
                 e_points[exercise.id] = None
-    json_data['msg'] = json_data['msg'] or 'sucessfull'
+    json_data['msg'] = json_data['msg'] or 'successful'
     json_data['submitted_points'] = e_points
     return e_points, json_data
 
@@ -678,10 +686,8 @@ def ajaxSavePoints(request):
                 request.db.query(ExerciseStudent).filter(models.ExerciseStudent.student_id == student_id)\
                     .filter(models.ExerciseStudent.exercise_id == exercise_id).delete()
             else:
-                ep = models.ExerciseStudent()
-                ep.student_id = student_id
-                ep.exercise_id = exercise_id
-                ep.points = submitted_points[exercise_id]
+                ep = models.ExerciseStudent(exercise_id=exercise_id, student_id=student_id,
+                                            points=submitted_points[exercise_id])
                 request.db.merge(ep)
 
     request.db.commit()
@@ -700,3 +706,38 @@ def ajaxGetPoints(request):
     for ep in exercise_points:
         points[ep.exercise_id] = float(ep.points) if ep.points else None
     return {'points': points}
+
+
+@view_config(route_name='exam_interactive_admission', renderer='muesli.web:templates/exam/admission_interactive.pt',
+             context=ExamContext, permission='edit')
+def interactive_admission(request):
+    exam = request.context.exam
+    assignments = exam.lecture.exams.filter(models.Exam.category == "assignment").all()
+    admission_limit = int(request.params['admission_limit'])
+    student_pointsum = request.db.query(models.User, func.sum(models.ExerciseStudent.points)).filter(models.User.lecture_students.any(models.LectureStudent.lecture_id == exam.lecture_id)).join(models.User.exercise_points).join(models.ExerciseStudent.exercise).filter(models.Exercise.exam_id.in_([a.id for a in assignments])).group_by(models.User.id).all()
+    sum_of_points_dict = {sp[0].id: str(sp[1]) for sp in student_pointsum if sp[1] and sp[1] >= admission_limit}
+
+    return {
+        "exam": exam,
+        "assignments": [a.id for a in assignments],
+        "n-students-admitted": len(sum_of_points_dict),
+        "sum_of_points": sum_of_points_dict
+    }
+
+
+@view_config(route_name='exam_auto_admit', renderer='json', context=ExamContext, permission='edit')
+def autoadmit(request):
+    """Unfortunately this is still not fully implemented. I have a script on my laptop calling this regularly for lectures that ask for this functionality"""
+    exam = request.context.exam
+    assignments = exam.lecture.exams.filter(models.Exam.category == "assignment").all()
+    admission_limit = int(request.params['admission_limit'])
+    admitted_students = exam.lecture.students.join(models.User.exercise_points).join(models.ExerciseStudent.exercise).filter(models.Exercise.exam_id.in_([a.id for a in assignments])).group_by(models.User.id).having(func.sum(models.ExerciseStudent.points) >= admission_limit).all()
+    for student in admitted_students:
+        student_admission = models.ExamAdmission(exam_id=exam.id, student_id=student.id, admission=True)
+        request.db.merge(student_admission)
+    request.db.commit()
+
+    return {
+        "n-students-admitted": len(admitted_students),
+    }
+

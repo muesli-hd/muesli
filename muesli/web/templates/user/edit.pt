@@ -66,7 +66,9 @@
     <metal:main metal:use-macro="templates('Fragments/api_keys_table.pt').macros['api_key_table']" />
 
 <br>
-<a role="button" class="btn btn-danger" tal:attributes="href request.route_path('user_delete', user_id=user.id)">Benutzer löschen</a>
+<a role="button" class="btn btn-danger" tal:attributes="href request.route_path('user_delete', user_id=user.id)">Benutzer löschen</a><br>
+<a role="button" class="btn btn-danger" tal:attributes="href request.route_path('user_delete_gdpr', user_id=user.id)"  onclick="return confirm('Wirklich unwiederruflich löschen? Es wird kein Sanity Check durchgeführt. D.h. wenn Noten noch nicht ins HisPos übertragen wurden, unbedingt Abbrechen!!!')">Benutzer wirklich nach DSGVO ohne Rückfrage löschen</a>
+
 
   </metal:main>
 </metal:main>

@@ -19,8 +19,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from hashlib import sha1
-
 import unittest
 import muesli.web
 from muesli.tests import functionalTests
@@ -57,6 +55,11 @@ class UserLoggedInTests(UnloggedTests):
         # Now we are logged in, thus we should
         # get 200 instead of 302
         res = self.testapp.get('/overview', status=200)
+
+    def test_overview_full(self):
+        # Now we are logged in, thus we should
+        # get 200 instead of 302
+        res = self.testapp.get('/overview?show_all=1', status=200)
 
 class TutorLoggedInTests(UserLoggedInTests):
     def setUp(self):

@@ -29,16 +29,17 @@ from email.mime.text import MIMEText
 from email.mime.message import MIMEMessage
 from email.utils import parseaddr, formataddr
 
+import muesli
+
 
 import mimetypes
 import smtplib
 import chardet
 
 
-testing = False
-
 # To be overwritten by value from config file
 server = 'localhost'
+port = 25
 
 """Code adapted from http://docs.python.org/library/email-examples.html"""
 def createAttachment(filename, data):
@@ -96,8 +97,8 @@ class Message:
         self.outer.attach(createAttachment(filename, data))
 
 def sendMail(message, request=None):
-    s = smtplib.SMTP(server)
-    if not testing:
+    s = smtplib.SMTP(server, port)
+    if not muesli.testmode:
         try:
             s.sendmail(message.sender, message.send_to, message.as_string())
         except smtplib.SMTPSenderRefused as e:

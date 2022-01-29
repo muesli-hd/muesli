@@ -11,41 +11,30 @@
   Released under the terms of the GNU GPL 3 or later
   -->
   <title>MÜSLI</title>
-  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/muesli.css')"></link>
-  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/fancybox/jquery.fancybox.css')"></link>
-  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/select2.css')"></link>
-  <script tal:repeat="filename request.javascript" type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
-  <script tal:attributes="src request.static_url('muesli.web:static/js/april_fool.js')"></script>
+  <link rel="stylesheet" type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/muesli.css')"/>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/jquery.min.js')"></script>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/april_fool.js')"></script>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/accidental-action-prevention.js')"></script>
   <!-- Bootstrap -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet"
+        type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/bootstrap.min.css')"/>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/popper.min.js')"></script>
+  <script type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/bootstrap.min.js')"></script>
+  <link rel="stylesheet"
+        type="text/css" tal:attributes="href request.static_url('muesli.web:static/css/bt4-dropdown-submenu.css')"/>
+  <script
+      type="text/javascript" tal:attributes="src request.static_url('muesli.web:static/js/bt4-dropdown-submenu.js')"></script>
 
-  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <!-- Manually added scripts and stylesheets -->
+  <link rel="stylesheet" type="text/css" tal:repeat="filename request.css"
+       tal:attributes="href request.static_url('muesli.web:static/css/%s' % (filename))"/>
+  <script type="text/javascript" tal:repeat="filename request.javascript"
+          tal:attributes="src request.static_url('muesli.web:static/js/%s' % (filename))"></script>
 
 </head>
 <body onload="aprilFool()">
 
 <metal:main metal:use-macro="templates('Fragments/menu.pt').macros['menu']" />
-
-<script>
-/* <![CDATA[ */
-function set_navigation(nav) {
-  var str = "<ul>\n";
-  for (var i = 0; i<nav.length; i++) {
-    str += '<li><a href="';
-    str += nav[i][1];
-    str += '">';
-    str += nav[i][0];
-    str += '</a></li>\n';
-  }
-  str += '</ul>';
-  document.getElementById('history').innerHTML = str;
-}
-/* ]]> */
-</script>
-
-<div id="history"></div>
 
 <metal:main metal:use-macro="templates('Fragments/message_queue.pt').macros['message_queue']">
 
@@ -53,14 +42,12 @@ function set_navigation(nav) {
   <main class="pt-3" role="main">
     <div class="jumbotron bg-mdb-color-lighten-6" id="content">
 
-      <!-- <metal:main metal:use-macro="templates('Fragments/navigation.pt').macros['navigation']" /> -->
       <metal:content define-slot="content" />
 
     </div>
   </main>
+  <metal:main metal:use-macro="templates('Fragments/footer.pt').macros['footer']">
 </div>
-
-<metal:main metal:use-macro="templates('Fragments/footer.pt').macros['footer']">
 
 </body>
 </html>

@@ -19,7 +19,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+import muesli
 from muesli import models, utils, DATAPROTECTION_HTML, CHANGELOG_HTML
 from muesli.web.forms import *
 from muesli.web.context import *
@@ -34,7 +34,6 @@ from pyramid.renderers import render_to_response as render
 import pyramid.exceptions
 from pyramid.url import route_url
 from sqlalchemy.orm import exc, joinedload
-from hashlib import sha1
 from markdown import markdown
 
 import re
@@ -67,6 +66,7 @@ def overview(request):
         tutorials_as_tutor = tutorials_as_tutor.filter(Lecture.term >= semesterlimit)
         tutorials = tutorials.filter(Lecture.term >= semesterlimit)
         lectures_as_assistant = lectures_as_assistant.filter(Lecture.term >= semesterlimit)
+    request.javascript.append('unsubscribe_modal_helpers.js')
     return {'uboo': uboo,
             'time_preferences': request.user.prepareTimePreferences(),
             'penalty_names': utils.penalty_names,
@@ -74,6 +74,12 @@ def overview(request):
             'tutorials': tutorials.all(),
             'lectures_as_assistant': lectures_as_assistant.all(),
             'tooltips': overview_tooltips}
+
+
+@view_config(route_name='start')
+def start(request):
+    return HTTPFound(location=request.route_url('overview'))
+
 
 @view_config(route_name='admin', renderer='muesli.web:templates/admin.pt', context=GeneralContext, permission='admin')
 def admin(request):
@@ -95,9 +101,11 @@ def test_exceptions(request):
             raise HTTPForbidden("Du kommsch hier ned rein!")
     return {}
 
+
 @view_config(route_name='contact', renderer='muesli.web:templates/contact.pt')
 def contact(request):
     return {}
+
 
 @view_config(route_name='index')
 def index(request):
@@ -213,11 +221,11 @@ def forbidden(exc, request):
 
 @view_config(context=pyramid.exceptions.HTTPBadRequest)
 def badRequest(e, request):
-    if not muesli.PRODUCTION_INSTANCE:
+    if muesli.DEVELOPMENT_MODE:
         print("TRYING TO RECONSTRUCT EXCEPTION")
         traceback.print_exc()
         print("RAISING ANYHOW")
-        raise exc
+        raise e
     now = datetime.datetime.now().strftime("%d. %B %Y, %H:%M Uhr")
     traceback.print_exc()
     email = request.user.email if request.user else '<nobody>'
@@ -245,7 +253,7 @@ def badRequest(e, request):
 
 @view_config(context=Exception)
 def internalServerError(e, request):
-    if not muesli.PRODUCTION_INSTANCE:
+    if muesli.DEVELOPMENT_MODE:
         print("TRYING TO RECONSTRUCT EXCEPTION")
         traceback.print_exc()
         print("RAISING ANYHOW")

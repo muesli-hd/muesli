@@ -3,28 +3,33 @@ version: '3.2'
 
 services:
   postgres:
-    image: 'postgres:latest'
+    image: 'postgres:10'
     environment:
-      - POSTGRES_DB=muesli
-      - POSTGRES_HOST_AUTH_METHOD=trust
-    ports:
-      - '127.0.0.1:5433:5432'
+      POSTGRES_PASSWORD: mueslipw
     volumes:
-      - './travis-muesli-origDb.sql:/docker-entrypoint-initdb.d/travis-muesli-origDb.sql'
+      - './docker/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh'
+      - './muesli.sql:/muesli.sql'
       - type: volume
         source: db-data
         target: /var/lib/postgresql/data
+
+  mailcatcher:
+    image: 'schickling/mailcatcher'
+
+  redis:
+    image: 'redis:6-alpine'
+
   muesli:
-    build: .
-    volumes:
-      - './:/opt/muesli4'
-    ports:
-      - '8080:8080'
-      - '127.0.0.1:8081:8081'
+    image: muesli:latest
     depends_on:
       - postgres
+      - redis
+      - mailcatcher
     environment:
-      MUESLI_TESTMODE: 1
+      MUESLI_DEVMODE: 1
+      MUESLI_DB_CONNECTION_STRING: postgresql://muesli:mueslipw@postgres/muesli
+      MUESLI_MAILSERVER_HOST: mailcatcher
+      MUESLI_MAILSERVER_PORT: 1025
 
 volumes:
   db-data:

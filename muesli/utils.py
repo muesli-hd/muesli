@@ -23,6 +23,7 @@ import datetime
 import pyramid.security
 from collections import defaultdict
 import yaml
+import jwt
 
 from muesli.types import Term
 
@@ -55,7 +56,7 @@ categories = [{'id': 'assignment', 'name': 'Übungszettel'},
 
 class Configuration:
     def __init__(self, filename):
-        with open(filename, 'r') as config_file:
+        with open(filename, 'r', encoding='utf-8') as config_file:
             self.data = yaml.safe_load(config_file.read())
 
     def __getitem__(self, key):
@@ -111,7 +112,7 @@ class PermissionInfo:
     def __init__(self, request):
         self.request = request
     def has_permission(self, permission):
-        return pyramid.security.has_permission(permission, self.request.context, self.request)
+        return self.request.has_permission(permission, self.request.context)
 
 class UserInfo:
     def __init__(self, user):
@@ -189,3 +190,13 @@ class AutoVivification(dict):
 def autovivify(levels=1, final=dict):
     return (defaultdict(final) if levels < 2 else
             defaultdict(lambda: autovivify(levels - 1, final)))
+
+def create_jwt_token(userid, expiration=None, **claims):
+    payload = claims
+    payload['sub'] = userid
+    payload['iat'] = iat = datetime.datetime.utcnow()
+    if expiration is None:
+        expiration = datetime.timedelta(days=90)
+    payload['exp'] = iat + expiration
+    token = jwt.encode(payload, muesli.config["api"]["JWT_SECRET_TOKEN"], algorithm='HS512')
+    return token

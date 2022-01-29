@@ -40,7 +40,7 @@ import sqlalchemy
 #
 from openpyxl import Workbook
 from openpyxl.styles import Font
-from openpyxl.writer.excel import save_virtual_workbook
+from tempfile import NamedTemporaryFile
 import io
 #
 from muesli import types
@@ -84,8 +84,9 @@ class View:
     def __call__(self):
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
         times = lecture.prepareTimePreferences(user=self.request.user)
-        subscribed_tutorial = self.request.user.tutorials.filter(LectureStudent.lecture_id == self.lecture_id).first()
-        form = TutorLectureSignIn(self.request)
+        subscribed_tutorial = self.request.user.tutorials.filter(Tutorial.lecture_id == self.lecture_id).first()
+        form = TutorLectureAuthSignIn(self.request)
+        self.request.javascript.append('unsubscribe_modal_helpers.js')
         return {'lecture': lecture,
                 'subscribed_tutorial': subscribed_tutorial,
                 'times': times,
@@ -211,8 +212,8 @@ class SwitchStudents(object):
         self.request = request
         self.db = self.request.db
         self.lecture_id = request.matchdict['lecture_id']
-        request.javascript.append('jquery/jquery.min.js')
-        request.javascript.append('jquery/select2.min.js')
+        request.javascript.append('select2.min.js')
+        request.css.append('select2.min.css')
 
     def __call__(self):
         lecture = self.db.query(models.Lecture).get(self.lecture_id)
@@ -274,6 +275,8 @@ class Edit:
         exams = dict([[cat['id'], sorted(list(lecture.exams.filter(models.Exam.category==cat['id'])),
                               key=lambda x:len(x.name))]
                       for cat in utils.categories])
+        self.request.javascript.append('select2.min.js')
+        self.request.css.append('select2.min.css')
         return {'lecture': lecture,
                 'names': names,
                 'pref_count': pref_count,
@@ -323,25 +326,39 @@ def delete(request):
 def change_assistants(request):
     lecture = request.context.lecture
     if request.method == 'POST':
-        for index, assistant in enumerate(lecture.assistants):
-            if 'change-{}'.format(assistant.id) in request.POST:
-                new_assistant = request.db.query(models.User).get(request.POST['assistant-{}'.format(assistant.id)])
-                if new_assistant in lecture.assistants:
-                    request.session.flash('{} ist bereits als Assistent für die Vorlesung eingetragen'.format(new_assistant.name), queue='errors')
-                else:
-                    lecture.assistants[index] = new_assistant
-                    request.session.flash('{} ist jetzt als neuer Assistent für die Vorlesung eingetragen!'.format(new_assistant.name), queue='messages')
-            if 'remove-{}'.format(assistant.id) in request.POST:
-                request.session.flash('{} wurde als Vorlesungsassistent entfernt!'.format(lecture.assistants[index].name), queue='messages')
-                del lecture.assistants[index]
-        if 'add-assistant' in request.POST:
-            if request.POST['new-assistant'] == "None":
-                request.session.flash('Bitte einen Assistenten auswählen!', queue='errors')
+        assistants_to_remove = set(lecture.assistants)
+        amount_assistants = len(assistants_to_remove)
+        for requested_assistant_str in request.POST.getall('assistants'):
+            # Frist try to add a normal assistant
+            try:
+                requested_assistant_int = int(requested_assistant_str)
+                requested_assistant = request.db.query(models.User).get(requested_assistant_int)
+            except ValueError:
+                # Now try to find a user with a corresponding email address
+                try:
+                    requested_assistant = request.db.query(models.User).filter(models.User.email == requested_assistant_str).one()
+                except exc.NoResultFound:
+                    request.session.flash('{} konnte nicht zu Assistenten hinzugefügt werden!'.format(requested_assistant_str),
+                                          queue='messages')
+                    continue
+            if requested_assistant in assistants_to_remove:
+                assistants_to_remove.remove(requested_assistant)
             else:
-                new_assistant = request.db.query(models.User).get(request.POST['new-assistant'])
-                if new_assistant and new_assistant not in lecture.assistants:
-                    lecture.assistants.append(new_assistant)
-                    request.session.flash('{} ist jetzt als zusätzlicher Assistent für die Vorlesung eingetragen!'.format(new_assistant.name), queue='messages')
+                lecture.assistants.append(requested_assistant)
+                request.session.flash(
+                    '{} ist jetzt als zusätzlicher Assistent für die Vorlesung eingetragen!'.format(requested_assistant.name),
+                    queue='messages')
+                amount_assistants += 1
+
+        # check that there still is an assistant left if we remove the
+        # requested ones
+        if amount_assistants - len(assistants_to_remove) > 0 :
+            for assistant_to_remove in assistants_to_remove:
+                lecture.assistants.remove(assistant_to_remove)
+                request.session.flash('{} wurde als Vorlesungsassistent entfernt!'.format(assistant_to_remove.name),
+                                          queue='messages')
+        else:
+            request.session.flash('Es konnten keine Vorlesungsassistenten entfernt werden, da sonst für diese Vorlesung kein Assistent mehr eingetragen wäre! Bitte lassen Sie einen Assistenten übrig', queue='errors')
     if request.db.new or request.db.dirty or request.db.deleted:
         if len(lecture.assistants) > 0:
             lecture.old_assistant = lecture.assistants[0]
@@ -463,7 +480,7 @@ def emailTutors(request):
 
     if request.method == 'POST' and form.processPostData(request.POST):
         tutors = lecture.tutors
-        message = Message(subject=form['subject'],
+        message = Message(subject='[{}][Tutoren] {}'.format(lecture.name, form['subject']),
                 sender=request.user.email,
                 to=[t.email for t in tutors],
                 cc=[assistant.email for assistant in lecture.assistants if form['copytoassistants'] == 0],
@@ -494,7 +511,7 @@ def emailStudents(request):
         bcc = [s.email for s in students]
         if form['copytotutors']==0:
             bcc.extend([t.email for t in lecture.tutors])
-        message = Message(subject=form['subject'],
+        message = Message(subject='[{}] {}'.format(lecture.name, form['subject']),
                 sender=request.user.email,
                 to= [assistant.email for assistant in lecture.assistants],
                 bcc=bcc,
@@ -586,9 +603,9 @@ def setPreferences(request):
     tps = []
     while 'time-%i' % row in request.POST:
         time = types.TutorialTime(request.POST['time-%i' % row])
-        tp = models.getOrCreate(models.TimePreference, request.db, (lecture.id, request.user.id, time))
-        tp.penalty = int(request.POST['pref-%i' % row])
-        tps.append(tp)
+        penalty = int(request.POST['pref-%i' % row])
+        tp = models.TimePreference(lecture_id=lecture.id, student_id=request.user.id, time=time, penalty=penalty)
+        tps.append(request.db.merge(tp))
         row +=  1
     if lecture.minimum_preferences:
         valid = len([tp for tp in tps if tp.penalty < 100]) >= lecture.minimum_preferences
@@ -635,8 +652,10 @@ def viewPoints(request):
     for exams in exams_by_category:
         sum_all = sum([x for x in [results[e.id]['sum'] for e in exams['exams']] if x])
         max_all = sum([x for x in [e.getMaxpoints() for e in exams['exams']] if x])
+        max_rel = sum([x for x in [e.getMaxpoints() for e in exams['exams'] if results[e.id]['sum']] if x])
         exams['sum'] = sum_all
         exams['max'] = max_all
+        exams['max_rel'] = max_rel
     exams_with_registration = [e for e in lecture.exams.all() if e.registration != None]
     registrations = {}
     for reg in request.db.query(models.ExamAdmission).filter(models.ExamAdmission.exam_id.in_([e.id for e in exams_with_registration])).filter(models.ExamAdmission.student_id == ls.student_id).all():
@@ -720,6 +739,34 @@ def exportYaml_details(request):
     response.text = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
     return response
 
+@view_config(route_name='lecture_export_yaml_emails',context = GeneralContext, permission = 'export_yaml')
+def exportYaml_emails(request):
+    lectures = request.db.query(models.Lecture)
+    if not "show_all" in request.GET:
+        lectures = lectures.filter(models.Lecture.is_visible == True)
+    out = [{
+            'name': lecture.name,
+            'lecturer': lecture.lecturer,
+            'student_count': lecture.lecture_students.count(),
+            'term': lecture.term.__html__(),
+            'tutorials': [{
+                    'tutor': tutorial.tutor.name if tutorial.tutor else '',
+                    'email': tutorial.tutor.email if tutorial.tutor else '',
+                    'place': tutorial.place,
+                    'time': tutorial.time.__html__(),
+                    'comment': tutorial.comment if tutorial.comment else '',
+                    'students': [{
+                        'name': student.name,
+                        'email': student.email
+                    } for student in tutorial.students]
+                } for tutorial in lecture.tutorials
+            ]
+        } for lecture in lectures.all()
+    ]
+    response = Response(content_type='application/x-yaml')
+    response.text = yaml.safe_dump(out, allow_unicode=True, default_flow_style=False)
+    return response
+
 
 class ExcelExport:
     def __init__(self, request):
@@ -728,7 +775,10 @@ class ExcelExport:
 
     def createResponse(self):
         response = Response(content_type='application/vnd.ms-excel')
-        response.body = save_virtual_workbook(self.w)
+        with NamedTemporaryFile() as tmp:
+            self.w.save(tmp.name)
+            tmp.seek(0)
+            response.body = tmp.read()
         return response
 
 
@@ -789,5 +839,5 @@ class DoExport(ExcelExport):
         # set column width
         for column_cells in worksheet_tutorials.columns:
             max_length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet_tutorials.column_dimensions[column_cells[0].column].width = max_length*1.2
+            worksheet_tutorials.column_dimensions[column_cells[0].column_letter].width = max_length*1.2
         return self.createResponse()
