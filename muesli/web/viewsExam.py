@@ -180,7 +180,7 @@ class EnterPointsBasic:
             admissions[admission.student_id] = admission
         for student in students:
             if not student.student_id in admissions:
-                admission = ExamAdmission(exam, student.student)
+                admission = ExamAdmission(exam=exam, student=student.student)
                 self.db.add(admission)
                 admissions[student.student_id] = admission
 
@@ -277,7 +277,7 @@ class Admission:
             admissions[admission.student_id] = admission
         for student in students:
             if not student.student_id in admissions:
-                admission = ExamAdmission(exam, student.student)
+                admission = ExamAdmission(exam=exam, student=student.student)
                 self.db.add(admission)
                 admissions[student.student_id] = admission
         counter = {'admission': Counter([x.admission for x in list(admissions.values())]),
