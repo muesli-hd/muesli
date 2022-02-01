@@ -38,6 +38,7 @@ from hashlib import sha1
 from muesli.mail import Message, sendMail
 
 import nacl.pwhash
+import nacl.exceptions
 
 import re
 import os
@@ -53,8 +54,11 @@ def authenticate_user_with_password(sa_session, user, guessed_password):
             sa_session.commit()
             return user
     else:
-        if nacl.pwhash.verify(user.password.encode('utf-8'), guessed_password.encode('utf-8')):
-            return user
+        try:
+            if nacl.pwhash.verify(user.password.encode('utf-8'), guessed_password.encode('utf-8')):
+                return user
+        except nacl.exceptions.InvalidkeyError as ex:
+            return None
     return None
 
 

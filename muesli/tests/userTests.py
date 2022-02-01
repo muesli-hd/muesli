@@ -202,6 +202,13 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
         self.session.commit()
         self.setUser(user2)
 
+    def test_user_login_wrong_password(self):
+        res = self.testapp.get('/user/login', status=200)
+        res.form['email'] = self.user.email
+        res.form['password'] = "wrong password"
+        res = res.form.submit()
+        self.assertEqual(res.status_int, 200)
+
     def test_user_delete(self):
         res = self.testapp.get('/user/delete/%s' % (self.user2.id), status=403)
 
