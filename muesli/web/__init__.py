@@ -142,12 +142,12 @@ class MuesliSecurityPolicy:
         return ACLHelper().permits(context, principals, permission)
 
     def remember(self, request, userid, **kw):
-        if not request.identity['authenticated_via_api']:
+        if not (request.identity and request.identity['authenticated_via_api']):
             request.session['auth.userid'] = userid
         return []
 
     def forget(self, request, **kw):
-        if not request.identity['authenticated_via_api']:
+        if not (request.identity and request.identity['authenticated_via_api']):
             if 'auth.userid' in request.session:
                 del request.session['auth.userid']
         return []
