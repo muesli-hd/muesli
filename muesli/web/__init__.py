@@ -79,7 +79,6 @@ class MuesliSecurityPolicy:
     def __init__(self, jwt_key, jwt_expiration_days):
         self.jwt_key = jwt_key
         self.jwt_expiration_days = jwt_expiration_days
-        self.authenticated_via_api = False
 
     def jwt_identify(self, request):
         try:
@@ -95,7 +94,7 @@ class MuesliSecurityPolicy:
             if request.db.query(models.BearerToken).get(identity["jti"]).revoked:
                 return None
             else:
-                self.authenticated_via_api = True
+                identity['authenticated_via_api'] = True
                 # rename the subject id into userid
                 identity['userid'] = identity.pop('sub')
                 return identity
@@ -106,7 +105,7 @@ class MuesliSecurityPolicy:
         identity = None
         # Check if user authenticated using Session
         if 'auth.userid' in request.session:
-            identity = {'userid': request.session['auth.userid']}
+            identity = {'userid': request.session['auth.userid'], 'authenticated_via_api': False}
         # Maybe the user authenticated using JWT. Now check for JWT token.
         if identity is None:
             identity = self.jwt_identify(request)
@@ -143,12 +142,12 @@ class MuesliSecurityPolicy:
         return ACLHelper().permits(context, principals, permission)
 
     def remember(self, request, userid, **kw):
-        if not self.authenticated_via_api:
+        if not request.identity['authenticated_via_api']:
             request.session['auth.userid'] = userid
         return []
 
     def forget(self, request, **kw):
-        if not self.authenticated_via_api:
+        if not request.identity['authenticated_via_api']:
             if 'auth.userid' in request.session:
                 del request.session['auth.userid']
         return []
