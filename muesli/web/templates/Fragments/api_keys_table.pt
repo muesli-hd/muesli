@@ -31,8 +31,8 @@
           <input role="button" class="btn btn-danger btn-sm" type="submit" value="Entfernen"/>
         </form>
       </td>
-      <td tal:condition="freshtoken">
-        <button role="button" class="btn btn-secondary btn-sm" tal:condition="key.id == max([e.id for e in keys])" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
+      <td>
+        <button role="button" class="btn btn-secondary btn-sm" tal:condition="freshtoken and (key.id == max([e.id for e in keys]))" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
       </td>
     </tr>
   </tbody>
