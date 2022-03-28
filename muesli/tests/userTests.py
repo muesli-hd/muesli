@@ -46,7 +46,6 @@ class BaseTests(functionalTests.BaseTests):
         res = self.testapp.get('/user/check', status=403)
 
     def test_user_register(self):
-        return # Registration is disabled due to spam activity
         res = self.testapp.get('/user/register', status=200)
         form = res.form
         form['email'] = 'matthias@matthias-k.org'
@@ -75,7 +74,6 @@ class BaseTests(functionalTests.BaseTests):
         self.assertTrue(res.status.startswith('302'))
 
     def test_user_register_other(self):
-        return # Registration is disabled due to spam activity
         res = self.testapp.get('/user/register_other', status=200)
         form = res.form
         form['email'] = 'matthias@matthias-k.org'
@@ -91,7 +89,6 @@ class BaseTests(functionalTests.BaseTests):
         self.assertTrue(res.status.startswith('302'))
 
     def test_user_confirm(self):
-        return # Registration is disabled due to spam activity
         self.test_user_register()
         self.session.expire_all()
         user = self.session.query(User).filter(User.email=='matthias@matthias-k.org').one()
@@ -168,7 +165,6 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
         res = self.testapp.get('/user/ajax_complete/%s/%s' % (self.lecture.id,self.tutorial.id), status=403)
 
     def test_user_register_same_email(self):
-        return # Registration is disabled due to spam activity
         res = self.testapp.get('/user/register', status=200)
         form = res.form
         # Same email
@@ -201,6 +197,13 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
         self.session.add(user2)
         self.session.commit()
         self.setUser(user2)
+
+    def test_user_login_wrong_password(self):
+        res = self.testapp.get('/user/login', status=200)
+        res.form['email'] = self.user.email
+        res.form['password'] = "wrong password"
+        res = res.form.submit()
+        self.assertEqual(res.status_int, 200)
 
     def test_user_delete(self):
         res = self.testapp.get('/user/delete/%s' % (self.user2.id), status=403)
