@@ -11,10 +11,10 @@
       pyramid.security glaubt, sie seien ${user}.
     </p>
 
-<p>
-MÜSLI verwaltet viele Übungsgruppen und Vorlesungen an der Fakultät für
-Mathematik und Informatik der Universität Heidelberg.
-</p>
+    <p>
+      MÜSLI verwaltet viele Übungsgruppen und Vorlesungen an der Fakultät für
+      Mathematik und Informatik der Universität Heidelberg.
+    </p>
 
     <form action="/user/login" tal:attributes="action request.route_path('user_login')" method="POST">
       <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
