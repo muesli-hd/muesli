@@ -7,7 +7,7 @@
       <th scope="col"> ID </th>
       <th scope="col"> Ablaufdatum </th>
       <th scope="col"> Beschreibung </th>
-      <th scope="col"> Entfernen </th>
+      <th scope="col"></th>
       <th scope="col"></th>
     </tr>
   <tbody>
