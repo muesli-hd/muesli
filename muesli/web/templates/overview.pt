@@ -12,7 +12,7 @@
   Bitte nehmen Sie sich die Zeit zu überprüfen, ob noch alle Ihre Angaben korrekt sind. <br>
   Dies ist insbesondere wichtig,
   wenn Sie den Studiengang gewechselt haben.<br>
-  Bestätigen/Korrigieren Sie <a tal:attributes="href request.route_path('user_check')">hier</a> Ihre Informationen,
+  Bestätigen oder korrigieren Sie Ihre Informationen unter <a tal:attributes="href request.route_path('user_check')">Nutzereinstellungen &raquo; Angaben ergänzen</a>,
   um diese Erinnerung für den Rest des Semesters nicht mehr zu sehen.
 </div>
 
