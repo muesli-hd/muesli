@@ -3,8 +3,8 @@
   <metal:main metal:fill-slot="content">
     <metal:main metal:use-macro="templates('Fragments/unsubscribe_modal.pt').macros['unsubscribe_modal']" />
 
-    <h2>
-        ${lecture.name}
+  <h2>
+    ${lecture.name}
   </h2>
 
   <p tal:condition="lecture.url">
