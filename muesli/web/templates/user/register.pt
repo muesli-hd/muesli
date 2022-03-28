@@ -15,7 +15,7 @@
       Werden Rechte zum Eintragen von Vorlesungen benötigt, so <a tal:attributes="href request.route_path('contact')">melden
       Sie sich bitte bei uns</a> nach der Anmeldung.
       <br/><br/>
-      Verwenden Sie eine Mailadresse unter <strong>uni-heidelberg.de</strong>, beispielsweise &lt;uniid&gt;@stud.uni-heidelberg.de
+      Verwenden Sie eine Mailadresse unter <code>uni-heidelberg.de</code>, beispielsweise <strong><code>&lt;uniid&gt;@stud.uni-heidelberg.de</code></strong>
       . Falls Sie noch keine besitzen, benutzen Sie bitte eine andere und ändern Sie diese sobald eine uni-heidelberg.de
       Adresse vorliegt.
     </p>
