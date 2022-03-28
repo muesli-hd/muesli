@@ -21,12 +21,7 @@
       <div class="card-body">
         <h2 class="card-title">Dokumentation</h2>
         <p>
-        Die verschiedenen API-Zugriffe sind über eine Swagger-UI dokumentiert.
-        <br>
-        Diese finden Sie
-        <a href="../api-explorer" target="_blank" rel="noopener noreferrer"
-           title="Link zur Swagger UI">hier</a>.
-        <br>
+        Die verschiedenen API-Zugriffe sind über eine <a href="../api-explorer" target="_blank" rel="noopener noreferrer" title="Link zur Swagger UI">Swagger-UI</a> dokumentiert.
         <strong>Achtung:</strong> Die dort angezeigten <em>"Try it out"</em>-Knöpfe führen die Anfragen auch tatsächlich aus.
         </p>
       </div>
@@ -34,12 +29,11 @@
     <div class="card mt-2">
       <div class="card-body">
         <h2>API-Keys verwalten</h2>
-
-        <metal:main metal:use-macro="templates('Fragments/api_keys_table.pt').macros['api_key_table']" />
-
         <p>
         Hier können Sie ihre aktuellen API-Keys verwalten.
         </p>
+
+        <metal:main metal:use-macro="templates('Fragments/api_keys_table.pt').macros['api_key_table']" />
 
         <br>
         <form action="/user/api_keys" tal:attributes="action request.route_path('user_api_keys')" method="POST">
