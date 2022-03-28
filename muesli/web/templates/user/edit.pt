@@ -61,7 +61,7 @@
 </ul>
 </div>
 
-    <h2>API Keys</h2>
+    <h2>API-Keys</h2>
 
     <metal:main metal:use-macro="templates('Fragments/api_keys_table.pt').macros['api_key_table']" />
 
