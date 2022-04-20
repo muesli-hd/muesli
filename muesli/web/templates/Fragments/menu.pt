@@ -39,7 +39,8 @@
             </li>
 
             <li class="nav-item active">
-              <a class="nav-link" tal:attributes="href request.route_path('user_api_keys')">API</a>
+              <a tal:condition="request.userInfo.is_loggedin()"
+                 class="nav-link" tal:attributes="href request.route_path('user_api_keys')">API</a>
             </li>
 
             <!-- Navigation tree -->
