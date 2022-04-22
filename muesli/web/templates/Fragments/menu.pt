@@ -38,11 +38,6 @@
               <a class="nav-link" tal:attributes="href request.route_path('lecture_list')">Vorlesungen</a>
             </li>
 
-            <li class="nav-item active">
-              <a tal:condition="request.userInfo.is_loggedin()"
-                 class="nav-link" tal:attributes="href request.route_path('user_api_keys')">API</a>
-            </li>
-
             <!-- Navigation tree -->
             <div tal:define="nodes navigation_tree.children" tal:omit-tag="">
               <div metal:define-macro="nav_tree_view" tal:omit-tag="">
@@ -94,6 +89,7 @@
                 <a class="dropdown-item" tal:attributes="href request.route_path('user_update')">Angaben ergänzen</a>
                 <a class="dropdown-item" tal:attributes="href request.route_path('user_change_email')">E-Mail ändern</a>
                 <a class="dropdown-item" tal:attributes="href request.route_path('user_change_password')">Passwort ändern</a>
+                <a class="dropdown-item" tal:attributes="href request.route_path('user_api_keys')">API</a>
               </div>
             </li>
             <li>
