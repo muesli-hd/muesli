@@ -5,17 +5,17 @@
     <h2>Bei MÜSLI registrieren</h2>
 
     <p>
-      Um sich anzumelden füllen Sie bitte das Formular unten aus. Bitte beachten Sie, dass die Daten später <strong>nicht
+      Um sich anzumelden, füllen Sie bitte das Formular unten aus. Bitte beachten Sie, dass die Daten später <strong>nicht
       mehr verändert werden können</strong>.
     </p>
 
     <p>
       Assistenten und Übungsleiter, die <strong>nicht</strong> selbst an Übungsgruppen teilnehmen, können sich auch
       <a tal:attributes="href request.route_path('user_register_other')">mit weniger Angaben anmelden</a>.
-      Werden Rechte zum Eintragen von Vorlesungen benötigt so <a tal:attributes="href request.route_path('contact')">melden
+      Werden Rechte zum Eintragen von Vorlesungen benötigt, so <a tal:attributes="href request.route_path('contact')">melden
       Sie sich bitte bei uns</a> nach der Anmeldung.
       <br/><br/>
-      Verwenden Sie eine Mailadresse unter <strong>uni-heidelberg.de</strong>, beispielsweise &lt;uniid&gt;@stud.uni-heidelberg.de
+      Verwenden Sie eine Mailadresse unter <code>uni-heidelberg.de</code>, beispielsweise <strong><code>&lt;uniid&gt;@stud.uni-heidelberg.de</code></strong>
       . Falls Sie noch keine besitzen, benutzen Sie bitte eine andere und ändern Sie diese sobald eine uni-heidelberg.de
       Adresse vorliegt.
     </p>
