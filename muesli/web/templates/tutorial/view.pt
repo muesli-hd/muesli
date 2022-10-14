@@ -102,7 +102,7 @@
               ${student.name}
             </a>
           </td>
-          <td>${student.subject}</td>
+          <td>${', '.join(ls.student.subjects)}</td>
           <td tal:condition="request.permissionInfo.has_permission('edit')">
             <metal:main metal:use-macro="templates('Fragments/HTML/move_student.pt').macros['movestudentmacro']" />
           </td>

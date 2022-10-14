@@ -21,6 +21,7 @@
 
 from muesli import models
 from muesli import utils
+from muesli.web import statements
 from muesli.web.context import *
 from muesli.web.forms import *
 
@@ -355,71 +356,21 @@ class Export:
 
 @view_config(route_name='exam_statistics', renderer='muesli.web:templates/exam/statistics.pt', context=ExamContext, permission='statistics')
 def statistics(request):
-    db = request.db
-    tutorial_ids = request.context.tutorial_ids
     exam = request.context.exam
     tutorials = request.context.tutorials
-    lecturestudents = exam.lecture.lecture_students.all()
-    statistics = exam.getStatistics(students=lecturestudents)
-    statistics_by_subject = exam.getStatisticsBySubjects(students=lecturestudents)# exam.getStatisticsBySubject(students=students)
-    if tutorials:
-        tutorialstudents = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))
-        tutstat = exam.getStatistics(students=tutorialstudents, prefix='tut')
-        statistics.update(exam.getStatistics(students=tutorialstudents, prefix='tut'))
-        old_statistics_by_subject = statistics_by_subject
-        statistics_by_subject = exam.getStatisticsBySubjects(students=tutorialstudents, prefix='tut')
-        statistics_by_subject.update_available(old_statistics_by_subject)
-    admissions = {}
-    if exam.admission!=None or exam.registration!=None or exam.medical_certificate!=None:
-        admission_data = exam.exam_admissions.all()
-        all_student_ids = [ls.student_id for ls in lecturestudents]
-        if exam.admission!=None:
-            admissions['admission_count'] = len([e for e in admission_data if e.admission and e.student_id in all_student_ids])
-        if exam.registration!=None:
-            admissions['registration_count'] = len([e for e in admission_data if e.registration and e.student_id in all_student_ids])
-        if exam.admission!=None and exam.registration!=None:
-            admissions['admission_and_registration_count'] = len([e for e in admission_data if e.admission and e.registration and e.student_id in all_student_ids])
-        if exam.medical_certificate!=None:
-            admissions['medical_certificate_count'] = len([e for e in admission_data if e.medical_certificate and e.student_id in all_student_ids])
-        if tutorials:
-            student_ids = [s.student_id for s in tutorialstudents]
-            if exam.admission!=None:
-                admissions['admission_count_tut'] = len([e for e in admission_data if e.admission and e.student_id in student_ids])
-            if exam.registration!=None:
-                admissions['registration_count_tut'] = len([e for e in admission_data if e.registration and e.student_id in student_ids])
-            if exam.admission!=None and exam.registration!=None:
-                admissions['admission_and_registration_count_tut'] = len([e for e in admission_data if e.registration and e.admission and e.student_id in student_ids])
-            if exam.medical_certificate!=None:
-                admissions['medical_certificate_count_tut'] = len([e for e in admission_data if e.medical_certificate and e.student_id in student_ids])
+    statistics_data = statements.lecture_exams_statistics(request.db, exam.id, tutorials)
+    admission_counts = statements.exam_admission_registration_medical_count(request.db, exam.id, tutorials)
     quantils = []
     for q in exam.getQuantils():
         quantils.append({'lecture': q})
     if tutorials:
         for i,q in enumerate(exam.getQuantils(students=tutorialstudents)):
             quantils[i]['tutorial'] = q
-        #quantils['tutorials'] = exam.getQuantils(students=tutorialstudents)
-    #pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
-    #points = DictOfObjects(lambda: {})
-    #for point in pointsQuery:
-        #points[point.student_id][point.exercise_id] = point
-    #for student in students:
-        #for e in exam.exercises:
-            #if not e.id in points[student.student_id]:
-                #exerciseStudent = models.ExerciseStudent()
-                #exerciseStudent.student = student.student
-                #exerciseStudent.exercise = e
-                #points[student.student_id][e.id] = exerciseStudent
-                #self.db.add(exerciseStudent)
-    #self.db.commit()
-    #for student in points:
-        #points[student]['total'] = sum([v.points for v in points[student].values() if v.points])
     return {'exam': exam,
-                    'tutorial_ids': request.matchdict['tutorial_ids'],
-                    #'students': students,
-                    'quantils': quantils,
-                    'admissions': admissions,
-                    'statistics': statistics,
-                    'statistics_by_subject': statistics_by_subject}
+            'tutorial_ids': request.matchdict['tutorial_ids'],
+            'quantils': quantils,
+            'admission_counts': admission_counts,
+            'statistics_data': statistics_data}
 
 @view_config(route_name='exam_statistics_bar')
 class ExamStatisticsBar:

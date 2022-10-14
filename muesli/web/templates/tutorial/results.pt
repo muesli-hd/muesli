@@ -30,7 +30,7 @@ $(document).ready(function()
       <span class="popup">
         <span style="display:none">${'%09.3f' % float(results[ls.student_id].get(cat['id'],0))}</span>
         ${results[ls.student_id].get(cat['id'],'')}
-        <span tal:condition="results[ls.student_id].get(cat['id'])!=None and cat_maxpoints[cat['id']]">
+        <span tal:condition="results[ls.student_id].get(cat['id']) is not None and cat_maxpoints[cat['id']]">
         (${'%d%%' % (float(results[ls.student_id][cat['id']])*100.0 / float(cat_maxpoints[cat['id']]))})
         </span>
 

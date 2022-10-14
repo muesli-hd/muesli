@@ -39,6 +39,7 @@ def getTutorForTutorials(tutorials):
     else:
         return []
 
+
 class UserContext:
     def __init__(self, request):
         user_id = request.matchdict['user_id']
@@ -50,6 +51,7 @@ class UserContext:
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]
 
+
 class ConfirmationContext:
     def __init__(self, request):
         confirmation_hash = request.matchdict['confirmation']
@@ -60,6 +62,7 @@ class ConfirmationContext:
                 (Allow, 'group:administrators', ALL_PERMISSIONS),
                 ]
 
+
 class NonLoginContext:
     def __init__(self, request):
         self.__acl__ = [
@@ -67,12 +70,16 @@ class NonLoginContext:
             (Allow, 'group:administrators', ALL_PERMISSIONS)
         ]
 
+
 class GeneralContext:
     def __init__(self, request):
         self.__acl__ = [
-                (Allow, Authenticated, ('update', 'change_email', 'change_password','view_keys','remove_keys')),
-                (Allow, 'group:administrators', ALL_PERMISSIONS),
-                ]+[(Allow, 'user:{0}'.format(a.id), 'create_lecture') for a in request.db.query(User).filter(User.is_assistant==1).all()]
+                           (Allow, Authenticated,
+                            ('update', 'change_email', 'change_password', 'view_keys', 'remove_keys', 'view_subjects')),
+                           (Allow, 'group:administrators', ALL_PERMISSIONS),
+                       ] + [(Allow, 'user:{0}'.format(a.id), 'create_lecture') for a in
+                            request.db.query(User).filter(User.is_assistant == 1).all()]
+
 
 class GradingContext:
     def __init__(self, request):
@@ -101,6 +108,7 @@ class LectureContext:
         # add lecture specific links
         if self.lecture is None:
             return
+
 
 class TutorialContext:
     def __init__(self, request):
@@ -213,6 +221,7 @@ class ExerciseContext:
                 ]+[(Allow, 'user:{0}'.format(assistant.id), ('statistics')) for assistant in self.exam.lecture.assistants
                 ]
 
+
 class CorrelationContext:
     def __init__(self, request):
         source1 = request.GET['source1']
@@ -276,6 +285,7 @@ class TutorialEndpointContext:
                 elif lecture.tutor_rights == editAllTutorials:
                     self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('viewAll'))] if request.user in lecture.tutors else []
 
+
 class ExamEndpointContext:
     def __init__(self, request):
         exam_id = request.matchdict['exam_id']
@@ -289,6 +299,7 @@ class ExamEndpointContext:
             self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view'))]
         self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view', 'edit'))] if request.user in lecture.assistants else []
         self.__acl__ += [(Allow, 'user:{0}'.format(request.user.id), ('view'))] if request.user in lecture.tutors else []
+
 
 class ExerciseEndpointContext:
     def __init__(self, request):

@@ -192,7 +192,7 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
         user2.first_name = 'Stefan'
         user2.last_name = 'Student'
         user2.email = 'User@muesli.org'
-        user2.subject = self.config['subjects'][0]
+        user2.subjects.append(self.config['subjects'][0])
         functionalTests.setUserPassword(user2, 'userpassword2')
         self.session.add(user2)
         self.session.commit()
@@ -316,7 +316,7 @@ class AdminLoggedInTests(AssistantLoggedInTests):
         res = self.testapp.get('/user/edit/%s' % self.tutor.id, status=200)
         res = self.testapp.get('/user/edit/%s' % self.assistant.id, status=200)
         res = self.testapp.get('/user/edit/%s' % self.admin.id, status=200)
-        self.user.subject='Ein süßer Umlaut'
+        self.user.subjects.append('Ein süßer Umlaut')
         self.session.commit()
         res = self.testapp.get('/user/edit/%s' % self.user.id, status=200)
 

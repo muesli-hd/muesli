@@ -3,7 +3,7 @@ version: '3.2'
 
 services:
   postgres:
-    image: 'postgres:10'
+    image: 'postgres:14.1'
     environment:
       POSTGRES_PASSWORD: mueslipw
     volumes:

@@ -18,36 +18,30 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import json
 
 from muesli import models
-from muesli import utils
 from muesli.web.context import *
 from muesli.web.forms import *
 from muesli.allocation import Allocation
 from muesli.mail import Message, sendMail
+from muesli.web import statements
 from muesli.web.viewsExam import MatplotlibView
-
-from collections import defaultdict
 
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTPForbidden
-from pyramid.url import route_url
 
+from sqlalchemy import select
 from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
 import sqlalchemy
-#
+
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from tempfile import NamedTemporaryFile
-import io
-#
 from muesli import types
 from muesli.web.tooltips import lecture_edit_tooltips
-
-import re
-import os
 
 import yaml
 
@@ -251,40 +245,31 @@ class SwitchStudents(object):
 
 
 @view_config(route_name='lecture_edit', renderer='muesli.web:templates/lecture/edit.pt', context=LectureContext, permission='edit')
-class Edit:
-    def __init__(self, request):
-        self.request = request
-        self.db = self.request.db
-        self.lecture_id = request.matchdict['lecture_id']
-    def __call__(self):
-        lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
-        form = LectureEdit(self.request, lecture)
-        assistants = self.db.query(models.User).filter(models.User.is_assistant==1).order_by(models.User.last_name).all()
+def lecture_edit(request):
+        lecture = request.context.lecture
 
-        if self.request.method == 'POST' and form.processPostData(self.request.POST):
+        form = LectureEdit(request, lecture)
+        if request.method == 'POST' and form.processPostData(request.POST):
             form.saveValues()
-            self.request.db.commit()
-        names = self.request.config['lecture_types'][lecture.type]
-        pref_subjects = lecture.pref_subjects()
-        pref_count = sum([pref[0] for pref in pref_subjects])
-        subjects = lecture.subjects()
-        student_count = sum([subj[0] for subj in subjects])
+            request.db.commit()
+        approved_assistants = request.db.scalars(select(models.User) \
+                                                 .where(models.User.is_assistant==1).order_by(models.User.last_name))
+        registration_info = statements.lecture_registered_participants_stats(request.db, lecture.id)
         # Query results are already lexicographically sorted.
-        # Sort again using length as key so we get length lexicographical sorting
+        # Sort again using length as key, so we get length lexicographical sorting
         # https://github.com/muesli-hd/muesli/issues/28
         exams = dict([[cat['id'], sorted(list(lecture.exams.filter(models.Exam.category==cat['id'])),
                               key=lambda x:len(x.name))]
                       for cat in utils.categories])
-        self.request.javascript.append('select2.min.js')
-        self.request.css.append('select2.min.css')
+        request.javascript.append('select2.min.js')
+        request.css.append('select2.min.css')
+        request.javascript.append('select2_bullet_deletion_hack.js')
         return {'lecture': lecture,
-                'names': names,
-                'pref_count': pref_count,
-                'subjects': subjects,
-                'student_count': student_count,
+                'names': request.config['lecture_types'][lecture.type],
+                'registration_info': registration_info,
                 'categories': utils.categories,
                 'exams': exams,
-                'assistants': assistants,
+                'assistants': approved_assistants,
                 'form': form,
                 'tooltips': lecture_edit_tooltips}
 
@@ -368,28 +353,16 @@ def change_assistants(request):
     return HTTPFound(location=request.route_url('lecture_edit', lecture_id = lecture.id))
 
 @view_config(route_name='lecture_preferences', renderer='muesli.web:templates/lecture/preferences.pt', context=LectureContext, permission='edit')
-class Preferences:
-    def __init__(self, request):
-        self.request = request
-        self.db = self.request.db
-        self.lecture_id = request.matchdict['lecture_id']
-    def __call__(self):
-        lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
-        names = self.request.config['lecture_types'][lecture.type]
-        pref_subjects = lecture.pref_subjects()
-        pref_count = sum([pref[0] for pref in pref_subjects])
-        subjects = lecture.subjects()
-        student_count = sum([subj[0] for subj in subjects])
+def lecture_preferences(request):
+        lecture = request.context.lecture
+        names = request.config['lecture_types'][lecture.type]
+        registration_info = statements.lecture_registered_participants_stats(request.db, lecture.id)
         times = lecture.prepareTimePreferences(user=None)
         times = sorted([t for t in times], key=lambda s:s['time'].value)
-        #print(times)
         return {'lecture': lecture,
                 'names': names,
-                'pref_subjects': pref_subjects,
-                'pref_count': pref_count,
-                'subjects': subjects,
                 'times': times,
-                'student_count': student_count,
+                'registration_info': registration_info,
                 'categories': utils.categories,
                 'exams': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
                 }
@@ -468,7 +441,7 @@ class ExportStudentsHtml:
         lecture = self.db.query(models.Lecture).get(self.lecture_id)
         students = lecture.lecture_students_for_tutorials([])
         if 'subject' in self.request.GET:
-            students = students.filter(models.LectureStudent.student.has(models.User.subject==self.request.GET['subject']))
+            students = students.filter(models.LectureStudent.student.has(self.request.GET['subject'] in models.User.subjects))
         return {'lecture': lecture,
                 'lecture_students': students}
 
@@ -836,6 +809,79 @@ class DoExport(ExcelExport):
                 for col, d in enumerate(item, 1):
                     worksheet_tutorials.cell(row=row_index, column=col, value=d)
                 row_index = row_index + 1
+        # set column width
+        for column_cells in worksheet_tutorials.columns:
+            max_length = max(len(str(cell.value)) for cell in column_cells)
+            worksheet_tutorials.column_dimensions[column_cells[0].column_letter].width = max_length*1.2
+        return self.createResponse()
+
+
+@view_config(route_name='lecture_export_multi_semester_statistics', renderer='json', context=GeneralContext, permission='export_multi_semester')
+def export_multi_semester_statistics(request):
+    if request.method == 'POST':
+        try:
+            module_map = request.json_body
+        except (KeyError, json.JSONDecodeError):
+            return {}
+    else:
+        return {}
+    result = {}
+    for module in module_map:
+        stmt = statements.lecture_statistics_multi_semester_stmt(module_map[module])
+        for lecture_id, lecture_term, lecture_name, lecture_lecturer, registered, admitted, total_active, \
+            active_faculty_internal, active_faculty_external, admitted_repeaters in request.db.execute(stmt):
+            result.setdefault(module, {})[lecture_id] = {
+                'term': str(lecture_term),
+                'name': lecture_name,
+                'lecturer': lecture_lecturer,
+                'registered': registered,
+                'total_active': total_active,
+                'active_faculty_internal': active_faculty_internal,
+                'active_faculty_external': active_faculty_external,
+                'admitted': admitted,
+                'included_admitted_non_active_students': admitted_repeaters
+            }
+    return result
+
+
+@view_config(route_name='lecture_export_multi_semester_statistics_xlsx', context=GeneralContext, permission='export_multi_semester')
+class export_multi_semester_statistics_xlsx(ExcelExport):
+    def __call__(self):
+        if self.request.method == 'POST':
+            try:
+                module_map = self.request.json_body
+            except (KeyError, json.JSONDecodeError):
+                return {}
+        else:
+            return {}
+
+        # sheet Stastistics
+        w = self.w
+        worksheet_tutorials = w.active
+        worksheet_tutorials.title = 'Statistics'
+        header = ['module',
+                  'id',
+                  'term',
+                  'name',
+                  'lecturer',
+                  'registered',
+                  'admitted',
+                  'total_active',
+                  'active_faculty_internal',
+                  'active_faculty_external',
+                  'included_admitted_non_active_students']
+        worksheet_tutorials.append(header)
+        worksheet_tutorials.row_dimensions[1].font = Font(bold=True)
+        row_index = 2
+
+        for module in module_map:
+            stmt = statements.lecture_statistics_multi_semester_stmt(module_map[module])
+            for parameters in self.request.db.execute(stmt):
+                worksheet_tutorials.cell(row=row_index, column=1, value=module)
+                for i, param in enumerate(parameters):
+                    worksheet_tutorials.cell(row=row_index, column=i+2, value=str(param))
+                row_index += 1
+
         # set column width
         for column_cells in worksheet_tutorials.columns:
             max_length = max(len(str(cell.value)) for cell in column_cells)

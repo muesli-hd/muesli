@@ -20,20 +20,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
-import pyramid.security
 from collections import defaultdict
 import yaml
 import jwt
+from sqlalchemy import select
 
 from muesli.types import Term
 
 import muesli
 
-preferences = [\
+preferences = [
         {'penalty': 1, 'name': 'Gut'},
         {'penalty': 3, 'name': 'Mittel'},
         {'penalty': 10,'name': 'Schlecht'},
-        {'penalty': 100, 'name': 'Gar nicht'}]
+        {'penalty': 100, 'name': 'Gar nicht'}
+]
 
 penalty_names = dict([[pref['penalty'], pref['name']] for pref in preferences])
 
@@ -75,19 +76,21 @@ tutorRights = [[editAllTutorials, 'Punkte zu allen Tutorien eintragen'],
                                         [editOwnTutorials, 'Punkte zu eigenen Tutorien eintragen'],
                                         [editNoTutorials, 'Keine Punkte eintragen']]
 
-def getSubjects(user=None):
-    hisSubjects = list(muesli.config['subjects'])
-    if user and not user.subject in hisSubjects:
-        hisSubjects.append(user.subject)
-    hisSubjects = list(zip(hisSubjects,hisSubjects))
-    return hisSubjects
+
+def get_selectable_subjects(request, user=None):
+    subject_set = set(request.db.scalars(select(muesli.models.Subject).where(muesli.models.Subject.curated == True)))
+    if user:
+        subject_set.update(user.subjects)
+    subject_list = [(s.id, s.name) for s in subject_set]
+    return sorted(subject_list, key=lambda s: s[0])
+
 
 def getSemesterLimit():
     now = datetime.datetime.now()
     semesterlimit = now.year
     if now.month < 4:
         semesterlimit -= 1
-    term = '1' if now.month>=4 and now.month <=9 else '2'
+    term = '1' if 4 <= now.month <= 9 else '2'
     semesterlimit = '%4i%s' % (semesterlimit, term)
     return semesterlimit
 
@@ -108,11 +111,14 @@ def getTerms():
             term += 1
     return terms
 
+
 class PermissionInfo:
     def __init__(self, request):
         self.request = request
+
     def has_permission(self, permission):
         return self.request.has_permission(permission, self.request.context)
+
 
 class UserInfo:
     def __init__(self, user):

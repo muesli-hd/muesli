@@ -14,9 +14,9 @@
             <span class="font-weight-bold" id="select-prepend-text">${field.label}</span>
           </div>
           <div class="col-sm-9 col-xl-10">
-            <select class="custom-select" tal:attributes="name field.name; disabled 'disabled' if field.readonly else None">
+            <select class="custom-select" tal:attributes="name field.name; disabled 'disabled' if field.readonly else None; multiple 'multiple' if hasattr(field, 'multiple') else None">
               <option tal:repeat="option field.options"
-                 tal:attributes="value str(option[0]); selected 'selected' if option[0]==field.value else None">
+                 tal:attributes="value str(option[0]); selected 'selected' if (option[0]==field.value and not hasattr(field, 'multiple')) or (hasattr(field, 'multiple') and field.value and option[0] in field.value) else None">
                   ${option[1]}
               </option>
             </select>
@@ -48,7 +48,7 @@
         aria-describedby="text-input-prepend-text" tal:attributes="
         name field.name; size str(field.size); value field.value;
         aria-label field.name; readonly 'readonly' if field.readonly else None;
-        placeholder ('z.B. ' + field.placeholder) if field.placeholder else None;">
+        placeholder ('z.B. ' + field.placeholder) if field.placeholder else None">
         </div>
       </div>
 
@@ -66,7 +66,7 @@
           <input type="password" class="form-control"
           aria-describedby="password-input-prepend-text" tal:attributes="
           name field.name; size str(field.size); value field.value;
-          aria-label field.name; readonly 'readonly' if field.readonly else None;">
+          aria-label field.name; readonly 'readonly' if field.readonly else None">
         </div>
       </div>
 
@@ -91,14 +91,13 @@
         <input type="file" tal:attributes="name field.name; size str(field.size); value field.value" multiple/>
       </div>
 
-
       <div name="formerror" class="alert alert-danger" tal:condition="field.name in form.errors"
           tal:content="'&uarr; ' + form.errors[field.name]">
       </div>
     </div>
 
+    <!-- CAPTCHA INPUT -->
     <div tal:condition="field.type == 'hidden' and field.name!='frc-captcha-solution'" tal:omit-tag="">
-      <!-- HIDDEN INPUT -->
       <input type="hidden" tal:attributes="name field.name; size str(field.size); value field.value; readonly 'readonly' if field.readonly else None"/>
     </div>
   </div>

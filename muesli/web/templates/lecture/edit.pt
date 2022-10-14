@@ -8,28 +8,11 @@
   <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
 
-<script>
-$(document).ready(function() {
-  // The following is some boilerplate to enable select2 and let backspace remove a bullet instead of converting it to text
-  // See https://github.com/select2/select2/issues/3354
-  $.fn.select2.amd.require(['select2/selection/search'], function (Search) {
-    var oldRemoveChoice = Search.prototype.searchRemoveChoice;
-
-    Search.prototype.searchRemoveChoice = function () {
-      oldRemoveChoice.apply(this, arguments);
-      this.$search.val('');
-    };
-
-    $('#assistant-select').select2();
-  });
-});
-</script>
-
 <div tal:condition="request.permissionInfo.has_permission('change_assistant')">
   <form tal:attributes="action request.route_path('lecture_change_assistants', lecture_id=lecture.id)" method="POST">
     <div class="form-group">
       <div class="input-group mb-2">
-        <select id="assistant-select" class="custom-select" name="assistants" multiple="multiple">
+        <select id="assistant-select" class="custom-select custom-multi-select" name="assistants" multiple="multiple">
           <option tal:repeat="assistant assistants" tal:attributes="value assistant.id; selected 'selected' if assistant in lecture.assistants else None">
             ${assistant}
           </option>
@@ -49,24 +32,26 @@ $(document).ready(function() {
 
 <div tal:condition="lecture.mode=='prefs'" tal:omit-tag="">
   <h3>Einteilung vornehmen</h3>
-  <p tal:condition="pref_count > 1">
-  Es haben sich insgesamt ${pref_count} Studenten angemeldet (<a tal:attributes="href request.route_path('lecture_preferences', lecture_id=lecture.id)">Details</a>).
+  <p tal:condition="registration_info['total_preliminary_participants'] > 1">
+  Es haben sich insgesamt ${registration_info['total_preliminary_participants']} Studenten angemeldet (<a tal:attributes="href request.route_path('lecture_preferences', lecture_id=lecture.id)">Details</a>).
   Gruppeneinteilung nach Präferenzen vornehmen.
   <strong>Dies überschreibt vorherige Einteilungen!</strong>
   </p>
 
-  <p tal:condition="pref_count <= 1">
-  Es hat sich bisher nur ${pref_count} Student angemeldet
-  (<a tal:attributes="href request.route_path('lecture_preferences', lecture_id=lecture.id)">Details</a>).
-  <br>
-  Sie können jetzt die Gruppeneinteilung nach Präferenzen vornehmen.
-  <br>
-  <strong>Dies überschreibt vorherige Einteilungen!</strong>
-  </p>
+  <div tal:condition="registration_info['total_preliminary_participants'] <= 1">
+    <p>
+      Es hat sich bisher nur ${registration_info['total_preliminary_participants']} Student angemeldet
+      (<a tal:attributes="href request.route_path('lecture_preferences', lecture_id=lecture.id)">Details</a>).
+    </p>
+  </div>
+  <p>
+    Sie können jetzt die Gruppeneinteilung nach Präferenzen vornehmen.
+    <strong>Dies überschreibt vorherige Einteilungen!</strong>
+    </p>
 
- <form method="post" tal:attributes="action request.route_path('lecture_do_allocation', lecture_id=lecture.id)">
-    <input role="button" class="btn btn-danger" type="submit" value="Einteilung vornehmen"/>
-  </form>
+   <form method="post" tal:attributes="action request.route_path('lecture_do_allocation', lecture_id=lecture.id)">
+      <input role="button" class="btn btn-danger" type="submit" value="Einteilung vornehmen"/>
+    </form>
 </div>
 
 <h3>${names['tutorials']}</h3>
@@ -247,17 +232,17 @@ Zu dieser ${names['name']} werden die folgenden ${names['tutorials']} angeboten:
     </tr>
   </thead>
   <tbody>
-    <tr tal:repeat="subject subjects">
+    <tr tal:repeat="subject registration_info['participants'].keys()">
       <td>
-        <a tal:attributes="href request.route_path('lecture_export_students_html', lecture_id=lecture.id, _query={'subject': subject[1]})">
-          ${subject[1] if subject[1] else "(Keine Angabe)"}
+        <a tal:attributes="href request.route_path('lecture_export_students_html', lecture_id=lecture.id, _query={'subject': subject})">
+          ${subject}
         </a>
       </td>
-      <td>${subject[0]}</td>
+      <td>${registration_info['participants'][subject]}</td>
     </tr>
     <tr class="font-weight-bold">
       <td>Gesamt</td>
-      <td>${student_count}</td>
+      <td>${registration_info['total_participants']}</td>
     </tr>
   </tbody>
 </table>

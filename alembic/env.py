@@ -19,8 +19,8 @@ sys.path.insert(0, _root_dir)
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
-import muesli.models
-target_metadata = muesli.models.Base.metadata
+from muesli.models import Base
+target_metadata = Base.metadata
 #target_metadata = None
 
 # other values from the config, defined by the needs of env.py,

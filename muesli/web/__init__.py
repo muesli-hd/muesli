@@ -26,24 +26,27 @@ import jwt
 from sqlalchemy.orm import sessionmaker
 
 from muesli.web.navigation_tree import create_navigation_tree
-from muesli.web.context import *
-from muesli.web.views import *
-from muesli.web.viewsLecture import *
-from muesli.web.viewsUser import *
+import muesli.web.context
+import muesli.web.views
+import muesli.web.viewsLecture
+import muesli.web.viewsUser
 from muesli.web.viewsTutorial import *
 from muesli.web.viewsApi import *
-from muesli.web.api.v1 import *
+import muesli.web.api.v1
 from muesli import utils
 import muesli
 
 import numbers
 
+
 @subscriber(NewRequest)
 def add_request_attributes(event):
     # Add database session
     event.request.db = event.request.registry.db_maker()
+
     def callback(request):
         request.db.rollback()
+
     event.request.add_finished_callback(callback)
 
     # Add user objects
@@ -60,17 +63,18 @@ def add_request_attributes(event):
     # Add config
     event.request.config = muesli.config
 
+
 @subscriber(BeforeRender)
 def add_navigation_tree_to_request(event):
     # Add navigation tree
     if event['request']:
         event['navigation_tree'] = create_navigation_tree(event['request'])
 
+
 @subscriber(BeforeRender)
 def add_templates_to_renderer_globals(event):
     event['templates'] = lambda name: get_renderer('templates/{0}'.format(name)).implementation()
     event['Number'] = numbers.Number
-
 
 
 # This class was created using the documentation on migrations pyramid 1.x authentication systems to 2.x.
@@ -152,37 +156,40 @@ class MuesliSecurityPolicy:
                 del request.session['auth.userid']
         return []
 
+
 def populate_config(config):
     config.set_security_policy(
         MuesliSecurityPolicy(muesli.config["api"]["JWT_SECRET_TOKEN"], muesli.config["api"]["KEY_EXPIRATION"]))
 
     config.add_static_view('static', 'muesli.web:static')
 
-    config.add_route('start', '/start', factory = GeneralContext)
-    config.add_route('overview', '/overview', factory = GeneralContext)
+    config.add_route('start', '/start', factory=GeneralContext)
+    config.add_route('overview', '/overview', factory=GeneralContext)
     config.add_route('contact', '/contact')
     config.add_route('changelog', '/changelog')
-    config.add_route('admin', '/admin', factory = GeneralContext)
+    config.add_route('admin', '/admin', factory=GeneralContext)
+    config.add_route('subject_admin', '/subject_admin', factory=GeneralContext)
+    config.add_route('subject_transfer_students', '/subject_transfer_students', factory=GeneralContext)
     config.add_route('test_exceptions', 'test_exception', factory=GeneralContext)
     config.add_route('index', '/')
-    config.add_route('email_users', '/email_users', factory = GeneralContext)
-    config.add_route('email_all_users','/email_all_users',factory = GeneralContext)
+    config.add_route('email_users', '/email_users', factory=GeneralContext)
+    config.add_route('email_all_users', '/email_all_users', factory=GeneralContext)
 
-    config.add_route('user_update', '/user/update', factory = GeneralContext)
-    config.add_route('user_check', '/user/check', factory = GeneralContext)
-    config.add_route('user_change_email', '/user/change_email', factory = GeneralContext)
-    config.add_route('user_change_password', '/user/change_password', factory = GeneralContext)
+    config.add_route('user_update', '/user/update', factory=GeneralContext)
+    config.add_route('user_check', '/user/check', factory=GeneralContext)
+    config.add_route('user_change_email', '/user/change_email', factory=GeneralContext)
+    config.add_route('user_change_password', '/user/change_password', factory=GeneralContext)
     config.add_route('user_logout', '/user/logout')
     config.add_route('user_login', '/user/login')
-    config.add_route('user_list', '/user/list', factory = GeneralContext)
-    config.add_route('user_edit', '/user/edit/{user_id}', factory = UserContext)
-    config.add_route('user_delete', '/user/delete/{user_id}', factory = UserContext)
-    config.add_route('user_delete_gdpr', '/user/delete_gdpr/{user_id}', factory = UserContext)
-    config.add_route('user_delete_unconfirmed', '/user/delete_unconfirmed', factory = GeneralContext)
-    config.add_route('user_doublets', '/user/doublets', factory = GeneralContext)
-    config.add_route('user_resend_confirmation_mail', '/user/resend_confirmation_mail/{user_id}', factory = UserContext)
-    config.add_route('user_list_subjects', '/user/list_subjects', factory = GeneralContext)
-    config.add_route('user_list_subjects_by_term', '/user/list_subjects_by_term', factory = GeneralContext)
+    config.add_route('user_list', '/user/list', factory=GeneralContext)
+    config.add_route('user_edit', '/user/edit/{user_id}', factory=UserContext)
+    config.add_route('user_delete', '/user/delete/{user_id}', factory=UserContext)
+    config.add_route('user_delete_gdpr', '/user/delete_gdpr/{user_id}', factory=UserContext)
+    config.add_route('user_delete_unconfirmed', '/user/delete_unconfirmed', factory=GeneralContext)
+    config.add_route('user_doublets', '/user/doublets', factory=GeneralContext)
+    config.add_route('user_resend_confirmation_mail', '/user/resend_confirmation_mail/{user_id}', factory=UserContext)
+    config.add_route('user_list_subjects', '/user/list_subjects', factory=GeneralContext)
+    config.add_route('user_list_subjects_by_term', '/user/list_subjects_by_term', factory=GeneralContext)
     config.add_route('user_register', '/user/register', factory=GeneralContext)
     config.add_route('user_register_other', '/user/register_other', factory=GeneralContext)
     config.add_route('user_wait_for_confirmation', '/user/wait_for_confirmation', factory=GeneralContext)
@@ -194,50 +201,50 @@ def populate_config(config):
     config.add_route('user_reset_password3', '/user/reset_password3/{confirmation}', factory=ConfirmationContext)
 
     config.add_route('user_api_keys', '/user/api_keys', factory=GeneralContext)
-    config.add_route('remove_api_key', '/user/remove_api_key/{key_id}',factory=GeneralContext)
+    config.add_route('remove_api_key', '/user/remove_api_key/{key_id}', factory=GeneralContext)
 
-    config.add_route('user_ajax_complete', '/user/ajax_complete/{lecture_id}/{tutorial_ids:[^/]*}', factory = TutorialContext)
-    config.add_route('lecture_add', '/lecture/add', factory = GeneralContext)
-    config.add_route('lecture_list', '/lecture/list', factory = GeneralContext)
-    config.add_route('lecture_edit', '/lecture/edit/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_delete', '/lecture/delete/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_change_assistants', '/lecture/change_assistants/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_preferences', '/lecture/preferences/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_prefhistogram', '/lecture/prefhistogram/{lecture_id}/{time}', factory = LectureContext)
-    config.add_route('lecture_remove_tutor', '/lecture/remove_tutor/{lecture_id}/{tutor_id}', factory = LectureContext)
-    config.add_route('lecture_add_tutor', '/lecture/add_tutor/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_do_allocation', '/lecture/do_allocation/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_remove_allocation', '/lecture/remove_allocation/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_email_students', '/lecture/email_students/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_email_tutors', '/lecture/email_tutors/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_view', '/lecture/view/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_view_removed_students', '/lecture/view_removed_students/{lecture_id}', factory = LectureContext)
+    config.add_route('user_ajax_complete', '/user/ajax_complete/{lecture_id}/{tutorial_ids:[^/]*}', factory=TutorialContext)
+    config.add_route('lecture_add', '/lecture/add', factory=GeneralContext)
+    config.add_route('lecture_list', '/lecture/list', factory=GeneralContext)
+    config.add_route('lecture_edit', '/lecture/edit/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_delete', '/lecture/delete/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_change_assistants', '/lecture/change_assistants/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_preferences', '/lecture/preferences/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_prefhistogram', '/lecture/prefhistogram/{lecture_id}/{time}', factory=LectureContext)
+    config.add_route('lecture_remove_tutor', '/lecture/remove_tutor/{lecture_id}/{tutor_id}', factory=LectureContext)
+    config.add_route('lecture_add_tutor', '/lecture/add_tutor/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_do_allocation', '/lecture/do_allocation/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_remove_allocation', '/lecture/remove_allocation/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_email_students', '/lecture/email_students/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_email_tutors', '/lecture/email_tutors/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_view', '/lecture/view/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_view_removed_students', '/lecture/view_removed_students/{lecture_id}', factory=LectureContext)
     config.add_route('lecture_set_preferences', '/lecture/set_preferences/{lecture_id}', factory=LectureContext)
     config.add_route('lecture_remove_preferences', '/lecture/remove_preferences/{lecture_id}', factory=LectureContext)
-    config.add_route('lecture_add_exam', '/lecture/add_exam/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_add_grading', '/lecture/add_grading/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_add_student', '/lecture/add_student/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_switch_students', '/lecture/switch_students/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_export_students_html', '/lecture/export_students_html/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_export_totals', '/lecture/export_totals/{lecture_id}', factory = LectureContext)
-    config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory = GeneralContext)
-    config.add_route('lecture_export_yaml_details','/lecture/export_yaml_details',factory = GeneralContext) #Canh added
-    config.add_route('lecture_export_yaml_emails', '/lecture/export_yaml_emails', factory = GeneralContext)
-    config.add_route('lecture_export_excel','/lecture/export_excel/downloadDetailTutorials.xlsx',factory = GeneralContext)
+    config.add_route('lecture_add_exam', '/lecture/add_exam/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_add_grading', '/lecture/add_grading/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_add_student', '/lecture/add_student/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_switch_students', '/lecture/switch_students/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_export_students_html', '/lecture/export_students_html/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_export_totals', '/lecture/export_totals/{lecture_id}', factory=LectureContext)
+    config.add_route('lecture_export_yaml', '/lecture/export_yaml', factory=GeneralContext)
+    config.add_route('lecture_export_yaml_details', '/lecture/export_yaml_details', factory=GeneralContext)  # Canh added
+    config.add_route('lecture_export_yaml_emails', '/lecture/export_yaml_emails', factory=GeneralContext)
+    config.add_route('lecture_export_excel', '/lecture/export_excel/downloadDetailTutorials.xlsx', factory=GeneralContext)
+    config.add_route('lecture_export_multi_semester_statistics', '/lecture/export_multi_semester_statistics', factory=GeneralContext)
+    config.add_route('lecture_export_multi_semester_statistics_xlsx', '/lecture/export_multi_semester_statistics_xlsx', factory=GeneralContext)
 
-    config.add_route('lecture_view_points', '/lecture/view_points/{lecture_id}', factory = LectureContext)
-
+    config.add_route('lecture_view_points', '/lecture/view_points/{lecture_id}', factory=LectureContext)
 
     config.add_route('tutorial_add', '/tutorial/add/{lecture_id}', factory=LectureContext)
     config.add_route('tutorial_duplicate', '/tutorial/duplicate/{lecture_id}/{tutorial_id}', factory=LectureContext)
     config.add_route('tutorial_delete', '/tutorial/delete/{tutorial_ids}', factory=TutorialContext)
-    config.add_route('tutorial_view', '/tutorial/view/{tutorial_ids}', factory = TutorialContext)
-    config.add_route('tutorial_results', '/tutorial/results/{lecture_id}/{tutorial_ids:[^/]*}', factory = TutorialContext)
-    config.add_route('tutorial_email', '/tutorial/email/{tutorial_ids}', factory = TutorialContext)
-    config.add_route('tutorial_email_preference', '/tutorial/email_preference/{tutorial_ids}', factory = TutorialContext)
-    config.add_route('tutorial_resign_as_tutor', '/tutorial/resign_as_tutor/{tutorial_ids}', factory = TutorialContext)
-    config.add_route('tutorial_assign_student', '/tutorial/assign_student', factory = AssignStudentContext)
-
+    config.add_route('tutorial_view', '/tutorial/view/{tutorial_ids}', factory=TutorialContext)
+    config.add_route('tutorial_results', '/tutorial/results/{lecture_id}/{tutorial_ids:[^/]*}', factory=TutorialContext)
+    config.add_route('tutorial_email', '/tutorial/email/{tutorial_ids}', factory=TutorialContext)
+    config.add_route('tutorial_email_preference', '/tutorial/email_preference/{tutorial_ids}', factory=TutorialContext)
+    config.add_route('tutorial_resign_as_tutor', '/tutorial/resign_as_tutor/{tutorial_ids}', factory=TutorialContext)
+    config.add_route('tutorial_assign_student', '/tutorial/assign_student', factory=AssignStudentContext)
 
     config.add_route('tutorial_edit', '/tutorial/edit/{tutorial_id}', factory=TutorialContext)
     config.add_route('tutorial_set_tutor', '/tutorial/set_tutor/{tutorial_id}')
@@ -247,8 +254,8 @@ def populate_config(config):
     config.add_route('tutorial_unsubscribe', '/tutorial/unsubscribe/{tutorial_id}', factory=TutorialContext)
     config.add_route('tutorial_ajax_get_tutorial', '/tutorial/ajax_get_tutorial/{lecture_id}', factory=LectureContext)
 
-    config.add_route('exam_auto_admit', '/exam/auto_admit/{exam_id}', factory = ExamContext)
-    config.add_route('exam_interactive_admission', '/exam/interactive_admission/{exam_id}', factory = ExamContext)
+    config.add_route('exam_auto_admit', '/exam/auto_admit/{exam_id}', factory=ExamContext)
+    config.add_route('exam_interactive_admission', '/exam/interactive_admission/{exam_id}', factory=ExamContext)
     config.add_route('exam_add_or_edit_exercise', '/exam/add_or_edit_exercise/{exam_id}/{exercise_id:[^/]*}', factory=ExamContext)
     config.add_route('exam_delete_exercise', '/exam/delete_exercise/{exam_id}/{exercise_id}', factory=ExamContext)
     config.add_route('exam_edit', '/exam/edit/{exam_id}', factory=ExamContext)
@@ -264,7 +271,7 @@ def populate_config(config):
     config.add_route('exam_enter_points_single', '/exam/enter_points_single/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
     config.add_route('exam_ajax_get_points', '/exam/ajax_get_points/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
     config.add_route('exam_ajax_save_points', '/exam/ajax_save_points/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
-    config.add_route('exam_export', '/exam/export/{exam_id}/{tutorial_ids:[^/]*}', factory = ExamContext)
+    config.add_route('exam_export', '/exam/export/{exam_id}/{tutorial_ids:[^/]*}', factory=ExamContext)
 
     config.add_route('grading_edit', '/grading/edit/{grading_id}', factory=GradingContext)
     config.add_route('grading_export', '/grading/export/{grading_id}.xlsx', factory=GradingContext)
@@ -282,7 +289,7 @@ def populate_config(config):
 
     config.add_route('api_login', '/api/v1/login')
     config.include('pyramid_chameleon')
-    # TODO: move the prefix addition into a seperate function for later
+    # TODO: move the prefix addition into a separate function for later
     # developed API's.
     config.route_prefix = 'api/v1'
     config.include('cornice')
@@ -300,6 +307,6 @@ def create_config(settings):
     return config
 
 
-def main(global_config=None, **settings):
+def main(_global_config=None, **settings):
     config = create_config(settings)
     return config.make_wsgi_app()
