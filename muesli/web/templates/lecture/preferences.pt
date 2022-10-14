@@ -15,19 +15,19 @@
       </tr>
     </thead>
     <tbody>
-      <tr tal:repeat="subject pref_subjects">
-        <td>${subject[1] if subject[1] else 'Keine Angabe'}</td>
-        <td>${subject[0]}</td>
+      <tr tal:repeat="subject registration_info['preliminary_participants'].keys()">
+        <td>${subject}</td>
+        <td>${registration_info['preliminary_participants'][subject]}</td>
       </tr>
       <tr class="font-weight-bold">
         <td>Gesamt</td>
-        <td>${pref_count}</td>
+        <td>${registration_info['total_preliminary_participants']}</td>
       </tr>
     </tbody>
   </table>
 
-  <p tal:condition="pref_count > 1">
-  Es haben sich insgesamt ${pref_count} Studenten angemeldet 
+  <p tal:condition="registration_info['total_preliminary_participants'] > 1">
+  Es haben sich insgesamt ${registration_info['total_preliminary_participants']} Studenten angemeldet
   (<a tal:attributes="href request.route_path('lecture_preferences', lecture_id=lecture.id)">Details</a>).
   <br>
   Sie können jetzt die Gruppeneinteilung nach Präferenzen vornehmen.
@@ -35,8 +35,8 @@
   <strong>Dies überschreibt vorherige Einteilungen!</strong>
   </p>
 
-  <p tal:condition="pref_count <= 1">
-  Es hat sich bisher nur ${pref_count} Student angemeldet
+  <p tal:condition="registration_info['total_preliminary_participants'] <= 1">
+  Es hat sich bisher nur ${registration_info['total_preliminary_participants']} Student angemeldet
   (<a tal:attributes="href request.route_path('lecture_preferences', lecture_id=lecture.id)">Details</a>).
   <br>
   Sie können jetzt die Gruppeneinteilung nach Präferenzen vornehmen.

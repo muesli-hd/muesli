@@ -138,7 +138,7 @@ class Tutorial:
               $ref: "#/definitions/Tutorial"
           responses:
             200:
-              description: successfull creation of a tutorial
+              description: successful creation of a tutorial
               schema:
                 type: object
                 properties:

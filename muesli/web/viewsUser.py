@@ -57,7 +57,7 @@ def authenticate_user_with_password(sa_session, user, guessed_password):
         try:
             if nacl.pwhash.verify(user.password.encode('utf-8'), guessed_password.encode('utf-8')):
                 return user
-        except nacl.exceptions.InvalidkeyError as ex:
+        except nacl.exceptions.InvalidkeyError:
             return None
     return None
 
@@ -146,13 +146,13 @@ def logout(request):
 def listUser(request):
     users = request.db.query(models.User).order_by(models.User.last_name, models.User.first_name)
     if 'subject' in request.GET:
-        users = users.filter(models.User.subject == request.GET['subject'])
+        users = users.filter(request.GET['subject'] in models.User.subjects)
     return {'users': users}
 
 
 @view_config(route_name='user_list_subjects', renderer='muesli.web:templates/user/list_subjects.pt', context=context.GeneralContext, permission='admin')
 def listSubjects(request):
-    subjects = request.db.query(models.User.subject, func.count(models.User.id)).group_by(models.User.subject).order_by(models.User.subject)
+    subjects = request.db.execute(select(models.Subject, func.count(models.User)).group_by(models.Subject).order_by(models.Subject)).all()
     return {'subjects': subjects}
 
 
@@ -168,14 +168,15 @@ def listSubjectsByTerm(request):
             .filter(models.Lecture.term >= settings['starting_term'])
             .group_by(models.Lecture.term).order_by(models.Lecture.term.desc())]
     subjects_by_term = []
-    table = request.db.query(models.Lecture.term, models.User.subject, func.count(models.User.id))\
-            .join(models.LectureStudent)\
-            .join(models.User)\
-            .filter(models.Lecture.term >= settings['starting_term'])\
-            .filter(not_(models.Lecture.name.contains(settings['exclude_lecture_name'])))\
-            .group_by(models.User.subject, models.Lecture.term)\
-            .order_by(models.Lecture.term, models.User.subject)
-    for (term, subject, count) in table:
+    stmt = select(models.Lecture.term, models.Subject.name, func.count(models.User.id)) \
+        .join(models.LectureStudent, models.LectureStudent.student_id == models.User.id) \
+        .join(models.user_subjects_table, models.User.id == models.user_subjects_table.c.student).join(models.Subject) \
+        .join(models.Lecture, models.LectureStudent.lecture_id == models.Lecture.id) \
+        .where(models.Lecture.term >= settings['starting_term']) \
+        .where(not_(models.Lecture.name.like(f"%{settings['exclude_lecture_name']}%"))) \
+        .group_by(models.Subject.name, models.Lecture.term) \
+        .order_by(models.Lecture.term, models.Subject.name)
+    for (term, subject, count) in request.db.execute(stmt):
         subject = re.sub(r'\(.*\)', '', str(subject))
         subject = re.sub(r'\s$', '', str(subject))
         if subject == 'None' or subject == '':
@@ -192,6 +193,10 @@ def listSubjectsByTerm(request):
 
 @view_config(route_name='user_edit', renderer='muesli.web:templates/user/edit.pt', context=context.UserContext, permission='edit')
 def edit(request):
+    request.javascript.append('select2.min.js')
+    request.css.append('select2.min.css')
+    request.javascript.append('subject_select.js')
+
     user_id = request.matchdict['user_id']
     user = request.db.query(models.User).get(user_id)
     lectures = user.lectures_as_assistant.all()
@@ -215,7 +220,8 @@ def edit(request):
             'lectures_as_assistant': user.lectures_as_assistant.all(),
             'tutorials_as_tutor': user.tutorials_as_tutor.all(),
             'penalty_names': utils.penalty_names,
-            'keys': keys}
+            'keys': keys,
+            'freshtoken': None}
 
 
 @view_config(route_name='user_delete', context=context.UserContext, permission='delete')
@@ -276,6 +282,8 @@ def delete_gdpr(request):
         l.assistants.remove(user)
     for t in user.tutorials_as_tutor:
         t.tutor = None
+    for s in user.subjects:
+        s.students.remove(user)
     request.db.delete(user)
     request.db.commit()
     request.session.flash('Benutzer %s und alle zugehörigen Daten wurden gelöscht!' % user, queue='messages')
@@ -321,15 +329,25 @@ def doublets(request):
 
 @view_config(route_name='user_update', renderer='muesli.web:templates/user/update.pt', context=context.GeneralContext, permission='update')
 def user_update(request):
+    request.javascript.append('select2.min.js')
+    request.css.append('select2.min.css')
+    request.javascript.append('select2_bullet_deletion_hack.js')
+    request.javascript.append('subject_select.js')
+
     form = forms.UserUpdate(request, request.user)
     if request.method == 'POST' and form.processPostData(request.POST):
         form.saveValues()
         request.db.commit()
         request.session.flash('Angaben geändert', queue='messages')
+        form = forms.UserUpdate(request, request.user)
     return {'form': form}
 
 @view_config(route_name='user_check', renderer='muesli.web:templates/user/check.pt', context=context.GeneralContext, permission='update')
 def user_check(request):
+    request.javascript.append('select2.min.js')
+    request.css.append('select2.min.css')
+    request.javascript.append('subject_select.js')
+
     form = forms.UserUpdate(request, request.user)
     if request.method == 'POST' and form.processPostData(request.POST):
         has_updated = request.db.query(models.UserHasUpdated).get(request.user.id)
@@ -346,11 +364,17 @@ def user_check(request):
 
 @view_config(route_name='user_register', renderer='muesli.web:templates/user/register.pt', context=context.GeneralContext)
 def register(request):
+    request.javascript.append('select2.min.js')
+    request.css.append('select2.min.css')
+    request.javascript.append('subject_select.js')
     form = forms.UserRegister(request)
     if request.method == 'POST' and form.processPostData(request.POST):
         if registerCommon(request, form):
             return HTTPFound(location=request.route_url('user_wait_for_confirmation'))
-    return {'form': form}
+    subjects = request.db.query(muesli.models.Subject).filter(muesli.models.Subject.curated == True).all()
+    for error in form.errors:
+        request.session.flash(error, queue='errors')
+    return {'form': form, 'subjects': subjects}
 
 
 @view_config(route_name='user_register_other', renderer='muesli.web:templates/user/register_other.pt', context=context.GeneralContext)

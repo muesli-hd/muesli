@@ -31,7 +31,6 @@ from muesli import models
 from muesli.web.api.v1 import allowed_attributes
 
 
-
 @view_config(route_name='openapi_spec', renderer='json')
 def api_spec(request):
     """ Return something.
@@ -46,7 +45,7 @@ def api_spec(request):
     """
     spec = APISpec(
         title='MÜSLI-API',
-        version='0.0.1',
+        version='0.0.2',
         openapi_version='2.0.0',
         securityDefinitions={
             "Bearer": {
@@ -80,6 +79,9 @@ def api_spec(request):
 
     add_pyramid_paths(spec, 'whoami', request=request)
 
+    add_pyramid_paths(spec, 'collection_subject', request=request)
+    add_pyramid_paths(spec, 'subject', request=request)
+
     # Be careful how the schemes are defined:
     #
     # If one (or its member) are instantiated as object and some are as class
@@ -108,6 +110,12 @@ def api_spec(request):
 
     spec.components.schema('ExerciseStudent', schema=models.ExerciseStudentSchema)
     spec.components.schema('Exercise', schema=models.ExerciseSchema)
+
+    spec.components.schema(
+        'CollectionSubject',
+        schema=models.SubjectSchema(only=allowed_attributes.collection_subject())
+    )
+    spec.components.schema('Subject', schema=models.SubjectSchema)
 
     openapi_json = spec.to_dict()
 

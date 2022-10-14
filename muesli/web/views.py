@@ -41,6 +41,8 @@ import os
 import datetime
 import traceback
 
+from sqlalchemy import select, func
+
 
 @view_config(route_name='overview', renderer='muesli.web:templates/overview.pt')
 def overview(request):
@@ -149,27 +151,14 @@ def emailAllUsers(request):
 
 @view_config(route_name='email_users', renderer='muesli.web:templates/email_users.pt', context=GeneralContext, permission='admin')
 def emailUsers(request):
-    ttype = request.params.get('type', 'wrong_subject')
+    ttype = request.params.get('type', 'unconfirmed')
     form = EmailWrongSubject(ttype, request)
     semesterlimit = utils.getSemesterLimit()
     students = request.db.query(models.User).filter(models.User.lecture_students.any(models.LectureStudent.lecture.has(models.Lecture.term >= semesterlimit))).all()
     bad_students = []
     headers = []
     table = []
-    if ttype=='wrong_subject':
-        headers = ['Fach', 'Beifach']
-        for student in students:
-            if not student.subject:
-                continue
-            lsub = student.subject.lower()
-            if 'mathematik (la)' in lsub:
-                if not ('hauptfach' in lsub or 'beifach' in lsub):
-                    bad_students.append(student)
-                elif not student.second_subject:
-                    bad_students.append(student)
-        for s in bad_students:
-            table.append((s,s.subject, s.second_subject))
-    elif ttype == 'unconfirmed':
+    if ttype == 'unconfirmed':
         headers = ['Anmeldedatum']
         bad_students = request.db.query(models.User).filter(models.User.password == None).all()
         for student in bad_students:
@@ -292,3 +281,17 @@ def favicon_view(request):
 @view_config(name='datenschutzerklaerung.html', renderer='muesli.web:templates/dataprotection.pt')
 def datenschutzerklaerung_view(request):
     return {'DATAPROTECTION_HTML': DATAPROTECTION_HTML}
+
+
+@view_config(route_name='subject_admin', renderer='muesli.web:templates/subject_admin.pt', context=GeneralContext,
+             permission='admin')
+def subject_admin(request):
+    query = select(models.Subject, func.count(models.User.id)).join(models.Subject.students).group_by(models.Subject.id)
+    subjects_and_studentcounts = request.db.scalars(query).all()
+    request.css.append('select2.min.css')
+    request.javascript.append('select2_bullet_deletion_hack.js')
+    request.javascript.append('select2.min.js')
+    request.javascript.append('toast.min.js')
+    request.css.append('toast.min.css')
+
+    return {'subjects': subjects_and_studentcounts}

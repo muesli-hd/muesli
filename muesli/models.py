@@ -24,11 +24,9 @@ import random
 import time
 import hashlib
 
-import sqlalchemy
 import sqlalchemy as sa
-import sqlalchemy.ext.declarative
-from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, String, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table, text
-from sqlalchemy.orm import relationship, backref, column_property, object_session
+from sqlalchemy import Column, ForeignKey, CheckConstraint, Text, String, Integer, Boolean, Unicode, DateTime, Date, Numeric, func, Table, text, select
+from sqlalchemy.orm import relationship, backref, column_property, object_session, declarative_base
 from muesli.types import Term, TutorialTime, ColumnWrapper
 from muesli.utils import DictOfObjects, AutoVivification, editOwnTutorials, listStrings, getTerms
 from muesli.web.api.v1 import allowed_attributes
@@ -37,7 +35,7 @@ from marshmallow import Schema, fields, pre_load, post_load
 from marshmallow.exceptions import ValidationError
 
 
-Base = sqlalchemy.ext.declarative.declarative_base()
+Base = declarative_base()
 
 
 lecture_tutors_table = Table('lecture_tutors', Base.metadata,
@@ -55,12 +53,25 @@ lecture_assistants_table = Table('lecture_assistants', Base.metadata,
         Column('assistant', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True)
 )
 
+user_subjects_table = Table('user_subjects', Base.metadata,
+                            Column('student', Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
+                            Column('subject', Integer, ForeignKey('subjects.id', ondelete='CASCADE'), primary_key=True)
+                            )
+
 # class GradingExam(Base):
 #        __tablename__ = 'grading_exams'
 #        grading_id = Column('grading', Integer, ForeignKey(Grading.id, ondelete='CASCADE'), nullable=False, primary_key=True)
 #        grading = relationship(Grading, backref='grading_exams')
 #        exam_id = Column('exam', Integer, ForeignKey(Exam.id, ondelete='CASCADE'), nullable=False, primary_key=True)
 #        exam = relationship(Exam, backref='grading_exams')
+
+
+class Subject(Base):
+    __tablename__ = 'subjects'
+    id = Column(Integer, primary_key=True)
+    name = Column(Text, nullable=False, unique=True)
+    curated = Column(Boolean, nullable=False, default=False)
+    students = relationship("User", secondary=user_subjects_table, backref=backref("subjects", order_by='Subject.id', lazy='dynamic'))
 
 
 class User(Base):
@@ -71,8 +82,6 @@ class User(Base):
     last_name = Column(Text, nullable=False)
     password = Column(Text)
     matrikel = Column(Text)
-    subject = Column(Text)
-    second_subject = Column(Text)
     title = Column(Text)
     # TODO: Convert to boolean
     is_admin = Column(Integer, nullable=False, default=0)
@@ -137,12 +146,6 @@ class User(Base):
 
     def confirmed(self):
         return self.password != None
-
-    def formatCompleteSubject(self):
-        ret = self.subject
-        if self.second_subject:
-            ret += ', Zweites Hauptfach: %s' % self.second_subject
-        return ret
 
     def is_deletable(self):
         if (self.tutorials.all()):
@@ -234,15 +237,11 @@ class Lecture(Base):
         if tutorials:
             ls = ls.filter(LectureStudent.tutorial_id.in_([tut.id for tut in tutorials]))  # sqlalchemy.or_(*[LectureStudent.tutorial_id==tut.id for tut in tutorials]))
         return ls
-#       @property
-#       def tutors(self):
-#               session = object_session(self)
-#               return session.query(User).filter(User.lecture_tutors.any(LectureTutor.lecture==self))
 
     def prepareTimePreferences(self, user=None):
         session = object_session(self)
         if self.mode == "prefs":
-            times = session.query(sqlalchemy.func.sum(Tutorial.max_students), Tutorial.time).\
+            times = session.query(func.sum(Tutorial.max_students), Tutorial.time).\
                     filter(Tutorial.lecture == self).\
                     group_by(Tutorial.time)
             times = [{'weekday':   result[1].weekday(),
@@ -265,25 +264,13 @@ class Lecture(Base):
             times = []
         return times
 
-    def pref_subjects(self):
-        session = object_session(self)
-        return session.query(sqlalchemy.func.count(User.id), User.subject).\
-                filter(User.time_preferences.any(TimePreference.lecture_id == self.id)).\
-                group_by(User.subject).order_by(User.subject)
-
-    def subjects(self):
-        session = object_session(self)
-        return session.query(sqlalchemy.func.count(User.id), User.subject).\
-                filter(User.lecture_students.any(LectureStudent.lecture_id == self.id)).\
-                group_by(User.subject).order_by(User.subject)
-
     def getLectureResults(self, tutorials=[], students=None):
         session = object_session(self)
         if not students:
             students = self.lecture_students_for_tutorials(tutorials)
         exercises = session.query(Exercise).filter(Exercise.exam_id.in_([e.id for e in self.exams])).all()
         lecture_results = session.query(\
-                        sqlalchemy.func.sum(ExerciseStudent.points).label('points'),
+                        func.sum(ExerciseStudent.points).label('points'),
                         ExerciseStudent.student_id.label('student_id'),
                         Exam, Exam.id)\
                         .filter(ExerciseStudent.exercise_id.in_([e.id  for e in exercises]))\
@@ -365,89 +352,6 @@ class Exam(Base):
             if e.id not in results:
                 results[e.id] = {'points': None, 'exercise': e}
         return results
-
-    def getStatistics(self, tutorials=None, students=None, statistics=None, prefix='lec'):
-        if statistics is None:
-            statistics = AutoVivification()
-        session = object_session(self)
-        if not students:
-            students = self.lecture.lecture_students_for_tutorials(tutorials).all()
-        pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student_id for s  in students]))\
-                                                .filter(ExerciseStudent.points!=None)
-        pointsStmt = pointsQuery.subquery()
-        exerciseStatistics = session.query(\
-                        pointsStmt.c.exercise.label('exercise_id'),
-                        func.count(pointsStmt.c.student).label('count'),
-                        func.avg(pointsStmt.c.points).label('avg'),
-                        func.variance(pointsStmt.c.points).label('variance')
-                ).group_by(pointsStmt.c.exercise)
-        examPoints = session.query(\
-                        pointsStmt.c.student.label('student_id'),
-                        func.sum(pointsStmt.c.points).label('points'),
-                ).group_by(pointsStmt.c.student).subquery()
-        examStatistics = session.query(\
-                        func.count(examPoints.c.student_id).label('count'),
-                        func.avg(examPoints.c.points).label('avg'),
-                        func.variance(examPoints.c.points).label('variance'),
-                ).one()
-        statistics['exam'] = {
-                prefix+'_avg': examStatistics.avg,
-                prefix+'_std': math.sqrt(examStatistics.variance) if examStatistics.variance else None,
-                prefix+'_count': examStatistics.count,
-                'max': self.getMaxpoints()}
-        for e in self.exercises:
-            statistics[e.id] = {prefix+'_avg': None, prefix+'_std': None, prefix+'_count': 0, 'max': e.maxpoints}
-        for e in exerciseStatistics.all():
-            statistics[e.exercise_id] = {
-                    prefix+'_avg': e.avg,
-                    prefix+'_std': math.sqrt(e.variance) if e.variance else None,
-                    prefix+'_count': e.count
-                    }
-        return statistics
-
-    def getStatisticsBySubjects(self, tutorials=None, students=None, statistics=None, prefix='lec'):
-        session = object_session(self)
-        if not students:
-            students = self.lecture.lecture_students_for_tutorials(tutorials)
-        exercise_points = session.query(ExerciseStudent, ExerciseStudent.student)
-        pointsQuery = self.exercise_points.filter(ExerciseStudent.student_id.in_([s.student_id for s  in students]))\
-                .filter(ExerciseStudent.exercise_id.in_([e.id for e in self.exercises]))\
-                .filter(ExerciseStudent.points!=None).subquery()
-        pointsStmt = session.query(User.subject, pointsQuery).join(pointsQuery, pointsQuery.c.student==User.id).subquery()
-        exerciseStatistics = session.query(\
-                        pointsStmt.c.exercise.label('exercise_id'),
-                        pointsStmt.c.subject.label('subject'),
-                        func.count(pointsStmt.c.student).label('count'),
-                        func.avg(pointsStmt.c.points).label('avg'),
-                        func.variance(pointsStmt.c.points).label('variance')
-                ).group_by(pointsStmt.c.exercise, pointsStmt.c.subject).all()
-        examPoints = session.query(\
-                        pointsStmt.c.student.label('student_id'),
-                        pointsStmt.c.subject.label('subject'),
-                        func.sum(pointsStmt.c.points).label('points'),
-                ).group_by(pointsStmt.c.student, pointsStmt.c.subject).subquery()
-        examStatistics = session.query(\
-                        examPoints.c.subject.label('subject'),
-                        func.count(examPoints.c.student_id).label('count'),
-                        func.avg(examPoints.c.points).label('avg'),
-                        func.variance(examPoints.c.points).label('variance'),
-                ).group_by(examPoints.c.subject).all()
-        if statistics is None:
-            statistics = AutoVivification()
-        maxpoints = self.getMaxpoints()
-        for res in examStatistics:
-            statistics[res.subject]['exam'] = {prefix+'_avg': res.avg,
-                                               prefix+'_std': math.sqrt(res.variance) if res.variance else None,
-                                               prefix+'_count': res.count,
-                                               'max': maxpoints}
-        for e in exerciseStatistics:
-            statistics[e.subject][e.exercise_id] = {
-                    prefix+'_avg': e.avg,
-                    prefix+'_std': math.sqrt(e.variance) if e.variance else None,
-                    prefix+'_count': e.count,
-                    'max': session.query(Exercise).get(e.exercise_id).maxpoints
-                    }
-        return statistics
 
     def getMaxpoints(self):
         return int(sum([e.maxpoints for e in self.exercises]))
@@ -735,6 +639,12 @@ class ExerciseSchema(Schema):
 class ExerciseStudentSchema(Schema):
     student = fields.Nested(UserSchema, only=allowed_attributes.user())
     points = fields.Float()
+
+
+class SubjectSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    name = fields.String(required=True)
+    curated = fields.Boolean()
 
 
 class BearerToken(Base):

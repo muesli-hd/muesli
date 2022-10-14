@@ -27,7 +27,7 @@
             ${ls.student.matrikel}
           </td>
           <td>
-            ${ls.student.subject}
+            ${', '.join(ls.student.subjects)}
           </td>
           <td>
             <a class="text-monospace" tal:attributes="href 'mailto:'+ls.student.email">

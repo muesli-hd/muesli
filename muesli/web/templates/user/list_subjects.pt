@@ -14,7 +14,7 @@
   <tbody>
     <tr tal:repeat="(subject, count) subjects">
       <td>
-        <a tal:attributes="href request.route_path('user_list', _query={'subject': subject})">
+        <a tal:attributes="href request.route_path('user_list', _query={'subject': subject.id})">
           ${subject}
         </a>
       </td>

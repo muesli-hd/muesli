@@ -400,7 +400,7 @@ class Export(ExcelView):
                 g = ''
             data = [grade.student.matrikel,
                     grade.student.last_name, '',
-                    grade.student.formatCompleteSubject(), '', '', g, '']
+                    ', '.join([s.name for s in grade.student.subjects]), '', '', g, '']
             for j, d in enumerate(data, 1):
                 worksheet_grades.cell(row=1+i, column=j, value=d)
         # set column width

@@ -371,6 +371,7 @@ def email(request):
             'lecture': lecture,
             'form': form}
 
+
 @view_config(route_name='tutorial_ajax_get_tutorial', renderer='json', context=LectureContext, permission='get_tutorials')
 def ajaxGetTutorial(request):
     lecture = request.context.lecture

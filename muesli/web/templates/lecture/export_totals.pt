@@ -29,7 +29,7 @@
     <td>${ls.tutorial.tutor.last_name if ls.tutorial.tutor else ''}</td>
     <td>${ls.student.last_name}, ${ls.student.first_name}</td>
     <td>${ls.student.matrikel}</td>
-    <td>${ls.student.subject}</td>
+    <td>${', '.join(ls.student.subjects)}</td>
     <div tal:repeat="cat exams_by_category">
       <td tal:repeat="exam cat['exams']">
         ${results[ls.student_id]['results'].get(exam.id, '') or ''}
