@@ -20,8 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import io
-import json
-from collections import Counter
+from collections import Counter, defaultdict
 
 import PIL.Image
 import PIL.ImageDraw
@@ -171,7 +170,7 @@ class EnterPointsBasic:
         pointsQuery = exam.exercise_points.filter(
             ExerciseStudent.student_id.in_([s.student.id for s in students])).options(
             sqlalchemy.orm.joinedload(ExerciseStudent.student), sqlalchemy.orm.joinedload(ExerciseStudent.exercise))
-        points = DictOfObjects(lambda: {})
+        points = defaultdict(lambda: {})
         # for s in students:
         #       for e in exam.exercises:
         #               points[s.student_id][e.id] = None
@@ -350,7 +349,7 @@ class Export:
         pointsQuery = exam.exercise_points.filter(
             ExerciseStudent.student_id.in_([s.student.id for s in students])).options(
             sqlalchemy.orm.joinedload(ExerciseStudent.student), sqlalchemy.orm.joinedload(ExerciseStudent.exercise))
-        points = DictOfObjects(lambda: {})
+        points = defaultdict(lambda: {})
         for point in pointsQuery:
             points[point.student_id][point.exercise_id] = point
         for student in students:

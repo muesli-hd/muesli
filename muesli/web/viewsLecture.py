@@ -37,6 +37,8 @@ from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
 import sqlalchemy
 
+from collections import defaultdict
+
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from tempfile import NamedTemporaryFile
@@ -518,14 +520,14 @@ def exportTotals(request):
     Tutor = sqlalchemy.orm.aliased(models.User)
     ls = ls.join(models.LectureStudent.student).join(models.LectureStudent.tutorial).join(Tutor, models.Tutorial.tutor).order_by(Tutor.last_name, models.User.last_name, models.User.first_name)
     lecture_results = lecture.get_lecture_results(students=ls)
-    results = DictOfObjects(lambda: DictOfObjects(lambda: {}))
+    results = defaultdict(lambda: defaultdict(lambda: {}))
     for res in lecture_results:
         results[res.student_id]['results'][res.Exam.id] = res.points
     cat_results = lecture.get_lecture_results_by_category(students=ls)
     for res in cat_results:
         results[res.student_id]['totals'][res.category] = res.points
     gresults = lecture.get_grading_results(students = ls)
-    grading_results = DictOfObjects(lambda: {})
+    grading_results = defaultdict(lambda: {})
     for res in gresults:
         grading_results[res.student_id][res.grading_id] = res.grade
     exams_by_category = [

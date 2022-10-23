@@ -29,7 +29,6 @@ from muesli import utils
 from muesli.types import TutorialTime
 import re
 import requests
-import json
 import sqlalchemy
 
 
@@ -175,7 +174,8 @@ class Form:
             self.errors = self.formValidator.errors
             return False
 
-    __getitem__ = lambda self, key: self.named_fields[key].value
+    def __getitem__(self, item):
+        return self.named_fields[item].value
 
     def __setitem__(self, key, value):
         self.named_fields[key].value = value
@@ -549,7 +549,7 @@ class UserEdit(ObjectForm):
                 label='Studiengänge',
                 type='select',
                 value=[s.id for s in user.subjects],
-                validator=SubjectSelect(request.db),
+                validator=SubjectSelect(request.db, if_missing=[]),
                 options=utils.get_selectable_subjects(request, user)
             ),
             FormField(
@@ -611,7 +611,7 @@ class UserUpdate(ObjectForm):
                 label='Studiengänge',
                 type='subject_select',
                 value=[s.id for s in user.subjects],
-                validator=SubjectSelect(request.db),
+                validator=SubjectSelect(request.db, if_missing=[]),
                 options=utils.get_selectable_subjects(request, user)
             ),
         ]
@@ -674,7 +674,7 @@ class UserRegister(CaptchaSecuredObjectForm):
                 'subjects',
                 label='Studiengänge',
                 type='select',
-                validator=SubjectSelect(request.db),
+                validator=SubjectSelect(request.db, if_missing=[]),
                 options=utils.get_selectable_subjects(request)
             ),
         ]
