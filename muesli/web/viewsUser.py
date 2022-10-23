@@ -354,7 +354,7 @@ def user_check(request):
         if has_updated is None:
             has_updated = models.UserHasUpdated(request.user.id, '0')
         has_updated.has_updated_info = muesli.utils.get_semester_limit()
-        if not has_updated in request.db:
+        if has_updated not in request.db:
             request.db.add(has_updated)
         request.db.commit()
         form.saveValues()
