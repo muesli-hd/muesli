@@ -19,43 +19,39 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from muesli import models
-from muesli import utils
+import io
+import json
+from collections import Counter
+
+import PIL.Image
+import PIL.ImageDraw
+import matplotlib
+import sqlalchemy
+from pyramid.httpexceptions import HTTPFound
+from pyramid.response import Response
+from pyramid.view import view_config
+from sqlalchemy.orm import exc
+from sqlalchemy.sql import func
+
 from muesli.web import statements
 from muesli.web.context import *
 from muesli.web.forms import *
 
-from pyramid.view import view_config
-from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound
-from pyramid.url import route_url
-from sqlalchemy.orm import exc
-from sqlalchemy.sql import func
-import sqlalchemy
-
-import PIL.Image
-import PIL.ImageDraw
-import io
-import json
-
-from collections import Counter
-
-import matplotlib
-
-matplotlib.use( 'Agg' )
+matplotlib.use('Agg')
 from matplotlib import pyplot
 
 import numpy as np
 
-import re
-import os
 import math
 
-@view_config(route_name='exam_edit', renderer='muesli.web:templates/exam/edit.pt', context=ExamContext, permission='edit')
+
+@view_config(route_name='exam_edit', renderer='muesli.web:templates/exam/edit.pt', context=ExamContext,
+             permission='edit')
 class Edit:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
+
     def __call__(self):
         exam = self.request.context.exam
         form = LectureEditExam(self.request, exam)
@@ -63,21 +59,26 @@ class Edit:
             form.saveValues()
             self.request.db.commit()
             form.message = "Änderungen gespeichert."
-        if exam.admission!=None or exam.registration!=None:
-            students = exam.lecture.lecture_students.options(sqlalchemy.orm.joinedload(LectureStudent.student))\
-                    .options(sqlalchemy.orm.joinedload('tutorial.tutor'))
+        if exam.admission != None or exam.registration != None:
+            students = exam.lecture.lecture_students.options(sqlalchemy.orm.joinedload(LectureStudent.student)) \
+                .options(sqlalchemy.orm.joinedload('tutorial.tutor'))
             if exam.admission != None:
-                students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.admission==True))))
+                students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(
+                    sqlalchemy.and_(models.ExamAdmission.exam_id == exam.id, models.ExamAdmission.admission == True))))
             if exam.registration != None:
-                students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.registration==True))))
+                students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(
+                    sqlalchemy.and_(models.ExamAdmission.exam_id == exam.id,
+                                    models.ExamAdmission.registration == True))))
             # first sort key: last_name, second sort key: first_name
             students = sorted(students, key=lambda s: (s.student.last_name.lower(), s.student.first_name.lower()))
-        else: students = None
+        else:
+            students = None
         return {'exam': exam,
                 'form': form,
                 'tutorial_ids': self.request.context.tutorial_ids_str,
                 'students': students
-               }
+                }
+
 
 @view_config(route_name='exam_delete', context=ExamContext, permission='edit')
 def delete(request):
@@ -91,19 +92,23 @@ def delete(request):
         request.db.delete(exam)
         request.db.commit()
         request.session.flash('Testat gelöscht!', queue='messages')
-    return HTTPFound(location=request.route_url('lecture_edit', lecture_id = exam.lecture.id))
+    return HTTPFound(location=request.route_url('lecture_edit', lecture_id=exam.lecture.id))
 
-@view_config(route_name='exam_add_or_edit_exercise', renderer='muesli.web:templates/exam/add_or_edit_exercise.pt', context=ExamContext, permission='edit')
+
+@view_config(route_name='exam_add_or_edit_exercise', renderer='muesli.web:templates/exam/add_or_edit_exercise.pt',
+             context=ExamContext, permission='edit')
 class AddOrEditExercise:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
         self.exercise_id = request.matchdict.get('exercise_id', None)
+
     def __call__(self):
         exam = self.request.context.exam
         if self.exercise_id:
             exercise = self.db.query(models.Exercise).get(self.exercise_id)
-        else: exercise = None
+        else:
+            exercise = None
         form = ExamAddOrEditExercise(self.request, exercise)
         if self.request.method == 'POST' and form.processPostData(self.request.POST):
             if exercise == None:
@@ -111,7 +116,8 @@ class AddOrEditExercise:
                 exercise.exam = exam
                 form.obj = exercise
                 creating = True
-            else: creating = False
+            else:
+                creating = False
             form.saveValues()
             self.request.db.commit()
             if creating: form['nr'] = form['nr'] + 1
@@ -119,12 +125,14 @@ class AddOrEditExercise:
         return {'form': form,
                 'exam': exam}
 
+
 @view_config(route_name='exam_delete_exercise', context=ExamContext, permission='edit')
 class DeleteExercise:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
         self.exercise_id = request.matchdict['exercise_id']
+
     def __call__(self):
         exam = self.request.context.exam
         exercise = self.db.query(models.Exercise).get(self.exercise_id)
@@ -138,7 +146,8 @@ class DeleteExercise:
             self.request.db.delete(exercise)
             self.request.db.commit()
             self.request.session.flash('Aufgabe gelöscht', queue='messages')
-        return HTTPFound(location=self.request.route_url('exam_edit', exam_id = exam.id))
+        return HTTPFound(location=self.request.route_url('exam_edit', exam_id=exam.id))
+
 
 class EnterPointsBasic:
     def __init__(self, request, raw=False):
@@ -146,20 +155,24 @@ class EnterPointsBasic:
         self.db = self.request.db
         self.tutorial_ids = self.request.context.tutorial_ids
         self.raw = raw
+
     def __call__(self):
         error_msgs = []
         exam = self.request.context.exam
         tutorials = self.request.context.tutorials
-        students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))\
-                                .options(sqlalchemy.orm.joinedload('tutorial.tutor'))
+        students = exam.lecture.lecture_students_for_tutorials(tutorials).options(
+            sqlalchemy.orm.joinedload(LectureStudent.student)) \
+            .options(sqlalchemy.orm.joinedload('tutorial.tutor'))
         students = students.all()
         if 'students' in self.request.GET:
             student_ids = self.request.GET['students'].split(',')
             student_ids = [int(sid.strip()) for sid in student_ids]
             students = [s for s in students if s.student.id in student_ids]
-        pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student), sqlalchemy.orm.joinedload(ExerciseStudent.exercise))
+        pointsQuery = exam.exercise_points.filter(
+            ExerciseStudent.student_id.in_([s.student.id for s in students])).options(
+            sqlalchemy.orm.joinedload(ExerciseStudent.student), sqlalchemy.orm.joinedload(ExerciseStudent.exercise))
         points = DictOfObjects(lambda: {})
-        #for s in students:
+        # for s in students:
         #       for e in exam.exercises:
         #               points[s.student_id][e.id] = None
         for point in pointsQuery.all():
@@ -175,8 +188,9 @@ class EnterPointsBasic:
                     points[student.student_id][e.id] = exerciseStudent
                     self.db.add(exerciseStudent)
 
-        db_admissions = exam.exam_admissions.filter(ExamAdmission.student_id.in_([s.student.id for s  in students])).all()
-        admissions={}
+        db_admissions = exam.exam_admissions.filter(
+            ExamAdmission.student_id.in_([s.student.id for s in students])).all()
+        admissions = {}
         for admission in db_admissions:
             admissions[admission.student_id] = admission
         for student in students:
@@ -205,12 +219,13 @@ class EnterPointsBasic:
                         if not value:
                             points[student.student_id][e.id].points = None
                         else:
-                            value = value.replace(',','.')
+                            value = value.replace(',', '.')
                             try:
                                 value = float(value)
                                 points[student.student_id][e.id].points = value
                             except:
-                                error_msgs.append('Could not convert "%s" (%s, Exercise %i)'%(value, student.student.name, e.nr))
+                                error_msgs.append(
+                                    'Could not convert "%s" (%s, Exercise %i)' % (value, student.student.name, e.nr))
         for student in points:
             points[student]['total'] = sum([v.points for v in list(points[student].values()) if v.points])
         if self.db.new or self.db.dirty or self.db.deleted:
@@ -234,47 +249,57 @@ class EnterPointsBasic:
                 'error_msg': '\n'.join(error_msgs)}
 
 
-@view_config(route_name='exam_enter_points', renderer='muesli.web:templates/exam/enter_points.pt', context=ExamContext, permission='view_points')
+@view_config(route_name='exam_enter_points', renderer='muesli.web:templates/exam/enter_points.pt', context=ExamContext,
+             permission='view_points')
 class EnterPoints(EnterPointsBasic):
     def __init__(self, request):
         super(EnterPoints, self).__init__(request, raw=False)
+
     def valueToBool(self, value):
-        if value=='1':
+        if value == '1':
             return True
-        if value=='0':
+        if value == '0':
             return False
-        if value=='':
+        if value == '':
             return None
         raise ValueError('"%r" could not be converted to boolean' % value)
 
-@view_config(route_name='exam_enter_points_raw', renderer='muesli.web:templates/exam/enter_points_raw.pt', context=ExamContext, permission='view_points')
+
+@view_config(route_name='exam_enter_points_raw', renderer='muesli.web:templates/exam/enter_points_raw.pt',
+             context=ExamContext, permission='view_points')
 class EnterPointsRaw(EnterPointsBasic):
     def __init__(self, request):
         super(EnterPointsRaw, self).__init__(request, raw=True)
 
-@view_config(route_name='exam_admission', renderer='muesli.web:templates/exam/admission.pt', context=ExamContext, permission='view_points')
+
+@view_config(route_name='exam_admission', renderer='muesli.web:templates/exam/admission.pt', context=ExamContext,
+             permission='view_points')
 class Admission:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
         self.tutorial_ids = self.request.context.tutorial_ids
+
     def valueToBool(self, value):
-        if value=='1':
+        if value == '1':
             return True
-        if value=='0':
+        if value == '0':
             return False
-        if value=='':
+        if value == '':
             return None
         raise ValueError('"%r" could not be converted to boolean' % value)
+
     def __call__(self):
         error_msgs = []
         exam = self.request.context.exam
         tutorials = self.request.context.tutorials
-        students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))\
-                                .options(sqlalchemy.orm.joinedload('tutorial.tutor'))
+        students = exam.lecture.lecture_students_for_tutorials(tutorials).options(
+            sqlalchemy.orm.joinedload(LectureStudent.student)) \
+            .options(sqlalchemy.orm.joinedload('tutorial.tutor'))
         students = students.all()
-        db_admissions = exam.exam_admissions.filter(ExamAdmission.student_id.in_([s.student.id for s  in students])).all()
-        admissions={}
+        db_admissions = exam.exam_admissions.filter(
+            ExamAdmission.student_id.in_([s.student.id for s in students])).all()
+        admissions = {}
         for admission in db_admissions:
             admissions[admission.student_id] = admission
         for student in students:
@@ -283,8 +308,8 @@ class Admission:
                 self.db.add(admission)
                 admissions[student.student_id] = admission
         counter = {'admission': Counter([x.admission for x in list(admissions.values())]),
-                           'registration': Counter([x.registration for x in list(admissions.values())]),
-                           'medical_certificate': Counter([x.medical_certificate for x in list(admissions.values())])}
+                   'registration': Counter([x.registration for x in list(admissions.values())]),
+                   'medical_certificate': Counter([x.medical_certificate for x in list(admissions.values())])}
         if self.request.method == 'POST':
             if not self.request.permissionInfo.has_permission('enter_points'):
                 return HTTPForbidden('Sie haben keine Rechte um Punkte einzutragen!')
@@ -297,27 +322,34 @@ class Admission:
                     admissions[ls.student_id].registration = self.valueToBool(self.request.POST[registration_parameter])
                 certificate_parameter = 'medical_certificate-{0}'.format(ls.student_id)
                 if exam.medical_certificate and certificate_parameter in self.request.POST:
-                    admissions[ls.student_id].medical_certificate = self.valueToBool(self.request.POST[certificate_parameter])
+                    admissions[ls.student_id].medical_certificate = self.valueToBool(
+                        self.request.POST[certificate_parameter])
         if self.db.new or self.db.dirty or self.db.deleted:
             self.db.commit()
         return {'exam': exam,
                 'tutorial_ids': self.request.matchdict['tutorial_ids'],
                 'students': students,
                 'admissions': admissions,
-                        'counter': counter,
+                'counter': counter,
                 }
 
-@view_config(route_name='exam_export', renderer='muesli.web:templates/exam/export.pt', context=ExamContext, permission='view_points')
+
+@view_config(route_name='exam_export', renderer='muesli.web:templates/exam/export.pt', context=ExamContext,
+             permission='view_points')
 class Export:
     def __init__(self, request):
         self.request = request
         self.db = self.request.db
         self.tutorial_ids = request.context.tutorial_ids
+
     def __call__(self):
         exam = self.request.context.exam
         tutorials = self.request.context.tutorials
-        students = exam.lecture.lecture_students_for_tutorials(tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student)).all()
-        pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student), sqlalchemy.orm.joinedload(ExerciseStudent.exercise))
+        students = exam.lecture.lecture_students_for_tutorials(tutorials).options(
+            sqlalchemy.orm.joinedload(LectureStudent.student)).all()
+        pointsQuery = exam.exercise_points.filter(
+            ExerciseStudent.student_id.in_([s.student.id for s in students])).options(
+            sqlalchemy.orm.joinedload(ExerciseStudent.student), sqlalchemy.orm.joinedload(ExerciseStudent.exercise))
         points = DictOfObjects(lambda: {})
         for point in pointsQuery:
             points[point.student_id][point.exercise_id] = point
@@ -333,21 +365,21 @@ class Export:
             self.db.commit()
         for student in points:
             points[student]['total'] = sum([v.points for v in list(points[student].values()) if v.points])
-        if exam.admission!=None or exam.registration!=None or exam.medical_certificate!=None:
+        if exam.admission != None or exam.registration != None or exam.medical_certificate != None:
             admissions = exam.exam_admissions
             for a in admissions:
-                if exam.admission!=None:
+                if exam.admission != None:
                     points[a.student_id]['admission'] = a.admission
-                if exam.registration!=None:
+                if exam.registration != None:
                     points[a.student_id]['registration'] = a.registration
-                if exam.medical_certificate!=None:
+                if exam.medical_certificate != None:
                     points[a.student_id]['medical_certificate'] = a.medical_certificate
             for student in students:
-                if exam.admission!=None and not 'admission' in points[student.student_id]:
+                if exam.admission != None and not 'admission' in points[student.student_id]:
                     points[student.student_id]['admission'] = None
-                if exam.registration!=None and not 'registration' in points[student.student_id]:
+                if exam.registration != None and not 'registration' in points[student.student_id]:
                     points[student.student_id]['registration'] = None
-                if exam.medical_certificate!=None and not 'medical_certificate' in points[student.student_id]:
+                if exam.medical_certificate != None and not 'medical_certificate' in points[student.student_id]:
                     points[student.student_id]['medical_certificate'] = None
         return {'exam': exam,
                 'tutorial_ids': self.request.matchdict['tutorial_ids'],
@@ -355,7 +387,8 @@ class Export:
                 'points': points}
 
 
-@view_config(route_name='exam_statistics', renderer='muesli.web:templates/exam/statistics.pt', context=ExamContext, permission='statistics')
+@view_config(route_name='exam_statistics', renderer='muesli.web:templates/exam/statistics.pt', context=ExamContext,
+             permission='statistics')
 def statistics(request):
     exam = request.context.exam
     tutorials = request.context.tutorials
@@ -373,28 +406,32 @@ def statistics(request):
             'admission_counts': admission_counts,
             'statistics_data': statistics_data}
 
+
 @view_config(route_name='exam_statistics_bar')
 class ExamStatisticsBar:
     def __init__(self, request):
         self.request = request
         self.width = 60
         self.height = 10
-        self.color1 = (0,0,255)
-        self.color2 = (140,140,255)
+        self.color1 = (0, 0, 255)
+        self.color2 = (140, 140, 255)
         self.max = float(request.matchdict['max'])
         self.lecture_points = float(request.matchdict['lecture_points'])
-        self.tutorial_points = float(request.matchdict['tutorial_points'])\
-                if (request.matchdict['tutorial_points']!=None and request.matchdict['tutorial_points']!='') else None
+        self.tutorial_points = float(request.matchdict['tutorial_points']) \
+            if (request.matchdict['tutorial_points'] != None and request.matchdict['tutorial_points'] != '') else None
         self.values = [[self.lecture_points, self.max]]
         if self.tutorial_points != None:
-            self.values.insert(0,[self.tutorial_points, self.max])
+            self.values.insert(0, [self.tutorial_points, self.max])
+
     def __call__(self):
-        image = PIL.Image.new('RGB', (self.width,self.height),(255,255,255))
+        image = PIL.Image.new('RGB', (self.width, self.height), (255, 255, 255))
         draw = PIL.ImageDraw.Draw(image)
-        barheight = float(self.height)/len(self.values)
-        for i,bar in enumerate(self.values):
-            draw.rectangle([(0,i*barheight),(float(self.width)*bar[1]/self.max,(i+1)*barheight)], fill=self.color2)
-            draw.rectangle([(0,i*barheight),(float(self.width)*bar[0]/self.max,(i+1)*barheight)], fill=self.color1)
+        barheight = float(self.height) / len(self.values)
+        for i, bar in enumerate(self.values):
+            draw.rectangle([(0, i * barheight), (float(self.width) * bar[1] / self.max, (i + 1) * barheight)],
+                           fill=self.color2)
+            draw.rectangle([(0, i * barheight), (float(self.width) * bar[0] / self.max, (i + 1) * barheight)],
+                           fill=self.color1)
         output = io.BytesIO()
         image.save(output, format='PNG')
         response = Response()
@@ -404,9 +441,11 @@ class ExamStatisticsBar:
         output.close()
         return response
 
+
 class MatplotlibView:
     def __init__(self):
         self.fig = pyplot.figure()
+
     def createResponse(self):
         output = io.BytesIO()
         self.fig.savefig(output, format='png', dpi=50, bbox_inches='tight')
@@ -417,6 +456,7 @@ class MatplotlibView:
         output.close()
         return response
 
+
 class Histogram(MatplotlibView):
     def __init__(self, request):
         MatplotlibView.__init__(self)
@@ -425,6 +465,7 @@ class Histogram(MatplotlibView):
         self.bins = None
         self.max = None
         self.label = None
+
     def __call__(self):
         if not self.bins:
             self.getBins()
@@ -433,13 +474,15 @@ class Histogram(MatplotlibView):
             ax.hist(self.points, bins=self.bins, color='red')
         ax.set_title(self.label)
         return self.createResponse()
+
     def getBins(self):
-        if self.max==None:
+        if self.max == None:
             self.max = max(self.points)
         factor = 1
-        while (self.max+2)/factor > 15:
+        while (self.max + 2) / factor > 15:
             factor += 1
-        self.bins = [i*factor-0.5 for i in range(int(math.ceil((self.max+2)/factor)))]
+        self.bins = [i * factor - 0.5 for i in range(int(math.ceil((self.max + 2) / factor)))]
+
 
 @view_config(route_name='exam_histogram_for_exercise', context=ExerciseContext, permission='statistics')
 class HistogramForExercise(Histogram):
@@ -448,10 +491,12 @@ class HistogramForExercise(Histogram):
         self.label = 'Punkteverteilung diese Gruppe' if self.request.context.tutorials else 'Punkteverteilung alle Gruppen'
         self.exercise = self.request.context.exercise
         exercise_points = self.exercise.exercise_points
-        students = self.exercise.exam.lecture.lecture_students_for_tutorials(tutorials=self.request.context.tutorials, order=False)
+        students = self.exercise.exam.lecture.lecture_students_for_tutorials(tutorials=self.request.context.tutorials,
+                                                                             order=False)
         exercise_points = exercise_points.filter(ExerciseStudent.student_id.in_([s.student_id for s in students]))
-        self.points = [round(float(p.points)) for p in exercise_points if p.points!=None]
+        self.points = [round(float(p.points)) for p in exercise_points if p.points != None]
         self.max = self.exercise.maxpoints
+
 
 @view_config(route_name='exam_histogram_for_exam', context=ExamContext, permission='statistics')
 class HistogramForExam(Histogram):
@@ -459,9 +504,10 @@ class HistogramForExam(Histogram):
         Histogram.__init__(self, request)
         self.label = 'Punkteverteilung diese Gruppe' if self.request.context.tutorials else 'Punkteverteilung alle Gruppen'
         self.exam = self.request.context.exam
-        students = self.exam.lecture.lecture_students_for_tutorials(tutorials=self.request.context.tutorials, order=False)
+        students = self.exam.lecture.lecture_students_for_tutorials(tutorials=self.request.context.tutorials,
+                                                                    order=False)
         exercise_points = self.exam.get_results(students=students)
-        self.points = [round(float(p.points)-0.01) for p in exercise_points if p.points!=None]
+        self.points = [round(float(p.points) - 0.01) for p in exercise_points if p.points != None]
         self.max = self.exam.get_max_points()
 
 
@@ -480,7 +526,8 @@ class Correlation(MatplotlibView):
         lecture = self.request.db.query(models.Lecture).get(id)
         points = lecture.get_lecture_results_by_category()
         max_points = sum([exam.get_max_points() for exam in lecture.exams if exam.category == 'assignment'])
-        return dict([(e.student_id, e.points) for e in points if e.points != None and e.category == 'assignment']), max_points, lecture.name
+        return dict([(e.student_id, e.points) for e in points if
+                     e.points != None and e.category == 'assignment']), max_points, lecture.name
 
     def getExerciseData(self, id):
         exercise = self.request.db.query(models.Exercise).get(id)
@@ -490,7 +537,7 @@ class Correlation(MatplotlibView):
                 "Aufgabe {}".format(exercise.nr))
 
     def getData(self, source):
-        source_type, source_id = source.split('_',1)
+        source_type, source_id = source.split('_', 1)
         if source_type == 'exam':
             return self.getExamData(source_id)
         elif source_type == 'lecture':
@@ -498,14 +545,14 @@ class Correlation(MatplotlibView):
         elif source_type == 'exercise':
             return self.getExerciseData(source_id)
 
-    def getBins(self, max_value, max_bins = 10):
-        if float(max_value)/max_bins < 1:
+    def getBins(self, max_value, max_bins=10):
+        if float(max_value) / max_bins < 1:
             stepsize = 0.5
         else:
-            stepsize = int(max_value/max_bins)
+            stepsize = int(max_value / max_bins)
         bins = [0]
         while bins[-1] < float(max_value):
-            bins.append(bins[-1]+stepsize)
+            bins.append(bins[-1] + stepsize)
         return bins
 
     def __call__(self):
@@ -513,45 +560,47 @@ class Correlation(MatplotlibView):
         source2 = self.request.GET['source2']
         data1, max1, name1 = self.getData(source1)
         data2, max2, name2 = self.getData(source2)
-        student_ids =  set(data1.keys()).intersection(list(data2.keys()))
+        student_ids = set(data1.keys()).intersection(list(data2.keys()))
         data = np.array([(float(data1[s_id]), float(data2[s_id])) for s_id in student_ids])
         if len(data):
-            x = data[:,0]
-            y = data[:,1]
-        else: x,y = [], []
+            x = data[:, 0]
+            y = data[:, 1]
+        else:
+            x, y = [], []
         bins1 = self.getBins(max1)
         bins2 = self.getBins(max2)
 
         try:
-            hist,xedges,yedges = np.histogram2d(x,y,bins=[bins1, bins2])
+            hist, xedges, yedges = np.histogram2d(x, y, bins=[bins1, bins2])
         except ValueError:
             # x,y = [] raises ValueErrors in old numpy
             hist = np.array([[0]])
-            xedges = [0,1]
+            xedges = [0, 1]
             yedges = xedges
 
-        color_stepsize = int(math.ceil(hist.max()/10.0)) or 1
+        color_stepsize = int(math.ceil(hist.max() / 10.0)) or 1
         color_ticks = list(range(0, int(hist.max()) or 1, color_stepsize))
-        color_bins = [-color_stepsize/2.0]
-        color_bins.extend([t+color_stepsize/2.0 for t in color_ticks])
+        color_bins = [-color_stepsize / 2.0]
+        color_bins.extend([t + color_stepsize / 2.0 for t in color_ticks])
 
         norm = matplotlib.colors.BoundaryNorm(color_bins, len(color_ticks))
 
-        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1] ]
+        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
         ax = self.fig.add_subplot(111)
-        im = ax.imshow(hist.T,extent=extent,interpolation='nearest',
-                origin='lower',
-                cmap = pyplot.cm.gray_r,
-                aspect='auto')
+        im = ax.imshow(hist.T, extent=extent, interpolation='nearest',
+                       origin='lower',
+                       cmap=pyplot.cm.gray_r,
+                       aspect='auto')
         ax.set_xlabel(name1)
         ax.set_ylabel(name2)
         self.fig.colorbar(im, norm=norm, boundaries=color_bins, ticks=color_ticks)
-        corrcoef = np.corrcoef(x, y)[0,1] if len(x)>0 else 0
+        corrcoef = np.corrcoef(x, y)[0, 1] if len(x) > 0 else 0
         ax.set_title("Korrelation = %.2f" % corrcoef)
         return self.createResponse()
 
 
-@view_config(route_name='exam_enter_points_single', renderer='muesli.web:templates/exam/enter_points_single.pt', context=ExamContext, permission='enter_points')
+@view_config(route_name='exam_enter_points_single', renderer='muesli.web:templates/exam/enter_points_single.pt',
+             context=ExamContext, permission='enter_points')
 def enterPointsSingle(request):
     exam = request.context.exam
     exercises = exam.exercises
@@ -605,7 +654,7 @@ def parse_points(post_data, exercises):
         elif 'points-{}'.format(exercise.id) in post_data:
             exercise_dict_key = 'points-{}'.format(exercise.id)
         if exercise_dict_key:
-            p = post_data[exercise_dict_key].replace(',','.')
+            p = post_data[exercise_dict_key].replace(',', '.')
             if p:
                 try:
                     p = float(p)
@@ -635,7 +684,7 @@ def ajaxSavePoints(request):
 
         for exercise_id in submitted_points:
             if submitted_points[exercise_id] is None:
-                request.db.query(ExerciseStudent).filter(models.ExerciseStudent.student_id == student_id)\
+                request.db.query(ExerciseStudent).filter(models.ExerciseStudent.student_id == student_id) \
                     .filter(models.ExerciseStudent.exercise_id == exercise_id).delete()
             else:
                 ep = models.ExerciseStudent(exercise_id=exercise_id, student_id=student_id,
@@ -652,7 +701,7 @@ def ajaxGetPoints(request):
     lecture_students = exam.lecture.lecture_students_for_tutorials(tutorials=request.context.tutorials)
     student_id = request.POST['student_id']
     student = lecture_students.filter(models.LectureStudent.student_id == student_id).one().student
-    exercise_points = exam.exercise_points.filter(models.ExerciseStudent.student_id==student.id)
+    exercise_points = exam.exercise_points.filter(models.ExerciseStudent.student_id == student.id)
     points = {}
     json_data = {'msg': '', 'format_error_cells': []}
     for ep in exercise_points:
@@ -666,7 +715,10 @@ def interactive_admission(request):
     exam = request.context.exam
     assignments = exam.lecture.exams.filter(models.Exam.category == "assignment").all()
     admission_limit = int(request.params['admission_limit'])
-    student_pointsum = request.db.query(models.User, func.sum(models.ExerciseStudent.points)).filter(models.User.lecture_students.any(models.LectureStudent.lecture_id == exam.lecture_id)).join(models.User.exercise_points).join(models.ExerciseStudent.exercise).filter(models.Exercise.exam_id.in_([a.id for a in assignments])).group_by(models.User.id).all()
+    student_pointsum = request.db.query(models.User, func.sum(models.ExerciseStudent.points)).filter(
+        models.User.lecture_students.any(models.LectureStudent.lecture_id == exam.lecture_id)).join(
+        models.User.exercise_points).join(models.ExerciseStudent.exercise).filter(
+        models.Exercise.exam_id.in_([a.id for a in assignments])).group_by(models.User.id).all()
     sum_of_points_dict = {sp[0].id: str(sp[1]) for sp in student_pointsum if sp[1] and sp[1] >= admission_limit}
 
     return {
@@ -683,7 +735,9 @@ def autoadmit(request):
     exam = request.context.exam
     assignments = exam.lecture.exams.filter(models.Exam.category == "assignment").all()
     admission_limit = int(request.params['admission_limit'])
-    admitted_students = exam.lecture.students.join(models.User.exercise_points).join(models.ExerciseStudent.exercise).filter(models.Exercise.exam_id.in_([a.id for a in assignments])).group_by(models.User.id).having(func.sum(models.ExerciseStudent.points) >= admission_limit).all()
+    admitted_students = exam.lecture.students.join(models.User.exercise_points).join(
+        models.ExerciseStudent.exercise).filter(models.Exercise.exam_id.in_([a.id for a in assignments])).group_by(
+        models.User.id).having(func.sum(models.ExerciseStudent.points) >= admission_limit).all()
     for student in admitted_students:
         student_admission = models.ExamAdmission(exam_id=exam.id, student_id=student.id, admission=True)
         request.db.merge(student_admission)
@@ -692,4 +746,3 @@ def autoadmit(request):
     return {
         "n-students-admitted": len(admitted_students),
     }
-
