@@ -39,10 +39,10 @@ $(document).ready(function()
           <tr tal:repeat="e exams_by_cat[cat['id']]">
             <td><a tal:attributes="href request.route_path('exam_enter_points', exam_id=e.id, tutorial_ids=tutorial_ids)">${e.name}</a></td>
             <td>${results[ls.student_id][e.id] if results[ls.student_id].get(e.id)!=None else '---'}</td>
-            <td tal:condition="e.getMaxpoints()">
-              ${'%3d%%' % (float(results[ls.student_id].get(e.id,0) or 0)*100.0/float(e.getMaxpoints()))  if e.id in results[ls.student_id] else '---'}
+            <td tal:condition="e.get_max_points()">
+              ${'%3d%%' % (float(results[ls.student_id].get(e.id,0) or 0)*100.0/float(e.get_max_points()))  if e.id in results[ls.student_id] else '---'}
             </td>
-            <td tal:condition="not e.getMaxpoints()">
+            <td tal:condition="not e.get_max_points()">
               N/A
             </td>
           </tr>

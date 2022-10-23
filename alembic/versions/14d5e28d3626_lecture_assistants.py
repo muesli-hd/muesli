@@ -51,5 +51,5 @@ def downgrade():
     connection = op.get_bind()
     results = connection.execute(lecture_assistants.select())
     for res in results:
-        connection.execute(lectures.update().where(lectures.c.id==res.lecture).values(assistant=res.assistant))
+        connection.execute(lectures.update(,.where(lectures.c.id == res.lecture).values(assistant=res.assistant))
     op.drop_table('lecture_assistants')

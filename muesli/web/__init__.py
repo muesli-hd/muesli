@@ -301,7 +301,7 @@ def populate_config(config):
 
 
 def create_config(settings):
-    settings.update(muesli.config['settings_override'])
+    settings.update(muesli.config['settings_override'], )
     config = Configurator(settings=settings)
     populate_config(config)
     return config

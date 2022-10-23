@@ -73,7 +73,7 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
   <tr>
     <td>Maximalpunktzahl</td>
     <td tal:repeat="e exam.exercises">${e.maxpoints}</td>
-    <td>${exam.getMaxpoints()}</td>
+    <td>${exam.get_max_points()}</td>
   </tr>
 </table>
 

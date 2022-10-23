@@ -28,7 +28,7 @@ class PopulatedTests(functionalTests.PopulatedTests):
         self.assertFalse(tree.children)
     def test_navigation_tree_has_tutorials(self):
         subscribe(db=self.session, user=self.user, tutorial=self.tutorial)
-        self.tutorial.lecture.term = muesli.utils.getSemesterLimit()
+        self.tutorial.lecture.term = muesli.utils.get_semester_limit()
         request = DummyRequest()
         request.user = self.user
         tree = create_navigation_tree(request)
@@ -36,7 +36,7 @@ class PopulatedTests(functionalTests.PopulatedTests):
         self.assertEqual(len(tree.children[0].children), 1)
         self.assertIn(self.tutorial.lecture.name, tree.children[0].children[0].label)
     def test_navigation_tree_tutor(self):
-        self.tutorial.lecture.term = muesli.utils.getSemesterLimit()
+        self.tutorial.lecture.term = muesli.utils.get_semester_limit()
         request = DummyRequest()
         request.user = self.tutor
         tree = create_navigation_tree(request)

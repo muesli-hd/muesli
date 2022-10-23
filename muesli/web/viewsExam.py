@@ -71,7 +71,7 @@ class Edit:
             if exam.registration != None:
                 students = students.filter(models.LectureStudent.student.has(models.User.exam_admissions.any(sqlalchemy.and_(models.ExamAdmission.exam_id==exam.id, models.ExamAdmission.registration==True))))
             # first sort key: last_name, second sort key: first_name
-            students = sorted(students, key=lambda s: (s.student.getLastName().lower(), s.student.getFirstName().lower()))
+            students = sorted(students, key=lambda s: (s.student.last_name.lower(), s.student.first_name.lower()))
         else: students = None
         return {'exam': exam,
                 'form': form,
@@ -219,7 +219,7 @@ class EnterPointsBasic:
         #       die selber auszurechnen...
         if tutorials:
             statistics = exam.getStatistics(students=None)
-            statistics.update(exam.getStatistics(students=students, prefix='tut'))
+            statistics.update(exam.getStatistics(students=students, prefix='tut'), )
         else:
             statistics = exam.getStatistics(students=students)
         self.request.javascript.append('toast.min.js')
@@ -232,6 +232,7 @@ class EnterPointsBasic:
                 'admissions': admissions,
                 'statistics': statistics,
                 'error_msg': '\n'.join(error_msgs)}
+
 
 @view_config(route_name='exam_enter_points', renderer='muesli.web:templates/exam/enter_points.pt', context=ExamContext, permission='view_points')
 class EnterPoints(EnterPointsBasic):
@@ -361,10 +362,10 @@ def statistics(request):
     statistics_data = statements.lecture_exams_statistics(request.db, exam.id, tutorials)
     admission_counts = statements.exam_admission_registration_medical_count(request.db, exam.id, tutorials)
     quantils = []
-    for q in exam.getQuantils():
+    for q in exam.get_quantils():
         quantils.append({'lecture': q})
     if tutorials:
-        for i,q in enumerate(exam.getQuantils(students=tutorialstudents)):
+        for i, q in enumerate(exam.get_quantils(students=tutorialstudents)):
             quantils[i]['tutorial'] = q
     return {'exam': exam,
             'tutorial_ids': request.matchdict['tutorial_ids'],
@@ -459,9 +460,9 @@ class HistogramForExam(Histogram):
         self.label = 'Punkteverteilung diese Gruppe' if self.request.context.tutorials else 'Punkteverteilung alle Gruppen'
         self.exam = self.request.context.exam
         students = self.exam.lecture.lecture_students_for_tutorials(tutorials=self.request.context.tutorials, order=False)
-        exercise_points = self.exam.getResults(students=students)
+        exercise_points = self.exam.get_results(students=students)
         self.points = [round(float(p.points)-0.01) for p in exercise_points if p.points!=None]
-        self.max = self.exam.getMaxpoints()
+        self.max = self.exam.get_max_points()
 
 
 @view_config(route_name='exam_correlation', context=CorrelationContext, permission='correlation')
@@ -472,18 +473,18 @@ class Correlation(MatplotlibView):
 
     def getExamData(self, id):
         exam = self.request.db.query(models.Exam).get(id)
-        points = exam.getResults()
-        return dict([(e.student_id, e.points) for e in points if e.points != None]), exam.getMaxpoints(), exam.name
+        points = exam.get_results()
+        return dict([(e.student_id, e.points) for e in points if e.points != None]), exam.get_max_points(), exam.name
 
     def getLectureData(self, id):
         lecture = self.request.db.query(models.Lecture).get(id)
-        points = lecture.getLectureResultsByCategory()
-        max_points = sum([exam.getMaxpoints() for exam in lecture.exams if exam.category == 'assignment'])
+        points = lecture.get_lecture_results_by_category()
+        max_points = sum([exam.get_max_points() for exam in lecture.exams if exam.category == 'assignment'])
         return dict([(e.student_id, e.points) for e in points if e.points != None and e.category == 'assignment']), max_points, lecture.name
 
     def getExerciseData(self, id):
         exercise = self.request.db.query(models.Exercise).get(id)
-        points = exercise.exam.lecture.getLectureResultsByCategory()
+        points = exercise.exam.lecture.get_lecture_results_by_category()
         return (dict([(e.student_id, e.points) for e in points if e.points != None and e.category == 'assignment']),
                 exercise.maxpoints,
                 "Aufgabe {}".format(exercise.nr))
@@ -568,7 +569,7 @@ def enterPointsSingle(request):
     student_results = {}
     for ls in lecture_students:
         student = ls.student
-        stud_result = exam.getResultsForStudent(student)
+        stud_result = exam.get_results_for_student(student)
         # read exercise ids from exercise_ids, since they will always have the correct order
         current_points = [str(stud_result[exercise_id]['points']) for _, exercise_id in exercise_ids]
         current_points.append(str(stud_result['sum']))

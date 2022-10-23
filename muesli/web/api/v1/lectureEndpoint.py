@@ -106,7 +106,7 @@ class Lecture:
         schema = models.LectureSchema(only=allowed_attr)
         response = schema.dump(lecture)
         if lecture.mode == 'off':
-            response.update({'tutorials': []})
+            response.update({'tutorials': []}, )
         return {'lecture': response,
                 'subscribed': subscribed}
 

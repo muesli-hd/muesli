@@ -204,12 +204,22 @@ class FormValidator:
             # self.errors = exc.error_dict
             return False
 
-    __getitem__ = lambda self, key: self.value.get(key, "")
-    __contains__ = lambda self, key: key in self.value
-    __iter__ = lambda self: iter(list(self.value.keys()))
+    def __getitem__(self, item):
+        return self.value.get(item, "")
+
+    def __contains__(self, item):
+        return item in self.value
+
+    def __iter__(self):
+        return iter(list(self.value.keys()))
+
     iterkeys = __iter__
-    iteritems = lambda self: iter(list(self.value.items()))
-    update = lambda self, *args, **kwargs: self.value.update(*args, **kwargs)
+
+    def iteritems(self):
+        return iter(list(self.value.items()))
+
+    def update(self, *args, **kwargs):
+        self.value.update(*args, **kwargs)
 
     def bind(self, obj, fields):
         """
@@ -340,7 +350,7 @@ class LectureEdit(ObjectForm):
                 'term',
                 label='Semester',
                 type='select',
-                options=utils.getTerms(),
+                options=utils.get_terms(),
                 value=lecture.term
             ),
             FormField(
@@ -451,7 +461,7 @@ class LectureAdd(ObjectForm):
                 'term',
                 label='Semester',
                 type='select',
-                options=utils.getTerms(),
+                options=utils.get_terms(),
                 # value=lecture.term
             ),
             FormField(
