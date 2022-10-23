@@ -168,11 +168,11 @@ def results(request):
     lecture = request.context.lecture
     lecture_students = lecture.lecture_students_for_tutorials(tutorials=tutorials).options(sqlalchemy.orm.joinedload(LectureStudent.student))\
             .options(sqlalchemy.orm.joinedload(LectureStudent.tutorial)).all()
-    lecture_results = lecture.getLectureResults(students=lecture_students)
-    results = lecture.getPreparedLectureResults(lecture_results)
+    lecture_results = lecture.get_lecture_results(students=lecture_students)
+    results = lecture.get_prepared_lecture_results(lecture_results)
     cat_maxpoints = dict([cat['id'], 0] for cat in utils.categories)
     for exam in lecture.exams:
-        cat_maxpoints[exam.category] += exam.getMaxpoints()
+        cat_maxpoints[exam.category] += exam.get_max_points()
     request.javascript.append('jquery.tablesorter.min.js')
     return {'tutorials': tutorials,
             'tutorial_ids': request.context.tutorial_ids_str,

@@ -77,7 +77,7 @@ class View:
         self.lecture_id = request.matchdict['lecture_id']
     def __call__(self):
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
-        times = lecture.prepareTimePreferences(user=self.request.user)
+        times = lecture.prepare_time_preferences(user=self.request.user)
         subscribed_tutorial = self.request.user.tutorials.filter(Tutorial.lecture_id == self.lecture_id).first()
         form = TutorLectureAuthSignIn(self.request)
         self.request.javascript.append('unsubscribe_modal_helpers.js')
@@ -357,7 +357,7 @@ def lecture_preferences(request):
         lecture = request.context.lecture
         names = request.config['lecture_types'][lecture.type]
         registration_info = statements.lecture_registered_participants_stats(request.db, lecture.id)
-        times = lecture.prepareTimePreferences(user=None)
+        times = lecture.prepare_time_preferences(user=None)
         times = sorted([t for t in times], key=lambda s:s['time'].value)
         return {'lecture': lecture,
                 'names': names,
@@ -517,14 +517,14 @@ def exportTotals(request):
     ls = lecture.lecture_students_for_tutorials(order=False)
     Tutor = sqlalchemy.orm.aliased(models.User)
     ls = ls.join(models.LectureStudent.student).join(models.LectureStudent.tutorial).join(Tutor, models.Tutorial.tutor).order_by(Tutor.last_name, models.User.last_name, models.User.first_name)
-    lecture_results = lecture.getLectureResults(students=ls)
+    lecture_results = lecture.get_lecture_results(students=ls)
     results = DictOfObjects(lambda: DictOfObjects(lambda: {}))
     for res in lecture_results:
         results[res.student_id]['results'][res.Exam.id] = res.points
-    cat_results = lecture.getLectureResultsByCategory(students=ls)
+    cat_results = lecture.get_lecture_results_by_category(students=ls)
     for res in cat_results:
         results[res.student_id]['totals'][res.category] = res.points
-    gresults = lecture.getGradingResults(students = ls)
+    gresults = lecture.get_grading_results(students = ls)
     grading_results = DictOfObjects(lambda: {})
     for res in gresults:
         grading_results[res.student_id][res.grading_id] = res.grade
@@ -571,7 +571,7 @@ def removeAllocation(request):
 @view_config(route_name='lecture_set_preferences', context=LectureContext, permission='view')
 def setPreferences(request):
     lecture = request.context.lecture
-    times = lecture.prepareTimePreferences(user=request.user)
+    times = lecture.prepare_time_preferences(user=request.user)
     row = 1
     tps = []
     while 'time-%i' % row in request.POST:
@@ -621,11 +621,11 @@ def viewPoints(request):
     exams_by_category = [cat for cat in exams_by_category if cat['exams']]
     results = {}
     for exam in exams:
-        results[exam.id] = exam.getResultsForStudent(ls.student)
+        results[exam.id] = exam.get_results_for_student(ls.student)
     for exams in exams_by_category:
         sum_all = sum([x for x in [results[e.id]['sum'] for e in exams['exams']] if x])
-        max_all = sum([x for x in [e.getMaxpoints() for e in exams['exams']] if x])
-        max_rel = sum([x for x in [e.getMaxpoints() for e in exams['exams'] if results[e.id]['sum']] if x])
+        max_all = sum([x for x in [e.get_max_points() for e in exams['exams']] if x])
+        max_rel = sum([x for x in [e.get_max_points() for e in exams['exams'] if results[e.id]['sum']] if x])
         exams['sum'] = sum_all
         exams['max'] = max_all
         exams['max_rel'] = max_rel

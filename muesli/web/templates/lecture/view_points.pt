@@ -29,7 +29,7 @@
                 <span tal:condition="not exam.url" tal:omit-tag="">${exam.name}</span>
               </th>
               <td>
-                <strong>${fF(results[exam.id]['sum'])}/${fF(exam.getMaxpoints())}</strong>
+                <strong>${fF(results[exam.id]['sum'])}/${fF(exam.get_max_points())}</strong>
               </td>
               <td tal:repeat="e exam.exercises">
               ${fF(results[exam.id][e.id]['points'])}/${fF(results[exam.id][e.id]['exercise'].maxpoints)}

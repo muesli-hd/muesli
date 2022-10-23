@@ -216,7 +216,7 @@ def edit(request):
     keys = keys.get("keys", "")
     return {'user': user,
             'form': form,
-            'time_preferences': user.prepareTimePreferences(),
+            'time_preferences': user.prepare_time_preferences(),
             'lectures_as_assistant': user.lectures_as_assistant.all(),
             'tutorials_as_tutor': user.tutorials_as_tutor.all(),
             'penalty_names': utils.penalty_names,
@@ -353,7 +353,7 @@ def user_check(request):
         has_updated = request.db.query(models.UserHasUpdated).get(request.user.id)
         if has_updated is None:
             has_updated = models.UserHasUpdated(request.user.id, '0')
-        has_updated.has_updated_info = muesli.utils.getSemesterLimit()
+        has_updated.has_updated_info = muesli.utils.get_semester_limit()
         if not has_updated in request.db:
             request.db.add(has_updated)
         request.db.commit()
@@ -473,7 +473,7 @@ def confirm(request):
         user = request.context.confirmation.user
         user.password = nacl.pwhash.str(form['password'].encode('utf-8')).decode('utf-8')
         request.db.delete(request.context.confirmation)
-        data_updated = models.UserHasUpdated(user.id, muesli.utils.getSemesterLimit())
+        data_updated = models.UserHasUpdated(user.id, muesli.utils.get_semester_limit())
         request.db.add(data_updated)
         request.db.commit()
         return HTTPFound(location=request.route_url('user_login'))

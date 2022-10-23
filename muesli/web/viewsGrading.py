@@ -179,7 +179,7 @@ class EnterGradesBasic:
 
     def populate_with_exam_results(self, grades, lecture_students, grading):
         for exam in grading.exams:
-            results = exam.getResults(students=lecture_students)
+            results = exam.get_results(students=lecture_students)
             for result in results:
                 grades[result.student_id]['exams'][exam.id]['points'] = result.points
             if exam.admission is not None or exam.registration is not None or exam.medical_certificate is not None:
@@ -297,7 +297,7 @@ class FormulaHistogram(EnterGradesBasic):
         indexes = numpy.arange(len(labels))
         width = 1
 
-        pyplot.rcParams.update({'font.size': 20})
+        pyplot.rcParams.update({'font.size': 20}, )
 
         fig = pyplot.figure(figsize=(12, 9))
 

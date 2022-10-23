@@ -19,7 +19,7 @@
     <metal:main metal:use-macro="templates('Fragments/unsubscribe_modal.pt').macros['unsubscribe_modal']" />
 
 <div class="card mb-2" tal:condition="tutorials_as_tutor">
-  <div class="card-body" tal:define="multi_tutorials request.user.prepareMultiTutorials()">
+  <div class="card-body" tal:define="multi_tutorials request.user.prepare_multi_tutorials()">
     <h3 class="card-title">
       Eigene Übungsgruppen
     </h3>
