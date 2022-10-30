@@ -237,28 +237,28 @@ class Lecture(Base):
     def prepare_time_preferences(self, user=None):
         session = object_session(self)
         if self.mode == "prefs":
-            times = session.query(func.sum(Tutorial.max_students), Tutorial.time). \
+            tutorial_times = session.query(func.sum(Tutorial.max_students), Tutorial.time). \
                 filter(Tutorial.lecture == self). \
                 group_by(Tutorial.time)
-            times = [{'weekday': result[1].weekday(),
-                      'timeofday': result[1].time(),
-                      'time': result[1],
-                      'max_students': result[0]} for result in times]
-            for time in times:
+            tutorial_times = [{'weekday': result[1].weekday(),
+                               'timeofday': result[1].time(),
+                               'time': result[1],
+                               'max_students': result[0]} for result in tutorial_times]
+            for tutorial_time in tutorial_times:
                 if user:
-                    pref = session.query(TimePreference).get((self.id, user.id, time['time'].value))
+                    pref = session.query(TimePreference).get((self.id, user.id, tutorial_time['time'].value))
                     if not pref:
-                        time['penalty'] = 100
+                        tutorial_time['penalty'] = 100
                     else:
-                        time['penalty'] = pref.penalty
+                        tutorial_time['penalty'] = pref.penalty
                 else:
-                    time['penalty'] = 100
+                    tutorial_time['penalty'] = 100
             if user:
                 if session.new or session.dirty or session.deleted:
                     session.commit()
         else:
-            times = []
-        return times
+            tutorial_times = []
+        return tutorial_times
 
     def get_lecture_results(self, tutorials=None, students=None):
         if tutorials is None:
@@ -352,19 +352,6 @@ class Exam(Base):
 
     def get_max_points(self):
         return int(sum([e.maxpoints for e in self.exercises]))
-
-    def get_quantils(self, students=None):
-        results = self.get_results(students=students).all()
-        all_count = len([res for res in results if res.points and res.points >= 0])
-        quantils = []
-        for i in range(self.get_max_points() + 1):
-            count = len([res for res in results if res.points and res.points >= i])
-            quantils.append({
-                'min_points': i,
-                'min_percent': i / float(self.get_max_points()) if self.get_max_points() else 0,
-                'count': count,
-                'quantile': float(count) / all_count if all_count != 0 else 0})
-        return quantils
 
     @property
     def admissions_string(self):
@@ -599,13 +586,16 @@ class TutorialSchema(Schema):
     exams = fields.Nested(ExamSchema, many=True, only=["id", "name"], dump_only=True)
     student_count = fields.Method("get_student_num")
 
-    def get_time(self, obj):
+    @staticmethod
+    def get_time(obj):
         return obj.time.__html__()
 
-    def load_time(self, value):
+    @staticmethod
+    def load_time(value):
         return TutorialTime(str(value))
 
-    def get_student_num(self, obj):
+    @staticmethod
+    def get_student_num(obj):
         return obj.students.count()
 
 
@@ -624,11 +614,13 @@ class LectureSchema(Schema):
     tutors = fields.Nested(UserSchema, many=True, dump_only=True)
 
     # Converts the Muesli defined type Term to it's string representation
-    def get_term(self, obj):
+    @staticmethod
+    def get_term(obj):
         return obj.term.__html__()
 
     # Constructs a Term from input like 20181
-    def load_term(self, value):
+    @staticmethod
+    def load_term(value):
         term = [Term(str(value)), Term(str(value))]
         if term in get_terms():
             return term[0]

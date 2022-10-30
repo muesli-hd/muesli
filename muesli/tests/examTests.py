@@ -20,10 +20,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import unittest
 import muesli.web
 from muesli.tests import functionalTests
-import json
+
 
 class BaseTests(functionalTests.BaseTests):
     def test_exam_edit(self):
