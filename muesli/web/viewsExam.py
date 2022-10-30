@@ -21,6 +21,7 @@
 
 import io
 from collections import Counter, defaultdict
+import json
 
 import PIL.Image
 import PIL.ImageDraw
@@ -393,12 +394,7 @@ def statistics(request):
     tutorials = request.context.tutorials
     statistics_data = statements.lecture_exams_statistics(request.db, exam.id, tutorials)
     admission_counts = statements.exam_admission_registration_medical_count(request.db, exam.id, tutorials)
-    quantils = []
-    for q in exam.get_quantils():
-        quantils.append({'lecture': q})
-    if tutorials:
-        for i, q in enumerate(exam.get_quantils(students=tutorialstudents)):
-            quantils[i]['tutorial'] = q
+    quantils = statements.exam_points_quantils(request.db, exam.id, tutorials)
     return {'exam': exam,
             'tutorial_ids': request.matchdict['tutorial_ids'],
             'quantils': quantils,

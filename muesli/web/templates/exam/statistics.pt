@@ -44,7 +44,7 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
     <th scope="col" tal:repeat="e exam.exercises">${e.nr}</th>
     <th scope="col">Σ</th>
   </thead>
-  <tr tal:repeat="subject sorted(statistics_data.keys(), key=lambda x: (x is None, x))" tal:condition="subject != 'TOTAL'">
+  <tr tal:repeat="subject sorted(statistics_data.keys(), key=lambda x: (x is None, x)).remove('TOTAL')">
     <td>${'(Keine Angabe)' if subject is None else subject}</td>
     <td tal:repeat="e exam.exercises">
       <span tal:define="statistics_data statistics_data[subject][e.id]; statistics_images True" tal:omit-tag="">
@@ -60,12 +60,12 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
   <tr class="footerstart">
     <td>Insgesamt</td>
     <td tal:repeat="e exam.exercises">
-      <span tal:define="statistics_data statistics['TOTAL'][e.id]; statistics_images True" tal:omit-tag="">
+      <span tal:define="statistics_data statistics_data['TOTAL'][e.id]; statistics_images True" tal:omit-tag="">
         <!-- <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" /> -->
       </span>
     </td>
     <td>
-      <span tal:define="statistics_data statistics_data['TOTAL']['TOTAL']; statistics_images True" tal:omit-tag="">
+      <span tal:define="statistics_data statistics_data['TOTAL'][0]; statistics_images True" tal:omit-tag="">
         <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
       </span>
     </td>
@@ -87,23 +87,23 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
     </tr>
     <tr tal:condition="exam.admission is not None">
       <td>Zugelassen</td>
-      <td tal:condition="tutorial_ids">${admissions['ADMISSIONS']['TUTORIALS']}</td>
-      <td>${admissions['ADMISSIONS']['LECTURE']}</td>
+      <td tal:condition="tutorial_ids">${admission_counts['ADMISSIONS']['TUTORIALS']}</td>
+      <td>${admission_counts['ADMISSIONS']['LECTURE']}</td>
     </tr>
     <tr tal:condition="exam.registration is not None">
       <td>Angemeldet</td>
-      <td tal:condition="tutorial_ids">${admissions['REGISTRATIONS']['TUTORIALS']}</td>
-      <td>${admissions['REGISTRATIONS']['LECTURE']}</td>
+      <td tal:condition="tutorial_ids">${admission_counts['REGISTRATIONS']['TUTORIALS']}</td>
+      <td>${admission_counts['REGISTRATIONS']['LECTURE']}</td>
     </tr>
     <tr tal:condition="exam.registration is not None and exam.admission is not None">
       <td>Zugelassen und angemeldet</td>
-      <td tal:condition="tutorial_ids">${admissions['ADMITTED_AND_REGISTERED']['TUTORIALS']}</td>
-      <td>${admissions['ADMITTED_AND_REGISTERED']['LECTURE']}</td>
+      <td tal:condition="tutorial_ids">${admission_counts['ADMITTED_AND_REGISTERED']['TUTORIALS']}</td>
+      <td>${admission_counts['ADMITTED_AND_REGISTERED']['LECTURE']}</td>
     </tr>
     <tr tal:condition="exam.medical_certificate is not None">
       <td>Attest</td>
-      <td tal:condition="tutorial_ids">${admissions['MEDICAL_CERTIFICATES']['TUTORIALS']}</td>
-      <td>${admissions['MEDICAL_CERTIFICATES']['LECTURE']}</td>
+      <td tal:condition="tutorial_ids">${admission_counts['MEDICAL_CERTIFICATES']['TUTORIALS']}</td>
+      <td>${admission_counts['MEDICAL_CERTIFICATES']['LECTURE']}</td>
     </tr>
   </table>
 </div>
@@ -121,9 +121,9 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
   </thead>
   <tbody>
     <tr tal:repeat="q quantils">
-      <td>${q['lecture']['min_points']} (${int(q['lecture']['min_percent']*100)}%)</td>
-      <td tal:condition="tutorial_ids">${int(q['tutorial']['quantile']*100)}% (${q['tutorial']['count']})</td>
-      <td>${int(q['lecture']['quantile']*100)}% (${q['lecture']['count']})</td>
+      <td>${q[0]['min_points']} (${int(q[0]['min_percent']*100)}%)</td>
+      <td tal:condition="tutorial_ids">${int(q[1]['TUTORIALS']['quantile']*100)}% (${q[1]['TUTORIALS']['count']})</td>
+      <td>${int(q[1]['ALL']['quantile']*100)}% (${q[1]['ALL']['count']})</td>
     </tr>
   </tbody>
 </table>
