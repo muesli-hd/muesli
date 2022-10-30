@@ -164,26 +164,6 @@ def list_strings(strings):
         return ', '.join(part1) + ' und ' + part2
 
 
-class DictOfObjects:
-    def __init__(self, create_function):
-        self.d = {}
-        self.createFunction = create_function
-
-    def __getitem__(self, key):
-        if key not in self.d:
-            self.d[key] = self.createFunction()
-        return self.d[key]
-
-    def __setitem__(self, key, value):
-        self.d[key] = value
-
-    def __iter__(self):
-        return self.d.__iter__()
-
-    def __str__(self):
-        return "%r" % self.d
-
-
 class AutoVivification(dict):
     """Implementation of perl's autovivification feature.
        from: https://stackoverflow.com/q/635483"""
