@@ -153,7 +153,7 @@ def lecture_exams_statistics_stmt(exam_id: int, tutorial_ids: List[int] = None) 
     Generates a query to get the average of achieved points and standard deviation for every exercise in each exam of
     the lecture grouped by course of studies. The resulting query has 7 columns:
     - query type: one of 'LECTURE', 'TUTORIALS'
-    - exercise_id: An exercise id or 'TOTAL'
+    - exercise_id: An exercise id or 0 (total identifier)
     - maxpoints: maximum number of points possible in this exercise
     - stddev: standard deviation of results
     - avg: average of results
@@ -184,7 +184,7 @@ def lecture_exams_statistics_stmt(exam_id: int, tutorial_ids: List[int] = None) 
         # by_exercise: Consider the sum over all exercises or every exercise individually
         # by_subject: Group by subject or ignore them (considering all students at once)
         res = (select(literal_column(f"'{query_type}'"),
-                      literal_column("'TOTAL'") if not by_exercise else m.ExerciseStudent.exercise_id,
+                      literal_column("0") if not by_exercise else m.ExerciseStudent.exercise_id,
                       m.Exercise.maxpoints,
                       func.stddev_pop(m.ExerciseStudent.points),
                       func.avg(m.ExerciseStudent.points),
@@ -195,8 +195,15 @@ def lecture_exams_statistics_stmt(exam_id: int, tutorial_ids: List[int] = None) 
                .where(existence_statements[query_type]))
 
         if by_subjects:
-            res = res.outerjoin(m.user_subjects_table).outerjoin(m.Subject) \
-              .group_by(m.Subject.name).order_by(m.Subject.name)
+            res = (res.outerjoin(m.user_subjects_table, m.ExerciseStudent.student_id == m.user_subjects_table.c.student)
+                   .outerjoin(m.Subject))
+            if by_exercise:
+                res = res.group_by(m.Subject.name, m.ExerciseStudent.exercise_id, m.Exercise.maxpoints)
+            else:
+                res = res.group_by(m.Subject.name, m.Exercise.maxpoints)
+            res = res.order_by(m.Subject.name)
+        else:
+            res = res.group_by(m.ExerciseStudent.exercise_id, m.Exercise.maxpoints)
         return res
 
     resulting_subqueries = []
@@ -263,34 +270,34 @@ def exam_admission_registration_medical_count_stmt(exam_id: int, tutorial_ids: L
     """
     existence_statements = student_subscribed_to_stmts(tutorial_ids)
     subqueries = []
-    for query_type in ("LECTURE", "TUTORIALS"):
+    for query_type in ("LECTURE", "TUTORIALS") if tutorial_ids else ("LECTURE",):
 
         # Number of admissions
         subqueries.append(select(literal_column(f"'{query_type}'"), literal_column("'ADMISSIONS'"),
                                  func.count(m.ExamAdmission.admission))
-                          .where(m.ExamAdmission.admission == 1)
+                          .where(m.ExamAdmission.admission == true())
                           .where(m.ExamAdmission.exam_id == exam_id)
                           .where(existence_statements[query_type]))
 
         # Number of registrations
         subqueries.append(select(literal_column(f"'{query_type}'"), literal_column("'REGISTRATIONS'"),
                                  func.count(m.ExamAdmission.registration))
-                          .where(m.ExamAdmission.registration == 1)
+                          .where(m.ExamAdmission.registration == true())
                           .where(m.ExamAdmission.exam_id == exam_id)
                           .where(existence_statements[query_type]))
 
         # Number of registered and admitted participants
         subqueries.append(select(literal_column(f"'{query_type}'"), literal_column("'ADMITTED_AND_REGISTERED'"),
                                  func.count(m.ExamAdmission.registration))
-                          .where(m.ExamAdmission.registration == 1)
-                          .where(m.ExamAdmission.admission == 1)
+                          .where(m.ExamAdmission.registration == true())
+                          .where(m.ExamAdmission.admission == true())
                           .where(m.ExamAdmission.exam_id == exam_id)
                           .where(existence_statements[query_type]))
 
         # Number of medical certificates
         subqueries.append(select(literal_column(f"'{query_type}'"), literal_column("'MEDICAL_CERTIFICATES'"),
                                  func.count(m.ExamAdmission.medical_certificate))
-                          .where(m.ExamAdmission.medical_certificate == 1)
+                          .where(m.ExamAdmission.medical_certificate == true())
                           .where(m.ExamAdmission.exam_id == exam_id)
                           .where(existence_statements[query_type]))
 
@@ -446,7 +453,11 @@ def exam_points_quantils_stmt(exam_id: int, tutorial_ids: List[int] = None) -> s
 
     The resulting query has 4 columns:
 
-    TODO: Columns of the resulting query
+    query_type: 'ALL' or 'TUTORIALS'. The group the count and quantil metrics are calculated for
+    point_sum: Number of points reached
+    percentage: What fraction of the possible points this represents
+    student_count: How many students have reached this number of points (all students or tutorial)
+    quantils: Fraction of students reached this number of points.
 
     Args:
         exam_id: Exam id to calculate the counts for.
@@ -457,11 +468,10 @@ def exam_points_quantils_stmt(exam_id: int, tutorial_ids: List[int] = None) -> s
         A sqlalchemy 2.x style select statement generating a result explained above.
     """
     # We need: lecture and tutorials statistics
-    max_point_sum = (select(func.max(select(func.sum(m.ExerciseStudent.points))
-                                     .join(m.Exercise)
-                                     .join(m.Exam)
-                                     .where(m.Exam.id == exam_id))
-                            ).scalar_subquery())
+    max_point_sum = (select(func.sum(m.Exercise.maxpoints))
+                     .join(m.Exam)
+                     .where(m.Exam.id == exam_id)
+                     .scalar_subquery())
 
     subqueries = []
 
@@ -512,17 +522,30 @@ def exam_points_quantils_stmt(exam_id: int, tutorial_ids: List[int] = None) -> s
 
         subqueries.append(this_query_type_result)
 
-    return union_all(*subqueries)
+    stmt = union_all(*subqueries)
+    return stmt.order_by(stmt.c.point_sum)
 
 
 def exam_points_quantils(sa_session: sqlalchemy.orm.Session, exam_id: int, tutorial_ids: List[int] = None):
-    percentiles = {}
+    percentiles = []
     stmt = exam_points_quantils_stmt(exam_id, tutorial_ids)
     for query_type, points, percentage, student_count, quantile in sa_session.execute(stmt):
-        percentiles.setdefault(query_type, []).append({
-            'min_points': points,
-            'min_percent': percentage,
-            'count': student_count,
-            'quantile': quantile
-        })
+        if points is None:
+            continue
+        if not percentiles or points != percentiles[-1][0]:
+            percentiles.append(({
+                'min_points': points,
+                'min_percent': percentage
+            }, {query_type: {
+                'count': student_count,
+                'quantile': quantile
+            }}))
+        else:
+            percentiles[-1][1][query_type] = {
+                'count': student_count,
+                'quantile': quantile
+            }
+    for _, metrics in percentiles:
+        if 'TUTORIALS' not in metrics:
+            metrics['TUTORIALS'] = metrics['ALL']
     return percentiles
