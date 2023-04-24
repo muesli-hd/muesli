@@ -4,9 +4,11 @@
     percentage = 0
     str_percentage = "0"
     color_attr = "bg-info"
-    if tutorial.student_count != 0:
+    if (tutorial.student_count != 0) and (tutorial.max_students != 0):
       percentage = (tutorial.student_count/tutorial.max_students) * 100
-      str_percentage = "%5.2f" % percentage
+    else:
+      percentage = 100
+    str_percentage = "%5.2f" % percentage
   ?>
   <div class="progress bg-light">
     <div class="progress-bar progress-bar-striped"
