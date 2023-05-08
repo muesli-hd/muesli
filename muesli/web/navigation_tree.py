@@ -65,7 +65,7 @@ def create_navigation_tree(request):
     if request.user is None:
         return root
 
-    semesterlimit = utils.get_semester_limit()
+    semesterlimit = utils.getSemesterLimit()
 
 
     # add tutorials the user subscribed to

@@ -5,6 +5,7 @@ $(document).ready(function() {
     let href = button.data('href');
     let confirm_text = button.data('modal-button-text') || 'Austreten';
     let button_class = button.data('modal-button-class') || 'btn-danger';
+    console.log(button_class)
 
     let modal = $(this);
     modal.find('.modal-body p').text(text);

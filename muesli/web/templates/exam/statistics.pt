@@ -44,15 +44,15 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
     <th scope="col" tal:repeat="e exam.exercises">${e.nr}</th>
     <th scope="col">Σ</th>
   </thead>
-  <tr tal:repeat="subject sorted(statistics_data.keys(), key=lambda x: (x is None, x)).remove('TOTAL')">
+  <tr tal:repeat="subject sorted(statistics_by_subject.keys(), key=lambda x: (x is None, x))">
     <td>${'(Keine Angabe)' if subject is None else subject}</td>
     <td tal:repeat="e exam.exercises">
-      <span tal:define="statistics_data statistics_data[subject][e.id]; statistics_images True" tal:omit-tag="">
+      <span tal:define="statisticsData statistics_by_subject[subject][e.id]; statistics_images True" tal:omit-tag="">
         <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
       </span>
     </td>
     <td>
-      <span tal:define="statistics_data statistics_data[subject]['TOTAL']; statistics_images True" tal:omit-tag="">
+      <span tal:define="statisticsData statistics_by_subject[subject]['exam']; statistics_images True" tal:omit-tag="">
         <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
       </span>
     </td>
@@ -60,12 +60,12 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
   <tr class="footerstart">
     <td>Insgesamt</td>
     <td tal:repeat="e exam.exercises">
-      <span tal:define="statistics_data statistics_data['TOTAL'][e.id]; statistics_images True" tal:omit-tag="">
+      <span tal:define="statisticsData statistics[e.id]; statistics_images True" tal:omit-tag="">
         <!-- <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" /> -->
       </span>
     </td>
     <td>
-      <span tal:define="statistics_data statistics_data['TOTAL'][0]; statistics_images True" tal:omit-tag="">
+      <span tal:define="statisticsData statistics['exam']; statistics_images True" tal:omit-tag="">
         <metal:main metal:use-macro="templates('Fragments/Format/avgstd.pt').macros['avgstd']" />
       </span>
     </td>
@@ -73,7 +73,7 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
   <tr>
     <td>Maximalpunktzahl</td>
     <td tal:repeat="e exam.exercises">${e.maxpoints}</td>
-    <td>${exam.get_max_points()}</td>
+    <td>${exam.getMaxpoints()}</td>
   </tr>
 </table>
 
@@ -85,25 +85,25 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
       <th tal:condition="tutorial_ids">Übungsgruppe</th>
       <th>Vorlesung</th>
     </tr>
-    <tr tal:condition="exam.admission is not None">
+    <tr tal:condition="exam.admission!=None">
       <td>Zugelassen</td>
-      <td tal:condition="tutorial_ids">${admission_counts['ADMISSIONS']['TUTORIALS']}</td>
-      <td>${admission_counts['ADMISSIONS']['LECTURE']}</td>
+      <td tal:condition="tutorial_ids">${admissions['admission_count_tut']}</td>
+      <td>${admissions['admission_count']}</td>
     </tr>
-    <tr tal:condition="exam.registration is not None">
+    <tr tal:condition="exam.registration!=None">
       <td>Angemeldet</td>
-      <td tal:condition="tutorial_ids">${admission_counts['REGISTRATIONS']['TUTORIALS']}</td>
-      <td>${admission_counts['REGISTRATIONS']['LECTURE']}</td>
+      <td tal:condition="tutorial_ids">${admissions['registration_count_tut']}</td>
+      <td>${admissions['registration_count']}</td>
     </tr>
-    <tr tal:condition="exam.registration is not None and exam.admission is not None">
+    <tr tal:condition="exam.registration!=None and exam.admission!=None">
       <td>Zugelassen und angemeldet</td>
-      <td tal:condition="tutorial_ids">${admission_counts['ADMITTED_AND_REGISTERED']['TUTORIALS']}</td>
-      <td>${admission_counts['ADMITTED_AND_REGISTERED']['LECTURE']}</td>
+      <td tal:condition="tutorial_ids">${admissions['admission_and_registration_count_tut']}</td>
+      <td>${admissions['admission_and_registration_count']}</td>
     </tr>
-    <tr tal:condition="exam.medical_certificate is not None">
+    <tr tal:condition="exam.medical_certificate!=None">
       <td>Attest</td>
-      <td tal:condition="tutorial_ids">${admission_counts['MEDICAL_CERTIFICATES']['TUTORIALS']}</td>
-      <td>${admission_counts['MEDICAL_CERTIFICATES']['LECTURE']}</td>
+      <td tal:condition="tutorial_ids">${admissions['medical_certificate_count_tut']}</td>
+      <td>${admissions['medical_certificate_count']}</td>
     </tr>
   </table>
 </div>
@@ -113,7 +113,7 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
 <div class="quantile" style="display:none">
 <a role="button" class="btn btn-primary" href="javascript:hide_quantils()">Verbergen</a>
 
-<table class="table mt-2 w-auto">
+<table class="table mt-2">
   <thead class="thead-dark">
     <th scope="col">Mindestpunktzahl</th>
     <th scope="col" tal:condition="tutorial_ids">Übungsgruppe</th>
@@ -121,9 +121,9 @@ gesamten Vorlesung. <span class="points">Die Punktedurchschnitte werden in der F
   </thead>
   <tbody>
     <tr tal:repeat="q quantils">
-      <td>${q[0]['min_points']} (${int(q[0]['min_percent']*100)}%)</td>
-      <td tal:condition="tutorial_ids">${int(q[1]['TUTORIALS']['quantile']*100)}% (${q[1]['TUTORIALS']['count']})</td>
-      <td>${int(q[1]['ALL']['quantile']*100)}% (${q[1]['ALL']['count']})</td>
+      <td>${q['lecture']['min_points']} (${int(q['lecture']['min_percent']*100)}%)</td>
+      <td tal:condition="tutorial_ids">${int(q['tutorial']['quantile']*100)}% (${q['tutorial']['count']})</td>
+      <td>${int(q['lecture']['quantile']*100)}% (${q['lecture']['count']})</td>
     </tr>
   </tbody>
 </table>

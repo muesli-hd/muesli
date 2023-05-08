@@ -179,7 +179,7 @@ class EnterGradesBasic:
 
     def populate_with_exam_results(self, grades, lecture_students, grading):
         for exam in grading.exams:
-            results = exam.get_results(students=lecture_students)
+            results = exam.getResults(students=lecture_students)
             for result in results:
                 grades[result.student_id]['exams'][exam.id]['points'] = result.points
             if exam.admission is not None or exam.registration is not None or exam.medical_certificate is not None:
@@ -297,7 +297,7 @@ class FormulaHistogram(EnterGradesBasic):
         indexes = numpy.arange(len(labels))
         width = 1
 
-        pyplot.rcParams.update({'font.size': 20}, )
+        pyplot.rcParams.update({'font.size': 20})
 
         fig = pyplot.figure(figsize=(12, 9))
 
@@ -400,7 +400,7 @@ class Export(ExcelView):
                 g = ''
             data = [grade.student.matrikel,
                     grade.student.last_name, '',
-                    ', '.join([s.name for s in grade.student.subjects]), '', '', g, '']
+                    grade.student.formatCompleteSubject(), '', '', g, '']
             for j, d in enumerate(data, 1):
                 worksheet_grades.cell(row=1+i, column=j, value=d)
         # set column width

@@ -101,18 +101,3 @@ def tutorial():
         'id', 'time', 'exams', 'lecture_id'
     ]
     return attributes
-
-
-def collection_subject():
-    """ Allowed attributes for the subjectEndpoint.
-    Args:
-    Returns:
-        attributes: A list of unlocked attributes for Subject.collection_get().
-    Raises:
-    """
-    attributes = [
-        'id',
-        'name',
-        'curated'
-    ]
-    return attributes

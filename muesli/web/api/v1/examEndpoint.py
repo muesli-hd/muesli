@@ -62,5 +62,5 @@ class Exam:
         exer_schema = models.ExerciseSchema(many=True)
         exam_schema = models.ExamSchema()
         result = exam_schema.dump(exam)
-        result.update({"exercises": exer_schema.dump(exam.exercises)}, )
+        result.update({"exercises": exer_schema.dump(exam.exercises)})
         return result

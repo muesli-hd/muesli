@@ -29,8 +29,7 @@ from muesli import utils
 from muesli.types import TutorialTime
 import re
 import requests
-import sqlalchemy
-
+import json
 
 def boolToValue(boolean):
     if boolean is None:
@@ -40,7 +39,6 @@ def boolToValue(boolean):
     elif not boolean:
         return 0
 
-
 def valueToBool(value):
     if value == 1:
         return True
@@ -48,7 +46,6 @@ def valueToBool(value):
         return False
     if value == 'None':
         return None
-
 
 class DateString(formencode.FancyValidator):
     prevalidator = formencode.validators.UnicodeString()
@@ -71,7 +68,6 @@ class DateString(formencode.FancyValidator):
             raise formencode.Invalid('Ungültiges Jahr!', value, state)
         return string
 
-
 class FormField:
     def __init__(self, name, label="", type="text", options=None,
                  value=None, size=40, comment=None, validator=None,
@@ -91,51 +87,35 @@ class FormField:
         self.readonly = readonly
         self.placeholder = placeholder
 
-
 class FileField(FormField):
     def __init__(self, name, growable=False, **kwargs):
         kwargs['type'] = 'file'
         FormField.__init__(self, name, **kwargs)
         self.growable = growable
 
-
 class PasswordField(FormField):
     def __init__(self, name, **kwargs):
         kwargs['type'] = 'password'
         FormField.__init__(self, name, **kwargs)
-
-
-class MultiSelectField(FormField):
-    def __init__(self, name, **kwargs):
-        kwargs['type'] = 'select'
-        FormField.__init__(self, name, **kwargs)
-        self.multiple = True
-
 
 class HiddenField(FormField):
     def __init__(self, name, **kwargs):
         kwargs['type'] = 'hidden'
         FormField.__init__(self, name, **kwargs)
 
-
 class Form:
-    def __init__(self, formfields, send="Senden", chained_validators=None):
-        if chained_validators is None:
-            chained_validators = []
-
+    def __init__(self, formfields, send="Senden", chained_validators=[]):
         self.formfields = formfields
-        self.named_fields = {field.name: field for field in self.formfields}
+        self.updateNames()
         self.chained_validators = chained_validators
-        self.formValidator = self.create_schema()
+        self.createSchema()
         self.errors = {}
         self.send = send
         self.message = ""
-        self.values = {}
 
-    def create_schema(self):
+    def createSchema(self):
         fields = self.formfields
         chained_validators = self.chained_validators
-
         class Schema(formencode.Schema):
             def __init__(self, *args, **kwargs):
                 for field in fields:
@@ -147,8 +127,12 @@ class Form:
                 if chained_validators:
                     kwargs['chained_validators'] = chained_validators
                 formencode.Schema.__init__(self, *args, **kwargs)
+        self.formValidator = FormValidator(Schema())
 
-        return FormValidator(Schema())
+    def updateNames(self):
+        self.named_fields = {}
+        for field in self.formfields:
+            self.named_fields[field.name] = field
 
     def processPostData(self, postData):
         try:
@@ -157,14 +141,13 @@ class Form:
         except KeyError:
             pass
         if self.formValidator.validate(postData):
-            for name, field in self.named_fields.items():
+            self.values = {}
+            for name in self.named_fields:
+                field = self.named_fields[name]
                 if field.type in ['select', 'radio']:
-                    if hasattr(field.validator, 'trust_validator') and field.validator.trust_validator:
-                        field.value = self.formValidator[name]
-                    else:
-                        for option in field.options:
-                            if self.formValidator[name] == str(option[0]):
-                                field.value = option[0]
+                    for option in field.options:
+                        if self.formValidator[name] == str(option[0]):
+                            field.value = option[0]
                 else:
                     field.value = self.formValidator[name]
                 self.values[name] = field.value
@@ -174,18 +157,13 @@ class Form:
             self.errors = self.formValidator.errors
             return False
 
-    def __getitem__(self, item):
-        return self.named_fields[item].value
+    __getitem__ = lambda self, key: self.named_fields[key].value
 
     def __setitem__(self, key, value):
-        self.named_fields[key].value = value
-
+        self.named_fields[key].value=value
 
 class FormValidator:
-    def __init__(self, schema, obj=None, fields=None):
-        if fields is None:
-            fields = []
-
+    def __init__(self, schema, obj=None, fields=[]):
         self.schema = schema
         self.value = {}
         if obj is not None:
@@ -199,27 +177,17 @@ class FormValidator:
             return True
         except formencode.Invalid as exc:
             self.errors = exc.unpack_errors()
-            # for key, e in exc.error_dict.iteritems():
-            #  self.errors[key] = e.msg
-            # self.errors = exc.error_dict
+        #for key, e in exc.error_dict.iteritems():
+        #  self.errors[key] = e.msg
+        #self.errors = exc.error_dict
             return False
 
-    def __getitem__(self, item):
-        return self.value.get(item, "")
-
-    def __contains__(self, item):
-        return item in self.value
-
-    def __iter__(self):
-        return iter(list(self.value.keys()))
-
+    __getitem__ = lambda self, key: self.value.get(key, "")
+    __contains__ = lambda self, key: key in self.value
+    __iter__ = lambda self: iter(list(self.value.keys()))
     iterkeys = __iter__
-
-    def iteritems(self):
-        return iter(list(self.value.items()))
-
-    def update(self, *args, **kwargs):
-        self.value.update(*args, **kwargs)
+    iteritems = lambda self: iter(list(self.value.items()))
+    update = lambda self, *args, **kwargs: self.value.update(*args, **kwargs)
 
     def bind(self, obj, fields):
         """
@@ -228,12 +196,8 @@ class FormValidator:
         for field in fields:
             setattr(obj, field, self[field])
 
-
 class CSRFSecureForm(Form):
-    def __init__(self, formfields, request, send="Ändern", chained_validators=None):
-        if chained_validators is None:
-            chained_validators = []
-
+    def __init__(self, formfields, request, send="Ändern", chained_validators=[]):
         token_field = HiddenField(
             'csrf_token',
             value=request.session.get_csrf_token(),
@@ -241,32 +205,27 @@ class CSRFSecureForm(Form):
         )
         Form.__init__(
             self,
-            formfields + [token_field],
+            formfields+[token_field],
             send=send,
             chained_validators=chained_validators
         )
 
-
 class ObjectForm(CSRFSecureForm):
-    def __init__(self, obj, formfields, request, send="Ändern", chained_validators=None):
+    def __init__(self, obj, formfields, request, send="Ändern", chained_validators=[]):
         CSRFSecureForm.__init__(self, formfields, request, send=send, chained_validators=chained_validators)
-        if chained_validators is None:
-            chained_validators = []
-
         self.obj = obj
 
-    def saveField(self, field_name):
-        setattr(self.obj, field_name, self[field_name])
+    def saveField(self, fieldName):
+        setattr(self.obj, fieldName, self[fieldName])
 
     def saveValues(self):
         for name in self.named_fields:
             if name != 'csrf_token':
                 self.saveField(name)
 
-
 class CaptchaResult(validators.FancyValidator):
     def _validate_python(self, value, state):
-        r = requests.post(muesli.config['captcha']['verification_url'], json={
+        r = requests.post(muesli.config['captcha']['verification_url'], json = {
             "message": value,
             "application_token": muesli.config['captcha']['application_token']
         })
@@ -274,51 +233,14 @@ class CaptchaResult(validators.FancyValidator):
             raise formencode.Invalid("Captcha verifizierung fehlgeschlagen.", value, state)
 
 
-class SubjectSelect(validators.FancyValidator):
-    def __init__(self, sa_session, *args, **kw):
-        super().__init__(*args, **kw)
-        self.accept_iterator = True
-        self.trust_validator = True
-        self.session = sa_session
-
-    def _convert_to_python(self, value, state):
-        subject_list = []
-        for subject_id_str in value:
-            try:
-                subject = self.session.get(models.Subject, int(subject_id_str))
-                subject_list.append(subject)
-            except ValueError:
-                # Check if a custom, not yet curated subject was entered
-                if subject_id_str.startswith('-1:'):
-                    custom_subject_name = subject_id_str[3:]
-
-                    # Catch empty subject names
-                    if not custom_subject_name:
-                        continue
-
-                    # Search for a subject with the same name,
-                    subject = self.session.scalar(
-                        sqlalchemy.select(models.Subject).where(models.Subject.name == custom_subject_name))
-                    if not subject:
-                        # if none was found, create a new subject
-                        subject = models.Subject()
-                        subject.name = custom_subject_name
-                        subject.curated = False
-                        self.session.add(subject)
-                    subject_list.append(subject)
-        return subject_list
-
-
 class CaptchaSecuredObjectForm(ObjectForm):
-    def __init__(self, obj, formfields, request, send="Ändern", chained_validators=None):
-        if chained_validators is None:
-            chained_validators = []
-
+    def __init__(self, obj, formfields, request, send="Ändern", chained_validators=[]):
         if muesli.config['captcha']['enable']:
             self.captcha = True
             captcha_field = FormField('frc-captcha-solution', type="hidden", validator=CaptchaResult())
             formfields += [captcha_field]
         ObjectForm.__init__(self, obj, formfields, request, send=send, chained_validators=chained_validators)
+
 
 
 class LectureEdit(ObjectForm):
@@ -350,7 +272,7 @@ class LectureEdit(ObjectForm):
                 'term',
                 label='Semester',
                 type='select',
-                options=utils.get_terms(),
+                options=utils.getTerms(),
                 value=lecture.term
             ),
             FormField(
@@ -414,24 +336,23 @@ class LectureEdit(ObjectForm):
                 value=boolToValue(lecture.is_visible)
             )
         ]
-        # if request.permissionInfo.has_permission('change_assistant'):
-        # assistants = request.db.query(models.User).filter(models.User.is_assistant==1).order_by(models.User.last_name).all()
-        # formfields.append(
-        # FormField('assistant',
-        # label='Assistent',
-        # type='select',
-        # options=[[a.id, unicode(a)] for a in assistants],
-        # value=lecture.assistant.id,
-        # required=True,
-        # ))
+        #if request.permissionInfo.has_permission('change_assistant'):
+            #assistants = request.db.query(models.User).filter(models.User.is_assistant==1).order_by(models.User.last_name).all()
+            #formfields.append(
+                  #FormField('assistant',
+                   #label='Assistent',
+                   #type='select',
+                   #options=[[a.id, unicode(a)] for a in assistants],
+                   #value=lecture.assistant.id,
+                   #required=True,
+                   #))
         ObjectForm.__init__(self, lecture, formfields, request, send='Ändern')
 
-    def saveField(self, field_name):
-        if field_name == 'is_visible':
+    def saveField(self, fieldName):
+        if fieldName == 'is_visible':
             self.obj.is_visible = valueToBool(self['is_visible'])
         else:
-            ObjectForm.saveField(self, field_name)
-
+            ObjectForm.saveField(self, fieldName)
 
 class LectureAdd(ObjectForm):
     def __init__(self, request):
@@ -446,7 +367,7 @@ class LectureAdd(ObjectForm):
                         request.config['lecture_types'].items()
                     )
                 ],
-                # value=lecture.type,
+                #value=lecture.type,
                 required=True
             ),
             FormField(
@@ -454,42 +375,42 @@ class LectureAdd(ObjectForm):
                 label='Name',
                 type='text',
                 size=100,
-                # value=lecture.name,
+                #value=lecture.name,
                 required=True
             ),
             FormField(
                 'term',
                 label='Semester',
                 type='select',
-                options=utils.get_terms(),
-                # value=lecture.term
+                options=utils.getTerms(),
+                #value=lecture.term
             ),
             FormField(
                 'lsf_id',
                 label='Veranstaltungsnummer',
                 type='text',
                 size=20,
-                # value=lecture.lsf_id
+                #value=lecture.lsf_id
             ),
             FormField(
                 'lecturer',
                 label='Dozent',
                 type='text',
                 size=40,
-                # value=lecture.lecturer
+                #value=lecture.lecturer
             ),
             FormField(
                 'url',
                 label='Homepage',
                 size=100,
-                # value=lecture.url
+                #value=lecture.url
             ),
         ]
         if request.permissionInfo.has_permission('change_assistant'):
             assistants = (
                 request.db.query(models.User)
-                    .filter(models.User.is_assistant == 1)
-                    .order_by(models.User.last_name).all()
+                .filter(models.User.is_assistant==1)
+                .order_by(models.User.last_name).all()
             )
             formfields.append(
                 FormField(
@@ -497,19 +418,18 @@ class LectureAdd(ObjectForm):
                     label='Assistent',
                     type='select',
                     options=[[a.id, str(a)] for a in assistants],
-                    # value=lecture.assistant.id,
+                    #value=lecture.assistant.id,
                     required=True,
                 )
             )
         ObjectForm.__init__(self, None, formfields, request, send='Anlegen')
 
-    def saveField(self, field_name):
-        if field_name == 'assistant':
+    def saveField(self, fieldName):
+        if fieldName == 'assistant':
             assistant = self.request.db.query(models.User).get(self['assistant'])
             self.obj.assistants = [assistant]
         else:
-            ObjectForm.saveField(self, field_name)
-
+            ObjectForm.saveField(self, fieldName)
 
 class UserEdit(ObjectForm):
     def __init__(self, request, user):
@@ -544,13 +464,26 @@ class UserEdit(ObjectForm):
                 validator=validators.Number,
                 value=user.matrikel
             ),
-            MultiSelectField(
-                'subjects',
-                label='Studiengänge',
+            FormField(
+                'subject',
+                label='Studiengang',
                 type='select',
-                value=[s.id for s in user.subjects],
-                validator=SubjectSelect(request.db, if_missing=[]),
-                options=utils.get_selectable_subjects(request, user)
+                value=user.subject,
+                options=utils.getSubjects(user)
+            ),
+            FormField(
+                'subject_alt',
+                label='Studiengang',
+                size=30,
+                comment='''Genauer Studiengang (falls Sonstiges gewählt).
+                Bitte in der Form "Fach (Studiengang)".''',
+                value=''
+            ),
+            FormField(
+                'second_subject',
+                label='Beifach',
+                comment='Falls Lehramt: Beifach',
+                value=user.second_subject
             ),
             FormField(
                 'is_assistant',
@@ -569,9 +502,16 @@ class UserEdit(ObjectForm):
         ]
         ObjectForm.__init__(self, user, formfields, request, send='Änderungen übernehmen')
 
-    def saveField(self, field_name):
-        ObjectForm.saveField(self, field_name)
-
+    def saveField(self, fieldName):
+        if fieldName == 'subject':
+            if self['subject'] == 'Sonstiges':
+                self.obj.subject = self['subject_alt']
+            else:
+                self.obj.subject = self['subject']
+        elif fieldName == 'alt_subject':
+            pass
+        else:
+            ObjectForm.saveField(self, fieldName)
 
 class UserUpdate(ObjectForm):
     def __init__(self, request, user):
@@ -606,29 +546,47 @@ class UserUpdate(ObjectForm):
                 validator=validators.Number,
                 value=user.matrikel
             ),
-            MultiSelectField(
-                'subjects',
-                label='Studiengänge',
-                type='subject_select',
-                value=[s.id for s in user.subjects],
-                validator=SubjectSelect(request.db, if_missing=[]),
-                options=utils.get_selectable_subjects(request, user)
+            FormField(
+                'subject',
+                label='Studiengang',
+                type='select',
+                value=user.subject,
+                options=utils.getSubjects(user)
+            ),
+            FormField(
+                'subject_alt',
+                label='Studiengang',
+                size=30,
+                comment='''Genauer Studiengang (falls Sonstiges gewählt).
+                Bitte in der Form "Fach (Studiengang)".''',
+                value=''),
+            FormField(
+                'second_subject',
+                label='Beifach',
+                comment='Falls Lehramt: Beifach',
+                value=user.second_subject
             ),
         ]
         ObjectForm.__init__(self, user, formfields, request, send='Änderungen übernehmen')
-        self.editok = ['subjects']
+        self.editok = ['title', 'subject', 'subject_alt', 'second_subject']
         if not getattr(user, 'matrikel'):
             self.editok.append('matrikel')
         for field in self.named_fields:
             if field not in self.editok:
                 self.named_fields[field].readonly = True
 
-    def saveField(self, field_name):
-        if field_name not in self.editok:
+    def saveField(self, fieldName):
+        if fieldName not in self.editok:
             return
+        if fieldName == 'subject':
+            if self['subject'] == 'Sonstiges':
+                self.obj.subject = self['subject_alt']
+            else:
+                self.obj.subject = self['subject']
+        elif fieldName == 'alt_subject':
+            pass
         else:
-            ObjectForm.saveField(self, field_name)
-
+            ObjectForm.saveField(self, fieldName)
 
 class UserRegister(CaptchaSecuredObjectForm):
     def __init__(self, request):
@@ -638,25 +596,25 @@ class UserRegister(CaptchaSecuredObjectForm):
                 label='E-Mail',
                 size=40,
                 comment='ACHTUNG: Unbedingt eine uni-heidelberg.de Mailadresse verwenden!',
-                # value=user.email,
+                #value=user.email,
                 required=True,
                 validator=validators.Email()
             ),
             FormField(
                 'title',
                 label='Titel', size=20,
-                # value=user.title
+                #value=user.title
             ),
             FormField(
                 'first_name',
                 label='Vorname', size=40,
-                # value=user.first_name,
+                #value=user.first_name,
                 required=True
             ),
             FormField(
                 'last_name',
                 label='Nachname', size=40,
-                # value=user.last_name,
+                #value=user.last_name,
                 required=True
             ),
             FormField(
@@ -667,28 +625,42 @@ class UserRegister(CaptchaSecuredObjectForm):
                 00000 eintragen. Die Matrikelnummer muss dann baldmöglichst
                 unter „Angaben ergänzen“ richtig gestellt werden!""",
                 validator=validators.Number,
-                # value=user.matrikel,
+                #value=user.matrikel,
                 required=True
             ),
-            MultiSelectField(
-                'subjects',
-                label='Studiengänge',
+            FormField(
+                'subject',
+                label='Studiengang',
                 type='select',
-                validator=SubjectSelect(request.db, if_missing=[]),
-                options=utils.get_selectable_subjects(request)
+                #value=user.subject,
+                options=utils.getSubjects(),
+                required=True
             ),
+            FormField(
+                'subject_alt',
+                label='Studiengang',
+                size=30,
+                comment='''Genauer Studiengang (falls Sonstiges gewählt). Bitte
+                in der Form "Fach (Studiengang)".''',
+                value=''
+            )
         ]
         CaptchaSecuredObjectForm.__init__(self, None, formfields, request, send='Registrieren')
-
-    def saveField(self, field_name):
-        if field_name == 'matrikel':
+    def saveField(self, fieldName):
+        if fieldName == 'subject':
+            if self['subject'] == 'Sonstiges':
+                self.obj.subject = self['subject_alt']
+            else:
+                self.obj.subject = self['subject']
+        elif fieldName == 'alt_subject':
+            pass
+        elif fieldName == 'matrikel':
             if self['matrikel'] == 00000:
                 self.obj.matrikel = None
             else:
                 self.obj.matrikel = self['matrikel']
         else:
-            CaptchaSecuredObjectForm.saveField(self, field_name)
-
+            CaptchaSecuredObjectForm.saveField(self, fieldName)
 
 class UserRegisterOther(CaptchaSecuredObjectForm):
     def __init__(self, request):
@@ -696,33 +668,31 @@ class UserRegisterOther(CaptchaSecuredObjectForm):
             FormField(
                 'email',
                 label='E-Mail', size=40,
-                # value=user.email,
+                #value=user.email,
                 required=True,
                 validator=validators.Email()
             ),
             FormField(
                 'title',
                 label='Titel', size=20,
-                # value=user.title
+                #value=user.title
             ),
             FormField(
                 'first_name',
                 label='Vorname', size=40,
-                # value=user.first_name,
+                #value=user.first_name,
                 required=True
             ),
             FormField(
                 'last_name',
                 label='Nachname', size=40,
-                # value=user.last_name,
+                #value=user.last_name,
                 required=True
             ),
         ]
         CaptchaSecuredObjectForm.__init__(self, None, formfields, request, send='Registrieren')
-
-    def saveField(self, field_name):
-        CaptchaSecuredObjectForm.saveField(self, field_name)
-
+    def saveField(self, fieldName):
+        CaptchaSecuredObjectForm.saveField(self, fieldName)
 
 class UserConfirm(ObjectForm):
     def __init__(self, request, confirmation):
@@ -752,7 +722,6 @@ class UserConfirm(ObjectForm):
             chained_validators=[validators.FieldsMatch('password', 'password_repeat')]
         )
 
-
 class UserLoginForm(ObjectForm):
     def __init__(self, request):
         formfields = [
@@ -772,7 +741,6 @@ class UserLoginForm(ObjectForm):
         ]
         ObjectForm.__init__(self, None, formfields, request, send='Anmelden')
 
-
 class UserChangeEmail(ObjectForm):
     def __init__(self, request, user):
         formfields = [
@@ -785,8 +753,7 @@ class UserChangeEmail(ObjectForm):
             ),
         ]
         ObjectForm.__init__(self, user, formfields, request, send='E-Mail-Adresse ändern')
-
-    def saveField(self, field_name):
+    def saveField(self, fieldName):
         pass
 
 
@@ -803,7 +770,7 @@ class SetAuthCodeDescription(ObjectForm):
         ObjectForm.__init__(self, None, formfields,
                             request, send='Generiere API-Key')
 
-    def saveField(self, field_name):
+    def saveField(self, fieldName):
         pass
 
 
@@ -826,7 +793,6 @@ class LectureAddExam(ObjectForm):
             )
         ]
         ObjectForm.__init__(self, None, formfields, request, send='Anlegen')
-
 
 class UserChangePassword(ObjectForm):
     def __init__(self, request):
@@ -852,7 +818,6 @@ class UserChangePassword(ObjectForm):
             chained_validators=[validators.FieldsMatch('new_password', 'new_password_repeat')]
         )
 
-
 class UserResetPassword(CaptchaSecuredObjectForm):
     def __init__(self, request):
         formfields = [
@@ -863,8 +828,7 @@ class UserResetPassword(CaptchaSecuredObjectForm):
                 validator=validators.Email()
             ),
         ]
-        CaptchaSecuredObjectForm.__init__(self, None, formfields, request, send='Passwort zurücksetzen')
-
+        CaptchaSecuredObjectForm.__init__(self, None, formfields, request,  send='Passwort zurücksetzen')
 
 class UserResetPassword3(ObjectForm):
     def __init__(self, request, confirmation):
@@ -890,7 +854,6 @@ class UserResetPassword3(ObjectForm):
             self, None, formfields, request, send='Neues Passwort setzen',
             chained_validators=[validators.FieldsMatch('password', 'password_repeat')]
         )
-
 
 class LectureEditExam(ObjectForm):
     def __init__(self, request, exam):
@@ -943,19 +906,17 @@ class LectureEditExam(ObjectForm):
             ),
         ]
         ObjectForm.__init__(self, exam, formfields, request, send='Änderungen speichern')
-
-    def saveField(self, field_name):
-        if field_name in ['admission', 'registration', 'medical_certificate', 'results_hidden']:
-            setattr(self.obj, field_name, valueToBool(self[field_name]))
+    def saveField(self, fieldName):
+        if fieldName in ['admission', 'registration', 'medical_certificate', 'results_hidden']:
+            setattr(self.obj, fieldName, valueToBool(self[fieldName]))
         else:
-            ObjectForm.saveField(self, field_name)
-
+            ObjectForm.saveField(self, fieldName)
 
 class TutorialEdit(ObjectForm):
     def __init__(self, request, tutorial):
         # TODO: Übungsleiter angeben. Aber wurde das jemals genutzt?
         formfields = [
-            # FormField('tutor',
+            #FormField('tutor',
             #   label=u'Übungsleiter', size=64),
             FormField(
                 'place',
@@ -966,8 +927,7 @@ class TutorialEdit(ObjectForm):
                 'wday',
                 label='Wochentag',
                 type='select',
-                options=list(
-                    enumerate(['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'])),
+                options=list(enumerate(['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'])),
                 required=True,
                 value=int(tutorial.time.weekday()) if tutorial else None
             ),
@@ -1000,24 +960,22 @@ class TutorialEdit(ObjectForm):
             )
         ]
         ObjectForm.__init__(self, tutorial, formfields, request, send='Ändern')
-
-    def saveField(self, field_name):
-        if field_name == 'is_special':
-            setattr(self.obj, field_name, valueToBool(self[field_name]))
-        elif field_name == 'wday':
+    def saveField(self, fieldName):
+        if fieldName == 'is_special':
+            setattr(self.obj, fieldName, valueToBool(self[fieldName]))
+        elif fieldName == 'wday':
             pass
-        elif field_name == 'timeofday':
+        elif fieldName == 'timeofday':
             timeofday = self['timeofday']
             if not ':' in timeofday:
                 timeofday += ':00'
-            if len(timeofday) < 5:
+            if len(timeofday) <5:
                 timeofday = '0' + timeofday
             timeString = '%s %s' % (self['wday'], timeofday)
             time = TutorialTime(timeString)
             setattr(self.obj, 'time', time)
         else:
-            ObjectForm.saveField(self, field_name)
-
+            ObjectForm.saveField(self, fieldName)
 
 class TutorialEmailPreference(CSRFSecureForm):
     def __init__(self, request):
@@ -1031,7 +989,6 @@ class TutorialEmailPreference(CSRFSecureForm):
             ),
         ]
         CSRFSecureForm.__init__(self, formfields, request, send='Speichern')
-
 
 class TutorialEmail(CSRFSecureForm):
     def __init__(self, request):
@@ -1061,7 +1018,6 @@ class TutorialEmail(CSRFSecureForm):
         ]
         CSRFSecureForm.__init__(self, formfields, request, send='Senden')
 
-
 class ExamAddOrEditExercise(ObjectForm):
     def __init__(self, request, exercise):
         formfields = [
@@ -1082,7 +1038,6 @@ class ExamAddOrEditExercise(ObjectForm):
         ]
         ObjectForm.__init__(self, exercise, formfields, request, send='Anlegen/Ändern')
 
-
 class LectureAddGrading(ObjectForm):
     def __init__(self, request):
         formfields = [
@@ -1093,7 +1048,6 @@ class LectureAddGrading(ObjectForm):
             ),
         ]
         ObjectForm.__init__(self, None, formfields, request, send='Anlegen')
-
 
 class LectureEmailTutors(CSRFSecureForm):
     def __init__(self, request):
@@ -1114,14 +1068,13 @@ class LectureEmailTutors(CSRFSecureForm):
                 validator=validators.FieldStorageUploadConverter()
             ),
             FormField('copytoassistants',
-                      label='Kopie an die Assistenten',
-                      type='radio',
-                      options=list(enumerate(['Senden', 'Nicht senden'])),
-                      value=0
-                      ),
+               label='Kopie an die Assistenten',
+               type='radio',
+               options=list(enumerate(['Senden', 'Nicht senden'])),
+               value=0
+           ),
         ]
         CSRFSecureForm.__init__(self, formfields, request, send='Senden')
-
 
 class LectureEmailStudents(CSRFSecureForm):
     def __init__(self, request):
@@ -1152,7 +1105,6 @@ class LectureEmailStudents(CSRFSecureForm):
         ]
         CSRFSecureForm.__init__(self, formfields, request, send='Senden')
 
-
 class EmailWrongSubject(CSRFSecureForm):
     def __init__(self, type, request):
         formfields = [
@@ -1179,7 +1131,6 @@ class EmailWrongSubject(CSRFSecureForm):
             ),
         ]
         CSRFSecureForm.__init__(self, formfields, request, send='Senden')
-
 
 class GradingEdit(ObjectForm):
     def __init__(self, request, grading):
@@ -1209,7 +1160,6 @@ class GradingEdit(ObjectForm):
             ),
         ]
         ObjectForm.__init__(self, grading, formfields, request, send='Ändern')
-
 
 class TutorLectureAuthSignIn(ObjectForm):
     def __init__(self, request):

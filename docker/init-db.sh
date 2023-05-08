@@ -31,7 +31,7 @@ EOSQL
 # This allows restoring sql dumps in the compressed postgres format too
 if [[ -f "/muesli.prod.sql" ]]; then
   echo "Loading production database dump"
-  pg_restore -U "postgres" -d "muesli" -d muesli -n public -1 /muesli.prod.sql
+  pg_restore -U "muesli-admin" -d "muesli" -d muesli -n public -1 /muesli.prod.sql
 else
   echo "Loading development database dump"
   psql -U "muesli-admin" -f /muesli.sql muesli

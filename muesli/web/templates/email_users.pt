@@ -11,6 +11,11 @@ Geben Sie hierzu in das Formular unten einen Betreff und die Nachricht ein und k
 
 <ul>
   <li>
+    <a tal:attributes="href request.route_path('email_users',_query={'type': 'wrong_subject'})">
+      Falsches Fach
+    </a>
+  </li>
+  <li>
     <a tal:attributes="href request.route_path('email_users',_query={'type': 'unconfirmed'})">
       Karteileichen
     </a>
@@ -31,7 +36,7 @@ Mit freundlichen Grüßen,<br />
   Das MÜSLI-Team
 </p>
 
-<form tal:attributes="action request.route_path('email_users')" method="POST"
+<form action="/email_wrong_subject" tal:attributes="action request.route_path('email_users')" method="POST"
   enctype="multipart/form-data">
   <metal:main metal:use-macro="templates('Fragments/HTML/form.pt').macros['formmacro']" />
 </form>
