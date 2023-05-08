@@ -49,7 +49,7 @@
       </td>
       <td>${ls.student.last_name}, ${ls.student.first_name}</td>
       <td>${ls.student.matrikel}</td>
-      <td>${', '.join([s.name for s in ls.student.subjects])}</td>
+      <td>${ls.student.subject}</td>
     </tr>
   </tbody>
 

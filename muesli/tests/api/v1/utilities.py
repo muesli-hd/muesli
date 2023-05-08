@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 #
-# muesli/tests/utilities.py
+# muesli/tests/lectureTests.py
 #
 # This file is part of MUESLI.
 #
-# Copyright (C) 2022, Tobias Wackenhut <tobias (at) wackenhut.org>
+# Copyright (C) 2011, Matthias Kuemmerer <matthias (at) matthias-k.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

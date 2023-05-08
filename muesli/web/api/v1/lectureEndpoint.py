@@ -32,7 +32,6 @@ from muesli import models
 from muesli.web.context import LectureEndpointContext
 from muesli.web.api.v1 import allowed_attributes
 
-
 @resource(collection_path='/lectures',
           path='/lectures/{lecture_id}',
           factory=LectureEndpointContext)
@@ -92,7 +91,7 @@ class Lecture:
             - "application/json"
           responses:
             200:
-              description: successful return of the lecture
+              description: successfull return of the lecture
               schema:
                 $ref: "#/definitions/Lecture"
         """
@@ -106,7 +105,7 @@ class Lecture:
         schema = models.LectureSchema(only=allowed_attr)
         response = schema.dump(lecture)
         if lecture.mode == 'off':
-            response.update({'tutorials': []}, )
+            response.update({'tutorials': []})
         return {'lecture': response,
                 'subscribed': subscribed}
 

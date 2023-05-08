@@ -25,7 +25,7 @@
     <td><span tal:condition="ls.tutorial.tutor" tal:content="ls.tutorial.tutor.last_name" /></td>
     <td>${ls.student.last_name}, ${ls.student.first_name}</td>
     <td>${ls.student.matrikel}</td>
-    <td>${', '.join(ls.student.subjects)}</td>
+    <td>${ls.student.subject}</td>
     <td tal:repeat="ex exam.exercises">${points[ls.student_id][ex.id].points if points[ls.student_id][ex.id].points!= None else ''}</td>
     <td>${points[ls.student_id].get('total', '')}</td>
     <td tal:condition="exam.admission!=None">

@@ -82,4 +82,5 @@ class AdminLoggedInTests(AssistantLoggedInTests):
 
     def test_email_users(self):
         res = self.testapp.get('/email_users', status=200)
+        res = self.testapp.get('/email_users?type=wrong_subject', status=200)
         res = self.testapp.get('/email_users?type=unconfirmed', status=200)

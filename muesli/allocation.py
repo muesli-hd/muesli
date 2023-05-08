@@ -87,7 +87,7 @@ class Allocation:
         # we do now add nodes for all different 'times' where
         # tutorials are happening. Every time gets an arc to the
         # master node.
-        times = self.lecture.prepare_time_preferences()
+        times = self.lecture.prepareTimePreferences()
         for time in times:
             time_tutorials = []
             tuts = self.session.query(models.Tutorial).filter(models.Tutorial.lecture_id==self.lecture.id).filter(models.Tutorial.time == time['time']).all()

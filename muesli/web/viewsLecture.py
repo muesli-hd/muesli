@@ -18,32 +18,36 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import json
 
 from muesli import models
+from muesli import utils
 from muesli.web.context import *
 from muesli.web.forms import *
 from muesli.allocation import Allocation
 from muesli.mail import Message, sendMail
-from muesli.web import statements
 from muesli.web.viewsExam import MatplotlibView
+
+from collections import defaultdict
 
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPFound, HTTPForbidden
+from pyramid.url import route_url
 
-from sqlalchemy import select
 from sqlalchemy.orm import exc, joinedload, undefer
 from sqlalchemy.sql.expression import desc
 import sqlalchemy
-
-from collections import defaultdict
-
+#
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from tempfile import NamedTemporaryFile
+import io
+#
 from muesli import types
 from muesli.web.tooltips import lecture_edit_tooltips
+
+import re
+import os
 
 import yaml
 
@@ -79,7 +83,7 @@ class View:
         self.lecture_id = request.matchdict['lecture_id']
     def __call__(self):
         lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
-        times = lecture.prepare_time_preferences(user=self.request.user)
+        times = lecture.prepareTimePreferences(user=self.request.user)
         subscribed_tutorial = self.request.user.tutorials.filter(Tutorial.lecture_id == self.lecture_id).first()
         form = TutorLectureAuthSignIn(self.request)
         self.request.javascript.append('unsubscribe_modal_helpers.js')
@@ -247,31 +251,40 @@ class SwitchStudents(object):
 
 
 @view_config(route_name='lecture_edit', renderer='muesli.web:templates/lecture/edit.pt', context=LectureContext, permission='edit')
-def lecture_edit(request):
-        lecture = request.context.lecture
+class Edit:
+    def __init__(self, request):
+        self.request = request
+        self.db = self.request.db
+        self.lecture_id = request.matchdict['lecture_id']
+    def __call__(self):
+        lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
+        form = LectureEdit(self.request, lecture)
+        assistants = self.db.query(models.User).filter(models.User.is_assistant==1).order_by(models.User.last_name).all()
 
-        form = LectureEdit(request, lecture)
-        if request.method == 'POST' and form.processPostData(request.POST):
+        if self.request.method == 'POST' and form.processPostData(self.request.POST):
             form.saveValues()
-            request.db.commit()
-        approved_assistants = request.db.scalars(select(models.User) \
-                                                 .where(models.User.is_assistant==1).order_by(models.User.last_name))
-        registration_info = statements.lecture_registered_participants_stats(request.db, lecture.id)
+            self.request.db.commit()
+        names = self.request.config['lecture_types'][lecture.type]
+        pref_subjects = lecture.pref_subjects()
+        pref_count = sum([pref[0] for pref in pref_subjects])
+        subjects = lecture.subjects()
+        student_count = sum([subj[0] for subj in subjects])
         # Query results are already lexicographically sorted.
-        # Sort again using length as key, so we get length lexicographical sorting
+        # Sort again using length as key so we get length lexicographical sorting
         # https://github.com/muesli-hd/muesli/issues/28
         exams = dict([[cat['id'], sorted(list(lecture.exams.filter(models.Exam.category==cat['id'])),
                               key=lambda x:len(x.name))]
                       for cat in utils.categories])
-        request.javascript.append('select2.min.js')
-        request.css.append('select2.min.css')
-        request.javascript.append('select2_bullet_deletion_hack.js')
+        self.request.javascript.append('select2.min.js')
+        self.request.css.append('select2.min.css')
         return {'lecture': lecture,
-                'names': request.config['lecture_types'][lecture.type],
-                'registration_info': registration_info,
+                'names': names,
+                'pref_count': pref_count,
+                'subjects': subjects,
+                'student_count': student_count,
                 'categories': utils.categories,
                 'exams': exams,
-                'assistants': approved_assistants,
+                'assistants': assistants,
                 'form': form,
                 'tooltips': lecture_edit_tooltips}
 
@@ -355,16 +368,28 @@ def change_assistants(request):
     return HTTPFound(location=request.route_url('lecture_edit', lecture_id = lecture.id))
 
 @view_config(route_name='lecture_preferences', renderer='muesli.web:templates/lecture/preferences.pt', context=LectureContext, permission='edit')
-def lecture_preferences(request):
-        lecture = request.context.lecture
-        names = request.config['lecture_types'][lecture.type]
-        registration_info = statements.lecture_registered_participants_stats(request.db, lecture.id)
-        times = lecture.prepare_time_preferences(user=None)
+class Preferences:
+    def __init__(self, request):
+        self.request = request
+        self.db = self.request.db
+        self.lecture_id = request.matchdict['lecture_id']
+    def __call__(self):
+        lecture = self.db.query(models.Lecture).options(undefer('tutorials.student_count')).get(self.lecture_id)
+        names = self.request.config['lecture_types'][lecture.type]
+        pref_subjects = lecture.pref_subjects()
+        pref_count = sum([pref[0] for pref in pref_subjects])
+        subjects = lecture.subjects()
+        student_count = sum([subj[0] for subj in subjects])
+        times = lecture.prepareTimePreferences(user=None)
         times = sorted([t for t in times], key=lambda s:s['time'].value)
+        #print(times)
         return {'lecture': lecture,
                 'names': names,
+                'pref_subjects': pref_subjects,
+                'pref_count': pref_count,
+                'subjects': subjects,
                 'times': times,
-                'registration_info': registration_info,
+                'student_count': student_count,
                 'categories': utils.categories,
                 'exams': dict([[cat['id'], lecture.exams.filter(models.Exam.category==cat['id'])] for cat in utils.categories]),
                 }
@@ -443,7 +468,7 @@ class ExportStudentsHtml:
         lecture = self.db.query(models.Lecture).get(self.lecture_id)
         students = lecture.lecture_students_for_tutorials([])
         if 'subject' in self.request.GET:
-            students = students.filter(models.LectureStudent.student.has(self.request.GET['subject'] in models.User.subjects))
+            students = students.filter(models.LectureStudent.student.has(models.User.subject==self.request.GET['subject']))
         return {'lecture': lecture,
                 'lecture_students': students}
 
@@ -519,15 +544,15 @@ def exportTotals(request):
     ls = lecture.lecture_students_for_tutorials(order=False)
     Tutor = sqlalchemy.orm.aliased(models.User)
     ls = ls.join(models.LectureStudent.student).join(models.LectureStudent.tutorial).join(Tutor, models.Tutorial.tutor).order_by(Tutor.last_name, models.User.last_name, models.User.first_name)
-    lecture_results = lecture.get_lecture_results(students=ls)
-    results = defaultdict(lambda: defaultdict(lambda: {}))
+    lecture_results = lecture.getLectureResults(students=ls)
+    results = DictOfObjects(lambda: DictOfObjects(lambda: {}))
     for res in lecture_results:
         results[res.student_id]['results'][res.Exam.id] = res.points
-    cat_results = lecture.get_lecture_results_by_category(students=ls)
+    cat_results = lecture.getLectureResultsByCategory(students=ls)
     for res in cat_results:
         results[res.student_id]['totals'][res.category] = res.points
-    gresults = lecture.get_grading_results(students = ls)
-    grading_results = defaultdict(lambda: {})
+    gresults = lecture.getGradingResults(students = ls)
+    grading_results = DictOfObjects(lambda: {})
     for res in gresults:
         grading_results[res.student_id][res.grading_id] = res.grade
     exams_by_category = [
@@ -573,7 +598,7 @@ def removeAllocation(request):
 @view_config(route_name='lecture_set_preferences', context=LectureContext, permission='view')
 def setPreferences(request):
     lecture = request.context.lecture
-    times = lecture.prepare_time_preferences(user=request.user)
+    times = lecture.prepareTimePreferences(user=request.user)
     row = 1
     tps = []
     while 'time-%i' % row in request.POST:
@@ -623,11 +648,11 @@ def viewPoints(request):
     exams_by_category = [cat for cat in exams_by_category if cat['exams']]
     results = {}
     for exam in exams:
-        results[exam.id] = exam.get_results_for_student(ls.student)
+        results[exam.id] = exam.getResultsForStudent(ls.student)
     for exams in exams_by_category:
         sum_all = sum([x for x in [results[e.id]['sum'] for e in exams['exams']] if x])
-        max_all = sum([x for x in [e.get_max_points() for e in exams['exams']] if x])
-        max_rel = sum([x for x in [e.get_max_points() for e in exams['exams'] if results[e.id]['sum']] if x])
+        max_all = sum([x for x in [e.getMaxpoints() for e in exams['exams']] if x])
+        max_rel = sum([x for x in [e.getMaxpoints() for e in exams['exams'] if results[e.id]['sum']] if x])
         exams['sum'] = sum_all
         exams['max'] = max_all
         exams['max_rel'] = max_rel
@@ -811,79 +836,6 @@ class DoExport(ExcelExport):
                 for col, d in enumerate(item, 1):
                     worksheet_tutorials.cell(row=row_index, column=col, value=d)
                 row_index = row_index + 1
-        # set column width
-        for column_cells in worksheet_tutorials.columns:
-            max_length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet_tutorials.column_dimensions[column_cells[0].column_letter].width = max_length*1.2
-        return self.createResponse()
-
-
-@view_config(route_name='lecture_export_multi_semester_statistics', renderer='json', context=GeneralContext, permission='export_multi_semester')
-def export_multi_semester_statistics(request):
-    if request.method == 'POST':
-        try:
-            module_map = request.json_body
-        except (KeyError, json.JSONDecodeError):
-            return {}
-    else:
-        return {}
-    result = {}
-    for module in module_map:
-        stmt = statements.lecture_statistics_multi_semester_stmt(module_map[module])
-        for lecture_id, lecture_term, lecture_name, lecture_lecturer, registered, admitted, total_active, \
-            active_faculty_internal, active_faculty_external, admitted_repeaters in request.db.execute(stmt):
-            result.setdefault(module, {})[lecture_id] = {
-                'term': str(lecture_term),
-                'name': lecture_name,
-                'lecturer': lecture_lecturer,
-                'registered': registered,
-                'total_active': total_active,
-                'active_faculty_internal': active_faculty_internal,
-                'active_faculty_external': active_faculty_external,
-                'admitted': admitted,
-                'included_admitted_non_active_students': admitted_repeaters
-            }
-    return result
-
-
-@view_config(route_name='lecture_export_multi_semester_statistics_xlsx', context=GeneralContext, permission='export_multi_semester')
-class export_multi_semester_statistics_xlsx(ExcelExport):
-    def __call__(self):
-        if self.request.method == 'POST':
-            try:
-                module_map = self.request.json_body
-            except (KeyError, json.JSONDecodeError):
-                return {}
-        else:
-            return {}
-
-        # sheet Stastistics
-        w = self.w
-        worksheet_tutorials = w.active
-        worksheet_tutorials.title = 'Statistics'
-        header = ['module',
-                  'id',
-                  'term',
-                  'name',
-                  'lecturer',
-                  'registered',
-                  'admitted',
-                  'total_active',
-                  'active_faculty_internal',
-                  'active_faculty_external',
-                  'included_admitted_non_active_students']
-        worksheet_tutorials.append(header)
-        worksheet_tutorials.row_dimensions[1].font = Font(bold=True)
-        row_index = 2
-
-        for module in module_map:
-            stmt = statements.lecture_statistics_multi_semester_stmt(module_map[module])
-            for parameters in self.request.db.execute(stmt):
-                worksheet_tutorials.cell(row=row_index, column=1, value=module)
-                for i, param in enumerate(parameters):
-                    worksheet_tutorials.cell(row=row_index, column=i+2, value=str(param))
-                row_index += 1
-
         # set column width
         for column_cells in worksheet_tutorials.columns:
             max_length = max(len(str(cell.value)) for cell in column_cells)

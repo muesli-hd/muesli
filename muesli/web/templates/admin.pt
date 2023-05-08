@@ -34,9 +34,6 @@
   <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('user_delete_unconfirmed')"><span class="align-self-center mx-auto">Karteileichen sichten und löschen</span></a>
   <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('user_doublets')"><span class="align-self-center mx-auto">Mehrfache Anmeldungen</span></a>
 </div>
-<div class="row">
-  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('subject_admin')"><span class="align-self-center mx-auto">Studienfächer administrieren</span></a>
-</div>
 
 <h2 class="flip white-text-border">Developement</h2>
 <div class="list-group">

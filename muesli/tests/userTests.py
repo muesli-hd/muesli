@@ -50,7 +50,7 @@ class BaseTests(functionalTests.BaseTests):
         form = res.form
         form['email'] = 'matthias@matthias-k.org'
         form['first_name'] = 'Matthias'
-        form['subjects'] = []
+        form['subject'] = 'Mathematik (Dipl.)'
         form['matrikel'] = '1234567'
         res = form.submit()
         self.assertTrue(res.status.startswith('200'))
@@ -59,7 +59,7 @@ class BaseTests(functionalTests.BaseTests):
         form['email'] = 'matthias@matthias-k.org'
         form['first_name'] = 'Matthias'
         form['last_name'] = 'Kümmerer'
-        form['subjects'] = []
+        form['subject'] = 'Mathematik (Dipl.)'
         form['matrikel'] = 'ui123'
         res = form.submit()
         self.assertTrue(res.status.startswith('200'))
@@ -68,7 +68,7 @@ class BaseTests(functionalTests.BaseTests):
         form['email'] = 'matthias@matthias-k.org'
         form['first_name'] = 'Matthias'
         form['last_name'] = 'Kümmerer'
-        form['subjects'] = []
+        form['subject'] = 'Mathematik (Dipl.)'
         form['matrikel'] = '1234567'
         res = form.submit()
         self.assertTrue(res.status.startswith('302'))
@@ -91,7 +91,7 @@ class BaseTests(functionalTests.BaseTests):
     def test_user_confirm(self):
         self.test_user_register()
         self.session.expire_all()
-        user = self.session.query(User).filter(User.email == 'matthias@matthias-k.org').one()
+        user = self.session.query(User).filter(User.email=='matthias@matthias-k.org').one()
         confirmation = user.confirmations[0]
         res = self.testapp.get('/user/confirm/%s' % confirmation.hash, status=200)
         form =  res.form
@@ -166,25 +166,33 @@ class UnloggedTests(BaseTests,functionalTests.PopulatedTests):
 
     def test_user_register_same_email(self):
         res = self.testapp.get('/user/register', status=200)
+        form = res.form
         # Same email
-        for email in (self.user.email, self.user.email.upper()):
-            form = res.form
-            form['email'] = email
-            form['first_name'] = 'Matthias'
-            form['last_name'] = 'Kümmerer'
-            form['subjects'] = [str(self.subjects[1].id)]
-            form['matrikel'] = '1234567'
-            res = form.submit()
-            self.assertTrue(res.status.startswith('200'))
-            self.assertResContains(res, 'existiert bereits')
-            form = res.form
+        form['email'] = self.user.email
+        form['first_name'] = 'Matthias'
+        form['last_name'] = 'Kümmerer'
+        form['subject'] = 'Mathematik (Dipl.)'
+        form['matrikel'] = '1234567'
+        res = form.submit()
+        self.assertTrue(res.status.startswith('200'))
+        self.assertResContains(res, 'existiert bereits')
+        form = res.form
+        # Same email different cases
+        form['email'] = self.user.email.upper()
+        form['first_name'] = 'Matthias'
+        form['last_name'] = 'Kümmerer'
+        form['subject'] = 'Mathematik (Dipl.)'
+        form['matrikel'] = '1234567'
+        res = form.submit()
+        self.assertTrue(res.status.startswith('200'))
+        self.assertResContains(res, 'existiert bereits')
 
     def test_user_case_insensitive_login(self):
         user2 = muesli.models.User()
         user2.first_name = 'Stefan'
         user2.last_name = 'Student'
         user2.email = 'User@muesli.org'
-        user2.subjects.append(self.config['subjects'][0])
+        user2.subject = self.config['subjects'][0]
         functionalTests.setUserPassword(user2, 'userpassword2')
         self.session.add(user2)
         self.session.commit()
@@ -308,7 +316,7 @@ class AdminLoggedInTests(AssistantLoggedInTests):
         res = self.testapp.get('/user/edit/%s' % self.tutor.id, status=200)
         res = self.testapp.get('/user/edit/%s' % self.assistant.id, status=200)
         res = self.testapp.get('/user/edit/%s' % self.admin.id, status=200)
-        self.user.subjects.append('Ein süßer Umlaut')
+        self.user.subject='Ein süßer Umlaut'
         self.session.commit()
         res = self.testapp.get('/user/edit/%s' % self.user.id, status=200)
 

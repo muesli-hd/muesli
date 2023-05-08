@@ -110,7 +110,7 @@ class Tutorial:
             lecture_student = None
         # If the user is part of the tutorial he is allowed to view the exams
         if self.request.has_permission('viewAll') or lecture_student:
-            result.update({"exams": exam_schema.dump(exa)}, )
+            result.update({"exams": exam_schema.dump(exa)})
         return result
 
     @view(permission='edit')
@@ -138,7 +138,7 @@ class Tutorial:
               $ref: "#/definitions/Tutorial"
           responses:
             200:
-              description: successful creation of a tutorial
+              description: successfull creation of a tutorial
               schema:
                 type: object
                 properties:

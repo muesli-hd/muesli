@@ -20,8 +20,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import io
-from collections import Counter, defaultdict
 import json
+from collections import Counter
 
 import PIL.Image
 import PIL.ImageDraw
@@ -33,7 +33,6 @@ from pyramid.view import view_config
 from sqlalchemy.orm import exc
 from sqlalchemy.sql import func
 
-from muesli.web import statements
 from muesli.web.context import *
 from muesli.web.forms import *
 
@@ -70,7 +69,8 @@ class Edit:
                     sqlalchemy.and_(models.ExamAdmission.exam_id == exam.id,
                                     models.ExamAdmission.registration == True))))
             # first sort key: last_name, second sort key: first_name
-            students = sorted(students, key=lambda s: (s.student.last_name.lower(), s.student.first_name.lower()))
+            students = sorted(students,
+                              key=lambda s: (s.student.getLastName().lower(), s.student.getFirstName().lower()))
         else:
             students = None
         return {'exam': exam,
@@ -171,7 +171,7 @@ class EnterPointsBasic:
         pointsQuery = exam.exercise_points.filter(
             ExerciseStudent.student_id.in_([s.student.id for s in students])).options(
             sqlalchemy.orm.joinedload(ExerciseStudent.student), sqlalchemy.orm.joinedload(ExerciseStudent.exercise))
-        points = defaultdict(lambda: {})
+        points = DictOfObjects(lambda: {})
         # for s in students:
         #       for e in exam.exercises:
         #               points[s.student_id][e.id] = None
@@ -234,7 +234,7 @@ class EnterPointsBasic:
         #       die selber auszurechnen...
         if tutorials:
             statistics = exam.getStatistics(students=None)
-            statistics.update(exam.getStatistics(students=students, prefix='tut'), )
+            statistics.update(exam.getStatistics(students=students, prefix='tut'))
         else:
             statistics = exam.getStatistics(students=students)
         self.request.javascript.append('toast.min.js')
@@ -350,7 +350,7 @@ class Export:
         pointsQuery = exam.exercise_points.filter(
             ExerciseStudent.student_id.in_([s.student.id for s in students])).options(
             sqlalchemy.orm.joinedload(ExerciseStudent.student), sqlalchemy.orm.joinedload(ExerciseStudent.exercise))
-        points = defaultdict(lambda: {})
+        points = DictOfObjects(lambda: {})
         for point in pointsQuery:
             points[point.student_id][point.exercise_id] = point
         for student in students:
@@ -390,16 +390,81 @@ class Export:
 @view_config(route_name='exam_statistics', renderer='muesli.web:templates/exam/statistics.pt', context=ExamContext,
              permission='statistics')
 def statistics(request):
+    db = request.db
+    tutorial_ids = request.context.tutorial_ids
     exam = request.context.exam
     tutorials = request.context.tutorials
-    statistics_data = statements.lecture_exams_statistics(request.db, exam.id, tutorials)
-    admission_counts = statements.exam_admission_registration_medical_count(request.db, exam.id, tutorials)
-    quantils = statements.exam_points_quantils(request.db, exam.id, tutorials)
+    lecturestudents = exam.lecture.lecture_students.all()
+    statistics = exam.getStatistics(students=lecturestudents)
+    statistics_by_subject = exam.getStatisticsBySubjects(
+        students=lecturestudents)  # exam.getStatisticsBySubject(students=students)
+    if tutorials:
+        tutorialstudents = exam.lecture.lecture_students_for_tutorials(tutorials).options(
+            sqlalchemy.orm.joinedload(LectureStudent.student))
+        tutstat = exam.getStatistics(students=tutorialstudents, prefix='tut')
+        statistics.update(exam.getStatistics(students=tutorialstudents, prefix='tut'))
+        old_statistics_by_subject = statistics_by_subject
+        statistics_by_subject = exam.getStatisticsBySubjects(students=tutorialstudents, prefix='tut')
+        statistics_by_subject.update_available(old_statistics_by_subject)
+    admissions = {}
+    if exam.admission != None or exam.registration != None or exam.medical_certificate != None:
+        admission_data = exam.exam_admissions.all()
+        all_student_ids = [ls.student_id for ls in lecturestudents]
+        if exam.admission != None:
+            admissions['admission_count'] = len(
+                [e for e in admission_data if e.admission and e.student_id in all_student_ids])
+        if exam.registration != None:
+            admissions['registration_count'] = len(
+                [e for e in admission_data if e.registration and e.student_id in all_student_ids])
+        if exam.admission != None and exam.registration != None:
+            admissions['admission_and_registration_count'] = len(
+                [e for e in admission_data if e.admission and e.registration and e.student_id in all_student_ids])
+        if exam.medical_certificate != None:
+            admissions['medical_certificate_count'] = len(
+                [e for e in admission_data if e.medical_certificate and e.student_id in all_student_ids])
+        if tutorials:
+            student_ids = [s.student_id for s in tutorialstudents]
+            if exam.admission != None:
+                admissions['admission_count_tut'] = len(
+                    [e for e in admission_data if e.admission and e.student_id in student_ids])
+            if exam.registration != None:
+                admissions['registration_count_tut'] = len(
+                    [e for e in admission_data if e.registration and e.student_id in student_ids])
+            if exam.admission != None and exam.registration != None:
+                admissions['admission_and_registration_count_tut'] = len(
+                    [e for e in admission_data if e.registration and e.admission and e.student_id in student_ids])
+            if exam.medical_certificate != None:
+                admissions['medical_certificate_count_tut'] = len(
+                    [e for e in admission_data if e.medical_certificate and e.student_id in student_ids])
+    quantils = []
+    for q in exam.getQuantils():
+        quantils.append({'lecture': q})
+    if tutorials:
+        for i, q in enumerate(exam.getQuantils(students=tutorialstudents)):
+            quantils[i]['tutorial'] = q
+        # quantils['tutorials'] = exam.getQuantils(students=tutorialstudents)
+    # pointsQuery = exam.exercise_points.filter(ExerciseStudent.student_id.in_([s.student.id for s  in students])).options(sqlalchemy.orm.joinedload(ExerciseStudent.student, ExerciseStudent.exercise))
+    # points = DictOfObjects(lambda: {})
+    # for point in pointsQuery:
+    # points[point.student_id][point.exercise_id] = point
+    # for student in students:
+    # for e in exam.exercises:
+    # if not e.id in points[student.student_id]:
+    # exerciseStudent = models.ExerciseStudent()
+    # exerciseStudent.student = student.student
+    # exerciseStudent.exercise = e
+    # points[student.student_id][e.id] = exerciseStudent
+    # self.db.add(exerciseStudent)
+    # self.db.commit()
+    # for student in points:
+    # points[student]['total'] = sum([v.points for v in points[student].values() if v.points])
     return {'exam': exam,
             'tutorial_ids': request.matchdict['tutorial_ids'],
+            # 'students': students,
             'quantils': quantils,
-            'admission_counts': admission_counts,
-            'statistics_data': statistics_data}
+            'admissions': admissions,
+            'statistics': statistics,
+            'statistics_by_subject': statistics_by_subject}
 
 
 @view_config(route_name='exam_statistics_bar')
@@ -501,9 +566,9 @@ class HistogramForExam(Histogram):
         self.exam = self.request.context.exam
         students = self.exam.lecture.lecture_students_for_tutorials(tutorials=self.request.context.tutorials,
                                                                     order=False)
-        exercise_points = self.exam.get_results(students=students)
+        exercise_points = self.exam.getResults(students=students)
         self.points = [round(float(p.points) - 0.01) for p in exercise_points if p.points != None]
-        self.max = self.exam.get_max_points()
+        self.max = self.exam.getMaxpoints()
 
 
 @view_config(route_name='exam_correlation', context=CorrelationContext, permission='correlation')
@@ -514,19 +579,19 @@ class Correlation(MatplotlibView):
 
     def getExamData(self, id):
         exam = self.request.db.query(models.Exam).get(id)
-        points = exam.get_results()
-        return dict([(e.student_id, e.points) for e in points if e.points != None]), exam.get_max_points(), exam.name
+        points = exam.getResults()
+        return dict([(e.student_id, e.points) for e in points if e.points != None]), exam.getMaxpoints(), exam.name
 
     def getLectureData(self, id):
         lecture = self.request.db.query(models.Lecture).get(id)
-        points = lecture.get_lecture_results_by_category()
-        max_points = sum([exam.get_max_points() for exam in lecture.exams if exam.category == 'assignment'])
+        points = lecture.getLectureResultsByCategory()
+        max_points = sum([exam.getMaxpoints() for exam in lecture.exams if exam.category == 'assignment'])
         return dict([(e.student_id, e.points) for e in points if
                      e.points != None and e.category == 'assignment']), max_points, lecture.name
 
     def getExerciseData(self, id):
         exercise = self.request.db.query(models.Exercise).get(id)
-        points = exercise.exam.lecture.get_lecture_results_by_category()
+        points = exercise.exam.lecture.getLectureResultsByCategory()
         return (dict([(e.student_id, e.points) for e in points if e.points != None and e.category == 'assignment']),
                 exercise.maxpoints,
                 "Aufgabe {}".format(exercise.nr))
@@ -613,7 +678,7 @@ def enterPointsSingle(request):
     student_results = {}
     for ls in lecture_students:
         student = ls.student
-        stud_result = exam.get_results_for_student(student)
+        stud_result = exam.getResultsForStudent(student)
         # read exercise ids from exercise_ids, since they will always have the correct order
         current_points = [str(stud_result[exercise_id]['points']) for _, exercise_id in exercise_ids]
         current_points.append(str(stud_result['sum']))
