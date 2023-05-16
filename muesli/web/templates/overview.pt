@@ -258,6 +258,9 @@
   Es werden nur aktuelle Veranstaltungen angezeigt.
   <a tal:attributes="href request.route_path('overview', _query={'show_all': '1'})">Alle anzeigen</a>.
 </p>
+<p class="alert alert-danger" tal:condition="request.GET.get('show_all', '0') == '0'">
+  Muesli will be unavailable on Thursday.
+</p>
 <p class="alert alert-info" role="alert" tal:condition="request.GET.get('show_all', '0') == '1'">
   Es werden alle Veranstaltungen angezeigt.
   <a tal:attributes="href request.route_path('overview')">Nur aktuelle anzeigen</a>.
