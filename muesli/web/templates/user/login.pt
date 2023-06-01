@@ -30,8 +30,5 @@
     Sollten Sie dennoch Probleme bei der Anmeldung haben,
 <a tal:attributes="href request.route_path('contact')">wenden Sie sich an uns</a>.
     </p>
-  <p class="alert alert-danger" tal:condition="request.GET.get('show_all', '0') == '0'">
-    Muesli will be temporarily unavailable for sometime.
-  </p>
   </metal:main>
 </metal:main>
