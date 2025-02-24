@@ -32,7 +32,7 @@
         </form>
       </td>
       <td>
-        <button role="button" class="btn btn-secondary btn-sm" tal:condition="freshtoken and (key.id == max([e.id for e in keys]))" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
+        <button role="button" class="btn btn-secondary btn-sm" tal:condition="'freshtoken' in vars() and freshtoken and (key.id == max([e.id for e in keys]))" onClick="copyToClipboard('${freshtoken}')">Kopiere JWT-Token</button>
       </td>
     </tr>
   </tbody>
