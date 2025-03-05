@@ -22,8 +22,8 @@ EOFILE
 
   # Remove the first two script arguments
   set -- "${@:3}"
-  docker-compose "${DOCKER_COMPOSE_PROJECT_OPTS[@]}" --no-ansi up --abort-on-container-exit --exit-code-from muesli --no-build "$@" muesli
+  docker compose "${DOCKER_COMPOSE_PROJECT_OPTS[@]}" --no-ansi up --abort-on-container-exit --exit-code-from muesli --no-build "$@" muesli
 else
-  docker-compose "${DOCKER_COMPOSE_PROJECT_OPTS[@]}" "-f" "${SCRIPT_DIR}/docker-compose.override.yml" up --abort-on-container-exit --exit-code-from muesli --build "$@" muesli
-  docker-compose "${DOCKER_COMPOSE_PROJECT_OPTS[@]}" "-f" "${SCRIPT_DIR}/docker-compose.override.yml" down
+  docker compose "${DOCKER_COMPOSE_PROJECT_OPTS[@]}" "-f" "${SCRIPT_DIR}/docker-compose.override.yml" up --abort-on-container-exit --exit-code-from muesli --build "$@" muesli
+  docker compose "${DOCKER_COMPOSE_PROJECT_OPTS[@]}" "-f" "${SCRIPT_DIR}/docker-compose.override.yml" down
 fi
