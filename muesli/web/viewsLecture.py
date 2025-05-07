@@ -698,7 +698,7 @@ def viewPoints(request):
 def exportYaml(request):
     lectures = request.db.query(models.Lecture)
     if not "show_all" in request.GET:
-        lectures = lectures.filter(models.Lecture.is_visible==True)
+        lectures = lectures.filter(models.Lecture.term==utils.getSemesterLimit())
     out = []
     for lecture in lectures.all():
         lecture_dict = {}
@@ -717,7 +717,7 @@ def exportYaml(request):
 def exportYaml_details(request):
     lectures = request.db.query(models.Lecture)
     if not "show_all" in request.GET:
-        lectures = lectures.filter(models.Lecture.is_visible == True)
+        lectures = lectures.filter(models.Lecture.term==utils.getSemesterLimit())
     out = []
     for lecture in lectures.all():
         lecture_dict = {}
@@ -743,7 +743,7 @@ def exportYaml_details(request):
 def exportYaml_emails(request):
     lectures = request.db.query(models.Lecture)
     if not "show_all" in request.GET:
-        lectures = lectures.filter(models.Lecture.is_visible == True)
+        lectures = lectures.filter(models.Lecture.term==utils.getSemesterLimit())
     out = [{
             'name': lecture.name,
             'lecturer': lecture.lecturer,
@@ -786,7 +786,7 @@ class ExcelExport:
 class DoExport(ExcelExport):
     def __call__(self):
         lectures = self.request.db.query(models.Lecture)
-        lectures = lectures.filter(models.Lecture.is_visible)
+        lectures = lectures.filter(models.Lecture.term==utils.getSemesterLimit())
         w = self.w
 
         # sheet Tutorials

@@ -169,12 +169,12 @@ def listSubjectsByTerm(request):
             .group_by(models.Lecture.term).order_by(models.Lecture.term.desc())]
     subjects_by_term = []
     table = request.db.query(models.Lecture.term, models.User.subject, func.count(models.User.id))\
-            .join(models.LectureStudent)\
-            .join(models.User)\
-            .filter(models.Lecture.term >= settings['starting_term'])\
-            .filter(not_(models.Lecture.name.contains(settings['exclude_lecture_name'])))\
-            .group_by(models.User.subject, models.Lecture.term)\
-            .order_by(models.Lecture.term, models.User.subject)
+    .join(models.LectureStudent, models.Lecture.id == models.LectureStudent.lecture_id)\
+    .join(models.User, models.User.id == models.LectureStudent.student_id)\
+    .filter(models.Lecture.term >= settings['starting_term'])\
+    .filter(not_(models.Lecture.name.like(f"%{settings['exclude_lecture_name']}%")))\
+    .group_by(models.User.subject, models.Lecture.term)\
+    .order_by(models.Lecture.term, models.User.subject)
     for (term, subject, count) in table:
         subject = re.sub(r'\(.*\)', '', str(subject))
         subject = re.sub(r'\s$', '', str(subject))

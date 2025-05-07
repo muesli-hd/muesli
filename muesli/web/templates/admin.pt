@@ -16,10 +16,10 @@
 </div>
 <div class="row">
   <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml_details')"><span class="align-self-center mx-auto">Aktuelle Vorlesungen und Tutorien als YAML exportieren</span></a>
-  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml_details', _query={'show_all': 1})"><span class="align-self-center mx-auto">Alle Vorlesungen und Tutorien als YAMLexportieren</span></a>
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml_details', _query={'show_all': 1})"><span class="align-self-center mx-auto">Alle Vorlesungen und Tutorien als YAML exportieren</span></a>
 </div>
 <div class="row">
-  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml_emails')"><span class="align-self-center mx-auto">Aktuelle Vorlesungsen Emails der Teilnehmenden als YAML exportieren</span></a>
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml_emails')"><span class="align-self-center mx-auto">Aktuelle Vorlesungen mit Emails der Teilnehmenden als YAML exportieren</span></a>
   <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_export_yaml_emails', _query={'show_all': 1})"><span class="align-self-center mx-auto">Alle exportieren</span></a>
 </div>
 <div class="row">
@@ -27,8 +27,8 @@
   <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('lecture_add')"><span class="align-self-center mx-auto">Neue Vorlesung</span></a>
 </div>
 <div class="row">
-  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('email_users')"><span class="align-self-center mx-auto">Studenten mit Problems mailen</span></a>
-  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('email_all_users')"><span class="align-self-center mx-auto">Alles Studenten mailen</span></a>
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('email_users')"><span class="align-self-center mx-auto">Studenten mit Problemen mailen</span></a>
+  <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('email_all_users')"><span class="align-self-center mx-auto">Allen Studenten mailen</span></a>
 </div>
 <div class="row">
   <a class="col-md btn border border-light btn-dark btn-block m-1 d-flex" tal:attributes="href request.route_path('user_delete_unconfirmed')"><span class="align-self-center mx-auto">Karteileichen sichten und löschen</span></a>
